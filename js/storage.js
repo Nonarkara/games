@@ -21,6 +21,10 @@ const defaultData = {
     '2048-fusion': 0,
     'trivia-master': 0,
     'cyber-blackjack': 1000,
+    'pattern-breaker': 0,
+    'reflex-matrix': 0,
+    'type-rush': 0,
+    'slide-2048': 0,
     'cipher-breaker': 0,
     'ai-sandbox': 0
   },

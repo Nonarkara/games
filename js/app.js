@@ -10,6 +10,7 @@ import { renderRetroSnake, renderSpaceDefender } from './games/retroArcade.js';
 import { renderFlappyBird, renderMinesweeper } from './games/casualArcade.js';
 import { renderTriviaMaster, renderBlackjack } from './games/adultMind.js';
 import { renderAIGameStudio } from './games/aiGameStudio.js';
+import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide2048 } from './games/curatedGames.js';
 import { bindModalUX } from './ui.js';
 
 const gamesCatalog = [
@@ -158,6 +159,54 @@ const gamesCatalog = [
     renderer: renderTriviaMaster
   },
   {
+    id: 'pattern-breaker',
+    title: 'Pattern Breaker',
+    category: 'adult-mind',
+    badge: '🧠 MIND & ADULT',
+    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    icon: '🔐',
+    age: 'Teen & Adult',
+    desc: 'Deductive logic puzzle. Crack a hidden 4-node path on a 3x3 grid using Mastermind-style hints.',
+    tags: ['Logic', 'Deduction', 'Memory'],
+    renderer: renderPatternBreaker
+  },
+  {
+    id: 'type-rush',
+    title: 'Type Rush',
+    category: 'skills',
+    badge: '🎓 LEARN SKILL',
+    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    icon: '⌨️',
+    age: 'Age 8+',
+    desc: '30-second typing fluency trainer. Build keyboard muscle memory with live WPM and accuracy scoring.',
+    tags: ['Typing', 'Keyboard', 'Fluency'],
+    renderer: renderTypeRush
+  },
+  {
+    id: 'reflex-matrix',
+    title: 'Reflex Matrix',
+    category: 'casual-friv',
+    badge: '⚡ CASUAL FRIV',
+    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    icon: '⚡',
+    age: 'All Ages',
+    desc: 'Hand-eye coordination trainer. Tap glowing cells before they fade — speed escalates each wave.',
+    tags: ['Reflex', 'Coordination', 'Reaction'],
+    renderer: renderReflexMatrix
+  },
+  {
+    id: 'slide-2048',
+    title: 'Slide 2048',
+    category: 'casual-friv',
+    badge: '⚡ CASUAL FRIV',
+    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    icon: '🔢',
+    age: 'All Ages',
+    desc: 'Classic sliding-tile strategy. Merge matching numbers and plan ahead to reach the 2048 tile.',
+    tags: ['Strategy', 'Merge', 'Planning'],
+    renderer: renderSlide2048
+  },
+  {
     id: 'cyber-blackjack',
     title: 'Cyber Blackjack 21',
     category: 'adult-mind',
@@ -237,6 +286,7 @@ class OmniArcadeApp {
       { id: 'all', label: '🚀 ALL GAMES' },
       { id: 'classics', label: '🕹️ CLASSICS' },
       { id: 'ai-studio', label: '🤖 AI BUILDER' },
+      { id: 'skills', label: '🎓 LEARN SKILLS' },
       { id: 'kids-edu', label: '👶 KIDS & EDU' },
       { id: 'retro-vault', label: '🐍 RETRO VAULT' },
       { id: 'casual-friv', label: '⚡ CASUAL FRIV' },
