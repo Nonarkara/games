@@ -3,99 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniArcade — Axiom Core Edition [PROTOCOL: OMNI_2026]</title>
-  <meta name="description" content="Axiom Mono-Amber browser gaming platform featuring Pac-Man 1980, Tetris 1984, custom ROM loader, Friv casual favorites, Educaplay kids games, and AI prompt studio." />
-
-  <!-- Tailwind CSS CDN -->
+  <title>OmniArcade — Learn by Playing</title>
+  <meta name="description" content="25 educational brain games for math, language, memory, science & focus. Progress saved. No ads. No logins. Play and learn." />
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
-
-  <!-- Custom Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
-<body class="bg-black text-slate-100 min-h-screen flex flex-col font-mono-hud scanlines selection:bg-amber-500 selection:text-black">
+<body class="min-h-screen flex flex-col" style="font-family:'Nunito',sans-serif">
 
-  <!-- Top Tactical Announcement Header -->
-  <div class="bg-amber-950/80 border-b border-amber-500/40 text-xs py-2 px-4 text-center text-amber-300 tracking-wider">
-    [SYSTEM_STATUS: ONLINE] — <span class="text-white font-extrabold">OMNI_ARCADE AXIOM EDITION</span> — MONO-AMBER HUD | PAC-MAN | TETRIS | ROM LOADER | AI GAME STUDIO
+  <!-- Top Status Bar -->
+  <div class="text-center py-2 px-4 text-xs tracking-wide" style="background:#e76f51;color:#fff;font-weight:600">
+    25 GAMES · NO ADS · NO LOGINS · PROGRESS SAVED · 100% FREE
   </div>
 
   <!-- Header -->
-  <header id="app-header" class="px-6 py-6 border-b border-amber-500/40 sticky top-0 z-30 bg-black/90 backdrop-blur-md">
-    <!-- Rendered dynamically by js/app.js -->
+  <header id="app-header" class="px-6 py-5 sticky top-0 z-30" style="background:rgba(253,246,227,0.95);backdrop-filter:blur(8px);border-bottom:2px solid #d9cbb0">
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
-    
-    <!-- Hero Terminal Banner -->
-    <section class="bg-black border-2 border-amber-500 p-6 md:p-8 mb-8 relative shadow-[0_0_30px_rgba(245,158,11,0.2)]">
-      <div class="field-transmission mb-4">
-        FIELD TRANSMISSION // REPOSITORY INTELLIGENCE VERIFIED // MONO-AMBER PALETTE ENFORCED
-      </div>
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8 relative" style="z-index:1">
 
+    <!-- Hero -->
+    <section class="mb-8 p-6 md:p-10 relative" style="background:#fffbf0;border:2px solid #d9cbb0;border-radius:18px;box-shadow:0 4px 16px rgba(43,33,24,0.08)">
+      <div class="field-transmission mb-4">
+        Learn by playing — that's what the games are saying.
+      </div>
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <span class="px-2.5 py-1 bg-amber-950 text-amber-300 border border-amber-500 text-[10px] font-bold uppercase tracking-widest mb-2 inline-block">
-            [PROTOCOL_ID: OMNI_SYSTEMS_2026]
-          </span>
-          <h2 class="text-2xl md:text-4xl font-black text-white tracking-wider mb-2">
-            ALL-IN-ONE <span class="text-amber-400">ARCADE & AI STUDIO</span>
+        <div class="flex-1">
+          <h2 class="text-3xl md:text-5xl font-black mb-3" style="color:#2b2118;font-family:'Fredoka',sans-serif;line-height:1.1">
+            Brain games that <span style="color:#e76f51">build real skills</span>
           </h2>
-          <p class="text-xs md:text-sm text-zinc-400 max-w-2xl leading-relaxed">
-            Featuring 100% legal native recreations of <strong>Pac-Man 1980</strong>, <strong>Tetris 1984</strong>, <strong>Space Defender</strong>, <strong>Retro Snake</strong>, plus a <strong>Custom Local ROM & Flash SWF Emulator Loader</strong> and <strong>Tesana.ai AI Game Studio</strong>!
+          <p class="text-sm md:text-base max-w-2xl leading-relaxed" style="color:#6b5d4f">
+            <strong>Math & logic</strong>, <strong>spelling & vocabulary</strong>, <strong>working memory</strong>, <strong>chemistry</strong>, <strong>geography</strong>, <strong>typing</strong>, and <strong>classic arcade</strong> favorites. Every game saves your progress. Designed for learners of every age.
           </p>
         </div>
-
-        <div class="bg-zinc-950 border border-amber-500/40 p-4 text-xs font-mono w-full md:w-auto">
-          <div class="text-amber-500 font-bold mb-1">[SYSTEM SPEC]</div>
-          <div class="text-zinc-400">PALETTE: MONO-AMBER</div>
-          <div class="text-zinc-400">CORNER RADIUS: 0px STRICT</div>
-          <div class="text-zinc-400">ENGINE: HTML5 CANVAS 2D</div>
-          <div class="text-amber-400 font-bold mt-1">EMULATOR: ACTIVE</div>
+        <div class="p-4 text-xs" style="background:#f5ecd7;border:2px solid #d9cbb0;border-radius:12px;min-width:200px;font-family:'Fredoka',sans-serif">
+          <div class="font-bold mb-2" style="color:#e76f51">WHY OMNI_ARCADE</div>
+          <div style="color:#6b5d4f">✓ No ads, no tracking</div>
+          <div style="color:#6b5d4f">✓ No login required</div>
+          <div style="color:#6b5d4f">✓ Works offline</div>
+          <div class="font-bold mt-1" style="color:#4a8c5e">✓ Always free</div>
         </div>
       </div>
     </section>
 
+    <!-- Recommended strip (adaptive) -->
+    <section id="recommended-strip" class="mb-8"></section>
+
     <!-- Category Navigation -->
-    <section id="category-bar" class="mb-8">
-      <!-- Rendered dynamically by js/app.js -->
-    </section>
+    <section id="category-bar" class="mb-8"></section>
 
     <!-- Game Cards Grid -->
-    <section id="game-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <!-- Rendered dynamically by js/app.js -->
-    </section>
+    <section id="game-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></section>
 
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-amber-500/40 bg-black py-6 px-6 mt-12 text-center text-xs text-zinc-500 font-mono">
+  <footer class="py-6 px-6 mt-12 text-center text-xs" style="background:#f5ecd7;border-top:2px solid #d9cbb0;color:#6b5d4f;font-family:'Fredoka',sans-serif">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-      <div>
-        <strong class="text-amber-400">OMNI_ARCADE</strong> [AXIOM_CORE_V2.0] © 2026
-      </div>
-      <div class="flex gap-4 text-zinc-400">
-        <span>🕹️ CLASSIC LEGENDS</span>
-        <span>💾 ROM LOADER</span>
-        <span>👶 KIDS & EDU</span>
-        <span>🤖 AI STUDIO</span>
+      <div><strong style="color:#e76f51">OmniArcade</strong> · Learn by Playing · 2026</div>
+      <div class="flex gap-3 flex-wrap justify-center text-xs">
+        <span style="color:#e76f51">Math</span>
+        <span style="color:#2a9d8f">Language</span>
+        <span style="color:#e9a23b">Memory</span>
+        <span style="color:#7b5ea7">Science</span>
+        <span style="color:#4a8c5e">Skills</span>
       </div>
     </div>
   </footer>
 
   <!-- Game Modal Overlay -->
-  <div id="game-modal-overlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
-    <div id="game-modal-container" class="w-full max-w-3xl my-auto">
-      <!-- Game canvas / UI rendered here -->
-    </div>
+  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(43,33,24,0.6);backdrop-filter:blur(6px)">
+    <div id="game-modal-container" class="w-full max-w-3xl my-auto"></div>
   </div>
 
-  <!-- Main JavaScript Module -->
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

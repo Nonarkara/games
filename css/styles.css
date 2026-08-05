@@ -1,144 +1,394 @@
 /* ============================================================================
- * OmniArcade — Axiom Core Design System
- * Dieter Rams × Mono-Amber: honest, unobtrusive, as little as possible.
- * Ten principles in mind: useful, aesthetic, understandable, honest,
- * unobtrusive, thorough down to the last detail, as little design as possible.
+ * OmniArcade — Storybook Arcade Design System
+ * Warm cream paper, per-category colors, rounded, hand-friendly, playful.
  * ========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap');
 
 :root {
-  /* Palette — restrained mono-amber. */
-  --axiom-amber: #f59e0b;
-  --axiom-amber-bright: #fbbf24;
-  --axiom-amber-dark: #b45309;
-  --axiom-bg-obsidian: #050505;
-  --axiom-bg-card: #0d0d0d;
-  --axiom-bg-surface: #141414;
-  --axiom-border-amber: rgba(245, 158, 11, 0.35);
-  --axiom-border-dim: rgba(255, 255, 255, 0.08);
+  /* Paper palette */
+  --paper: #fdf6e3;
+  --paper-deep: #f5ecd7;
+  --ink: #2b2118;
+  --ink-soft: #6b5d4f;
+  --line: #d9cbb0;
 
-  /* Spacing rhythm — one scale, used consistently. */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
+  /* Category accents */
+  --c-math: #e76f51;
+  --c-language: #2a9d8f;
+  --c-memory: #e9a23b;
+  --c-science: #7b5ea7;
+  --c-skills: #4a8c5e;
+  --c-arcade: #4a90d9;
+  --c-kids: #e08e45;
+  --c-classics: #b8860b;
+  --c-retro: #c04e3d;
+  --c-mind: #5c6bc0;
+  --c-ai: #6a4c93;
 
-  /* Motion. */
-  --ease: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur-fast: 0.12s;
-  --dur: 0.2s;
+  --accent: var(--c-math);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 2px 8px rgba(43, 33, 24, 0.08);
+  --shadow: 0 4px 16px rgba(43, 33, 24, 0.12);
+  --shadow-lg: 0 8px 32px rgba(43, 33, 24, 0.16);
 }
 
-/* Rams: "Good design is as little design as possible."
-   Zero rounded corners — a deliberate, honest system constraint. */
-* {
-  border-radius: 0 !important;
-}
+/* Reset — storybook has soft corners */
+* { box-sizing: border-box; }
 
 body {
-  font-family: 'Outfit', 'JetBrains Mono', sans-serif;
-  background-color: var(--axiom-bg-obsidian);
-  color: #f3f4f6;
+  font-family: 'Nunito', sans-serif;
+  background: var(--paper);
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(231, 111, 81, 0.03), transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(42, 157, 143, 0.03), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(123, 94, 167, 0.02), transparent 50%);
+  color: var(--ink);
   overflow-x: hidden;
 }
 
-.font-mono-hud { font-family: 'JetBrains Mono', monospace; }
-.font-retro { font-family: 'Press Start 2P', monospace; }
-
-/* --- Amber glow utilities (calmer than before) -------------------------- */
-.amber-glow { box-shadow: 0 0 12px rgba(245, 158, 11, 0.22); }
-.amber-glow-lg { box-shadow: 0 0 24px rgba(245, 158, 11, 0.28); }
-.amber-text-glow { text-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
-
-/* --- CRT scanlines (refined: subtler, toggleable via reduced-motion) ---- */
-.scanlines { position: relative; }
-.scanlines::before {
-  content: " ";
-  display: block;
-  position: absolute;
+/* Paper texture overlay */
+body::before {
+  content: '';
+  position: fixed;
   inset: 0;
-  background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.18) 50%);
-  z-index: 20;
-  background-size: 100% 3px;
   pointer-events: none;
-  opacity: 0.5;
+  z-index: 0;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
 }
 
-/* --- Custom scrollbar ---------------------------------------------------- */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #050505; }
-::-webkit-scrollbar-thumb { background: var(--axiom-amber-dark); }
-::-webkit-scrollbar-thumb:hover { background: var(--axiom-amber); }
+.font-mono-hud { font-family: 'Fredoka', sans-serif; }
+.font-retro { font-family: 'Fredoka', sans-serif; }
 
-/* --- Focus visibility: honest, obvious, keyboard-only ------------------- */
-:focus { outline: none; }
-:focus-visible {
-  outline: 2px solid var(--axiom-amber-bright);
-  outline-offset: 2px;
-}
+/* Headings use storybook display font */
+h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 
-/* --- Cards -------------------------------------------------------------- */
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--paper-deep); }
+::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 5px; }
+
+/* Focus */
+:focus-visible { outline: 3px solid var(--c-arcade); outline-offset: 2px; }
+
+/* ============================================================================
+ * Cards — soft, warm, friendly
+ * ========================================================================== */
 .axiom-card {
-  background: var(--axiom-bg-card);
-  border: 1px solid var(--axiom-border-amber);
-  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  background: #fffbf0;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+.axiom-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--accent);
+  opacity: 0.7;
 }
 .axiom-card:hover {
-  border-color: var(--axiom-amber-bright);
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.2);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent);
 }
 .axiom-card:focus-visible {
-  border-color: var(--axiom-amber-bright);
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.3);
-}
-
-/* --- Field transmission log -------------------------------------------- */
-.field-transmission {
-  background: rgba(245, 158, 11, 0.05);
-  border-left: 3px solid var(--axiom-amber);
-  padding: var(--space-3) var(--space-4);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  color: var(--axiom-amber-bright);
+  border-color: var(--c-arcade);
+  box-shadow: var(--shadow);
 }
 
 /* ============================================================================
- * Shared game button classes (used across all game modules)
+ * Category accent mapping
+ * ========================================================================== */
+.axiom-card[data-cat="math-logic"]::after    { background: var(--c-math); }
+.axiom-card[data-cat="language"]::after       { background: var(--c-language); }
+.axiom-card[data-cat="memory-focus"]::after   { background: var(--c-memory); }
+.axiom-card[data-cat="science"]::after        { background: var(--c-science); }
+.axiom-card[data-cat="skills"]::after         { background: var(--c-skills); }
+.axiom-card[data-cat="casual-friv"]::after    { background: var(--c-arcade); }
+.axiom-card[data-cat="kids-edu"]::after       { background: var(--c-kids); }
+.axiom-card[data-cat="classics"]::after       { background: var(--c-classics); }
+.axiom-card[data-cat="retro-vault"]::after    { background: var(--c-retro); }
+.axiom-card[data-cat="adult-mind"]::after     { background: var(--c-mind); }
+.axiom-card[data-cat="ai-studio"]::after      { background: var(--c-ai); }
+
+/* ============================================================================
+ * Field transmission (now: rhyme strip)
+ * ========================================================================== */
+.field-transmission {
+  background: var(--paper-deep);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1rem;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* ============================================================================
+ * Game button classes
  * ========================================================================== */
 .axiom-close-btn {
-  padding: var(--space-2) var(--space-3);
-  background: #451a03;
-  border: 1px solid var(--axiom-amber);
-  color: #fcd34d;
-  font-size: 0.75rem;
-  font-family: 'JetBrains Mono', monospace;
-  transition: background var(--dur) var(--ease);
+  padding: 0.5rem 1rem;
+  background: var(--paper-deep);
+  border: 2px solid var(--line);
+  color: var(--ink-soft);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
-.axiom-close-btn:hover { background: #78350f; }
+.axiom-close-btn:hover { background: var(--ink); color: var(--paper); }
 
 .axiom-dpad-btn {
-  padding: var(--space-3);
-  background: #18181b;
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  color: var(--axiom-amber);
+  padding: 0.75rem;
+  background: var(--paper-deep);
+  border: 2px solid var(--line);
+  color: var(--ink);
   font-weight: 700;
-  font-size: 0.75rem;
-  font-family: 'JetBrains Mono', monospace;
-  transition: background var(--dur-fast) var(--ease);
+  font-size: 0.8rem;
+  font-family: 'Fredoka', sans-serif;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.1s ease;
 }
-.axiom-dpad-btn:hover { background: #78350f; }
-.axiom-dpad-btn:active { background: var(--axiom-amber-dark); color: #000; }
+.axiom-dpad-btn:hover { background: var(--c-arcade); color: #fff; border-color: var(--c-arcade); }
+.axiom-dpad-btn:active { transform: scale(0.95); }
 
 /* ============================================================================
  * Modal scroll-lock
  * ========================================================================== */
 body.axiom-modal-open { overflow: hidden; }
 
+/* Result overlay must cover the game area, not the full backdrop.
+   The modal container is the positioned ancestor for the result overlay. */
+#game-modal-container { position: relative; }
+
 /* ============================================================================
- * Result Overlay — the honest, unobtrusive replacement for alert()
+ * Header — Storybook Edition (matches index.html / hero / footer)
+ * ========================================================================== */
+.omni-logo {
+  width: 48px; height: 48px;
+  background: #fffbf0;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.omni-brand {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.omni-version {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: var(--paper-deep);
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.omni-tagline {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================================
+ * Search + Pills + Stats
+ * ========================================================================== */
+.omni-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.omni-search-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 0.85rem;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.omni-search {
+  background: #fffbf0;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.6rem 0.45rem 2rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  color: var(--ink);
+  width: 11rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.omni-search::placeholder { color: var(--ink-soft); opacity: 0.7; }
+.omni-search:focus {
+  outline: none;
+  border-color: var(--c-arcade);
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.18);
+}
+@media (min-width: 768px) { .omni-search { width: 14rem; } }
+
+.omni-pill {
+  background: var(--paper-deep);
+  border: 2px solid var(--line);
+  color: var(--ink-soft);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.7rem;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.omni-pill:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.omni-stat {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--paper-deep);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.7rem;
+  min-width: 64px;
+}
+.omni-stat-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+.omni-stat-value {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--c-skills);
+  line-height: 1;
+}
+
+/* ============================================================================
+ * Category bar
+ * ========================================================================== */
+.omni-cat-bar { scrollbar-width: thin; }
+.omni-cat {
+  background: #fffbf0;
+  border: 2px solid var(--line);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  transition: all 0.15s ease;
+}
+.omni-cat:hover { border-color: var(--c-arcade); color: var(--ink); }
+.omni-cat.is-active {
+  background: var(--c-arcade);
+  border-color: var(--c-arcade);
+  color: #fff;
+}
+.omni-cat-count {
+  background: rgba(0,0,0,0.08);
+  color: inherit;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  padding: 1px 7px;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+}
+.omni-cat.is-active .omni-cat-count { background: rgba(255,255,255,0.25); }
+
+/* ============================================================================
+ * Empty state for the grid
+ * ========================================================================== */
+.omni-empty {
+  grid-column: 1 / -1;
+  padding: 3.5rem 1rem;
+  text-align: center;
+  background: #fffbf0;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+}
+.omni-empty-icon { font-size: 2.5rem; opacity: 0.6; margin-bottom: 0.5rem; }
+.omni-empty-title { font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; }
+.omni-empty-hint { font-family: 'Nunito', sans-serif; font-size: 0.85rem; color: var(--ink-soft); }
+
+/* ============================================================================
+ * Recommended strip (adaptive)
+ * ========================================================================== */
+.omni-recommended {
+  background: #fffbf0;
+  border: 2px solid var(--line);
+  border-left: 4px solid var(--c-skills);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.omni-recommended-head { margin-bottom: 0.85rem; }
+.omni-recommended-eyebrow {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--c-skills);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.omni-recommended-title {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 0.15rem;
+}
+.omni-recommended-title em { color: var(--c-skills); font-style: normal; }
+
+.omni-recommended-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.6rem;
+}
+.omni-rec-card {
+  display: flex; align-items: center; gap: 0.6rem;
+  text-align: left;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.15s ease;
+}
+.omni-rec-card:hover { border-color: var(--c-arcade); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.omni-rec-card:focus-visible { outline: 3px solid var(--c-arcade); outline-offset: 2px; }
+.omni-rec-icon { font-size: 1.4rem; }
+.omni-rec-title { display: block; font-weight: 700; color: var(--ink); font-size: 0.85rem; line-height: 1.2; }
+.omni-rec-meta { display: block; font-size: 0.7rem; color: var(--ink-soft); }
+
+/* ============================================================================
+ * Result Overlay — storybook card style
  * ========================================================================== */
 .axiom-result-overlay {
   position: absolute;
@@ -147,150 +397,128 @@ body.axiom-modal-open { overflow: hidden; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-6);
-  background: rgba(5, 5, 5, 0.88);
-  backdrop-filter: blur(4px);
-  animation: axiom-fade-in var(--dur) var(--ease);
+  padding: 1.5rem;
+  background: rgba(253, 246, 227, 0.92);
+  backdrop-filter: blur(6px);
+  animation: fade-in 0.2s ease;
 }
 
 .axiom-result-card {
   width: 100%;
-  max-width: 380px;
-  background: var(--axiom-bg-card);
-  border: 2px solid var(--axiom-amber);
-  padding: var(--space-8) var(--space-6);
+  max-width: 400px;
+  background: #fffbf0;
+  border: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
   text-align: center;
-  box-shadow: 0 0 40px rgba(245, 158, 11, 0.25);
-  animation: axiom-pop-in 0.28s var(--ease);
+  box-shadow: var(--shadow-lg);
+  animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
-.axiom-result-card.axiom-result-win { border-color: #10b981; box-shadow: 0 0 40px rgba(16, 185, 129, 0.25); }
+.axiom-result-card.axiom-result-win { border-color: var(--c-skills); }
 
 .axiom-result-glyph {
-  font-size: 2.5rem;
-  line-height: 1;
-  margin-bottom: var(--space-4);
-  color: var(--axiom-amber-bright);
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
 }
-.axiom-result-win .axiom-result-glyph { color: #34d399; }
+.axiom-result-card.axiom-result-win .axiom-result-glyph { color: var(--c-skills); }
+.axiom-result-card:not(.axiom-result-win) .axiom-result-glyph { color: var(--c-math); }
 
 .axiom-result-title {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: #fff;
-  margin-bottom: var(--space-2);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
 }
 
 .axiom-result-msg {
-  font-size: 0.8rem;
-  color: #a1a1aa;
-  margin-bottom: var(--space-6);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.5rem;
   line-height: 1.5;
 }
 
 .axiom-result-score {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  margin-bottom: var(--space-4);
-  background: #000;
-  border: 1px solid var(--axiom-border-amber);
+  gap: 0.25rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: var(--paper-deep);
+  border-radius: var(--radius-sm);
 }
 .axiom-result-score-label {
-  font-size: 0.6rem;
-  letter-spacing: 0.15em;
-  color: var(--axiom-amber);
-  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  font-weight: 600;
 }
 .axiom-result-score-value {
   font-size: 2.5rem;
-  font-weight: 900;
-  color: #fff;
-  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: 'Fredoka', sans-serif;
 }
 
 .axiom-result-high {
   display: inline-block;
-  padding: var(--space-1) var(--space-3);
-  margin-bottom: var(--space-6);
-  background: var(--axiom-amber);
-  color: #000;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  font-family: 'JetBrains Mono', monospace;
-  animation: axiom-pulse 1.4s var(--ease) infinite;
+  padding: 0.3rem 0.8rem;
+  margin-bottom: 1.5rem;
+  background: var(--c-memory);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 20px;
+  animation: pulse 1.5s ease infinite;
 }
 
 .axiom-result-actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 0.5rem;
 }
 
 .axiom-btn {
-  padding: var(--space-4);
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 800;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  border: 1px solid;
+  padding: 0.85rem;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 2px solid;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  transition: all 0.15s ease;
 }
-.axiom-btn:active { transform: translateY(1px); }
+.axiom-btn:active { transform: scale(0.98); }
 
 .axiom-btn-primary {
-  background: var(--axiom-amber);
-  border-color: var(--axiom-amber-bright);
-  color: #000;
+  background: var(--c-skills);
+  border-color: var(--c-skills);
+  color: #fff;
 }
-.axiom-btn-primary:hover { background: var(--axiom-amber-bright); }
+.axiom-btn-primary:hover { background: #3a6e4a; }
 
 .axiom-btn-ghost {
   background: transparent;
-  border-color: rgba(245, 158, 11, 0.4);
-  color: var(--axiom-amber);
+  border-color: var(--line);
+  color: var(--ink-soft);
 }
-.axiom-btn-ghost:hover { background: #1c1917; }
+.axiom-btn-ghost:hover { background: var(--paper-deep); }
 
 /* ============================================================================
  * Animations
  * ========================================================================== */
-@keyframes axiom-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes axiom-pop-in {
-  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
-@keyframes axiom-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.65; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.05); }
 }
 
-/* ============================================================================
- * Reduced motion — respect the user. Rams: "good design is unobtrusive."
- * ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .scanlines::before { display: none; }
-  .axiom-result-high { animation: none; }
-}
-
-/* ============================================================================
- * Mobile tuning
- * ========================================================================== */
-@media (max-width: 640px) {
-  .axiom-result-card { max-width: 100%; padding: var(--space-6) var(--space-4); }
-  .axiom-result-score-value { font-size: 2rem; }
 }

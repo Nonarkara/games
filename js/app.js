@@ -3,6 +3,7 @@
  */
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
+import { AnalyticsService } from './analytics.js';
 
 import { renderCyberTetris, renderCyberPacman, renderRomLoader } from './games/classicArcade.js';
 import { renderMathSafari, renderMemoryMatch, renderWordSearch } from './games/kidsEdu.js';
@@ -11,7 +12,8 @@ import { renderFlappyBird, renderMinesweeper } from './games/casualArcade.js';
 import { renderTriviaMaster, renderBlackjack } from './games/adultMind.js';
 import { renderAIGameStudio } from './games/aiGameStudio.js';
 import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide2048 } from './games/curatedGames.js';
-import { bindModalUX } from './ui.js';
+import { renderStroop, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
+import { bindModalUX, GameSession } from './ui.js';
 
 const gamesCatalog = [
   {
@@ -217,7 +219,15 @@ const gamesCatalog = [
     desc: 'Casino card game against AI dealer. Manage bankroll chips, hit, and stand.',
     tags: ['Cards', 'Casino', 'Strategy'],
     renderer: renderBlackjack
-  }
+  },
+  { id: 'stroop-match', title: 'Stroop Color Match', category: 'memory-focus', badge: '🧠 FOCUS', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🎨', age: 'Age 8+', desc: 'Cognitive inhibition trainer. Pick the ink color — not the word. Builds executive function.', tags: ['Stroop', 'Focus', 'Inhibition'], renderer: renderStroop },
+  { id: 'simon-seq', title: 'Simon Sequence', category: 'memory-focus', badge: '🧠 FOCUS', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🔵', age: 'All Ages', desc: 'Auditory working-memory trainer. Watch the glowing pattern grow, then repeat it back.', tags: ['Memory', 'Sequence', 'Recall'], renderer: renderSimon },
+  { id: 'anagram-scramble', title: 'Anagram Scramble', category: 'language', badge: '📖 LANGUAGE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🔤', age: 'Age 10+', desc: 'Spelling & vocabulary builder. Unscramble jumbled letters into real words under pressure.', tags: ['Spelling', 'Vocabulary', 'Anagram'], renderer: renderAnagram },
+  { id: 'word-builder', title: 'Word Builder', category: 'language', badge: '📖 LANGUAGE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🅰️', age: 'Age 7+', desc: 'Phonics & spelling sprint. Build as many valid words as you can from 7 letter tiles in 60 seconds.', tags: ['Phonics', 'Spelling', 'Timed'], renderer: renderWordBuilder },
+  { id: 'periodic-quest', title: 'Periodic Quest', category: 'science', badge: '🔬 SCIENCE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '⚗️', age: 'Age 12+', desc: 'Chemistry recall trainer. Match element symbols to their names across 10 rounds.', tags: ['Chemistry', 'Elements', 'Recall'], renderer: renderPeriodicQuest },
+  { id: 'capital-quiz', title: 'Capital Quest', category: 'science', badge: '🔬 SCIENCE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🌍', age: 'Age 8+', desc: 'World geography trainer. Learn the capitals of 15 major countries across 10 rounds.', tags: ['Geography', 'Capitals', 'Recall'], renderer: renderCapitalQuiz },
+  { id: 'number-chain', title: 'Number Chain', category: 'math-logic', badge: '🎯 MATH', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🔗', age: 'Age 10+', desc: 'Numerical reasoning trainer. Identify the pattern and predict the next number in the sequence.', tags: ['Patterns', 'Reasoning', 'Algebra'], renderer: renderNumberChain },
+  { id: 'tower-hanoi', title: 'Tower of Hanoi', category: 'math-logic', badge: '🎯 MATH', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🗼', age: 'Age 8+', desc: 'Classic recursive-planning puzzle. Move all disks to peg 3 in the fewest moves possible.', tags: ['Logic', 'Planning', 'Recursive'], renderer: renderTowerHanoi }
 ];
 
 class OmniArcadeApp {
@@ -230,9 +240,52 @@ class OmniArcadeApp {
 
   initUI() {
     this.renderHeader();
+    this.renderRecommended();
     this.renderCategoryBar();
     this.renderGameGrid();
     this.bindEvents();
+  }
+
+  renderRecommended() {
+    const el = document.querySelector('#recommended-strip');
+    if (!el) return;
+
+    // First-time visitors: a single welcome row, no recommendations yet.
+    if (!AnalyticsService.hasHistory()) {
+      el.innerHTML = `
+        <div class="omni-recommended">
+          <div class="omni-recommended-head">
+            <span class="omni-recommended-eyebrow">✨ WELCOME</span>
+            <h3 class="omni-recommended-title">Pick a game. We'll suggest what to play next based on what you skip.</h3>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const recs = AnalyticsService.getRecommendations(gamesCatalog, 3);
+    if (recs.length === 0) { el.innerHTML = ''; return; }
+
+    const weakest = AnalyticsService.getWeakestSkill();
+    el.innerHTML = `
+      <div class="omni-recommended">
+        <div class="omni-recommended-head">
+          <span class="omni-recommended-eyebrow">🎯 RECOMMENDED FOR YOU</span>
+          <h3 class="omni-recommended-title">Build up your <em>${weakest}</em> skills</h3>
+        </div>
+        <div class="omni-recommended-grid">
+          ${recs.map(g => `
+            <button class="omni-rec-card" data-game="${g.id}" data-cat="${g.category}" aria-label="Play ${g.title}">
+              <span class="omni-rec-icon">${g.icon}</span>
+              <span class="omni-rec-title">${g.title}</span>
+              <span class="omni-rec-meta">${g.age} · ${g.tags.slice(0,2).join(' · ')}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>`;
+
+    el.querySelectorAll('.omni-rec-card').forEach(btn => {
+      btn.onclick = () => this.launchGame(btn.dataset.game);
+    });
   }
 
   renderHeader() {
@@ -241,37 +294,31 @@ class OmniArcadeApp {
     if (!headerEl) return;
 
     headerEl.innerHTML = `
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 font-mono-hud">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-black border-2 border-amber-500 flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-            🎮
-          </div>
+          <div class="omni-logo">🎮</div>
           <div>
             <div class="flex items-center gap-2">
-              <h1 class="text-3xl font-black tracking-wider text-amber-400">
-                OMNI_ARCADE
-              </h1>
-              <span class="text-[10px] px-2 py-0.5 bg-amber-950 border border-amber-500 text-amber-300">v2.0_AXIOM</span>
+              <h1 class="omni-brand">OmniArcade</h1>
+              <span class="omni-version">LEARN EDITION</span>
             </div>
-            <p class="text-[10px] text-amber-500/80 font-mono tracking-widest uppercase">
-              SATELLITE INTELLIGENCE GAMING PROTOCOL [EVENT_ID: OMNI_2026]
-            </p>
+            <p class="omni-tagline">25 educational & brain games · Math · Language · Memory · Science</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="relative">
-            <input id="search-input" type="text" placeholder="QUERY GAMES..." value="${this.searchQuery}" class="bg-black border border-amber-500/50 px-4 py-2 text-xs pl-8 text-amber-200 focus:outline-none focus:border-amber-400 w-44 md:w-56" />
-            <span class="absolute left-2.5 top-2 text-amber-500 text-xs">🔍</span>
+        <div class="flex items-center gap-2 flex-wrap justify-center">
+          <div class="omni-search-wrap">
+            <span class="omni-search-icon" aria-hidden="true">🔍</span>
+            <input id="search-input" type="text" placeholder="Search games…" value="${this.searchQuery}" class="omni-search" aria-label="Search games" />
           </div>
 
-          <button id="sound-toggle-btn" class="px-3 py-2 bg-zinc-950 border border-amber-500/50 text-amber-300 hover:bg-amber-900 text-xs transition">
-            🔊 SOUND FX
+          <button id="sound-toggle-btn" class="omni-pill" aria-label="Toggle sound effects">
+            🔊 SOUND
           </button>
 
-          <div class="bg-black border border-amber-500/50 px-3 py-2 text-xs">
-            <span class="text-amber-500/80">PLAYED:</span>
-            <span class="text-amber-400 font-bold ml-1">${stats.gamesPlayed || 0}</span>
+          <div class="omni-stat">
+            <span class="omni-stat-label">PLAYED</span>
+            <span class="omni-stat-value">${stats.gamesPlayed || 0}</span>
           </div>
         </div>
       </div>
@@ -283,14 +330,18 @@ class OmniArcadeApp {
     if (!navEl) return;
 
     const baseCats = [
-      { id: 'all', label: '🚀 ALL GAMES' },
-      { id: 'classics', label: '🕹️ CLASSICS' },
-      { id: 'ai-studio', label: '🤖 AI BUILDER' },
-      { id: 'skills', label: '🎓 LEARN SKILLS' },
-      { id: 'kids-edu', label: '👶 KIDS & EDU' },
-      { id: 'retro-vault', label: '🐍 RETRO VAULT' },
-      { id: 'casual-friv', label: '⚡ CASUAL FRIV' },
-      { id: 'adult-mind', label: '🧠 MIND & ADULT' }
+      { id: 'all', label: '🚀 All Games' },
+      { id: 'math-logic', label: '🎯 Math & Logic' },
+      { id: 'language', label: '📖 Language' },
+      { id: 'memory-focus', label: '🧠 Memory & Focus' },
+      { id: 'science', label: '🔬 Science' },
+      { id: 'skills', label: '🎓 Skills' },
+      { id: 'kids-edu', label: '👶 Kids & Edu' },
+      { id: 'casual-friv', label: '⚡ Arcade' },
+      { id: 'classics', label: '🕹️ Classics' },
+      { id: 'retro-vault', label: '🐍 Retro Vault' },
+      { id: 'adult-mind', label: '🧠 Mind Games' },
+      { id: 'ai-studio', label: '🤖 AI Builder' }
     ];
     const categories = baseCats.map(c => ({
       ...c,
@@ -298,11 +349,11 @@ class OmniArcadeApp {
     }));
 
     navEl.innerHTML = `
-      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-2 font-mono-hud">
+      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-2 omni-cat-bar">
         ${categories.map(cat => `
-          <button class="cat-pill-btn px-4 py-2 font-bold text-xs whitespace-nowrap transition flex items-center gap-2 ${this.activeCategory === cat.id ? 'bg-amber-500 text-black border border-amber-400 font-extrabold shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-black text-amber-400 border border-amber-500/40 hover:bg-amber-950'}" data-cat="${cat.id}">
+          <button class="omni-cat ${this.activeCategory === cat.id ? 'is-active' : ''}" data-cat="${cat.id}" aria-pressed="${this.activeCategory === cat.id}">
             <span>${cat.label}</span>
-            <span class="text-[9px] px-1.5 py-0.5 ${this.activeCategory === cat.id ? 'bg-black text-amber-400' : 'bg-zinc-900 text-amber-500'}">${cat.count}</span>
+            <span class="omni-cat-count">${cat.count}</span>
           </button>
         `).join('')}
       </div>
@@ -322,9 +373,10 @@ class OmniArcadeApp {
 
     if (filtered.length === 0) {
       gridEl.innerHTML = `
-        <div class="col-span-full py-16 text-center text-amber-500/60 font-mono-hud">
-          <div class="text-4xl mb-2">🔍</div>
-          <p class="text-sm font-bold">QUERY RETURNED ZERO MATCHES IN CATALOG.</p>
+        <div class="col-span-full omni-empty">
+          <div class="omni-empty-icon">🔍</div>
+          <p class="omni-empty-title">No games match your search.</p>
+          <p class="omni-empty-hint">Try a different keyword or pick another category.</p>
         </div>
       `;
       return;
@@ -333,7 +385,7 @@ class OmniArcadeApp {
     gridEl.innerHTML = filtered.map(game => {
       const high = StorageService.getHighScore(game.id);
       return `
-        <div class="axiom-card p-5 flex flex-col justify-between group cursor-pointer font-mono-hud" data-game="${game.id}" tabindex="0" role="button" aria-label="Launch ${game.title}">
+        <div class="axiom-card p-5 flex flex-col justify-between group cursor-pointer font-mono-hud" data-game="${game.id}" data-cat="${game.category}" tabindex="0" role="button" aria-label="Launch ${game.title}">
           <div>
             <div class="flex justify-between items-start mb-3">
               <span class="text-3xl text-amber-400">${game.icon}</span>
@@ -388,17 +440,29 @@ class OmniArcadeApp {
     overlay.classList.remove('hidden');
     container.innerHTML = '';
 
+    // GameSession traps every timer/listener/raf the game creates so we can
+    // kill them all on close — fixes stray-loop bugs across all 25 games.
+    const session = new GameSession();
+    const startedAt = Date.now();
+    let sessionScore = 0;
+
     const closeGame = () => {
+      const durationMs = Date.now() - startedAt;
+      // Log to local analytics. Backend-ready contract (see analytics.js).
+      try { AnalyticsService.log(game.id, game.category, sessionScore, durationMs); } catch (e) { /* storage full etc. */ }
+      session.teardown();
       overlay.classList.add('hidden');
       container.innerHTML = '';
       if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
+      this.renderRecommended();
       this.renderHeader();
       this.renderGameGrid();
     };
 
-    // Backdrop click + ESC to close (Rams: unobtrusive, obvious when needed).
     this._releaseModalUX = bindModalUX(overlay, closeGame);
 
+    // Inject a score-setter hook so each game's showResult can record final score.
+    container._recordScore = (s) => { sessionScore = Math.max(sessionScore, s | 0); };
     game.renderer(container, closeGame);
   }
 
@@ -422,7 +486,7 @@ class OmniArcadeApp {
       if (e.target.id === 'sound-toggle-btn') {
         soundFx.init();
         const muted = soundFx.toggleMute();
-        e.target.innerText = muted ? '🔇 MUTED' : '🔊 SOUND FX';
+        e.target.innerText = muted ? '🔇 MUTED' : '🔊 SOUND';
       }
     });
   }
