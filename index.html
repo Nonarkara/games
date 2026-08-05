@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniArcade — Axiom Core Edition [PROTOCOL: OMNI_2026]</title>
+  <meta name="description" content="Axiom Mono-Amber browser gaming platform featuring Pac-Man 1980, Tetris 1984, custom ROM loader, Friv casual favorites, Educaplay kids games, and AI prompt studio." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body class="bg-black text-slate-100 min-h-screen flex flex-col font-mono-hud scanlines selection:bg-amber-500 selection:text-black">
+
+  <!-- Top Tactical Announcement Header -->
+  <div class="bg-amber-950/80 border-b border-amber-500/40 text-xs py-2 px-4 text-center text-amber-300 tracking-wider">
+    [SYSTEM_STATUS: ONLINE] — <span class="text-white font-extrabold">OMNI_ARCADE AXIOM EDITION</span> — MONO-AMBER HUD | PAC-MAN | TETRIS | ROM LOADER | AI GAME STUDIO
+  </div>
+
+  <!-- Header -->
+  <header id="app-header" class="px-6 py-6 border-b border-amber-500/40 sticky top-0 z-30 bg-black/90 backdrop-blur-md">
+    <!-- Rendered dynamically by js/app.js -->
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+    
+    <!-- Hero Terminal Banner -->
+    <section class="bg-black border-2 border-amber-500 p-6 md:p-8 mb-8 relative shadow-[0_0_30px_rgba(245,158,11,0.2)]">
+      <div class="field-transmission mb-4">
+        FIELD TRANSMISSION // REPOSITORY INTELLIGENCE VERIFIED // MONO-AMBER PALETTE ENFORCED
+      </div>
+
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <span class="px-2.5 py-1 bg-amber-950 text-amber-300 border border-amber-500 text-[10px] font-bold uppercase tracking-widest mb-2 inline-block">
+            [PROTOCOL_ID: OMNI_SYSTEMS_2026]
+          </span>
+          <h2 class="text-2xl md:text-4xl font-black text-white tracking-wider mb-2">
+            ALL-IN-ONE <span class="text-amber-400">ARCADE & AI STUDIO</span>
+          </h2>
+          <p class="text-xs md:text-sm text-zinc-400 max-w-2xl leading-relaxed">
+            Featuring 100% legal native recreations of <strong>Pac-Man 1980</strong>, <strong>Tetris 1984</strong>, <strong>Space Defender</strong>, <strong>Retro Snake</strong>, plus a <strong>Custom Local ROM & Flash SWF Emulator Loader</strong> and <strong>Tesana.ai AI Game Studio</strong>!
+          </p>
+        </div>
+
+        <div class="bg-zinc-950 border border-amber-500/40 p-4 text-xs font-mono w-full md:w-auto">
+          <div class="text-amber-500 font-bold mb-1">[SYSTEM SPEC]</div>
+          <div class="text-zinc-400">PALETTE: MONO-AMBER</div>
+          <div class="text-zinc-400">CORNER RADIUS: 0px STRICT</div>
+          <div class="text-zinc-400">ENGINE: HTML5 CANVAS 2D</div>
+          <div class="text-amber-400 font-bold mt-1">EMULATOR: ACTIVE</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Navigation -->
+    <section id="category-bar" class="mb-8">
+      <!-- Rendered dynamically by js/app.js -->
+    </section>
+
+    <!-- Game Cards Grid -->
+    <section id="game-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Rendered dynamically by js/app.js -->
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-amber-500/40 bg-black py-6 px-6 mt-12 text-center text-xs text-zinc-500 font-mono">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <strong class="text-amber-400">OMNI_ARCADE</strong> [AXIOM_CORE_V2.0] © 2026
+      </div>
+      <div class="flex gap-4 text-zinc-400">
+        <span>🕹️ CLASSIC LEGENDS</span>
+        <span>💾 ROM LOADER</span>
+        <span>👶 KIDS & EDU</span>
+        <span>🤖 AI STUDIO</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Game Modal Overlay -->
+  <div id="game-modal-overlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div id="game-modal-container" class="w-full max-w-3xl my-auto">
+      <!-- Game canvas / UI rendered here -->
+    </div>
+  </div>
+
+  <!-- Main JavaScript Module -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

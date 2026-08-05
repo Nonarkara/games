@@ -1,0 +1,296 @@
+/* ============================================================================
+ * OmniArcade — Axiom Core Design System
+ * Dieter Rams × Mono-Amber: honest, unobtrusive, as little as possible.
+ * Ten principles in mind: useful, aesthetic, understandable, honest,
+ * unobtrusive, thorough down to the last detail, as little design as possible.
+ * ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap');
+
+:root {
+  /* Palette — restrained mono-amber. */
+  --axiom-amber: #f59e0b;
+  --axiom-amber-bright: #fbbf24;
+  --axiom-amber-dark: #b45309;
+  --axiom-bg-obsidian: #050505;
+  --axiom-bg-card: #0d0d0d;
+  --axiom-bg-surface: #141414;
+  --axiom-border-amber: rgba(245, 158, 11, 0.35);
+  --axiom-border-dim: rgba(255, 255, 255, 0.08);
+
+  /* Spacing rhythm — one scale, used consistently. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Motion. */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 0.12s;
+  --dur: 0.2s;
+}
+
+/* Rams: "Good design is as little design as possible."
+   Zero rounded corners — a deliberate, honest system constraint. */
+* {
+  border-radius: 0 !important;
+}
+
+body {
+  font-family: 'Outfit', 'JetBrains Mono', sans-serif;
+  background-color: var(--axiom-bg-obsidian);
+  color: #f3f4f6;
+  overflow-x: hidden;
+}
+
+.font-mono-hud { font-family: 'JetBrains Mono', monospace; }
+.font-retro { font-family: 'Press Start 2P', monospace; }
+
+/* --- Amber glow utilities (calmer than before) -------------------------- */
+.amber-glow { box-shadow: 0 0 12px rgba(245, 158, 11, 0.22); }
+.amber-glow-lg { box-shadow: 0 0 24px rgba(245, 158, 11, 0.28); }
+.amber-text-glow { text-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
+
+/* --- CRT scanlines (refined: subtler, toggleable via reduced-motion) ---- */
+.scanlines { position: relative; }
+.scanlines::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.18) 50%);
+  z-index: 20;
+  background-size: 100% 3px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* --- Custom scrollbar ---------------------------------------------------- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: var(--axiom-amber-dark); }
+::-webkit-scrollbar-thumb:hover { background: var(--axiom-amber); }
+
+/* --- Focus visibility: honest, obvious, keyboard-only ------------------- */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--axiom-amber-bright);
+  outline-offset: 2px;
+}
+
+/* --- Cards -------------------------------------------------------------- */
+.axiom-card {
+  background: var(--axiom-bg-card);
+  border: 1px solid var(--axiom-border-amber);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.axiom-card:hover {
+  border-color: var(--axiom-amber-bright);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.2);
+  transform: translateY(-2px);
+}
+.axiom-card:focus-visible {
+  border-color: var(--axiom-amber-bright);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.3);
+}
+
+/* --- Field transmission log -------------------------------------------- */
+.field-transmission {
+  background: rgba(245, 158, 11, 0.05);
+  border-left: 3px solid var(--axiom-amber);
+  padding: var(--space-3) var(--space-4);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--axiom-amber-bright);
+}
+
+/* ============================================================================
+ * Shared game button classes (used across all game modules)
+ * ========================================================================== */
+.axiom-close-btn {
+  padding: var(--space-2) var(--space-3);
+  background: #451a03;
+  border: 1px solid var(--axiom-amber);
+  color: #fcd34d;
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  transition: background var(--dur) var(--ease);
+}
+.axiom-close-btn:hover { background: #78350f; }
+
+.axiom-dpad-btn {
+  padding: var(--space-3);
+  background: #18181b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: var(--axiom-amber);
+  font-weight: 700;
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  transition: background var(--dur-fast) var(--ease);
+}
+.axiom-dpad-btn:hover { background: #78350f; }
+.axiom-dpad-btn:active { background: var(--axiom-amber-dark); color: #000; }
+
+/* ============================================================================
+ * Modal scroll-lock
+ * ========================================================================== */
+body.axiom-modal-open { overflow: hidden; }
+
+/* ============================================================================
+ * Result Overlay — the honest, unobtrusive replacement for alert()
+ * ========================================================================== */
+.axiom-result-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: rgba(5, 5, 5, 0.88);
+  backdrop-filter: blur(4px);
+  animation: axiom-fade-in var(--dur) var(--ease);
+}
+
+.axiom-result-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--axiom-bg-card);
+  border: 2px solid var(--axiom-amber);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  box-shadow: 0 0 40px rgba(245, 158, 11, 0.25);
+  animation: axiom-pop-in 0.28s var(--ease);
+}
+
+.axiom-result-card.axiom-result-win { border-color: #10b981; box-shadow: 0 0 40px rgba(16, 185, 129, 0.25); }
+
+.axiom-result-glyph {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin-bottom: var(--space-4);
+  color: var(--axiom-amber-bright);
+}
+.axiom-result-win .axiom-result-glyph { color: #34d399; }
+
+.axiom-result-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #fff;
+  margin-bottom: var(--space-2);
+}
+
+.axiom-result-msg {
+  font-size: 0.8rem;
+  color: #a1a1aa;
+  margin-bottom: var(--space-6);
+  line-height: 1.5;
+}
+
+.axiom-result-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  background: #000;
+  border: 1px solid var(--axiom-border-amber);
+}
+.axiom-result-score-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--axiom-amber);
+  font-family: 'JetBrains Mono', monospace;
+}
+.axiom-result-score-value {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.axiom-result-high {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  margin-bottom: var(--space-6);
+  background: var(--axiom-amber);
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-family: 'JetBrains Mono', monospace;
+  animation: axiom-pulse 1.4s var(--ease) infinite;
+}
+
+.axiom-result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.axiom-btn {
+  padding: var(--space-4);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  border: 1px solid;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.axiom-btn:active { transform: translateY(1px); }
+
+.axiom-btn-primary {
+  background: var(--axiom-amber);
+  border-color: var(--axiom-amber-bright);
+  color: #000;
+}
+.axiom-btn-primary:hover { background: var(--axiom-amber-bright); }
+
+.axiom-btn-ghost {
+  background: transparent;
+  border-color: rgba(245, 158, 11, 0.4);
+  color: var(--axiom-amber);
+}
+.axiom-btn-ghost:hover { background: #1c1917; }
+
+/* ============================================================================
+ * Animations
+ * ========================================================================== */
+@keyframes axiom-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes axiom-pop-in {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes axiom-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* ============================================================================
+ * Reduced motion — respect the user. Rams: "good design is unobtrusive."
+ * ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .scanlines::before { display: none; }
+  .axiom-result-high { animation: none; }
+}
+
+/* ============================================================================
+ * Mobile tuning
+ * ========================================================================== */
+@media (max-width: 640px) {
+  .axiom-result-card { max-width: 100%; padding: var(--space-6) var(--space-4); }
+  .axiom-result-score-value { font-size: 2rem; }
+}
