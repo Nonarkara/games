@@ -63,8 +63,10 @@ export class GameSession {
 
     window.setInterval = function(...a) { const id = s._orig.setInterval.apply(window, a); s._timers.add(id); return id; };
     window.setTimeout = function(...a) { const id = s._orig.setTimeout.apply(window, a); s._timeouts.add(id); return id; };
-    window.clearInterval = function(id) { s._timers.delete(id); s._orig.clearInterval(id); };
-    window.clearTimeout = function(id) { s._timeouts.delete(id); s._orig.clearTimeout(id); };
+    // .call(window, …) is required — native timer functions throw
+    // "Illegal invocation" when called unbound from module (strict) code.
+    window.clearInterval = function(id) { s._timers.delete(id); s._orig.clearInterval.call(window, id); };
+    window.clearTimeout = function(id) { s._timeouts.delete(id); s._orig.clearTimeout.call(window, id); };
     window.requestAnimationFrame = function(cb) { const id = s._orig.raf.call(window, cb); s._rafIds.add(id); return id; };
     window.cancelAnimationFrame = function(id) { s._rafIds.delete(id); s._orig.craf.call(window, id); };
     window.addEventListener = function(type, fn, opts) {
@@ -75,8 +77,8 @@ export class GameSession {
   _track(type, fn) { this._listeners.push({ type, fn, el: window }); }
 
   teardown() {
-    this._timers.forEach(id => this._orig.clearInterval(id));
-    this._timeouts.forEach(id => this._orig.clearTimeout(id));
+    this._timers.forEach(id => this._orig.clearInterval.call(window, id));
+    this._timeouts.forEach(id => this._orig.clearTimeout.call(window, id));
     this._rafIds.forEach(id => this._orig.craf.call(window, id));
     this._listeners.forEach(({ type, fn, el }) => el.removeEventListener(type, fn));
     this._timers.clear(); this._timeouts.clear(); this._rafIds.clear(); this._listeners = [];
@@ -109,7 +111,8 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
     const res = StorageService.updateHighScore(gameId, score);
     isNewHigh = res.isNewHigh;
   }
-  soundFx.play(tone === 'win' ? 'playWin' : 'playGameOver');
+  // soundFx has no generic play(name) dispatcher — call the method directly.
+  soundFx[tone === 'win' ? 'playWin' : 'playGameOver']();
 
   const overlay = document.createElement('div');
   overlay.className = 'axiom-result-overlay';
