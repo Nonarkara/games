@@ -710,6 +710,126 @@ body.axiom-modal-open { overflow: hidden; }
 .labs-option.is-wrong .labs-option-letter { background: var(--c-math); color: #fff; border-color: var(--c-math); }
 
 /* ============================================================================
+ * Labs · Host mode — Blow Into The Cartridge.
+ * One screen in the middle of a table. Everything scales up from the Labs
+ * base: same look, bigger, readable from across a room and on a phone.
+ * Three type sizes only — question, options, meta.
+ * ========================================================================== */
+.labs-modal--host { max-width: 860px; }
+
+/* Extra deck accents (the base Labs set only covers five) */
+.labs-card--c-labs  { border-left-color: var(--c-labs); }
+.labs-card--c-math  { border-left-color: var(--c-math); }
+.labs-card--mixed   { border-left-color: var(--ink); }
+
+/* Picker settings row */
+.host-settings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 0.25rem 0 0.75rem;
+}
+.host-timer-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.9rem;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.host-timer-btn:hover { border-color: var(--c-labs); color: var(--c-labs); }
+.host-timer-btn:focus-visible { outline: 3px solid var(--c-labs); outline-offset: 2px; }
+
+/* Question header */
+/* Eyebrow and counter sit together on the left — pushing the counter right
+   collides with the close button on narrow screens. */
+.host-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-right: 7rem; /* clear of the close button */
+}
+.host-meta .labs-eyebrow { margin-bottom: 0; }
+.host-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.host-timer-track {
+  height: 6px;
+  background: var(--paper-deep);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.6rem;
+}
+.host-timer-fill {
+  height: 100%;
+  width: 0;
+  background: var(--c-labs);
+}
+
+/* The question — display tier */
+.host-question {
+  font-family: 'Fredoka', sans-serif;
+  font-size: clamp(1.35rem, 5vw, 2.2rem);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+  text-wrap: balance;
+  margin: 1.25rem 0;
+  padding: 1rem 1.15rem;
+  background: var(--paper-deep);
+  border-left: 4px solid var(--c-labs);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Options — body tier. Not individually clickable: the whole card advances,
+   so they must not signify a tap target that does nothing. */
+.host-options { gap: 0.5rem; }
+.host-option {
+  min-height: 48px;
+  font-size: clamp(0.95rem, 2.6vw, 1.15rem);
+  cursor: default;
+}
+.host-option:hover { border-color: var(--line); transform: none; }
+.host-option .labs-option-letter { width: 32px; height: 32px; font-size: 0.85rem; }
+.host-option.is-dimmed { opacity: 0.45; }
+
+/* The payoff line */
+.host-fact {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--paper-deep);
+  border-left: 4px solid var(--c-skills);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: clamp(0.9rem, 2.4vw, 1.05rem);
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 70ch;
+  animation: pop-in 0.22s ease-out;
+}
+
+@media (max-width: 480px) {
+  .labs-modal--host { padding: 1.15rem; }
+  .host-meta { padding-right: 6.5rem; }
+  .host-question { margin: 1rem 0; padding: 0.85rem 0.9rem; }
+}
+
+/* ============================================================================
  * Animations
  * ========================================================================== */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }

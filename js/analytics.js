@@ -16,7 +16,8 @@ const CATEGORY_SKILLS = {
   'classics': 'Spatial Reasoning',
   'retro-vault': 'Reflex & Coordination',
   'adult-mind': 'Critical Thinking',
-  'ai-studio': 'Creativity'
+  'ai-studio': 'Creativity',
+  'labs': 'Recall & Culture'
 };
 
 export class AnalyticsService {

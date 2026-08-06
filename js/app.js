@@ -14,6 +14,7 @@ import { renderAIGameStudio } from './games/aiGameStudio.js';
 import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide2048 } from './games/curatedGames.js';
 import { renderStroop, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
 import { renderNonTrivial } from './games/labsGames.js';
+import { renderBlowIntoTheCartridge } from './games/nineties.js';
 import { bindModalUX, GameSession } from './ui.js';
 
 const gamesCatalog = [
@@ -229,7 +230,8 @@ const gamesCatalog = [
   { id: 'capital-quiz', title: 'Capital Quest', category: 'science', badge: '🔬 SCIENCE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🌍', age: 'Age 8+', desc: 'World geography trainer. Learn the capitals of 15 major countries across 10 rounds.', tags: ['Geography', 'Capitals', 'Recall'], renderer: renderCapitalQuiz },
   { id: 'number-chain', title: 'Number Chain', category: 'math-logic', badge: '🎯 MATH', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🔗', age: 'Age 10+', desc: 'Numerical reasoning trainer. Identify the pattern and predict the next number in the sequence.', tags: ['Patterns', 'Reasoning', 'Algebra'], renderer: renderNumberChain },
   { id: 'tower-hanoi', title: 'Tower of Hanoi', category: 'math-logic', badge: '🎯 MATH', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🗼', age: 'Age 8+', desc: 'Classic recursive-planning puzzle. Move all disks to peg 3 in the fewest moves possible.', tags: ['Logic', 'Planning', 'Recursive'], renderer: renderTowerHanoi },
-  { id: 'non-trivial', title: 'Non-Trivial', category: 'labs', badge: '🧪 LABS', badgeBg: 'bg-violet-500/20 text-violet-200 border-violet-400/40', icon: '🧠', age: 'Friends only', desc: 'Personal trivia portal. Five packs hand-curated from 100 days of writing — books, bikes, Shanghai, philosophers, sound. Play with friends. Add your own packs in js/games/labsGames.js.', tags: ['Trivia', 'Personal', 'Multi-pack', 'Friends'], renderer: renderNonTrivial }
+  { id: 'non-trivial', title: 'Non-Trivial', category: 'labs', badge: '🧪 LABS', badgeBg: 'bg-violet-500/20 text-violet-200 border-violet-400/40', icon: '🧠', age: 'Friends only', desc: 'Personal trivia portal. Five packs hand-curated from 100 days of writing — books, bikes, Shanghai, philosophers, sound. Play with friends. Add your own packs in js/games/labsGames.js.', tags: ['Trivia', 'Personal', 'Multi-pack', 'Friends'], renderer: renderNonTrivial },
+  { id: 'blow-cartridge', title: 'Blow Into The Cartridge', category: 'labs', badge: '🧪 LABS', badgeBg: 'bg-violet-500/20 text-violet-200 border-violet-400/40', icon: '🕹', age: 'Party', desc: 'Host-mode 90s/00s trivia for a room. 240 questions across six decks — artifacts, screen, sound, pixels, dial-up, playground. One screen, everyone shouts, score on paper. Nothing repeats until the deck runs dry.', tags: ['Trivia', 'Party', '90s', 'Host mode'], renderer: renderBlowIntoTheCartridge }
 ];
 
 class OmniArcadeApp {
