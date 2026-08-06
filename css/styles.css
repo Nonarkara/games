@@ -24,6 +24,8 @@
   --c-retro: #c04e3d;
   --c-mind: #5c6bc0;
   --c-ai: #6a4c93;
+  --c-labs: #5d3fd3;       /* electric violet — the personal-portal signal */
+  --c-music: #2a9d8f;      /* teal — used for the sound & frequency trivia */
 
   --accent: var(--c-math);
   --radius: 14px;
@@ -116,6 +118,7 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .axiom-card[data-cat="retro-vault"]::after    { background: var(--c-retro); }
 .axiom-card[data-cat="adult-mind"]::after     { background: var(--c-mind); }
 .axiom-card[data-cat="ai-studio"]::after      { background: var(--c-ai); }
+.axiom-card[data-cat="labs"]::after         { background: var(--c-labs); }
 
 /* ============================================================================
  * Field transmission (now: rhyme strip)
@@ -502,6 +505,209 @@ body.axiom-modal-open { overflow: hidden; }
   color: var(--ink-soft);
 }
 .axiom-btn-ghost:hover { background: var(--paper-deep); }
+
+/* ============================================================================
+ * Labs — Dr Non's personal games portal.
+ * Distinct visual: violet, monospaced eyebrow, no-nonsense quiz UI.
+ * ========================================================================== */
+.labs-modal {
+  background: #fffbf0;
+  border: 2px solid var(--line);
+  border-left: 5px solid var(--c-labs);
+  border-radius: var(--radius);
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  font-family: 'Nunito', sans-serif;
+}
+.labs-modal--quiz { border-left-color: var(--c-arcade); }
+
+.labs-head { margin-bottom: 1rem; position: relative; }
+.labs-head .axiom-close-btn { position: absolute; top: 0; right: 0; }
+
+.labs-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--c-labs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+.labs-title {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.4rem;
+  line-height: 1.1;
+}
+.labs-sub {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  max-width: 56ch;
+}
+.labs-sub code {
+  background: var(--paper-deep);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--c-labs);
+}
+
+/* Hub: grid of trivia cards */
+.labs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.7rem;
+  margin: 1rem 0 0.75rem;
+}
+.labs-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto auto;
+  column-gap: 0.75rem;
+  text-align: left;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-left: 5px solid var(--c-arcade);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.85rem;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.15s ease;
+}
+.labs-card--c-language { border-left-color: var(--c-language); }
+.labs-card--c-arcade    { border-left-color: var(--c-arcade); }
+.labs-card--c-kids      { border-left-color: var(--c-kids); }
+.labs-card--c-science   { border-left-color: var(--c-science); }
+.labs-card--c-music     { border-left-color: var(--c-music); }
+.labs-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--c-labs); }
+.labs-card:focus-visible { outline: 3px solid var(--c-labs); outline-offset: 2px; }
+.labs-card-icon { grid-row: 1 / span 2; font-size: 1.6rem; align-self: center; }
+.labs-card-title { font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); font-size: 1rem; line-height: 1.1; }
+.labs-card-sub { font-size: 0.75rem; color: var(--ink-soft); grid-column: 2; line-height: 1.3; }
+.labs-card-meta {
+  grid-column: 1 / -1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--line);
+}
+
+.labs-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+.labs-lock { color: var(--c-labs); font-weight: 700; }
+.labs-back {
+  background: transparent;
+  border: 0;
+  color: var(--c-labs);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+}
+.labs-back:hover { color: var(--ink); text-decoration: underline; }
+.labs-foot-meta { text-align: right; }
+
+/* Quiz: progress, question, options */
+.labs-progress {
+  display: flex; align-items: center; gap: 0.6rem;
+  margin-top: 0.4rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.labs-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--paper-deep);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.labs-progress-fill {
+  height: 100%;
+  background: var(--c-arcade);
+  transition: width 0.3s ease;
+}
+.labs-progress-score { color: var(--c-skills); font-weight: 700; }
+
+.labs-question {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+  margin: 1rem 0 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--paper-deep);
+  border-left: 3px solid var(--c-arcade);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.labs-options {
+  display: flex; flex-direction: column; gap: 0.55rem;
+}
+.labs-option {
+  display: flex; align-items: stretch; gap: 0.75rem;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  transition: all 0.12s ease;
+}
+.labs-option:hover:not(:disabled) { border-color: var(--c-arcade); transform: translateX(2px); }
+.labs-option:disabled { cursor: default; }
+.labs-option-letter {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: var(--paper-deep);
+  border: 1.5px solid var(--line);
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+.labs-option-text { display: flex; align-items: center; line-height: 1.35; }
+.labs-option.is-correct {
+  background: rgba(74, 140, 94, 0.12);
+  border-color: var(--c-skills);
+}
+.labs-option.is-correct .labs-option-letter { background: var(--c-skills); color: #fff; border-color: var(--c-skills); }
+.labs-option.is-wrong {
+  background: rgba(231, 111, 81, 0.12);
+  border-color: var(--c-math);
+}
+.labs-option.is-wrong .labs-option-letter { background: var(--c-math); color: #fff; border-color: var(--c-math); }
 
 /* ============================================================================
  * Animations
