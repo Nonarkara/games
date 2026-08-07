@@ -23,7 +23,6 @@ const gamesCatalog = [
     title: 'Cyber Tetris 1984',
     category: 'classics',
     badge: '🕹️ CLASSIC LEGEND',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🧱',
     age: 'All Ages',
     desc: 'Original falling tetromino block puzzle. Rotate pieces, clear lines, and build high combo multipliers.',
@@ -35,7 +34,6 @@ const gamesCatalog = [
     title: 'Cyber Pac-Man 1980',
     category: 'classics',
     badge: '🕹️ CLASSIC LEGEND',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🟡',
     age: 'All Ages',
     desc: 'Classic arcade maze navigation! Eat dots, power pellets, and outsmart Blinky, Pinky, Inky & Clyde AI.',
@@ -47,7 +45,6 @@ const gamesCatalog = [
     title: 'Retro ROM / SWF Loader',
     category: 'classics',
     badge: '💾 FILE INSPECTOR',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '💾',
     age: 'All Ages',
     desc: "Local game-file inspector. Drop a legal .nes, .gb, .sfc, or .swf backup to preview its header metadata.",
@@ -59,7 +56,6 @@ const gamesCatalog = [
     title: 'AI Game Builder Studio',
     category: 'ai-studio',
     badge: '🤖 AI GENERATOR',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🤖',
     age: 'All Ages',
     desc: 'Inspired by Tesana.ai — Type prompts or pick presets to build custom playable games live!',
@@ -71,7 +67,6 @@ const gamesCatalog = [
     title: 'Retro Cyber Snake',
     category: 'retro-vault',
     badge: '🕹️ RETRO VAULT',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🐍',
     age: 'All Ages',
     desc: "Classic 8-bit arcade grid snake with speed boosts and glowing food.",
@@ -83,7 +78,6 @@ const gamesCatalog = [
     title: 'Space Defender',
     category: 'retro-vault',
     badge: '🕹️ RETRO VAULT',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '👾',
     age: 'All Ages',
     desc: 'Classic space shooter! Control your laser turret to defend against alien invader waves.',
@@ -95,7 +89,6 @@ const gamesCatalog = [
     title: 'Math Safari Rush',
     category: 'kids-edu',
     badge: '👶 KIDS & EDU',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🧮',
     age: 'Age 6+',
     desc: 'Inspired by Educaplay — Solve arithmetic equations to leap over obstacles!',
@@ -107,7 +100,6 @@ const gamesCatalog = [
     title: 'Memory Match Mania',
     category: 'kids-edu',
     badge: '👶 KIDS & EDU',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🧠',
     age: 'Age 5+',
     desc: 'Flip cards and match animal pairs with streak bonuses & moves counter.',
@@ -119,7 +111,6 @@ const gamesCatalog = [
     title: 'Word Search Quest',
     category: 'kids-edu',
     badge: '👶 KIDS & EDU',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🔤',
     age: 'Age 7+',
     desc: 'Search for hidden vocabulary words in an interactive letter grid.',
@@ -131,7 +122,6 @@ const gamesCatalog = [
     title: 'Flappy Cyber Bird',
     category: 'casual-friv',
     badge: '⚡ CASUAL FRIV',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🐦',
     age: 'All Ages',
     desc: 'Inspired by Friv — Precision tap-to-fly arcade action through glowing pipes.',
@@ -143,7 +133,6 @@ const gamesCatalog = [
     title: 'Minesweeper Pro',
     category: 'casual-friv',
     badge: '⚡ CASUAL FRIV',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '💣',
     age: 'Age 10+',
     desc: 'Classic logic puzzle game. Flag mines and uncover safe grid numbers.',
@@ -155,7 +144,6 @@ const gamesCatalog = [
     title: 'Ultimate Trivia Master',
     category: 'adult-mind',
     badge: '🧠 MIND & ADULT',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '❓',
     age: 'Teen & Adult',
     desc: 'Deep trivia challenge covering History, Sci-Fi, Science, and Gaming culture.',
@@ -167,7 +155,6 @@ const gamesCatalog = [
     title: 'Pattern Breaker',
     category: 'adult-mind',
     badge: '🧠 MIND & ADULT',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🔐',
     age: 'Teen & Adult',
     desc: 'Deductive logic puzzle. Crack a hidden 4-node path on a 3x3 grid using Mastermind-style hints.',
@@ -179,7 +166,6 @@ const gamesCatalog = [
     title: 'Type Rush',
     category: 'skills',
     badge: '🎓 LEARN SKILL',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '⌨️',
     age: 'Age 8+',
     desc: '30-second typing fluency trainer. Build keyboard muscle memory with live WPM and accuracy scoring.',
@@ -191,7 +177,6 @@ const gamesCatalog = [
     title: 'Reflex Matrix',
     category: 'casual-friv',
     badge: '⚡ CASUAL FRIV',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '⚡',
     age: 'All Ages',
     desc: 'Hand-eye coordination trainer. Tap glowing cells before they fade — speed escalates each wave.',
@@ -203,7 +188,6 @@ const gamesCatalog = [
     title: 'Slide 2048',
     category: 'casual-friv',
     badge: '⚡ CASUAL FRIV',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🔢',
     age: 'All Ages',
     desc: 'Classic sliding-tile strategy. Merge matching numbers and plan ahead to reach the 2048 tile.',
@@ -215,23 +199,22 @@ const gamesCatalog = [
     title: 'Cyber Blackjack 21',
     category: 'adult-mind',
     badge: '🧠 MIND & ADULT',
-    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     icon: '🃏',
     age: 'Adult 18+',
     desc: 'Casino card game against AI dealer. Manage bankroll chips, hit, and stand.',
     tags: ['Cards', 'Casino', 'Strategy'],
     renderer: renderBlackjack
   },
-  { id: 'stroop-match', title: 'Stroop Color Match', category: 'memory-focus', badge: '🧠 FOCUS', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🎨', age: 'Age 8+', desc: 'Cognitive inhibition trainer. Pick the ink color — not the word. Builds executive function.', tags: ['Stroop', 'Focus', 'Inhibition'], renderer: renderStroop },
-  { id: 'simon-seq', title: 'Simon Sequence', category: 'memory-focus', badge: '🧠 FOCUS', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🔵', age: 'All Ages', desc: 'Auditory working-memory trainer. Watch the glowing pattern grow, then repeat it back.', tags: ['Memory', 'Sequence', 'Recall'], renderer: renderSimon },
-  { id: 'anagram-scramble', title: 'Anagram Scramble', category: 'language', badge: '📖 LANGUAGE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🔤', age: 'Age 10+', desc: 'Spelling & vocabulary builder. Unscramble jumbled letters into real words under pressure.', tags: ['Spelling', 'Vocabulary', 'Anagram'], renderer: renderAnagram },
-  { id: 'word-builder', title: 'Word Builder', category: 'language', badge: '📖 LANGUAGE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🅰️', age: 'Age 7+', desc: 'Phonics & spelling sprint. Build as many valid words as you can from 7 letter tiles in 60 seconds.', tags: ['Phonics', 'Spelling', 'Timed'], renderer: renderWordBuilder },
-  { id: 'periodic-quest', title: 'Periodic Quest', category: 'science', badge: '🔬 SCIENCE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '⚗️', age: 'Age 12+', desc: 'Chemistry recall trainer. Match element symbols to their names across 10 rounds.', tags: ['Chemistry', 'Elements', 'Recall'], renderer: renderPeriodicQuest },
-  { id: 'capital-quiz', title: 'Capital Quest', category: 'science', badge: '🔬 SCIENCE', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🌍', age: 'Age 8+', desc: 'World geography trainer. Learn the capitals of 15 major countries across 10 rounds.', tags: ['Geography', 'Capitals', 'Recall'], renderer: renderCapitalQuiz },
-  { id: 'number-chain', title: 'Number Chain', category: 'math-logic', badge: '🎯 MATH', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🔗', age: 'Age 10+', desc: 'Numerical reasoning trainer. Identify the pattern and predict the next number in the sequence.', tags: ['Patterns', 'Reasoning', 'Algebra'], renderer: renderNumberChain },
-  { id: 'tower-hanoi', title: 'Tower of Hanoi', category: 'math-logic', badge: '🎯 MATH', badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', icon: '🗼', age: 'Age 8+', desc: 'Classic recursive-planning puzzle. Move all disks to peg 3 in the fewest moves possible.', tags: ['Logic', 'Planning', 'Recursive'], renderer: renderTowerHanoi },
-  { id: 'non-trivial', title: 'Non-Trivial', category: 'labs', badge: '🧪 LABS', badgeBg: 'bg-violet-500/20 text-violet-200 border-violet-400/40', icon: '🧠', age: 'Friends only', desc: 'Personal trivia portal. Five packs hand-curated from 100 days of writing — books, bikes, Shanghai, philosophers, sound. Play with friends. Add your own packs in js/games/labsGames.js.', tags: ['Trivia', 'Personal', 'Multi-pack', 'Friends'], renderer: renderNonTrivial },
-  { id: 'blow-cartridge', title: 'Blow Into The Cartridge', category: 'labs', badge: '🧪 LABS', badgeBg: 'bg-violet-500/20 text-violet-200 border-violet-400/40', icon: '🕹', age: 'Party', desc: 'Host-mode 90s/00s trivia for a room. 240 questions across six decks — artifacts, screen, sound, pixels, dial-up, playground. One screen, everyone shouts, score on paper. Nothing repeats until the deck runs dry.', tags: ['Trivia', 'Party', '90s', 'Host mode'], renderer: renderBlowIntoTheCartridge }
+  { id: 'stroop-match', title: 'Stroop Color Match', category: 'memory-focus', badge: '🧠 FOCUS', icon: '🎨', age: 'Age 8+', desc: 'Cognitive inhibition trainer. Pick the ink color — not the word. Builds executive function.', tags: ['Stroop', 'Focus', 'Inhibition'], renderer: renderStroop },
+  { id: 'simon-seq', title: 'Simon Sequence', category: 'memory-focus', badge: '🧠 FOCUS', icon: '🔵', age: 'All Ages', desc: 'Auditory working-memory trainer. Watch the glowing pattern grow, then repeat it back.', tags: ['Memory', 'Sequence', 'Recall'], renderer: renderSimon },
+  { id: 'anagram-scramble', title: 'Anagram Scramble', category: 'language', badge: '📖 LANGUAGE', icon: '🔤', age: 'Age 10+', desc: 'Spelling & vocabulary builder. Unscramble jumbled letters into real words under pressure.', tags: ['Spelling', 'Vocabulary', 'Anagram'], renderer: renderAnagram },
+  { id: 'word-builder', title: 'Word Builder', category: 'language', badge: '📖 LANGUAGE', icon: '🅰️', age: 'Age 7+', desc: 'Phonics & spelling sprint. Build as many valid words as you can from 7 letter tiles in 60 seconds.', tags: ['Phonics', 'Spelling', 'Timed'], renderer: renderWordBuilder },
+  { id: 'periodic-quest', title: 'Periodic Quest', category: 'science', badge: '🔬 SCIENCE', icon: '⚗️', age: 'Age 12+', desc: 'Chemistry recall trainer. Match element symbols to their names across 10 rounds.', tags: ['Chemistry', 'Elements', 'Recall'], renderer: renderPeriodicQuest },
+  { id: 'capital-quiz', title: 'Capital Quest', category: 'science', badge: '🔬 SCIENCE', icon: '🌍', age: 'Age 8+', desc: 'World geography trainer. Learn the capitals of 15 major countries across 10 rounds.', tags: ['Geography', 'Capitals', 'Recall'], renderer: renderCapitalQuiz },
+  { id: 'number-chain', title: 'Number Chain', category: 'math-logic', badge: '🎯 MATH', icon: '🔗', age: 'Age 10+', desc: 'Numerical reasoning trainer. Identify the pattern and predict the next number in the sequence.', tags: ['Patterns', 'Reasoning', 'Algebra'], renderer: renderNumberChain },
+  { id: 'tower-hanoi', title: 'Tower of Hanoi', category: 'math-logic', badge: '🎯 MATH', icon: '🗼', age: 'Age 8+', desc: 'Classic recursive-planning puzzle. Move all disks to peg 3 in the fewest moves possible.', tags: ['Logic', 'Planning', 'Recursive'], renderer: renderTowerHanoi },
+  { id: 'non-trivial', title: 'Non-Trivial', category: 'labs', badge: '🧪 LABS', icon: '🧠', age: 'Friends only', desc: 'Personal trivia portal. Five packs hand-curated from 100 days of writing — books, bikes, Shanghai, philosophers, sound. Play with friends. Add your own packs in js/games/labsGames.js.', tags: ['Trivia', 'Personal', 'Multi-pack', 'Friends'], renderer: renderNonTrivial },
+  { id: 'blow-cartridge', title: 'Blow Into The Cartridge', category: 'labs', badge: '🧪 LABS', icon: '🕹', age: 'Party', desc: 'Host-mode 90s/00s trivia for a room. 240 questions across six decks — artifacts, screen, sound, pixels, dial-up, playground. One screen, everyone shouts, score on paper. Nothing repeats until the deck runs dry.', tags: ['Trivia', 'Party', '90s', 'Host mode'], renderer: renderBlowIntoTheCartridge }
 ];
 
 class OmniArcadeApp {
@@ -390,34 +373,19 @@ class OmniArcadeApp {
     gridEl.innerHTML = filtered.map(game => {
       const high = StorageService.getHighScore(game.id);
       return `
-        <div class="axiom-card p-5 flex flex-col justify-between group cursor-pointer font-mono-hud" data-game="${game.id}" data-cat="${game.category}" tabindex="0" role="button" aria-label="Launch ${game.title}">
-          <div>
-            <div class="flex justify-between items-start mb-3">
-              <span class="text-3xl text-amber-400">${game.icon}</span>
-              <span class="text-[9px] font-bold px-2 py-0.5 border ${game.badgeBg}">
-                ${game.badge}
-              </span>
-            </div>
-
-            <h3 class="text-lg font-bold text-white group-hover:text-amber-400 transition-colors mb-1">
-              ${game.title}
-            </h3>
-            <p class="text-xs text-zinc-400 mb-4 line-clamp-2">
-              ${game.desc}
-            </p>
+        <div class="axiom-card omni-card" data-game="${game.id}" data-cat="${game.category}" tabindex="0" role="button" aria-label="Launch ${game.title}">
+          <div class="omni-card-head">
+            <span class="omni-card-icon">${game.icon}</span>
+            <span class="omni-card-badge">${game.badge}</span>
           </div>
-
-          <div>
-            <div class="flex flex-wrap gap-1 mb-4">
-              ${game.tags.map(t => `<span class="text-[9px] bg-zinc-950 text-amber-500/80 px-2 py-0.5 border border-amber-500/30">#${t}</span>`).join('')}
-            </div>
-
-            <div class="flex items-center justify-between pt-3 border-t border-amber-500/30 text-xs">
-              <span class="text-zinc-500">HIGH: <strong class="text-amber-400">${high}</strong></span>
-              <button class="play-btn px-4 py-2 bg-amber-600 hover:bg-amber-500 text-black font-black text-xs uppercase tracking-wider transition">
-                ▶ LAUNCH
-              </button>
-            </div>
+          <h3 class="omni-card-title">${game.title}</h3>
+          <p class="omni-card-desc">${game.desc}</p>
+          <div class="omni-card-tags">
+            ${game.tags.map(t => `<span class="omni-card-tag">#${t}</span>`).join('')}
+          </div>
+          <div class="omni-card-foot">
+            <span class="omni-card-high">HIGH <strong>${high}</strong></span>
+            <button class="omni-card-launch" type="button">▶ LAUNCH</button>
           </div>
         </div>
       `;

@@ -391,6 +391,141 @@ body.axiom-modal-open { overflow: hidden; }
 .omni-rec-meta { display: block; font-size: 0.7rem; color: var(--ink-soft); }
 
 /* ============================================================================
+ * Card grid — public Games catalog
+ * Storybook tokens. Per-category accent drives the top border AND the badge.
+ * ========================================================================== */
+.omni-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1.1rem 1.15rem 1rem;
+  color: var(--ink);
+  cursor: pointer;
+  /* inherits background, border, border-radius, shadow, ::after top-stripe from .axiom-card */
+}
+.omni-card:focus-visible { outline: 3px solid var(--c-arcade); outline-offset: 2px; }
+
+.omni-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.omni-card-icon { font-size: 1.9rem; line-height: 1; }
+
+.omni-card-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.omni-card-title {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  margin: 0;
+  /* prevent title from sitting flush with badge/icon */
+}
+.omni-card:hover .omni-card-title { color: var(--c-skills); }
+
+.omni-card-desc {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;       /* push the foot row to the bottom regardless of desc length */
+}
+
+.omni-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.omni-card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.omni-card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  padding-top: 0.55rem;
+  margin-top: 0.15rem;
+  border-top: 1px solid var(--line);
+}
+.omni-card-high {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.omni-card-high strong {
+  color: var(--c-skills);
+  font-weight: 700;
+  margin-left: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.omni-card-launch {
+  background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  padding: 0.5rem 0.95rem;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+.omni-card-launch:hover { background: var(--c-skills); }
+.omni-card-launch:active { transform: scale(0.97); }
+.omni-card-launch:focus-visible { outline: 3px solid var(--c-arcade); outline-offset: 2px; }
+
+/* Per-category badge color: the top stripe and the badge now agree. */
+.omni-card[data-cat="math-logic"]    .omni-card-badge { color: var(--c-math); }
+.omni-card[data-cat="language"]      .omni-card-badge { color: var(--c-language); }
+.omni-card[data-cat="memory-focus"]  .omni-card-badge { color: var(--c-memory); }
+.omni-card[data-cat="science"]       .omni-card-badge { color: var(--c-science); }
+.omni-card[data-cat="skills"]        .omni-card-badge { color: var(--c-skills); }
+.omni-card[data-cat="kids-edu"]      .omni-card-badge { color: var(--c-kids); }
+.omni-card[data-cat="casual-friv"]   .omni-card-badge { color: var(--c-arcade); }
+.omni-card[data-cat="classics"]      .omni-card-badge { color: var(--c-classics); }
+.omni-card[data-cat="retro-vault"]   .omni-card-badge { color: var(--c-retro); }
+.omni-card[data-cat="adult-mind"]    .omni-card-badge { color: var(--c-mind); }
+.omni-card[data-cat="ai-studio"]     .omni-card-badge { color: var(--c-ai); }
+.omni-card[data-cat="labs"]          .omni-card-badge { color: var(--c-labs); }
+
+/* ============================================================================
  * Result Overlay — storybook card style
  * ========================================================================== */
 .axiom-result-overlay {
@@ -653,6 +788,7 @@ body.axiom-modal-open { overflow: hidden; }
   transition: width 0.3s ease;
 }
 .labs-progress-score { color: var(--c-skills); font-weight: 700; }
+.labs-progress-text { color: var(--ink-soft); font-weight: 700; min-width: 4.5em; }
 
 .labs-question {
   font-family: 'Fredoka', sans-serif;
