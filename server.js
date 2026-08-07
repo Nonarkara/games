@@ -9,9 +9,10 @@ const __dirname = path.dirname(__filename);
 const PORT = 3000;
 
 const MIME_TYPES = {
-  '.html': 'text/html',
-  '.js': 'text/javascript',
-  '.css': 'text/css',
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
   '.json': 'application/json',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -20,23 +21,33 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
-  const ext = path.extname(filePath);
+  try {
+    const host = req.headers.host || 'localhost';
+    const parsedUrl = new URL(req.url, `http://${host}`);
+    let reqPath = parsedUrl.pathname === '/' ? '/index.html' : parsedUrl.pathname;
+    let filePath = path.join(__dirname, path.normalize(reqPath));
 
-  fs.readFile(filePath, (err, content) => {
-    if (err) {
-      if (err.code === 'ENOENT') {
-        res.writeHead(404, { 'Content-Type': 'text/html' });
-        res.end('<h1>404 Not Found</h1>', 'utf-8');
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+    fs.readFile(filePath, (err, content) => {
+      if (err) {
+        if (err.code === 'ENOENT') {
+          res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end('<h1 style="font-family:sans-serif;padding:2rem;">404 Not Found</h1>', 'utf-8');
+        } else {
+          res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(`<h1 style="font-family:sans-serif;padding:2rem;">Server Error: ${err.code}</h1>`, 'utf-8');
+        }
       } else {
-        res.writeHead(500);
-        res.end(`Server Error: ${err.code}`, 'utf-8');
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(content, 'utf-8');
       }
-    } else {
-      res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
-      res.end(content, 'utf-8');
-    }
-  });
+    });
+  } catch (e) {
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Bad Request');
+  }
 });
 
 server.listen(PORT, () => {

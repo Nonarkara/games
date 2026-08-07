@@ -465,6 +465,11 @@ class OmniArcadeApp {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function bootApp() {
   new OmniArcadeApp();
-});
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootApp);
+} else {
+  bootApp();
+}

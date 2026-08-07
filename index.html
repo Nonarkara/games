@@ -20,6 +20,29 @@
 
   <!-- Header -->
   <header id="app-header" class="px-6 py-5 sticky top-0 z-30" style="background:rgba(253,246,227,0.95);backdrop-filter:blur(8px);border-bottom:2px solid #d9cbb0">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="omni-logo">🎮</div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="omni-brand">OmniArcade</h1>
+            <span class="omni-version">LEARN EDITION</span>
+          </div>
+          <p class="omni-tagline">25 educational & brain games · Math · Language · Memory · Science</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap justify-center">
+        <div class="omni-search-wrap">
+          <span class="omni-search-icon" aria-hidden="true">🔍</span>
+          <input id="search-input" type="text" placeholder="Search games…" class="omni-search" aria-label="Search games" />
+        </div>
+        <button id="sound-toggle-btn" class="omni-pill" aria-label="Toggle sound effects">🔊 SOUND</button>
+        <div class="omni-stat">
+          <span class="omni-stat-label">PLAYED</span>
+          <span class="omni-stat-value">0</span>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- Main Content -->
