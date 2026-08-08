@@ -12,97 +12,49 @@
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
-  <header id="app-header" class="omni-header"></header>
-
-  <main class="omni-main">
-    <section id="omni-hud" aria-label="Floor plan"></section>
-
-    <!-- PROTOCOL — research as structure, not a footnote -->
-    <section class="omni-protocol" aria-labelledby="protocol-title">
-      <div class="omni-protocol-head">
-        <h2 id="protocol-title" class="omni-protocol-title">PROTOCOL</h2>
-        <p class="omni-protocol-lede">
-          What practicing these tasks can and cannot do. Near transfer is real.
-          Far transfer to “smarter in life” is contested — the skeptical review is listed on purpose.
-        </p>
+  <div class="cabinet">
+    <!-- Left rail: wing select like a cabinet button strip -->
+    <aside class="cabinet-rail" aria-label="Wings">
+      <div class="cabinet-rail-brand">
+        <p class="cabinet-mark font-mono-hud" aria-hidden="true">OA</p>
+        <p class="cabinet-rail-word">SELECT</p>
       </div>
-
-      <div class="omni-protocol-map">
-        <div class="omni-protocol-cell">
-          <span class="omni-protocol-code font-mono-hud">NBK</span>
-          <span class="omni-protocol-task">Dual N-Back</span>
-          <a href="https://doi.org/10.1073/pnas.0801268105" target="_blank" rel="noopener">Jaeggi et al. 2008 · PNAS</a>
-        </div>
-        <div class="omni-protocol-cell">
-          <span class="omni-protocol-code font-mono-hud">DSP</span>
-          <span class="omni-protocol-task">Digit Span</span>
-          <a href="https://doi.org/10.1037/h0043158" target="_blank" rel="noopener">Miller 1956 · Psych. Review</a>
-        </div>
-        <div class="omni-protocol-cell">
-          <span class="omni-protocol-code font-mono-hud">STR</span>
-          <span class="omni-protocol-task">Stroop Match</span>
-          <a href="https://doi.org/10.1037/h0054651" target="_blank" rel="noopener">Stroop 1935 · JEP</a>
-        </div>
-        <div class="omni-protocol-cell">
-          <span class="omni-protocol-code font-mono-hud">GNG</span>
-          <span class="omni-protocol-task">Go / No-Go</span>
-          <a href="https://doi.org/10.1016/j.tics.2008.07.005" target="_blank" rel="noopener">Verbruggen &amp; Logan 2008 · TiCS</a>
-        </div>
-        <div class="omni-protocol-cell">
-          <span class="omni-protocol-code font-mono-hud">VSR</span>
-          <span class="omni-protocol-task">Visual Search</span>
-          <a href="https://doi.org/10.1038/nature01647" target="_blank" rel="noopener">Green &amp; Bavelier 2003 · Nature</a>
-        </div>
-        <div class="omni-protocol-cell">
-          <span class="omni-protocol-code font-mono-hud">AIM</span>
-          <span class="omni-protocol-task">Aim Trainer</span>
-          <a href="https://doi.org/10.1111/j.1467-8721.2009.01660.x" target="_blank" rel="noopener">Dye, Green &amp; Bavelier 2009</a>
-        </div>
-      </div>
-
-      <details class="omni-science">
-        <summary class="omni-science-summary">FULL DOCKET — EIGHT MORE REFERENCES</summary>
-        <div class="omni-science-body">
-          <p class="omni-science-intro">
-            Practicing these tasks reliably improves the abilities they exercise — visual attention,
-            processing speed, working-memory span, interference control. Whether those gains transfer
-            broadly to everyday life is still debated. What is not debated: twenty minutes here
-            exercises attention; twenty minutes of an infinite feed spends it.
-          </p>
-          <ul class="omni-science-list">
-            <li>Custom video-game training enhanced cognitive control in adults aged 60–85.
-              <a href="https://doi.org/10.1038/nature12486" target="_blank" rel="noopener">Anguera et al. (2013), <em>Nature</em> 501, 97–101</a></li>
-            <li>Two months of platformer play induced measurable gray-matter growth in hippocampus, prefrontal cortex, and cerebellum.
-              <a href="https://doi.org/10.1038/mp.2013.120" target="_blank" rel="noopener">Kühn et al. (2014), <em>Molecular Psychiatry</em> 19, 265–271</a></li>
-            <li>Strategy-game training attenuated cognitive decline measures in older adults.
-              <a href="https://doi.org/10.1037/a0013494" target="_blank" rel="noopener">Basak et al. (2008), <em>Psychology and Aging</em> 23, 765–777</a></li>
-            <li>Executive functions — inhibition, working memory, cognitive flexibility — as a trainable triad.
-              <a href="https://doi.org/10.1146/annurev-psych-113011-143750" target="_blank" rel="noopener">Diamond (2013), <em>Annual Review of Psychology</em> 64, 135–168</a></li>
-            <li>Working memory as temporary storage and manipulation — the frame Digit Span sits in.
-              <a href="https://doi.org/10.1126/science.1736359" target="_blank" rel="noopener">Baddeley (1992), <em>Science</em> 255, 556–559</a></li>
-            <li>Action-game players show faster processing speed without loss of accuracy.
-              <a href="https://doi.org/10.1111/j.1467-8721.2009.01660.x" target="_blank" rel="noopener">Dye, Green &amp; Bavelier (2009), <em>Current Directions</em> 18, 321–326</a></li>
-            <li>Continuous performance / go–no-go as a standard probe of inhibitory control.
-              <a href="https://doi.org/10.1016/j.tics.2008.07.005" target="_blank" rel="noopener">Verbruggen &amp; Logan (2008), <em>Trends in Cognitive Sciences</em> 12, 418–424</a></li>
-            <li><strong>The caveat, on purpose:</strong> strong evidence for improvement on trained tasks; weak evidence for far transfer. This floor does not claim otherwise.
-              <a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons et al. (2016), <em>Psychological Science in the Public Interest</em> 17, 103–186</a></li>
-          </ul>
-        </div>
+      <nav id="category-bar" class="cabinet-wings"></nav>
+      <details class="cabinet-papers">
+        <summary>Papers</summary>
+        <ol class="cabinet-paper-list">
+          <li><a href="https://doi.org/10.1073/pnas.0801268105" target="_blank" rel="noopener">Jaeggi 2008 · N-back</a></li>
+          <li><a href="https://doi.org/10.1037/h0043158" target="_blank" rel="noopener">Miller 1956 · Span</a></li>
+          <li><a href="https://doi.org/10.1037/h0054651" target="_blank" rel="noopener">Stroop 1935</a></li>
+          <li><a href="https://doi.org/10.1016/j.tics.2008.07.005" target="_blank" rel="noopener">Verbruggen 2008 · Go/No-Go</a></li>
+          <li><a href="https://doi.org/10.1038/nature01647" target="_blank" rel="noopener">Green &amp; Bavelier 2003</a></li>
+          <li><a href="https://doi.org/10.1111/j.1467-8721.2009.01660.x" target="_blank" rel="noopener">Dye et al. 2009</a></li>
+          <li><a href="https://doi.org/10.1038/nature12486" target="_blank" rel="noopener">Anguera 2013</a></li>
+          <li><a href="https://doi.org/10.1038/mp.2013.120" target="_blank" rel="noopener">Kühn 2014</a></li>
+          <li><a href="https://doi.org/10.1037/a0013494" target="_blank" rel="noopener">Basak 2008</a></li>
+          <li><a href="https://doi.org/10.1146/annurev-psych-113011-143750" target="_blank" rel="noopener">Diamond 2013</a></li>
+          <li><a href="https://doi.org/10.1126/science.1736359" target="_blank" rel="noopener">Baddeley 1992</a></li>
+          <li><a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons 2016 · caveat</a></li>
+        </ol>
       </details>
-    </section>
+      <div id="cabinet-rail-meta" class="cabinet-rail-meta"></div>
+    </aside>
 
-    <section id="recommended-strip"></section>
-    <section id="category-bar"></section>
-    <section id="game-grid" class="omni-bay" aria-label="Game bay"></section>
-  </main>
+    <div class="cabinet-stage">
+      <header id="app-header" class="cabinet-top"></header>
+      <section id="omni-hud" class="cabinet-attract" aria-label="Attract"></section>
+      <section id="recommended-strip" class="cabinet-cue" hidden></section>
+      <section id="game-grid" class="cabinet-select" aria-label="Game select"></section>
+      <footer class="cabinet-foot">
+        Near transfer is real. Far transfer is contested — Simons 2016 is in Papers on purpose.
+        No ads. No login. Offline-capable.
+      </footer>
+    </div>
+  </div>
 
-  <footer class="omni-footer">
-    <strong>OmniArcade</strong> · Kill time without killing your mind · 2026
-  </footer>
-
-  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(0,0,0,0.78)">
     <div id="game-modal-container" class="w-full max-w-3xl my-auto"></div>
   </div>
 

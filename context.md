@@ -21,7 +21,7 @@ Plain ESM, no build. `index.html` shell → `js/app.js` (`gamesCatalog[]`, one e
 
 `css/styles.css` keeps the legacy token *names* (`--paper`, `--ink`, `--c-*`) with console *values*: bg `#0a0e14`, ONE amber `#f59e0b`, zero radius, hairlines, no shadows/glows. `--c-math` (red) and `--c-skills` (green) are semantic wrong/correct feedback ONLY — never decoration. Fonts: Josefin Sans / Source Sans 3 / JetBrains Mono (`.font-mono-hud`).
 
-**Floor plan IA:** four wings — TRAIN / ARCADE / LEARN / LABS — rendered as dense bay rows (mono game codes, not emoji cards). PROTOCOL panel maps TRAIN titles → DOI papers; full docket stays in the collapsible. Positioning: brain training for adults — "kill time without killing your mind." Keep claims within what PROTOCOL + Simons 2016 support.
+**Cabinet IA (2026-08-08 anti-template):** left wing rail (TRAIN/ARCADE/LEARN/LABS) + attract marquee (brand hero + hover-linked feature) + select list. Papers live in the rail. Not a centered dashboard stack. Positioning: brain training for adults — "kill time without killing your mind." Keep claims within Simons 2016 + the paper list.
 
 ## Tests
 

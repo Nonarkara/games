@@ -90,17 +90,18 @@ const gamesCatalog = [
 
 class OmniArcadeApp {
   constructor() {
-    this.activeWing = 'all';
+    this.activeWing = 'train';
     this.searchQuery = '';
+    this.focusId = 'dual-n-back';
     this._releaseModalUX = null;
     this.initUI();
   }
 
   initUI() {
+    this.renderRailMeta();
     this.renderHeader();
-    this.renderHud();
-    this.renderRecommended();
     this.renderWingBar();
+    this.renderAttract();
     this.renderGameBay();
     this.bindEvents();
   }
@@ -109,103 +110,71 @@ class OmniArcadeApp {
     return gamesCatalog.filter(g => g.wing !== 'meta').length;
   }
 
-  paperCount() {
-    return gamesCatalog.filter(g => g.paper).length;
+  featuredGame() {
+    const pool = this.filteredGames();
+    if (this.focusId) {
+      const focused = pool.find(g => g.id === this.focusId);
+      if (focused) return focused;
+    }
+    if (AnalyticsService.hasHistory()) {
+      const rec = AnalyticsService.getRecommendations(gamesCatalog, 1)[0];
+      if (rec && pool.some(g => g.id === rec.id)) return rec;
+    }
+    return pool[0] || gamesCatalog.find(g => g.id === 'dual-n-back');
+  }
+
+  renderRailMeta() {
+    const el = document.querySelector('#cabinet-rail-meta');
+    if (!el) return;
+    const stats = StorageService.getData();
+    el.innerHTML = `
+      <button id="sound-toggle-btn" class="cabinet-rail-btn" type="button" aria-label="Toggle sound">SOUND</button>
+      <p class="cabinet-rail-played font-mono-hud"><span>${stats.gamesPlayed || 0}</span> played</p>
+    `;
   }
 
   renderHeader() {
-    const stats = StorageService.getData();
     const headerEl = document.querySelector('#app-header');
     if (!headerEl) return;
-
     headerEl.innerHTML = `
-      <div class="omni-shell">
-        <div class="omni-brand-block">
-          <div class="omni-logo" aria-hidden="true"><span>OA</span></div>
-          <div>
-            <h1 class="omni-brand">OmniArcade</h1>
-            <p class="omni-tagline">KILL TIME WITHOUT KILLING YOUR MIND</p>
-          </div>
-        </div>
-        <div class="omni-header-controls">
-          <div class="omni-search-wrap">
-            <span class="omni-search-icon font-mono-hud" aria-hidden="true">/</span>
-            <input id="search-input" type="text" placeholder="Find a game…" value="${this.searchQuery}" class="omni-search" aria-label="Search games" />
-          </div>
-          <button id="sound-toggle-btn" class="omni-pill" aria-label="Toggle sound effects">SOUND</button>
-          <div class="omni-stat">
-            <span class="omni-stat-label">PLAYED</span>
-            <span class="omni-stat-value">${stats.gamesPlayed || 0}</span>
-          </div>
-        </div>
-      </div>
+      <label class="cabinet-search">
+        <span class="font-mono-hud" aria-hidden="true">/</span>
+        <input id="search-input" type="search" placeholder="Find a title" value="${this.searchQuery}" aria-label="Search games" />
+      </label>
+      <p class="cabinet-top-note font-mono-hud">${this.playableCount()} titles</p>
     `;
   }
 
-  renderHud() {
+  renderAttract() {
     const el = document.querySelector('#omni-hud');
     if (!el) return;
-    const n = this.playableCount();
-    const papers = this.paperCount();
+    const feature = this.featuredGame();
+    const high = feature ? StorageService.getHighScore(feature.id) : 0;
+    const wingLabel = this.activeWing === 'all' ? 'FULL FLOOR' : (WING_META[this.activeWing]?.title || this.activeWing.toUpperCase());
+
     el.innerHTML = `
-      <div class="omni-hero">
-        <div class="omni-hero-main">
-          <p class="omni-hero-kicker font-mono-hud">FLOOR PLAN · ${n} TITLES · ${papers} LINKED PAPERS</p>
-          <h2 class="omni-hero-title">You were going to kill twenty minutes anyway.</h2>
-          <p class="omni-hero-sub">
-            Spend them on working memory, inhibition, and reaction speed — not the feed.
-            Every TRAIN title maps to a real task. Arcade keeps score. No ads, no login, works offline.
-          </p>
-        </div>
-        <dl class="omni-hero-meters">
-          <div><dt>TRAIN</dt><dd>${gamesCatalog.filter(g => g.wing === 'train').length}</dd></div>
-          <div><dt>ARCADE</dt><dd>${gamesCatalog.filter(g => g.wing === 'arcade').length}</dd></div>
-          <div><dt>LEARN</dt><dd>${gamesCatalog.filter(g => g.wing === 'learn').length}</dd></div>
-          <div><dt>LABS</dt><dd>${gamesCatalog.filter(g => g.wing === 'labs').length}</dd></div>
-        </dl>
+      <div class="attract-copy">
+        <h1 class="attract-brand">OmniArcade</h1>
+        <p class="attract-line">Kill time without killing your mind.</p>
+        <p class="attract-sub">
+          You were going to spend twenty minutes somewhere.
+          Put them on working memory, inhibition, and reaction speed — not the feed.
+        </p>
       </div>
+      ${feature ? `
+        <button type="button" class="attract-feature" data-game="${feature.id}" aria-label="Play ${feature.title}">
+          <span class="attract-feature-left">
+            <span class="attract-feature-wing font-mono-hud">${wingLabel} · ${feature.code}</span>
+            <span class="attract-feature-title">${feature.title}</span>
+            <span class="attract-feature-desc">${feature.desc}${feature.paper ? ' · ' + feature.paper : ''} · HI ${high}</span>
+          </span>
+          <span class="attract-feature-cta">INSERT COIN</span>
+        </button>
+      ` : ''}
     `;
-  }
 
-  renderRecommended() {
-    const el = document.querySelector('#recommended-strip');
-    if (!el) return;
-
-    if (!AnalyticsService.hasHistory()) {
-      el.innerHTML = `
-        <div class="omni-recommended">
-          <p class="omni-recommended-eyebrow font-mono-hud">NEXT SESSION</p>
-          <h3 class="omni-recommended-title">Start in TRAIN — Dual N-Back or Stroop — then wander the arcade.</h3>
-        </div>`;
-      return;
-    }
-
-    const recs = AnalyticsService.getRecommendations(gamesCatalog, 3);
-    if (recs.length === 0) { el.innerHTML = ''; return; }
-
-    const weakest = AnalyticsService.getWeakestSkill();
-    el.innerHTML = `
-      <div class="omni-recommended">
-        <div class="omni-recommended-head">
-          <p class="omni-recommended-eyebrow font-mono-hud">NEXT SESSION</p>
-          <h3 class="omni-recommended-title">Underplayed: <em>${weakest}</em></h3>
-        </div>
-        <div class="omni-recommended-grid">
-          ${recs.map(g => `
-            <button class="omni-rec-card" data-game="${g.id}" aria-label="Play ${g.title}">
-              <span class="omni-rec-code font-mono-hud">${g.code}</span>
-              <span class="omni-rec-body">
-                <span class="omni-rec-title">${g.title}</span>
-                <span class="omni-rec-meta">${g.domain}${g.paper ? ' · ' + g.paper : ''}</span>
-              </span>
-            </button>
-          `).join('')}
-        </div>
-      </div>`;
-
-    el.querySelectorAll('.omni-rec-card').forEach(btn => {
-      btn.onclick = () => this.launchGame(btn.dataset.game);
-    });
+    const feat = el.querySelector('.attract-feature');
+    if (feat) feat.onclick = () => this.launchGame(feat.dataset.game);
   }
 
   renderWingBar() {
@@ -221,24 +190,18 @@ class OmniArcadeApp {
       ])
     );
 
-    navEl.innerHTML = `
-      <div class="omni-wing-bar" role="tablist" aria-label="Arcade wings">
-        ${WINGS.map(w => `
-          <button type="button" class="omni-wing ${this.activeWing === w.id ? 'is-active' : ''}"
-            data-wing="${w.id}" role="tab" aria-selected="${this.activeWing === w.id}">
-            <span class="omni-wing-label">${w.label}</span>
-            <span class="omni-wing-blurb">${w.blurb}</span>
-            <span class="omni-wing-count font-mono-hud">${counts[w.id]}</span>
-          </button>
-        `).join('')}
-      </div>
-    `;
+    navEl.innerHTML = WINGS.map(w => `
+      <button type="button" class="cabinet-wing ${this.activeWing === w.id ? 'is-active' : ''}"
+        data-wing="${w.id}" aria-pressed="${this.activeWing === w.id}">
+        <span class="cabinet-wing-label">${w.label}</span>
+        <span class="cabinet-wing-count font-mono-hud">${counts[w.id]}</span>
+      </button>
+    `).join('');
   }
 
   filteredGames() {
     const q = this.searchQuery.toLowerCase().trim();
     return gamesCatalog.filter(g => {
-      // About sits as a footer row on ALL; only enter the bay via search otherwise.
       if (g.wing === 'meta' && !q) return false;
       if (this.activeWing !== 'all' && g.wing !== this.activeWing) return false;
       if (!q) return true;
@@ -252,15 +215,16 @@ class OmniArcadeApp {
     if (!gridEl) return;
 
     const filtered = this.filteredGames();
-    gridEl.className = 'omni-bay';
+    gridEl.className = 'cabinet-select';
 
     if (filtered.length === 0) {
-      gridEl.innerHTML = `
-        <div class="omni-empty">
-          <p class="omni-empty-title">No titles match.</p>
-          <p class="omni-empty-hint">Clear search or pick another wing.</p>
-        </div>`;
+      gridEl.innerHTML = `<p class="cabinet-empty">Nothing matches. Clear search or pick another wing.</p>`;
       return;
+    }
+
+    // Keep focus inside the visible list
+    if (!filtered.some(g => g.id === this.focusId)) {
+      this.focusId = filtered[0].id;
     }
 
     const order = ['train', 'arcade', 'learn', 'labs', 'meta'];
@@ -268,59 +232,67 @@ class OmniArcadeApp {
       .map(wing => ({ wing, games: filtered.filter(g => g.wing === wing) }))
       .filter(g => g.games.length > 0);
 
-    gridEl.innerHTML = groups.map(({ wing, games }) => {
-      const meta = WING_META[wing] || { title: wing.toUpperCase(), sub: '' };
-      return `
-        <section class="omni-bay-wing" data-wing="${wing}">
-          <header class="omni-bay-head">
-            <div>
-              <h3 class="omni-bay-title">${meta.title}</h3>
-              <p class="omni-bay-sub">${meta.sub}</p>
-            </div>
-            <span class="omni-bay-n font-mono-hud">${String(games.length).padStart(2, '0')}</span>
-          </header>
-          <div class="omni-bay-list" role="list">
-            ${games.map(game => this.bayRow(game)).join('')}
-          </div>
-        </section>`;
-    }).join('');
+    const showGroupLabels = this.activeWing === 'all' && groups.length > 1;
 
-    // About row when browsing ALL with no search
+    gridEl.innerHTML = groups.map(({ wing, games }) => `
+      <div class="select-block" data-wing="${wing}">
+        ${showGroupLabels ? `<p class="select-block-label font-mono-hud">${WING_META[wing]?.title || wing}</p>` : ''}
+        <ul class="select-list" role="listbox" aria-label="${WING_META[wing]?.title || 'Games'}">
+          ${games.map(game => this.selectRow(game)).join('')}
+        </ul>
+      </div>
+    `).join('');
+
     if (this.activeWing === 'all' && !this.searchQuery.trim()) {
       const about = gamesCatalog.find(g => g.id === 'about-dr-non');
       if (about) {
         gridEl.insertAdjacentHTML('beforeend', `
-          <section class="omni-bay-wing omni-bay-wing--meta">
-            <div class="omni-bay-list">${this.bayRow(about)}</div>
-          </section>`);
+          <div class="select-block select-block--meta">
+            <ul class="select-list">${this.selectRow(about)}</ul>
+          </div>`);
       }
     }
 
     gridEl.querySelectorAll('[data-game]').forEach(row => {
-      const launch = () => this.launchGame(row.dataset.game);
-      row.addEventListener('click', (e) => {
-        if (e.target.closest('button') || row.dataset.game) launch();
+      row.addEventListener('mouseenter', () => {
+        this.focusId = row.dataset.game;
+        this.paintFocus();
+        this.renderAttract();
       });
+      row.addEventListener('focus', () => {
+        this.focusId = row.dataset.game;
+        this.paintFocus();
+        this.renderAttract();
+      });
+      const launch = () => this.launchGame(row.dataset.game);
+      row.addEventListener('click', launch);
       row.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(); }
       });
     });
+
+    this.paintFocus();
+    this.renderAttract();
   }
 
-  bayRow(game) {
+  selectRow(game) {
     const high = StorageService.getHighScore(game.id);
+    const isFocus = game.id === this.focusId;
     return `
-      <article class="omni-bay-row" data-game="${game.id}" data-wing="${game.wing}" tabindex="0" role="listitem" aria-label="Launch ${game.title}">
-        <span class="omni-bay-code font-mono-hud">${game.code}</span>
-        <div class="omni-bay-main">
-          <h4 class="omni-bay-name">${game.title}</h4>
-          <p class="omni-bay-desc">${game.desc}</p>
-        </div>
-        <span class="omni-bay-domain font-mono-hud">${game.domain}</span>
-        <span class="omni-bay-paper font-mono-hud">${game.paper || game.age}</span>
-        <span class="omni-bay-high font-mono-hud">HI <strong>${high}</strong></span>
-        <button type="button" class="omni-bay-play" tabindex="-1">PLAY</button>
-      </article>`;
+      <li class="select-row ${isFocus ? 'is-focus' : ''}" data-game="${game.id}" tabindex="0" role="option" aria-selected="${isFocus}" aria-label="${game.title}">
+        <span class="select-code font-mono-hud">${game.code}</span>
+        <span class="select-name">${game.title}</span>
+        <span class="select-meta font-mono-hud">${game.paper || game.domain}</span>
+        <span class="select-hi font-mono-hud">${high}</span>
+      </li>`;
+  }
+
+  paintFocus() {
+    document.querySelectorAll('.select-row').forEach(row => {
+      const on = row.dataset.game === this.focusId;
+      row.classList.toggle('is-focus', on);
+      row.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
   }
 
   launchGame(gameId) {
@@ -349,8 +321,7 @@ class OmniArcadeApp {
       overlay.classList.add('hidden');
       container.innerHTML = '';
       if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
-      this.renderRecommended();
-      this.renderHeader();
+      this.renderRailMeta();
       this.renderGameBay();
     };
 
@@ -368,10 +339,11 @@ class OmniArcadeApp {
     });
 
     document.addEventListener('click', (e) => {
-      const wingBtn = e.target.closest('.omni-wing');
+      const wingBtn = e.target.closest('.cabinet-wing');
       if (wingBtn) {
         soundFx.playClick();
         this.activeWing = wingBtn.dataset.wing;
+        this.focusId = null;
         this.renderWingBar();
         this.renderGameBay();
         return;
