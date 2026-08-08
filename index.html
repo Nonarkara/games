@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="masterpiece">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniArcade — Kill time without killing your mind</title>
-  <meta name="description" content="34 games across TRAIN, ARCADE, LEARN, and LABS. Working memory, inhibition, reaction speed — with DOI-linked research and real scoreboards. No ads, no logins." />
-  <meta name="theme-color" content="#0a0e14" />
+  <title>OmniArcade — Axiom Design Core [PROTOCOL: OMNI_2026]</title>
+  <meta name="description" content="Axiom Design Core terminal console featuring 34 research & arcade tasks across TRAIN, ARCADE, LEARN, and LABS." />
+  <meta name="theme-color" content="#030508" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
-<body>
+<body class="scanlines bg-[#030508] text-[#e6edf3]">
+
+  <!-- Top Tactical Satellite Status Bar -->
+  <div class="bg-[#0c111a] border-b border-[rgba(245,158,11,0.35)] py-1.5 px-4 text-[11px] font-mono-hud text-[#f59e0b] flex flex-wrap justify-between items-center gap-2">
+    <div>[SYSTEM STATUS: ONLINE] — <strong class="text-white">OMNI_ARCADE AXIOM DESIGN CORE</strong></div>
+    <div class="hidden md:block opacity-80">[PROTOCOL: OMNI_2026] · LAT 13.7563° N · LON 100.5018° E · SATELLITE HUD ACTIVE</div>
+    <div>34 TASKS · ZERO ADS · OFFLINE READY</div>
+  </div>
 
   <div class="cabinet">
     <!-- Left rail: wing select like a cabinet button strip -->
@@ -54,7 +61,7 @@
     </div>
   </div>
 
-  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(0,0,0,0.78)">
+  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(0,0,0,0.85)">
     <div id="game-modal-container" class="w-full max-w-3xl my-auto"></div>
   </div>
 
