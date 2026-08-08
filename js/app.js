@@ -1,5 +1,7 @@
 /**
- * OmniArcade - Main Application Coordinator & Router (Axiom Core Edition)
+ * OmniArcade — Main coordinator
+ * Floor plan: four wings (TRAIN / ARCADE / LEARN / LABS) + dense bay rows.
+ * Category filter bug fixed: clicks bind to .omni-wing / .omni-bay-row.
  */
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
@@ -15,217 +17,80 @@ import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide20
 import { renderStroop, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
 import { renderNonTrivial } from './games/labsGames.js';
 import { renderBlowIntoTheCartridge } from './games/nineties.js';
-import { renderDualNBack, renderSchulteTable, renderAimTrainer } from './games/trainerGames.js';
+import {
+  renderDualNBack, renderSchulteTable, renderAimTrainer,
+  renderGoNoGo, renderDigitSpan, renderMentalMath, renderVisualSearch
+} from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
 import { bindModalUX, GameSession } from './ui.js';
 
+const WINGS = [
+  { id: 'all', label: 'ALL', blurb: 'Full floor' },
+  { id: 'train', label: 'TRAIN', blurb: 'Research tasks' },
+  { id: 'arcade', label: 'ARCADE', blurb: 'Play dens' },
+  { id: 'learn', label: 'LEARN', blurb: 'Skill drills' },
+  { id: 'labs', label: 'LABS', blurb: 'Personal packs' }
+];
+
+const WING_META = {
+  train: { title: 'TRAIN', sub: 'Lab tasks with a paper trail. Gains stay closest to what you practice.' },
+  arcade: { title: 'ARCADE', sub: 'Classics, shooters, casinos, and the AI sandbox. Scoreboards count.' },
+  learn: { title: 'LEARN', sub: 'Math, language, science, and kids drills — fluency under a clock.' },
+  labs: { title: 'LABS', sub: 'Hand-curated rooms. Friends, parties, private packs.' },
+  meta: { title: 'SIGNAL', sub: 'Why this floor exists.' }
+};
+
+/** @type {Array<{id:string,code:string,title:string,wing:string,category:string,domain:string,desc:string,age:string,paper?:string,tags:string[],renderer:Function}>} */
 const gamesCatalog = [
-  {
-    id: 'cyber-tetris',
-    title: 'Cyber Tetris 1984',
-    category: 'classics',
-    badge: '🕹️ CLASSIC LEGEND',
-    icon: '🧱',
-    age: 'All Ages',
-    desc: 'Original falling tetromino block puzzle. Rotate pieces, clear lines, and build high combo multipliers.',
-    tags: ['Tetris', 'Classic', 'Puzzle'],
-    renderer: renderCyberTetris
-  },
-  {
-    id: 'cyber-pacman',
-    title: 'Cyber Pac-Man 1980',
-    category: 'classics',
-    badge: '🕹️ CLASSIC LEGEND',
-    icon: '🟡',
-    age: 'All Ages',
-    desc: 'Classic arcade maze navigation! Eat dots, power pellets, and outsmart Blinky, Pinky, Inky & Clyde AI.',
-    tags: ['Pac-Man', 'Arcade', 'Ghost AI'],
-    renderer: renderCyberPacman
-  },
-  {
-    id: 'rom-loader',
-    title: 'Retro ROM / SWF Loader',
-    category: 'classics',
-    badge: '💾 FILE INSPECTOR',
-    icon: '💾',
-    age: 'All Ages',
-    desc: "Local game-file inspector. Drop a legal .nes, .gb, .sfc, or .swf backup to preview its header metadata.",
-    tags: ['File Inspector', 'ROM Info', 'Local'],
-    renderer: renderRomLoader
-  },
-  {
-    id: 'ai-sandbox',
-    title: 'AI Game Builder Studio',
-    category: 'ai-studio',
-    badge: '🤖 AI GENERATOR',
-    icon: '🤖',
-    age: 'All Ages',
-    desc: 'Inspired by Tesana.ai — Type prompts or pick presets to build custom playable games live!',
-    tags: ['AI Prompt', 'Custom Physics', 'Sandbox'],
-    renderer: renderAIGameStudio
-  },
-  {
-    id: 'cyber-snake',
-    title: 'Retro Cyber Snake',
-    category: 'retro-vault',
-    badge: '🕹️ RETRO VAULT',
-    icon: '🐍',
-    age: 'All Ages',
-    desc: "Classic 8-bit arcade grid snake. Arrow keys to turn, eat the glowing food, don't hit a wall or your own tail.",
-    tags: ['Retro', 'Arcade', 'Classic'],
-    renderer: renderRetroSnake
-  },
-  {
-    id: 'space-defender',
-    title: 'Space Defender',
-    category: 'retro-vault',
-    badge: '🕹️ RETRO VAULT',
-    icon: '👾',
-    age: 'All Ages',
-    desc: 'Classic space shooter! Control your laser turret to defend against alien invader waves.',
-    tags: ['Shooter', 'Invaders', 'Space'],
-    renderer: renderSpaceDefender
-  },
-  {
-    id: 'math-safari',
-    title: 'Math Safari Rush',
-    category: 'kids-edu',
-    badge: '👶 KIDS & EDU',
-    icon: '🧮',
-    age: 'Age 6+',
-    desc: 'Inspired by Educaplay — Solve arithmetic equations to leap over obstacles!',
-    tags: ['Math', 'Speed Quiz', 'Educational'],
-    renderer: renderMathSafari
-  },
-  {
-    id: 'memory-match',
-    title: 'Memory Match Mania',
-    category: 'kids-edu',
-    badge: '👶 KIDS & EDU',
-    icon: '🧠',
-    age: 'Age 5+',
-    desc: 'Flip cards and match animal pairs with streak bonuses & moves counter.',
-    tags: ['Memory', 'Animals', 'Puzzle'],
-    renderer: renderMemoryMatch
-  },
-  {
-    id: 'word-search',
-    title: 'Word Search Quest',
-    category: 'kids-edu',
-    badge: '👶 KIDS & EDU',
-    icon: '🔤',
-    age: 'Age 7+',
-    desc: 'Search for hidden vocabulary words in an interactive letter grid.',
-    tags: ['Words', 'Vocabulary', 'Learning'],
-    renderer: renderWordSearch
-  },
-  {
-    id: 'flappy-bird',
-    title: 'Flappy Cyber Bird',
-    category: 'casual-friv',
-    badge: '⚡ CASUAL FRIV',
-    icon: '🐦',
-    age: 'All Ages',
-    desc: 'Inspired by Friv — Precision tap-to-fly arcade action through glowing pipes.',
-    tags: ['Casual', 'Timing', 'Addictive'],
-    renderer: renderFlappyBird
-  },
-  {
-    id: 'minesweeper',
-    title: 'Minesweeper Pro',
-    category: 'casual-friv',
-    badge: '⚡ CASUAL FRIV',
-    icon: '💣',
-    age: 'Age 10+',
-    desc: 'Classic logic puzzle game. Flag mines and uncover safe grid numbers.',
-    tags: ['Logic', 'Strategy', 'Grid'],
-    renderer: renderMinesweeper
-  },
-  {
-    id: 'trivia-master',
-    title: 'Ultimate Trivia Master',
-    category: 'adult-mind',
-    badge: '🧠 MIND & ADULT',
-    icon: '❓',
-    age: 'Teen & Adult',
-    desc: 'Deep trivia challenge covering History, Sci-Fi, Science, and Gaming culture.',
-    tags: ['Trivia', 'Quiz', 'Knowledge'],
-    renderer: renderTriviaMaster
-  },
-  {
-    id: 'pattern-breaker',
-    title: 'Pattern Breaker',
-    category: 'adult-mind',
-    badge: '🧠 MIND & ADULT',
-    icon: '🔐',
-    age: 'Teen & Adult',
-    desc: 'Deductive logic puzzle. Crack a hidden 4-node path on a 3x3 grid using Mastermind-style hints.',
-    tags: ['Logic', 'Deduction', 'Memory'],
-    renderer: renderPatternBreaker
-  },
-  {
-    id: 'type-rush',
-    title: 'Type Rush',
-    category: 'skills',
-    badge: '🎓 LEARN SKILL',
-    icon: '⌨️',
-    age: 'Age 8+',
-    desc: '30-second typing fluency trainer. Build keyboard muscle memory with live WPM and accuracy scoring.',
-    tags: ['Typing', 'Keyboard', 'Fluency'],
-    renderer: renderTypeRush
-  },
-  {
-    id: 'reflex-matrix',
-    title: 'Reflex Matrix',
-    category: 'casual-friv',
-    badge: '⚡ CASUAL FRIV',
-    icon: '⚡',
-    age: 'All Ages',
-    desc: 'Hand-eye coordination trainer. Tap glowing cells before they fade — speed escalates each wave.',
-    tags: ['Reflex', 'Coordination', 'Reaction'],
-    renderer: renderReflexMatrix
-  },
-  {
-    id: 'slide-2048',
-    title: 'Slide 2048',
-    category: 'casual-friv',
-    badge: '⚡ CASUAL FRIV',
-    icon: '🔢',
-    age: 'All Ages',
-    desc: 'Classic sliding-tile strategy. Merge matching numbers and plan ahead to reach the 2048 tile.',
-    tags: ['Strategy', 'Merge', 'Planning'],
-    renderer: renderSlide2048
-  },
-  {
-    id: 'cyber-blackjack',
-    title: 'Cyber Blackjack 21',
-    category: 'adult-mind',
-    badge: '🧠 MIND & ADULT',
-    icon: '🃏',
-    age: 'Adult 18+',
-    desc: 'Casino card game against AI dealer. Manage bankroll chips, hit, and stand.',
-    tags: ['Cards', 'Casino', 'Strategy'],
-    renderer: renderBlackjack
-  },
-  { id: 'stroop-match', title: 'Stroop Color Match', category: 'memory-focus', badge: '🧠 FOCUS', icon: '🎨', age: 'Age 8+', desc: 'Cognitive inhibition trainer. Pick the ink color — not the word. Builds executive function.', tags: ['Stroop', 'Focus', 'Inhibition'], renderer: renderStroop },
-  { id: 'simon-seq', title: 'Simon Sequence', category: 'memory-focus', badge: '🧠 FOCUS', icon: '🔵', age: 'All Ages', desc: 'Auditory working-memory trainer. Watch the glowing pattern grow, then repeat it back.', tags: ['Memory', 'Sequence', 'Recall'], renderer: renderSimon },
-  { id: 'anagram-scramble', title: 'Anagram Scramble', category: 'language', badge: '📖 LANGUAGE', icon: '🔤', age: 'Age 10+', desc: 'Spelling & vocabulary builder. Unscramble jumbled letters into real words under pressure.', tags: ['Spelling', 'Vocabulary', 'Anagram'], renderer: renderAnagram },
-  { id: 'word-builder', title: 'Word Builder', category: 'language', badge: '📖 LANGUAGE', icon: '🅰️', age: 'Age 7+', desc: 'Phonics & spelling sprint. Build as many valid words as you can from 7 letter tiles in 60 seconds.', tags: ['Phonics', 'Spelling', 'Timed'], renderer: renderWordBuilder },
-  { id: 'periodic-quest', title: 'Periodic Quest', category: 'science', badge: '🔬 SCIENCE', icon: '⚗️', age: 'Age 12+', desc: 'Chemistry recall trainer. Match element symbols to their names across 10 rounds.', tags: ['Chemistry', 'Elements', 'Recall'], renderer: renderPeriodicQuest },
-  { id: 'capital-quiz', title: 'Capital Quest', category: 'science', badge: '🔬 SCIENCE', icon: '🌍', age: 'Age 8+', desc: 'World geography trainer. Learn the capitals of 15 major countries across 10 rounds.', tags: ['Geography', 'Capitals', 'Recall'], renderer: renderCapitalQuiz },
-  { id: 'number-chain', title: 'Number Chain', category: 'math-logic', badge: '🎯 MATH', icon: '🔗', age: 'Age 10+', desc: 'Numerical reasoning trainer. Identify the pattern and predict the next number in the sequence.', tags: ['Patterns', 'Reasoning', 'Algebra'], renderer: renderNumberChain },
-  { id: 'tower-hanoi', title: 'Tower of Hanoi', category: 'math-logic', badge: '🎯 MATH', icon: '🗼', age: 'Age 8+', desc: 'Classic recursive-planning puzzle. Move all disks to peg 3 in the fewest moves possible.', tags: ['Logic', 'Planning', 'Recursive'], renderer: renderTowerHanoi },
-  { id: 'non-trivial', title: 'Non-Trivial', category: 'labs', badge: '🧪 LABS', icon: '🧠', age: 'Friends only', desc: 'Personal trivia portal. Five packs hand-curated from 100 days of writing — books, bikes, Shanghai, philosophers, sound. Play with friends. Add your own packs in js/games/labsGames.js.', tags: ['Trivia', 'Personal', 'Multi-pack', 'Friends'], renderer: renderNonTrivial },
-  { id: 'blow-cartridge', title: 'Blow Into The Cartridge', category: 'labs', badge: '🧪 LABS', icon: '🕹', age: 'Party', desc: 'Host-mode 90s/00s trivia for a room. 240 questions across six decks — artifacts, screen, sound, pixels, dial-up, playground. One screen, everyone shouts, score on paper. Nothing repeats until the deck runs dry.', tags: ['Trivia', 'Party', '90s', 'Host mode'], renderer: renderBlowIntoTheCartridge },
-  { id: 'dual-n-back', title: 'Dual N-Back', category: 'memory-focus', badge: '🧠 FOCUS', icon: '🧮', age: 'Teen & Adult', desc: 'The working-memory task from the Jaeggi studies. Press P when the position repeats from 2 steps back, L when the letter does.', tags: ['Working memory', 'N-back', 'Research'], renderer: renderDualNBack },
-  { id: 'schulte-table', title: 'Schulte Table', category: 'memory-focus', badge: '🧠 FOCUS', icon: '🔢', age: 'Teen & Adult', desc: 'Attention-field drill: tap 1→25 in order, eyes fixed on the center, letting peripheral vision do the finding. Under 25 seconds is strong.', tags: ['Attention', 'Speed', 'Peripheral vision'], renderer: renderSchulteTable },
-  { id: 'aim-trainer', title: 'Aim Trainer', category: 'skills', badge: '🎓 SKILL', icon: '🎯', age: 'All Ages', desc: 'Thirty seconds of targets. Hit them as they appear; your average reaction time is measured and kept on the board.', tags: ['Hand-eye', 'Reaction', 'Precision'], renderer: renderAimTrainer },
-  { id: 'about-dr-non', title: 'Why This Exists', category: 'about', badge: '👤 ABOUT', icon: '👤', age: 'Everyone', desc: 'Dr Non, a lifetime of games, and the case against killing time. With the 2007 MIT Wii photo as evidence.', tags: ['Dr Non', 'Gamification', 'Story'], renderer: renderAbout }
+  // ── TRAIN ──────────────────────────────────────────────────────────────
+  { id: 'dual-n-back', code: 'NBK', title: 'Dual N-Back', wing: 'train', category: 'memory-focus', domain: 'Working memory', age: 'Teen+', desc: 'Position + letter 2-back. The Jaeggi working-memory task.', paper: 'Jaeggi 2008', tags: ['N-back', 'Research'], renderer: renderDualNBack },
+  { id: 'digit-span', code: 'DSP', title: 'Digit Span', wing: 'train', category: 'memory-focus', domain: 'Capacity', age: 'Teen+', desc: 'Watch digits, type them back. Span grows until it breaks.', paper: 'Miller 1956', tags: ['Capacity', 'Recall'], renderer: renderDigitSpan },
+  { id: 'stroop-match', code: 'STR', title: 'Stroop Match', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: '8+', desc: 'Name the ink, ignore the word. Lab-standard interference since 1935.', paper: 'Stroop 1935', tags: ['Inhibition', 'Focus'], renderer: renderStroop },
+  { id: 'go-nogo', code: 'GNG', title: 'Go / No-Go', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: 'Teen+', desc: 'Press on GO. Withhold on NO-GO. False starts cost more than slow hits.', paper: 'Verbruggen 2008', tags: ['Inhibition', 'Impulse'], renderer: renderGoNoGo },
+  { id: 'simon-seq', code: 'SIM', title: 'Simon Sequence', wing: 'train', category: 'memory-focus', domain: 'Sequence memory', age: 'All', desc: 'Watch the pattern grow, then play it back.', tags: ['Memory', 'Sequence'], renderer: renderSimon },
+  { id: 'schulte-table', code: 'SCH', title: 'Schulte Table', wing: 'train', category: 'memory-focus', domain: 'Attention field', age: 'Teen+', desc: 'Tap 1→25. Eyes on center; peripheral vision does the finding.', tags: ['Attention', 'Peripheral'], renderer: renderSchulteTable },
+  { id: 'visual-search', code: 'VSR', title: 'Visual Search', wing: 'train', category: 'memory-focus', domain: 'Selective attention', age: 'Teen+', desc: 'Find the odd rotated letter in growing clutter.', paper: 'Green 2003', tags: ['Attention', 'Search'], renderer: renderVisualSearch },
+  { id: 'aim-trainer', code: 'AIM', title: 'Aim Trainer', wing: 'train', category: 'skills', domain: 'Hand-eye', age: 'All', desc: 'Thirty seconds of targets. Average reaction time stays on the board.', paper: 'Dye 2009', tags: ['Reaction', 'Precision'], renderer: renderAimTrainer },
+  { id: 'mental-math', code: 'MMX', title: 'Mental Math', wing: 'train', category: 'math-logic', domain: 'Fluency', age: '10+', desc: '45-second arithmetic sprint. Speed under accuracy pressure.', tags: ['Arithmetic', 'Speed'], renderer: renderMentalMath },
+  { id: 'type-rush', code: 'TYP', title: 'Type Rush', wing: 'train', category: 'skills', domain: 'Keyboard fluency', age: '8+', desc: '30-second typing drill with live WPM and accuracy.', tags: ['Typing', 'WPM'], renderer: renderTypeRush },
+  { id: 'reflex-matrix', code: 'RFX', title: 'Reflex Matrix', wing: 'train', category: 'casual-friv', domain: 'Coordination', age: 'All', desc: 'Tap glowing cells before they fade. Speed escalates each wave.', tags: ['Reflex', 'Coordination'], renderer: renderReflexMatrix },
+
+  // ── ARCADE ─────────────────────────────────────────────────────────────
+  { id: 'cyber-tetris', code: 'TET', title: 'Cyber Tetris 1984', wing: 'arcade', category: 'classics', domain: 'Spatial', age: 'All', desc: 'Falling tetrominoes, line clears, combo multipliers.', tags: ['Classic', 'Puzzle'], renderer: renderCyberTetris },
+  { id: 'cyber-pacman', code: 'PAC', title: 'Cyber Pac-Man 1980', wing: 'arcade', category: 'classics', domain: 'Maze', age: 'All', desc: 'Dots, power pellets, four ghost AIs.', tags: ['Classic', 'Arcade'], renderer: renderCyberPacman },
+  { id: 'cyber-snake', code: 'SNK', title: 'Retro Cyber Snake', wing: 'arcade', category: 'retro-vault', domain: 'Grid', age: 'All', desc: 'Grow, turn, do not bite your own tail.', tags: ['Retro', 'Classic'], renderer: renderRetroSnake },
+  { id: 'space-defender', code: 'INV', title: 'Space Defender', wing: 'arcade', category: 'retro-vault', domain: 'Shooter', age: 'All', desc: 'Laser turret vs invader waves.', tags: ['Shooter', 'Space'], renderer: renderSpaceDefender },
+  { id: 'flappy-bird', code: 'FLP', title: 'Flappy Cyber Bird', wing: 'arcade', category: 'casual-friv', domain: 'Timing', age: 'All', desc: 'Tap-to-fly through pipes. Precision over panic.', tags: ['Casual', 'Timing'], renderer: renderFlappyBird },
+  { id: 'minesweeper', code: 'MNE', title: 'Minesweeper Pro', wing: 'arcade', category: 'casual-friv', domain: 'Logic', age: '10+', desc: 'Flag mines, read the numbers, clear the grid.', tags: ['Logic', 'Grid'], renderer: renderMinesweeper },
+  { id: 'slide-2048', code: '204', title: 'Slide 2048', wing: 'arcade', category: 'casual-friv', domain: 'Planning', age: 'All', desc: 'Merge matching tiles. Reach 2048 without boxing yourself in.', tags: ['Strategy', 'Merge'], renderer: renderSlide2048 },
+  { id: 'cyber-blackjack', code: 'BJ21', title: 'Cyber Blackjack 21', wing: 'arcade', category: 'adult-mind', domain: 'Cards', age: '18+', desc: 'Hit, stand, manage the bankroll against the dealer.', tags: ['Cards', 'Casino'], renderer: renderBlackjack },
+  { id: 'trivia-master', code: 'TRV', title: 'Trivia Master', wing: 'arcade', category: 'adult-mind', domain: 'Knowledge', age: 'Teen+', desc: 'History, sci-fi, science, gaming culture.', tags: ['Trivia', 'Quiz'], renderer: renderTriviaMaster },
+  { id: 'pattern-breaker', code: 'PTN', title: 'Pattern Breaker', wing: 'arcade', category: 'adult-mind', domain: 'Deduction', age: 'Teen+', desc: 'Crack a hidden 4-node path with Mastermind-style hints.', tags: ['Logic', 'Deduction'], renderer: renderPatternBreaker },
+  { id: 'rom-loader', code: 'ROM', title: 'ROM / SWF Inspector', wing: 'arcade', category: 'classics', domain: 'Files', age: 'All', desc: 'Drop a legal .nes / .gb / .sfc / .swf backup — header metadata only.', tags: ['Local', 'Inspector'], renderer: renderRomLoader },
+  { id: 'ai-sandbox', code: 'AIG', title: 'AI Game Builder', wing: 'arcade', category: 'ai-studio', domain: 'Sandbox', age: 'All', desc: 'Prompt or pick a preset; get a playable micro-game live.', tags: ['AI', 'Sandbox'], renderer: renderAIGameStudio },
+
+  // ── LEARN ──────────────────────────────────────────────────────────────
+  { id: 'number-chain', code: 'NCH', title: 'Number Chain', wing: 'learn', category: 'math-logic', domain: 'Patterns', age: '10+', desc: 'Spot the rule, predict the next number.', tags: ['Patterns', 'Reasoning'], renderer: renderNumberChain },
+  { id: 'tower-hanoi', code: 'HNI', title: 'Tower of Hanoi', wing: 'learn', category: 'math-logic', domain: 'Planning', age: '8+', desc: 'Move every disk to peg 3 in the fewest moves.', tags: ['Logic', 'Recursive'], renderer: renderTowerHanoi },
+  { id: 'anagram-scramble', code: 'ANA', title: 'Anagram Scramble', wing: 'learn', category: 'language', domain: 'Spelling', age: '10+', desc: 'Unscramble letters into real words under pressure.', tags: ['Spelling', 'Vocabulary'], renderer: renderAnagram },
+  { id: 'word-builder', code: 'WRD', title: 'Word Builder', wing: 'learn', category: 'language', domain: 'Phonics', age: '7+', desc: 'Build valid words from 7 tiles in 60 seconds.', tags: ['Phonics', 'Timed'], renderer: renderWordBuilder },
+  { id: 'periodic-quest', code: 'ELM', title: 'Periodic Quest', wing: 'learn', category: 'science', domain: 'Chemistry', age: '12+', desc: 'Match element symbols to names across 10 rounds.', tags: ['Chemistry', 'Recall'], renderer: renderPeriodicQuest },
+  { id: 'capital-quiz', code: 'CAP', title: 'Capital Quest', wing: 'learn', category: 'science', domain: 'Geography', age: '8+', desc: 'Capitals of major countries, ten rounds.', tags: ['Geography', 'Capitals'], renderer: renderCapitalQuiz },
+  { id: 'math-safari', code: 'MSF', title: 'Math Safari Rush', wing: 'learn', category: 'kids-edu', domain: 'Arithmetic', age: '6+', desc: 'Solve equations to clear the path.', tags: ['Math', 'Kids'], renderer: renderMathSafari },
+  { id: 'memory-match', code: 'MEM', title: 'Memory Match', wing: 'learn', category: 'kids-edu', domain: 'Pairs', age: '5+', desc: 'Flip cards, match animal pairs, watch the streak.', tags: ['Memory', 'Kids'], renderer: renderMemoryMatch },
+  { id: 'word-search', code: 'WSR', title: 'Word Search Quest', wing: 'learn', category: 'kids-edu', domain: 'Vocabulary', age: '7+', desc: 'Find hidden words in a letter grid.', tags: ['Words', 'Kids'], renderer: renderWordSearch },
+
+  // ── LABS ───────────────────────────────────────────────────────────────
+  { id: 'non-trivial', code: 'NTR', title: 'Non-Trivial', wing: 'labs', category: 'labs', domain: 'Personal', age: 'Friends', desc: 'Five packs from 100 days of writing — books, bikes, Shanghai, philosophers, sound.', tags: ['Trivia', 'Friends'], renderer: renderNonTrivial },
+  { id: 'blow-cartridge', code: 'BIC', title: 'Blow Into The Cartridge', wing: 'labs', category: 'labs', domain: 'Party host', age: 'Party', desc: '240 questions, six 90s/00s decks. One screen, everyone shouts, score on paper.', tags: ['Party', '90s'], renderer: renderBlowIntoTheCartridge },
+
+  // ── META ───────────────────────────────────────────────────────────────
+  { id: 'about-dr-non', code: 'WHY', title: 'Why This Exists', wing: 'meta', category: 'about', domain: 'Signal', age: 'Everyone', desc: 'Dr Non, a lifetime of games, and the case against killing time.', tags: ['Story'], renderer: renderAbout }
 ];
 
 class OmniArcadeApp {
   constructor() {
-    this.activeCategory = 'all';
+    this.activeWing = 'all';
     this.searchQuery = '';
     this._releaseModalUX = null;
     this.initUI();
@@ -233,24 +98,84 @@ class OmniArcadeApp {
 
   initUI() {
     this.renderHeader();
+    this.renderHud();
     this.renderRecommended();
-    this.renderCategoryBar();
-    this.renderGameGrid();
+    this.renderWingBar();
+    this.renderGameBay();
     this.bindEvents();
+  }
+
+  playableCount() {
+    return gamesCatalog.filter(g => g.wing !== 'meta').length;
+  }
+
+  paperCount() {
+    return gamesCatalog.filter(g => g.paper).length;
+  }
+
+  renderHeader() {
+    const stats = StorageService.getData();
+    const headerEl = document.querySelector('#app-header');
+    if (!headerEl) return;
+
+    headerEl.innerHTML = `
+      <div class="omni-shell">
+        <div class="omni-brand-block">
+          <div class="omni-logo" aria-hidden="true"><span>OA</span></div>
+          <div>
+            <h1 class="omni-brand">OmniArcade</h1>
+            <p class="omni-tagline">KILL TIME WITHOUT KILLING YOUR MIND</p>
+          </div>
+        </div>
+        <div class="omni-header-controls">
+          <div class="omni-search-wrap">
+            <span class="omni-search-icon font-mono-hud" aria-hidden="true">/</span>
+            <input id="search-input" type="text" placeholder="Find a game…" value="${this.searchQuery}" class="omni-search" aria-label="Search games" />
+          </div>
+          <button id="sound-toggle-btn" class="omni-pill" aria-label="Toggle sound effects">SOUND</button>
+          <div class="omni-stat">
+            <span class="omni-stat-label">PLAYED</span>
+            <span class="omni-stat-value">${stats.gamesPlayed || 0}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderHud() {
+    const el = document.querySelector('#omni-hud');
+    if (!el) return;
+    const n = this.playableCount();
+    const papers = this.paperCount();
+    el.innerHTML = `
+      <div class="omni-hero">
+        <div class="omni-hero-main">
+          <p class="omni-hero-kicker font-mono-hud">FLOOR PLAN · ${n} TITLES · ${papers} LINKED PAPERS</p>
+          <h2 class="omni-hero-title">You were going to kill twenty minutes anyway.</h2>
+          <p class="omni-hero-sub">
+            Spend them on working memory, inhibition, and reaction speed — not the feed.
+            Every TRAIN title maps to a real task. Arcade keeps score. No ads, no login, works offline.
+          </p>
+        </div>
+        <dl class="omni-hero-meters">
+          <div><dt>TRAIN</dt><dd>${gamesCatalog.filter(g => g.wing === 'train').length}</dd></div>
+          <div><dt>ARCADE</dt><dd>${gamesCatalog.filter(g => g.wing === 'arcade').length}</dd></div>
+          <div><dt>LEARN</dt><dd>${gamesCatalog.filter(g => g.wing === 'learn').length}</dd></div>
+          <div><dt>LABS</dt><dd>${gamesCatalog.filter(g => g.wing === 'labs').length}</dd></div>
+        </dl>
+      </div>
+    `;
   }
 
   renderRecommended() {
     const el = document.querySelector('#recommended-strip');
     if (!el) return;
 
-    // First-time visitors: a single welcome row, no recommendations yet.
     if (!AnalyticsService.hasHistory()) {
       el.innerHTML = `
         <div class="omni-recommended">
-          <div class="omni-recommended-head">
-            <span class="omni-recommended-eyebrow">✨ WELCOME</span>
-            <h3 class="omni-recommended-title">Pick a game. We'll suggest what to play next based on what you skip.</h3>
-          </div>
+          <p class="omni-recommended-eyebrow font-mono-hud">NEXT SESSION</p>
+          <h3 class="omni-recommended-title">Start in TRAIN — Dual N-Back or Stroop — then wander the arcade.</h3>
         </div>`;
       return;
     }
@@ -262,15 +187,17 @@ class OmniArcadeApp {
     el.innerHTML = `
       <div class="omni-recommended">
         <div class="omni-recommended-head">
-          <span class="omni-recommended-eyebrow">🎯 RECOMMENDED FOR YOU</span>
-          <h3 class="omni-recommended-title">Build up your <em>${weakest}</em> skills</h3>
+          <p class="omni-recommended-eyebrow font-mono-hud">NEXT SESSION</p>
+          <h3 class="omni-recommended-title">Underplayed: <em>${weakest}</em></h3>
         </div>
         <div class="omni-recommended-grid">
           ${recs.map(g => `
-            <button class="omni-rec-card" data-game="${g.id}" data-cat="${g.category}" aria-label="Play ${g.title}">
-              <span class="omni-rec-icon">${g.icon}</span>
-              <span class="omni-rec-title">${g.title}</span>
-              <span class="omni-rec-meta">${g.age} · ${g.tags.slice(0,2).join(' · ')}</span>
+            <button class="omni-rec-card" data-game="${g.id}" aria-label="Play ${g.title}">
+              <span class="omni-rec-code font-mono-hud">${g.code}</span>
+              <span class="omni-rec-body">
+                <span class="omni-rec-title">${g.title}</span>
+                <span class="omni-rec-meta">${g.domain}${g.paper ? ' · ' + g.paper : ''}</span>
+              </span>
             </button>
           `).join('')}
         </div>
@@ -281,122 +208,119 @@ class OmniArcadeApp {
     });
   }
 
-  renderHeader() {
-    const stats = StorageService.getData();
-    const headerEl = document.querySelector('#app-header');
-    if (!headerEl) return;
-
-    headerEl.innerHTML = `
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-3">
-          <div class="omni-logo">🎮</div>
-          <div>
-            <h1 class="omni-brand">OmniArcade</h1>
-            <p class="omni-tagline">KILL TIME WITHOUT KILLING YOUR MIND</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 flex-wrap justify-center">
-          <div class="omni-search-wrap">
-            <span class="omni-search-icon" aria-hidden="true">🔍</span>
-            <input id="search-input" type="text" placeholder="Search games…" value="${this.searchQuery}" class="omni-search" aria-label="Search games" />
-          </div>
-
-          <button id="sound-toggle-btn" class="omni-pill" aria-label="Toggle sound effects">
-            🔊 SOUND
-          </button>
-
-          <div class="omni-stat">
-            <span class="omni-stat-label">PLAYED</span>
-            <span class="omni-stat-value">${stats.gamesPlayed || 0}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  renderCategoryBar() {
+  renderWingBar() {
     const navEl = document.querySelector('#category-bar');
     if (!navEl) return;
 
-    const baseCats = [
-      { id: 'all', label: '🚀 All Games' },
-      { id: 'labs', label: '🧪 Labs' },
-      { id: 'math-logic', label: '🎯 Math & Logic' },
-      { id: 'language', label: '📖 Language' },
-      { id: 'memory-focus', label: '🧠 Memory & Focus' },
-      { id: 'science', label: '🔬 Science' },
-      { id: 'skills', label: '🎓 Skills' },
-      { id: 'kids-edu', label: '👶 Kids & Edu' },
-      { id: 'casual-friv', label: '⚡ Arcade' },
-      { id: 'classics', label: '🕹️ Classics' },
-      { id: 'retro-vault', label: '🐍 Retro Vault' },
-      { id: 'adult-mind', label: '🧠 Mind Games' },
-      { id: 'ai-studio', label: '🤖 AI Builder' },
-      { id: 'about', label: '👤 About' }
-    ];
-    const categories = baseCats.map(c => ({
-      ...c,
-      count: c.id === 'all' ? gamesCatalog.length : gamesCatalog.filter(g => g.category === c.id).length
-    }));
+    const counts = Object.fromEntries(
+      WINGS.map(w => [
+        w.id,
+        w.id === 'all'
+          ? gamesCatalog.filter(g => g.wing !== 'meta').length
+          : gamesCatalog.filter(g => g.wing === w.id).length
+      ])
+    );
 
     navEl.innerHTML = `
-      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-2 omni-cat-bar">
-        ${categories.map(cat => `
-          <button class="omni-cat ${this.activeCategory === cat.id ? 'is-active' : ''}" data-cat="${cat.id}" aria-pressed="${this.activeCategory === cat.id}">
-            <span>${cat.label}</span>
-            <span class="omni-cat-count">${cat.count}</span>
+      <div class="omni-wing-bar" role="tablist" aria-label="Arcade wings">
+        ${WINGS.map(w => `
+          <button type="button" class="omni-wing ${this.activeWing === w.id ? 'is-active' : ''}"
+            data-wing="${w.id}" role="tab" aria-selected="${this.activeWing === w.id}">
+            <span class="omni-wing-label">${w.label}</span>
+            <span class="omni-wing-blurb">${w.blurb}</span>
+            <span class="omni-wing-count font-mono-hud">${counts[w.id]}</span>
           </button>
         `).join('')}
       </div>
     `;
   }
 
-  renderGameGrid() {
+  filteredGames() {
+    const q = this.searchQuery.toLowerCase().trim();
+    return gamesCatalog.filter(g => {
+      // About sits as a footer row on ALL; only enter the bay via search otherwise.
+      if (g.wing === 'meta' && !q) return false;
+      if (this.activeWing !== 'all' && g.wing !== this.activeWing) return false;
+      if (!q) return true;
+      const hay = `${g.title} ${g.desc} ${g.domain} ${g.code} ${g.tags.join(' ')} ${g.paper || ''}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  renderGameBay() {
     const gridEl = document.querySelector('#game-grid');
     if (!gridEl) return;
 
-    const filtered = gamesCatalog.filter(g => {
-      const matchCat = this.activeCategory === 'all' || g.category === this.activeCategory;
-      const q = this.searchQuery.toLowerCase();
-      const matchSearch = g.title.toLowerCase().includes(q) || g.desc.toLowerCase().includes(q);
-      return matchCat && matchSearch;
-    });
+    const filtered = this.filteredGames();
+    gridEl.className = 'omni-bay';
 
     if (filtered.length === 0) {
       gridEl.innerHTML = `
-        <div class="col-span-full omni-empty">
-          <div class="omni-empty-icon">🔍</div>
-          <p class="omni-empty-title">No games match your search.</p>
-          <p class="omni-empty-hint">Try a different keyword or pick another category.</p>
-        </div>
-      `;
+        <div class="omni-empty">
+          <p class="omni-empty-title">No titles match.</p>
+          <p class="omni-empty-hint">Clear search or pick another wing.</p>
+        </div>`;
       return;
     }
 
-    gridEl.innerHTML = filtered.map(game => {
-      const high = StorageService.getHighScore(game.id);
+    const order = ['train', 'arcade', 'learn', 'labs', 'meta'];
+    const groups = order
+      .map(wing => ({ wing, games: filtered.filter(g => g.wing === wing) }))
+      .filter(g => g.games.length > 0);
+
+    gridEl.innerHTML = groups.map(({ wing, games }) => {
+      const meta = WING_META[wing] || { title: wing.toUpperCase(), sub: '' };
       return `
-        <div class="axiom-card omni-card" data-game="${game.id}" data-cat="${game.category}" tabindex="0" role="button" aria-label="Launch ${game.title}">
-          <div class="omni-card-head">
-            <span class="omni-card-icon">${game.icon}</span>
-            <span class="omni-card-badge">${game.badge}</span>
+        <section class="omni-bay-wing" data-wing="${wing}">
+          <header class="omni-bay-head">
+            <div>
+              <h3 class="omni-bay-title">${meta.title}</h3>
+              <p class="omni-bay-sub">${meta.sub}</p>
+            </div>
+            <span class="omni-bay-n font-mono-hud">${String(games.length).padStart(2, '0')}</span>
+          </header>
+          <div class="omni-bay-list" role="list">
+            ${games.map(game => this.bayRow(game)).join('')}
           </div>
-          <h3 class="omni-card-title">${game.title}</h3>
-          <p class="omni-card-desc">${game.desc}</p>
-          <div class="omni-card-foot">
-            <span class="omni-card-high">HIGH <strong>${high}</strong></span>
-            <button class="omni-card-launch" type="button">▶ LAUNCH</button>
-          </div>
-        </div>
-      `;
+        </section>`;
     }).join('');
 
-    gridEl.querySelectorAll('.axiom-card').forEach(card => {
-      const launch = () => this.launchGame(card.dataset.game);
-      card.onclick = launch;
-      card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(); } };
+    // About row when browsing ALL with no search
+    if (this.activeWing === 'all' && !this.searchQuery.trim()) {
+      const about = gamesCatalog.find(g => g.id === 'about-dr-non');
+      if (about) {
+        gridEl.insertAdjacentHTML('beforeend', `
+          <section class="omni-bay-wing omni-bay-wing--meta">
+            <div class="omni-bay-list">${this.bayRow(about)}</div>
+          </section>`);
+      }
+    }
+
+    gridEl.querySelectorAll('[data-game]').forEach(row => {
+      const launch = () => this.launchGame(row.dataset.game);
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('button') || row.dataset.game) launch();
+      });
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(); }
+      });
     });
+  }
+
+  bayRow(game) {
+    const high = StorageService.getHighScore(game.id);
+    return `
+      <article class="omni-bay-row" data-game="${game.id}" data-wing="${game.wing}" tabindex="0" role="listitem" aria-label="Launch ${game.title}">
+        <span class="omni-bay-code font-mono-hud">${game.code}</span>
+        <div class="omni-bay-main">
+          <h4 class="omni-bay-name">${game.title}</h4>
+          <p class="omni-bay-desc">${game.desc}</p>
+        </div>
+        <span class="omni-bay-domain font-mono-hud">${game.domain}</span>
+        <span class="omni-bay-paper font-mono-hud">${game.paper || game.age}</span>
+        <span class="omni-bay-high font-mono-hud">HI <strong>${high}</strong></span>
+        <button type="button" class="omni-bay-play" tabindex="-1">PLAY</button>
+      </article>`;
   }
 
   launchGame(gameId) {
@@ -414,28 +338,23 @@ class OmniArcadeApp {
     overlay.classList.remove('hidden');
     container.innerHTML = '';
 
-    // GameSession traps every timer/listener/raf the game creates so we can
-    // kill them all on close — fixes stray-loop bugs across all 25 games.
     const session = new GameSession();
     const startedAt = Date.now();
     let sessionScore = 0;
 
     const closeGame = () => {
       const durationMs = Date.now() - startedAt;
-      // Log to local analytics. Backend-ready contract (see analytics.js).
-      try { AnalyticsService.log(game.id, game.category, sessionScore, durationMs); } catch (e) { /* storage full etc. */ }
+      try { AnalyticsService.log(game.id, game.category, sessionScore, durationMs); } catch (e) { /* ignore */ }
       session.teardown();
       overlay.classList.add('hidden');
       container.innerHTML = '';
       if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
       this.renderRecommended();
       this.renderHeader();
-      this.renderGameGrid();
+      this.renderGameBay();
     };
 
     this._releaseModalUX = bindModalUX(overlay, closeGame);
-
-    // Inject a score-setter hook so each game's showResult can record final score.
     container._recordScore = (s) => { sessionScore = Math.max(sessionScore, s | 0); };
     game.renderer(container, closeGame);
   }
@@ -444,23 +363,25 @@ class OmniArcadeApp {
     document.addEventListener('input', (e) => {
       if (e.target.id === 'search-input') {
         this.searchQuery = e.target.value;
-        this.renderGameGrid();
+        this.renderGameBay();
       }
     });
 
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest('.cat-pill-btn');
-      if (btn) {
+      const wingBtn = e.target.closest('.omni-wing');
+      if (wingBtn) {
         soundFx.playClick();
-        this.activeCategory = btn.dataset.cat;
-        this.renderCategoryBar();
-        this.renderGameGrid();
+        this.activeWing = wingBtn.dataset.wing;
+        this.renderWingBar();
+        this.renderGameBay();
+        return;
       }
 
-      if (e.target.id === 'sound-toggle-btn') {
+      if (e.target.id === 'sound-toggle-btn' || e.target.closest('#sound-toggle-btn')) {
+        const btn = document.querySelector('#sound-toggle-btn');
         soundFx.init();
         const muted = soundFx.toggleMute();
-        e.target.innerText = muted ? '🔇 MUTED' : '🔊 SOUND';
+        if (btn) btn.textContent = muted ? 'MUTED' : 'SOUND';
       }
     });
   }

@@ -17,11 +17,11 @@ npx wrangler pages deploy . --project-name=games --commit-dirty=true
 
 Plain ESM, no build. `index.html` shell → `js/app.js` (`gamesCatalog[]`, one entry per game, `renderer: renderXxx(container, onClose)`) → `js/games/*.js` suites. Shared: `ui.js` (GameSession timer/listener trap, ScopedKeyboard, showResult), `storage.js` (high scores + top-5 leaderboards with 5-letter initials), `analytics.js`, `audio.js`. `server.js` is the local dev server only (port 3000).
 
-## Design — AXIOM Console register (2026-08-08 overhaul)
+## Design — AXIOM Console register (2026-08-08 · bay overhaul)
 
 `css/styles.css` keeps the legacy token *names* (`--paper`, `--ink`, `--c-*`) with console *values*: bg `#0a0e14`, ONE amber `#f59e0b`, zero radius, hairlines, no shadows/glows. `--c-math` (red) and `--c-skills` (green) are semantic wrong/correct feedback ONLY — never decoration. Fonts: Josefin Sans / Source Sans 3 / JetBrains Mono (`.font-mono-hud`).
 
-Positioning: brain training for adults — "kill time without killing your mind." THE SCIENCE collapsible in index.html carries 8 DOI-linked references including the skeptical Simons 2016; keep claims within what it supports.
+**Floor plan IA:** four wings — TRAIN / ARCADE / LEARN / LABS — rendered as dense bay rows (mono game codes, not emoji cards). PROTOCOL panel maps TRAIN titles → DOI papers; full docket stays in the collapsible. Positioning: brain training for adults — "kill time without killing your mind." Keep claims within what PROTOCOL + Simons 2016 support.
 
 ## Tests
 

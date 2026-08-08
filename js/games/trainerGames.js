@@ -1,10 +1,13 @@
 /**
  * OmniArcade — Trainer Suite (Console Edition)
- * Three research-anchored trainers, each mapped to a citation in the
- * portal's THE SCIENCE section:
- *   Dual N-Back    → Jaeggi et al. 2008 (working memory)
- *   Schulte Table  → classic attention/peripheral-scan drill
- *   Aim Trainer    → Dye/Green/Bavelier 2009 (processing speed, hand-eye)
+ * Research-anchored trainers, each mapped to a citation in PROTOCOL:
+ *   Dual N-Back     → Jaeggi et al. 2008 (working memory)
+ *   Schulte Table   → classic attention/peripheral-scan drill
+ *   Aim Trainer     → Dye/Green/Bavelier 2009 (processing speed)
+ *   Go / No-Go      → Verbruggen & Logan 2008 (response inhibition)
+ *   Digit Span      → Miller 1956 / Baddeley working-memory capacity
+ *   Mental Math     → arithmetic fluency under time pressure
+ *   Visual Search   → Green & Bavelier selective attention paradigm
  */
 import { soundFx } from '../audio.js';
 import { ScopedKeyboard, showResult } from '../ui.js';
@@ -317,5 +320,458 @@ export function renderAimTrainer(container, onClose) {
 
     container.querySelector('#close-game-btn').onclick = () => { clearInterval(countdown); onClose(); };
     placeTarget();
+  }
+}
+
+/* ===========================================================================
+ * 4. GO / NO-GO — press on GO, withhold on NO-GO
+ * ======================================================================== */
+export function renderGoNoGo(container, onClose) {
+  start();
+
+  function start() {
+    const TRIALS = 36, MS = 900, GAP = 450;
+    // ~25% no-go — enough to punish impulsivity without boredom.
+    const seq = Array.from({ length: TRIALS }, (_, i) => (i % 4 === 0 ? 'NOGO' : 'GO'));
+    for (let i = seq.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [seq[i], seq[j]] = [seq[j], seq[i]];
+    }
+
+    let t = -1, hits = 0, falseAlarms = 0, misses = 0, reactions = [];
+    let armed = false, shownAt = 0, timer = null, gapTimer = null;
+
+    container.innerHTML = `
+      <div class="${FRAME}">
+        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+          <div>
+            <h2 class="text-2xl font-black text-amber-400 tracking-wider">GO / NO-GO</h2>
+            <p class="text-[10px] text-amber-500/80 uppercase">Response inhibition · Verbruggen &amp; Logan 2008</p>
+          </div>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        </div>
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
+          Tap or press SPACE on GO. Do nothing on NO-GO. False starts cost more than slow hits.
+        </div>
+        <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div>TRIAL <span id="gng-trial" class="text-white">0</span> / ${TRIALS}</div>
+          <div>HITS <span id="gng-hits" class="text-amber-400">0</span></div>
+          <div>FA <span id="gng-fa" class="text-white">0</span></div>
+        </div>
+        <button id="gng-stage" class="w-full h-[220px] bg-zinc-950 border border-amber-500/40 flex items-center justify-center text-4xl font-black tracking-widest text-amber-400" aria-label="respond">
+          READY
+        </button>
+      </div>
+    `;
+
+    const stage = container.querySelector('#gng-stage');
+    const hitsEl = container.querySelector('#gng-hits');
+    const faEl = container.querySelector('#gng-fa');
+    const trialEl = container.querySelector('#gng-trial');
+
+    function respond() {
+      if (!armed) return;
+      armed = false;
+      const kind = seq[t];
+      if (kind === 'GO') {
+        hits++;
+        reactions.push(Math.round(performance.now() - shownAt));
+        hitsEl.innerText = hits;
+        soundFx.playCoin();
+        stage.innerText = 'HIT';
+      } else {
+        falseAlarms++;
+        faEl.innerText = falseAlarms;
+        soundFx.playHit();
+        stage.innerText = 'FALSE START';
+      }
+    }
+
+    function advance() {
+      clearTimeout(timer);
+      clearTimeout(gapTimer);
+      if (t >= 0 && armed && seq[t] === 'GO') {
+        misses++;
+        armed = false;
+      } else if (t >= 0 && armed && seq[t] === 'NOGO') {
+        armed = false;
+      }
+      t++;
+      if (t >= TRIALS) return end();
+      trialEl.innerText = t + 1;
+      stage.innerText = '·';
+      gapTimer = setTimeout(() => {
+        stage.innerText = seq[t];
+        stage.style.color = seq[t] === 'GO' ? '#f59e0b' : '#e6edf3';
+        armed = true;
+        shownAt = performance.now();
+        timer = setTimeout(advance, MS);
+      }, GAP);
+    }
+
+    function end() {
+      clearTimeout(timer);
+      clearTimeout(gapTimer);
+      kb.destroy();
+      const avg = reactions.length ? Math.round(reactions.reduce((a, b) => a + b, 0) / reactions.length) : 0;
+      const score = Math.max(0, hits * 12 - falseAlarms * 18 - misses * 8);
+      const clean = falseAlarms === 0 && misses <= 2;
+      showResult({
+        container,
+        title: clean ? 'INHIBITION LOCKED' : 'SESSION COMPLETE',
+        message: `${hits} hits · ${falseAlarms} false starts · ${misses} misses · avg GO ${avg || '—'}ms. The hard skill is withholding, not pressing.`,
+        score,
+        gameId: 'go-nogo',
+        tone: clean ? 'win' : 'over',
+        onRestart: () => start(),
+        onClose
+      });
+    }
+
+    const kb = new ScopedKeyboard();
+    kb.on({ ' ': respond });
+    stage.onclick = respond;
+    container.querySelector('#close-game-btn').onclick = () => {
+      clearTimeout(timer); clearTimeout(gapTimer); kb.destroy(); onClose();
+    };
+    advance();
+  }
+}
+
+/* ===========================================================================
+ * 5. DIGIT SPAN — hear/see digits, repeat them back
+ * ======================================================================== */
+export function renderDigitSpan(container, onClose) {
+  start();
+
+  function start() {
+    let span = 3, score = 0, lives = 3, round = 0;
+    let phase = 'idle'; // show | input
+    let target = [];
+    let typed = [];
+
+    container.innerHTML = `
+      <div class="${FRAME}">
+        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+          <div>
+            <h2 class="text-2xl font-black text-amber-400 tracking-wider">DIGIT SPAN</h2>
+            <p class="text-[10px] text-amber-500/80 uppercase">Working-memory capacity · Miller 1956</p>
+          </div>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        </div>
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
+          Watch the digits. When they clear, type them back in order. Span grows on success.
+        </div>
+        <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div>SPAN <span id="ds-span" class="text-amber-400 text-base">3</span></div>
+          <div>SCORE <span id="ds-score" class="text-white">0</span></div>
+          <div>LIVES <span id="ds-lives" class="text-white">3</span></div>
+        </div>
+        <div id="ds-display" class="h-[100px] flex items-center justify-center text-5xl font-black tracking-[0.35em] text-amber-400 bg-zinc-950 border border-amber-500/40 mb-4">—</div>
+        <div id="ds-input" class="h-12 flex items-center justify-center text-2xl font-bold tracking-[0.3em] text-white mb-4 min-h-[44px]">&nbsp;</div>
+        <div class="grid grid-cols-5 gap-2 max-w-[280px] mx-auto">
+          ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button class="ds-key axiom-dpad-btn" data-n="${n}">${n}</button>`).join('')}
+        </div>
+        <div class="flex justify-center gap-2 mt-3">
+          <button id="ds-clear" class="axiom-dpad-btn">CLEAR</button>
+          <button id="ds-enter" class="axiom-dpad-btn">ENTER</button>
+        </div>
+      </div>
+    `;
+
+    const display = container.querySelector('#ds-display');
+    const inputEl = container.querySelector('#ds-input');
+    const spanEl = container.querySelector('#ds-span');
+    const scoreEl = container.querySelector('#ds-score');
+    const livesEl = container.querySelector('#ds-lives');
+
+    function paintInput() {
+      inputEl.innerText = typed.length ? typed.join('') : (phase === 'input' ? '_' : '\u00a0');
+    }
+
+    function nextRound() {
+      round++;
+      target = Array.from({ length: span }, () => Math.floor(Math.random() * 10));
+      typed = [];
+      phase = 'show';
+      paintInput();
+      let i = 0;
+      display.innerText = '';
+      const flash = () => {
+        if (i >= target.length) {
+          display.innerText = '…';
+          phase = 'input';
+          paintInput();
+          return;
+        }
+        display.innerText = String(target[i]);
+        i++;
+        setTimeout(() => {
+          display.innerText = '';
+          setTimeout(flash, 180);
+        }, 650);
+      };
+      flash();
+    }
+
+    function submit() {
+      if (phase !== 'input') return;
+      const ok = typed.length === target.length && typed.every((d, i) => d === target[i]);
+      if (ok) {
+        score += span * 10;
+        scoreEl.innerText = score;
+        span = Math.min(9, span + 1);
+        spanEl.innerText = span;
+        soundFx.playCoin();
+        nextRound();
+      } else {
+        lives--;
+        livesEl.innerText = lives;
+        soundFx.playHit();
+        if (lives <= 0) {
+          kb.destroy();
+          showResult({
+            container,
+            title: span >= 7 ? 'SPAN SOLID' : 'CAPACITY CHECK',
+            message: `Peak span ${span}. Miller's "magical number seven" is the classic adult average — going past 7 under load is strong.`,
+            score,
+            gameId: 'digit-span',
+            tone: span >= 7 ? 'win' : 'over',
+            onRestart: () => start(),
+            onClose
+          });
+          return;
+        }
+        span = Math.max(3, span - 1);
+        spanEl.innerText = span;
+        nextRound();
+      }
+    }
+
+    container.querySelectorAll('.ds-key').forEach(btn => {
+      btn.onclick = () => {
+        if (phase !== 'input' || typed.length >= span) return;
+        typed.push(parseInt(btn.dataset.n, 10));
+        paintInput();
+        soundFx.playClick();
+      };
+    });
+    container.querySelector('#ds-clear').onclick = () => { typed = []; paintInput(); };
+    container.querySelector('#ds-enter').onclick = submit;
+
+    const kb = new ScopedKeyboard();
+    const digitHandlers = {};
+    for (let d = 0; d <= 9; d++) {
+      digitHandlers[String(d)] = () => {
+        if (phase !== 'input' || typed.length >= span) return;
+        typed.push(d);
+        paintInput();
+      };
+    }
+    digitHandlers.Enter = submit;
+    digitHandlers.Backspace = () => { typed.pop(); paintInput(); };
+    kb.on(digitHandlers);
+
+    container.querySelector('#close-game-btn').onclick = () => { kb.destroy(); onClose(); };
+    nextRound();
+  }
+}
+
+/* ===========================================================================
+ * 6. MENTAL MATH — timed arithmetic fluency
+ * ======================================================================== */
+export function renderMentalMath(container, onClose) {
+  start();
+
+  function start() {
+    const DURATION = 45;
+    let score = 0, correct = 0, wrong = 0, left = DURATION, over = false;
+    let a = 0, b = 0, op = '+', answer = 0, typed = '';
+    let countdown = null;
+
+    function roll() {
+      const ops = ['+', '-', '×'];
+      op = ops[Math.floor(Math.random() * ops.length)];
+      if (op === '+') { a = 10 + Math.floor(Math.random() * 40); b = 10 + Math.floor(Math.random() * 40); answer = a + b; }
+      else if (op === '-') { a = 20 + Math.floor(Math.random() * 50); b = 5 + Math.floor(Math.random() * (a - 5)); answer = a - b; }
+      else { a = 3 + Math.floor(Math.random() * 9); b = 3 + Math.floor(Math.random() * 9); answer = a * b; }
+      typed = '';
+      paint();
+    }
+
+    container.innerHTML = `
+      <div class="${FRAME}">
+        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+          <div>
+            <h2 class="text-2xl font-black text-amber-400 tracking-wider">MENTAL MATH</h2>
+            <p class="text-[10px] text-amber-500/80 uppercase">Arithmetic fluency · 45-second sprint</p>
+          </div>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        </div>
+        <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div>SCORE <span id="mm-score" class="text-amber-400 text-base">0</span></div>
+          <div><span id="mm-time" class="text-white text-base">${DURATION}</span>s</div>
+          <div>OK <span id="mm-ok" class="text-white">0</span> · X <span id="mm-bad" class="text-white">0</span></div>
+        </div>
+        <div id="mm-q" class="text-center text-4xl font-black text-white tracking-wider mb-3 h-14"></div>
+        <div id="mm-a" class="text-center text-3xl font-bold text-amber-400 tracking-[0.2em] mb-4 h-12 min-h-[44px]">_</div>
+        <div class="grid grid-cols-3 gap-2 max-w-[240px] mx-auto">
+          ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="mm-key axiom-dpad-btn" data-n="${n}">${n}</button>`).join('')}
+          <button class="mm-key axiom-dpad-btn" data-n="clear">C</button>
+          <button class="mm-key axiom-dpad-btn" data-n="0">0</button>
+          <button class="mm-key axiom-dpad-btn" data-n="enter">↵</button>
+        </div>
+      </div>
+    `;
+
+    const qEl = container.querySelector('#mm-q');
+    const aEl = container.querySelector('#mm-a');
+    const scoreEl = container.querySelector('#mm-score');
+    const okEl = container.querySelector('#mm-ok');
+    const badEl = container.querySelector('#mm-bad');
+
+    function paint() {
+      qEl.innerText = `${a} ${op} ${b}`;
+      aEl.innerText = typed.length ? typed : '_';
+    }
+
+    function submit() {
+      if (over || !typed.length) return;
+      const n = parseInt(typed, 10);
+      if (n === answer) {
+        correct++; score += 10; okEl.innerText = correct; soundFx.playCoin();
+      } else {
+        wrong++; score = Math.max(0, score - 3); badEl.innerText = wrong; soundFx.playHit();
+      }
+      scoreEl.innerText = score;
+      roll();
+    }
+
+    container.querySelectorAll('.mm-key').forEach(btn => {
+      btn.onclick = () => {
+        if (over) return;
+        const k = btn.dataset.n;
+        if (k === 'clear') { typed = ''; paint(); return; }
+        if (k === 'enter') { submit(); return; }
+        if (typed.length >= 4) return;
+        typed += k;
+        paint();
+        soundFx.playClick();
+      };
+    });
+
+    const kb = new ScopedKeyboard();
+    const handlers = {};
+    for (let d = 0; d <= 9; d++) {
+      handlers[String(d)] = () => { if (over || typed.length >= 4) return; typed += String(d); paint(); };
+    }
+    handlers.Enter = submit;
+    handlers.Backspace = () => { typed = typed.slice(0, -1); paint(); };
+    kb.on(handlers);
+
+    countdown = setInterval(() => {
+      left--;
+      container.querySelector('#mm-time').innerText = left;
+      if (left <= 0) {
+        over = true;
+        clearInterval(countdown);
+        kb.destroy();
+        showResult({
+          container,
+          title: correct >= 18 ? 'FLUENT' : 'SPRINT DONE',
+          message: `${correct} correct · ${wrong} wrong in 45s. Fluency is speed under accuracy pressure — not calculator avoidance as a lifestyle.`,
+          score,
+          gameId: 'mental-math',
+          tone: correct >= 18 ? 'win' : 'over',
+          onRestart: () => start(),
+          onClose
+        });
+      }
+    }, 1000);
+
+    container.querySelector('#close-game-btn').onclick = () => { clearInterval(countdown); kb.destroy(); onClose(); };
+    roll();
+  }
+}
+
+/* ===========================================================================
+ * 7. VISUAL SEARCH — find the odd target among distractors
+ * ======================================================================== */
+export function renderVisualSearch(container, onClose) {
+  start();
+
+  function start() {
+    const ROUNDS = 16;
+    let round = 0, score = 0, reactions = [], startedAt = 0;
+
+    function paintRound() {
+      round++;
+      const size = Math.min(36, 12 + round * 2);
+      const targetIdx = Math.floor(Math.random() * size);
+      // Feature-search: target is rotated T among upright L distractors (or vice versa).
+      const targetIsT = Math.random() < 0.5;
+      const cells = Array.from({ length: size }, (_, i) => {
+        const isTarget = i === targetIdx;
+        const glyph = isTarget ? (targetIsT ? 'T' : 'L') : (targetIsT ? 'L' : 'T');
+        const rot = isTarget ? (targetIsT ? 90 : 0) : (targetIsT ? 0 : 90);
+        return `<button class="vs-cell" data-target="${isTarget ? '1' : '0'}" style="transform:rotate(${rot}deg)" aria-label="search item">${glyph}</button>`;
+      });
+
+      container.innerHTML = `
+        <div class="${FRAME}">
+          <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+            <div>
+              <h2 class="text-2xl font-black text-amber-400 tracking-wider">VISUAL SEARCH</h2>
+              <p class="text-[10px] text-amber-500/80 uppercase">Selective attention · Green &amp; Bavelier paradigm</p>
+            </div>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+          </div>
+          <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
+            Find the odd letter — the one rotated differently from the rest. Distractors grow each round.
+          </div>
+          <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+            <div>ROUND <span class="text-white">${round}</span> / ${ROUNDS}</div>
+            <div>SCORE <span id="vs-score" class="text-amber-400">${score}</span></div>
+            <div>AVG <span id="vs-avg" class="text-white">${reactions.length ? Math.round(reactions.reduce((a,b)=>a+b,0)/reactions.length) : '—'}ms</span></div>
+          </div>
+          <div class="vs-grid">${cells.join('')}</div>
+        </div>
+      `;
+
+      startedAt = performance.now();
+      container.querySelectorAll('.vs-cell').forEach(btn => {
+        btn.onclick = () => {
+          const hit = btn.dataset.target === '1';
+          if (hit) {
+            const rt = Math.round(performance.now() - startedAt);
+            reactions.push(rt);
+            score += Math.max(5, 40 - Math.floor(rt / 50));
+            soundFx.playCoin();
+            if (round >= ROUNDS) {
+              const avg = Math.round(reactions.reduce((a, b) => a + b, 0) / reactions.length);
+              showResult({
+                container,
+                title: avg < 1200 ? 'SHARP SEARCH' : 'FIELD CLEARED',
+                message: `Average find time ${avg}ms across ${ROUNDS} rounds. Action-game players tend to search cluttered fields faster without losing accuracy.`,
+                score,
+                gameId: 'visual-search',
+                tone: avg < 1200 ? 'win' : 'over',
+                onRestart: () => start(),
+                onClose
+              });
+            } else {
+              paintRound();
+            }
+          } else {
+            score = Math.max(0, score - 5);
+            container.querySelector('#vs-score').innerText = score;
+            soundFx.playHit();
+          }
+        };
+      });
+      container.querySelector('#close-game-btn').onclick = onClose;
+    }
+
+    paintRound();
   }
 }

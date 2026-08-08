@@ -83,8 +83,6 @@ h1, h2, h3, h4 { font-family: 'Josefin Sans', sans-serif; }
   opacity: 0.7;
 }
 .axiom-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
   border-color: var(--accent);
 }
 .axiom-card:focus-visible {
@@ -152,29 +150,72 @@ body.axiom-modal-open { overflow: hidden; }
 /* ============================================================================
  * Header — Storybook Edition (matches index.html / hero / footer)
  * ========================================================================== */
+.omni-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 0.85rem 1.25rem;
+  background: rgba(10, 14, 20, 0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.omni-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.85rem;
+}
+.omni-brand-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.omni-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.omni-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 2.5rem;
+  position: relative;
+  z-index: 1;
+}
 .omni-logo {
-  width: 48px; height: 48px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  width: 44px; height: 44px;
+  background: var(--amber);
+  border: 1px solid var(--amber);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem;
-  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+.omni-logo span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0a0e14;
+  letter-spacing: 0.06em;
 }
 .omni-brand {
   font-family: 'Josefin Sans', sans-serif;
-  font-size: 1.65rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--ink);
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
 .omni-tagline {
-  font-family: 'Source Sans 3', sans-serif;
-  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
   color: var(--ink-soft);
-  margin-top: 2px;
-  letter-spacing: 0.02em;
+  margin-top: 3px;
+  letter-spacing: 0.12em;
 }
 
 /* ============================================================================
@@ -188,9 +229,9 @@ body.axiom-modal-open { overflow: hidden; }
 .omni-search-icon {
   position: absolute;
   left: 10px;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  color: var(--amber);
   pointer-events: none;
-  opacity: 0.7;
 }
 .omni-search {
   background: var(--paper);
@@ -217,13 +258,16 @@ body.axiom-modal-open { overflow: hidden; }
   color: var(--ink-soft);
   border-radius: var(--radius-sm);
   padding: 0.45rem 0.7rem;
-  font-family: 'Josefin Sans', sans-serif;
-  font-weight: 600;
-  font-size: 0.75rem;
+  min-height: 44px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
-.omni-pill:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.omni-pill:hover { border-color: var(--amber); color: var(--amber); }
+.omni-pill:active { transform: scale(0.97); }
 
 .omni-stat {
   display: flex; flex-direction: column; align-items: center;
@@ -250,54 +294,70 @@ body.axiom-modal-open { overflow: hidden; }
 }
 
 /* ============================================================================
- * Category bar
+ * Wing bar — four dens, not fourteen emoji chips
  * ========================================================================== */
-.omni-cat-bar { scrollbar-width: thin; }
-.omni-cat {
-  background: var(--paper);
+.omni-wing-bar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
   border: 1px solid var(--line);
-  color: var(--ink-soft);
-  border-radius: 0;
-  padding: 0.45rem 0.9rem;
-  font-family: 'Josefin Sans', sans-serif;
-  font-weight: 600;
-  font-size: 0.78rem;
-  white-space: nowrap;
-  cursor: pointer;
-  display: inline-flex; align-items: center; gap: 0.45rem;
-  transition: all 0.15s ease;
+  margin-bottom: 1.25rem;
 }
-.omni-cat:hover { border-color: var(--c-arcade); color: var(--ink); }
-.omni-cat.is-active {
+.omni-wing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-height: 64px;
+  padding: 0.7rem 0.75rem;
+  background: var(--paper);
+  border: 0;
+  border-right: 1px solid var(--line);
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.omni-wing:last-child { border-right: 0; }
+.omni-wing:hover { color: var(--ink); background: var(--paper-deep); }
+.omni-wing.is-active {
   background: var(--amber);
-  border-color: var(--amber);
   color: #0a0e14;
 }
-.omni-cat-count {
-  background: rgba(0,0,0,0.08);
-  color: inherit;
-  border-radius: 0;
-  font-size: 0.65rem;
-  padding: 1px 7px;
+.omni-wing-label {
+  font-family: 'Josefin Sans', sans-serif;
   font-weight: 700;
-  min-width: 18px;
-  text-align: center;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
 }
-.omni-cat.is-active .omni-cat-count { background: rgba(10,14,20,0.18); }
+.omni-wing-blurb {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+.omni-wing-count {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  margin-top: 0.2rem;
+}
+.omni-wing.is-active .omni-wing-count { color: #0a0e14; }
+@media (max-width: 720px) {
+  .omni-wing-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .omni-wing:nth-child(2n) { border-right: 0; }
+  .omni-wing { border-bottom: 1px solid var(--line); }
+  .omni-wing:last-child { grid-column: 1 / -1; }
+}
 
 /* ============================================================================
- * Empty state for the grid
+ * Empty state
  * ========================================================================== */
 .omni-empty {
-  grid-column: 1 / -1;
-  padding: 3.5rem 1rem;
+  padding: 2.5rem 1rem;
   text-align: center;
   background: var(--paper);
-  border: 2px dashed var(--line);
-  border-radius: var(--radius);
+  border: 1px dashed var(--line);
 }
-.omni-empty-icon { font-size: 2.5rem; opacity: 0.6; margin-bottom: 0.5rem; }
-.omni-empty-title { font-family: 'Josefin Sans', sans-serif; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; }
+.omni-empty-title { font-family: 'Josefin Sans', sans-serif; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; font-size: 1rem; }
 .omni-empty-hint { font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; color: var(--ink-soft); }
 
 /* ============================================================================
@@ -306,50 +366,60 @@ body.axiom-modal-open { overflow: hidden; }
 .omni-recommended {
   background: var(--paper);
   border: 1px solid var(--line);
-  border-left: 4px solid var(--amber);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
-  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--amber);
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.25rem;
 }
-.omni-recommended-head { margin-bottom: 0.85rem; }
+.omni-recommended-head { margin-bottom: 0.75rem; }
 .omni-recommended-eyebrow {
-  font-family: 'Josefin Sans', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.62rem;
+  font-weight: 700;
   color: var(--amber);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin: 0 0 0.35rem;
 }
 .omni-recommended-title {
   font-family: 'Josefin Sans', sans-serif;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--ink);
-  margin-top: 0.15rem;
+  margin: 0;
+  line-height: 1.3;
 }
 .omni-recommended-title em { color: var(--amber); font-style: normal; }
 
 .omni-recommended-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.6rem;
+  gap: 0;
+  border-top: 1px solid var(--line);
+  margin-top: 0.75rem;
 }
 .omni-rec-card {
-  display: flex; align-items: center; gap: 0.6rem;
+  display: flex; align-items: center; gap: 0.75rem;
   text-align: left;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 0.55rem 0.7rem;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--line);
+  padding: 0.75rem 0.7rem;
+  min-height: 56px;
   cursor: pointer;
   font-family: 'Source Sans 3', sans-serif;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease;
 }
-.omni-rec-card:hover { border-color: var(--c-arcade); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.omni-rec-card:focus-visible { outline: 3px solid var(--c-arcade); outline-offset: 2px; }
-.omni-rec-icon { font-size: 1.4rem; }
-.omni-rec-title { display: block; font-weight: 700; color: var(--ink); font-size: 0.85rem; line-height: 1.2; }
-.omni-rec-meta { display: block; font-size: 0.7rem; color: var(--ink-soft); }
+.omni-rec-card:last-child { border-right: 0; }
+.omni-rec-card:hover { background: var(--paper-deep); }
+.omni-rec-card:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.omni-rec-code {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.08em;
+  min-width: 2.5rem;
+}
+.omni-rec-body { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.omni-rec-title { font-weight: 700; color: var(--ink); font-size: 0.9rem; line-height: 1.2; }
+.omni-rec-meta { font-size: 0.7rem; color: var(--ink-soft); }
 
 /* ============================================================================
  * Card grid — public Games catalog
@@ -926,36 +996,158 @@ body.axiom-modal-open { overflow: hidden; }
   }
 }
 /* ============================================================================
- * Console chrome — hero, science, footer (AXIOM register)
+ * Console chrome — hero HUD, protocol map, bay, footer
  * ========================================================================== */
 .omni-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+  align-items: end;
   background: var(--paper);
   border: 1px solid var(--line);
-  border-left: 4px solid var(--amber);
+  border-left: 3px solid var(--amber);
+  padding: 1.35rem 1.35rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.omni-hero-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  margin: 0 0 0.65rem;
 }
 .omni-hero-title {
   font-family: 'Josefin Sans', sans-serif;
-  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  font-size: clamp(1.65rem, 4vw, 2.35rem);
   font-weight: 700;
   color: var(--ink);
   line-height: 1.15;
   text-wrap: balance;
-  margin-bottom: 0.75rem;
+  margin: 0 0 0.65rem;
 }
 .omni-hero-sub {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--ink-soft);
-  line-height: 1.6;
-  max-width: 62ch;
+  line-height: 1.55;
+  max-width: 58ch;
+  margin: 0;
+}
+.omni-hero-meters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--line);
+  min-width: 168px;
+  margin: 0;
+}
+.omni-hero-meters > div {
+  padding: 0.65rem 0.75rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.omni-hero-meters > div:nth-child(2n) { border-right: 0; }
+.omni-hero-meters > div:nth-child(n+3) { border-bottom: 0; }
+.omni-hero-meters dt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.omni-hero-meters dd {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--amber);
+  margin: 0.1rem 0 0;
+  line-height: 1;
+}
+@media (max-width: 720px) {
+  .omni-hero { grid-template-columns: 1fr; }
+  .omni-hero-meters { width: 100%; }
+}
+
+/* Protocol — research as floor structure */
+.omni-protocol {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  margin-bottom: 1.25rem;
+}
+.omni-protocol-head {
+  padding: 1.1rem 1.25rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.omni-protocol-title {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  margin: 0 0 0.4rem;
+}
+.omni-protocol-lede {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  max-width: 72ch;
+  margin: 0;
+}
+.omni-protocol-map {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+.omni-protocol-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  min-height: 88px;
+}
+.omni-protocol-cell:nth-child(3n) { border-right: 0; }
+.omni-protocol-code {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--amber);
+}
+.omni-protocol-task {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.omni-protocol-cell a {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  width: fit-content;
+}
+.omni-protocol-cell a:hover {
+  color: var(--amber);
+  border-bottom-color: rgba(245,158,11,0.45);
+}
+@media (max-width: 720px) {
+  .omni-protocol-map { grid-template-columns: 1fr 1fr; }
+  .omni-protocol-cell:nth-child(3n) { border-right: 1px solid var(--line); }
+  .omni-protocol-cell:nth-child(2n) { border-right: 0; }
+}
+@media (max-width: 420px) {
+  .omni-protocol-map { grid-template-columns: 1fr; }
+  .omni-protocol-cell { border-right: 0; }
 }
 
 .omni-science {
-  background: var(--paper);
-  border: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  background: transparent;
 }
 .omni-science-summary {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--amber);
@@ -963,6 +1155,9 @@ body.axiom-modal-open { overflow: hidden; }
   cursor: pointer;
   list-style: none;
   user-select: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 .omni-science-summary::-webkit-details-marker { display: none; }
 .omni-science-summary::before { content: '▸ '; }
@@ -996,12 +1191,169 @@ body.axiom-modal-open { overflow: hidden; }
 .omni-science-list a:hover { border-bottom-color: var(--amber); }
 .omni-science-list strong { color: var(--ink); }
 
+/* Bay — dense console listing, not emoji cards */
+.omni-bay {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.omni-bay-wing {
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.omni-bay-wing--meta { border-left: 3px solid var(--amber); }
+.omni-bay-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-deep);
+}
+.omni-bay-title {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  margin: 0 0 0.2rem;
+}
+.omni-bay-sub {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 62ch;
+  line-height: 1.4;
+}
+.omni-bay-n {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+}
+.omni-bay-list { display: flex; flex-direction: column; }
+.omni-bay-row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr 7.5rem 6.5rem 5rem auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  min-height: 56px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.omni-bay-row:last-child { border-bottom: 0; }
+.omni-bay-row:hover { background: rgba(245, 158, 11, 0.06); }
+.omni-bay-row:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.omni-bay-code {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+}
+.omni-bay-main { min-width: 0; }
+.omni-bay-name {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.15rem;
+  line-height: 1.2;
+}
+.omni-bay-row:hover .omni-bay-name { color: var(--amber); }
+.omni-bay-desc {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.omni-bay-domain,
+.omni-bay-paper {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.omni-bay-high {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-align: right;
+}
+.omni-bay-high strong {
+  color: var(--amber);
+  font-size: 0.85rem;
+  margin-left: 0.2rem;
+}
+.omni-bay-play {
+  background: var(--amber);
+  color: #0a0e14;
+  border: 0;
+  min-height: 36px;
+  padding: 0.4rem 0.85rem;
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.omni-bay-play:hover { background: #ffb224; }
+.omni-bay-play:active { transform: scale(0.97); }
+@media (max-width: 900px) {
+  .omni-bay-row {
+    grid-template-columns: 3rem 1fr auto;
+    grid-template-areas:
+      "code main play"
+      "code meta play";
+    row-gap: 0.25rem;
+  }
+  .omni-bay-code { grid-area: code; align-self: start; padding-top: 0.2rem; }
+  .omni-bay-main { grid-area: main; }
+  .omni-bay-play { grid-area: play; align-self: center; }
+  .omni-bay-domain,
+  .omni-bay-paper,
+  .omni-bay-high { display: none; }
+  .omni-bay-desc { -webkit-line-clamp: 2; }
+}
+
+/* Visual Search trainer grid */
+.vs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 0.4rem;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.vs-cell {
+  aspect-ratio: 1;
+  min-height: 44px;
+  background: #090c12;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #e6edf3;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.vs-cell:hover { border-color: var(--amber); background: rgba(245,158,11,0.08); }
+
 .omni-footer {
   background: var(--paper);
   border-top: 1px solid var(--line);
   color: var(--ink-soft);
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: 0.04em;
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.7rem;
 }
 .omni-footer strong { color: var(--amber); }
 
