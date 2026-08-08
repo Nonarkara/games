@@ -69,7 +69,7 @@ const gamesCatalog = [
     badge: '🕹️ RETRO VAULT',
     icon: '🐍',
     age: 'All Ages',
-    desc: "Classic 8-bit arcade grid snake with speed boosts and glowing food.",
+    desc: "Classic 8-bit arcade grid snake. Arrow keys to turn, eat the glowing food, don't hit a wall or your own tail.",
     tags: ['Retro', 'Arcade', 'Classic'],
     renderer: renderRetroSnake
   },
@@ -285,11 +285,8 @@ class OmniArcadeApp {
         <div class="flex items-center gap-3">
           <div class="omni-logo">🎮</div>
           <div>
-            <div class="flex items-center gap-2">
-              <h1 class="omni-brand">OmniArcade</h1>
-              <span class="omni-version">LEARN EDITION</span>
-            </div>
-            <p class="omni-tagline">25 educational & brain games · Math · Language · Memory · Science</p>
+            <h1 class="omni-brand">OmniArcade</h1>
+            <p class="omni-tagline">${gamesCatalog.length} free games · no ads, no logins, progress saved</p>
           </div>
         </div>
 
@@ -380,9 +377,6 @@ class OmniArcadeApp {
           </div>
           <h3 class="omni-card-title">${game.title}</h3>
           <p class="omni-card-desc">${game.desc}</p>
-          <div class="omni-card-tags">
-            ${game.tags.map(t => `<span class="omni-card-tag">#${t}</span>`).join('')}
-          </div>
           <div class="omni-card-foot">
             <span class="omni-card-high">HIGH <strong>${high}</strong></span>
             <button class="omni-card-launch" type="button">▶ LAUNCH</button>

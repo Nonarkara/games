@@ -121,21 +121,6 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .axiom-card[data-cat="labs"]::after         { background: var(--c-labs); }
 
 /* ============================================================================
- * Field transmission (now: rhyme strip)
- * ========================================================================== */
-.field-transmission {
-  background: var(--paper-deep);
-  border-left: 4px solid var(--accent);
-  border-radius: var(--radius-sm);
-  padding: 0.6rem 1rem;
-  font-family: 'Fredoka', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--ink-soft);
-  font-style: italic;
-}
-
-/* ============================================================================
  * Game button classes
  * ========================================================================== */
 .axiom-close-btn {
@@ -195,18 +180,6 @@ body.axiom-modal-open { overflow: hidden; }
   color: var(--ink);
   line-height: 1.1;
   letter-spacing: -0.01em;
-}
-.omni-version {
-  font-family: 'Fredoka', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  background: var(--paper-deep);
-  border: 1.5px solid var(--line);
-  color: var(--ink-soft);
-  border-radius: 999px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 .omni-tagline {
   font-family: 'Nunito', sans-serif;
@@ -418,14 +391,12 @@ body.axiom-modal-open { overflow: hidden; }
   font-size: 0.62rem;
   font-weight: 700;
   padding: 3px 8px;
-  border: 1.5px solid currentColor;
   border-radius: 4px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--ink-soft);
   background: var(--paper-deep);
-  transition: color 0.15s ease, background 0.15s ease;
 }
 
 .omni-card-title {
@@ -450,23 +421,6 @@ body.axiom-modal-open { overflow: hidden; }
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;       /* push the foot row to the bottom regardless of desc length */
-}
-
-.omni-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-.omni-card-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.62rem;
-  color: var(--ink-soft);
-  background: var(--paper-deep);
-  padding: 2px 7px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
 }
 
 .omni-card-foot {
