@@ -154,7 +154,7 @@ export function renderBlackjack(container, onClose) {
               <span class="text-3xl text-amber-400">🃏</span>
               <div>
                 <h2 class="text-2xl font-black text-amber-400 tracking-wider">CYBER BLACKJACK 21</h2>
-                <p class="text-[10px] text-amber-500/80 uppercase">CASINO PROTOCOL [DEALER_AI_CARD_TABLE]</p>
+                <p class="text-[10px] text-amber-500/80 uppercase">Get closer to 21 than the dealer without going over · face cards = 10 · ace = 11 or 1 · dealer must draw to 17</p>
               </div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn">✕ TERMINATE</button>

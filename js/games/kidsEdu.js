@@ -234,6 +234,21 @@ export function renderWordSearch(container, onClose) {
       ['S', 'T', 'A', 'R', 'K']
     ];
     let found = [];
+    let foundCells = new Set(); // 'r,c' of every cell belonging to a found word
+    let selStart = null;        // {r,c} of the first click, or null
+
+    // Straight line (horizontal/vertical/diagonal) between two cells, endpoints
+    // inclusive. Returns null if the two cells don't share a row, column, or
+    // diagonal — that's what keeps the click-click gesture honest.
+    function linePath(a, b) {
+      const dr = Math.sign(b.r - a.r), dc = Math.sign(b.c - a.c);
+      if (dr === 0 && dc === 0) return null;
+      if (dr !== 0 && dc !== 0 && Math.abs(b.r - a.r) !== Math.abs(b.c - a.c)) return null;
+      const steps = Math.max(Math.abs(b.r - a.r), Math.abs(b.c - a.c));
+      const path = [];
+      for (let i = 0; i <= steps; i++) path.push({ r: a.r + dr * i, c: a.c + dc * i });
+      return path;
+    }
 
     function render() {
       container.innerHTML = `
@@ -249,6 +264,10 @@ export function renderWordSearch(container, onClose) {
             <button id="close-game-btn" class="axiom-close-btn">✕ TERMINATE</button>
           </div>
 
+          <div class="text-amber-500 text-xs mb-3">
+            ${selStart ? 'NOW CLICK THE LAST LETTER OF THE WORD' : 'CLICK THE FIRST LETTER OF A WORD, THEN ITS LAST LETTER'}
+          </div>
+
           <div class="mb-4 flex flex-wrap gap-2">
             ${words.map(w => `
               <span class="px-3 py-1 text-xs font-bold border ${found.includes(w) ? 'bg-amber-500 text-black border-amber-400 line-through' : 'bg-zinc-900 text-amber-300 border-amber-500/30'}">
@@ -258,31 +277,47 @@ export function renderWordSearch(container, onClose) {
           </div>
 
           <div class="grid grid-cols-5 gap-2 mb-4 bg-zinc-950 p-4 border border-amber-500/40">
-            ${grid.map((row, r) => row.map((char, c) => `
-              <div class="aspect-square flex items-center justify-center bg-black border border-amber-500/40 text-xl font-extrabold text-amber-300">
+            ${grid.map((row, r) => row.map((char, c) => {
+              const key = `${r},${c}`;
+              const isSel = selStart && selStart.r === r && selStart.c === c;
+              const isFound = foundCells.has(key);
+              return `
+              <button class="ws-cell aspect-square flex items-center justify-center border text-xl font-extrabold transition
+                ${isFound ? 'bg-amber-500 border-amber-400 text-black' : isSel ? 'bg-amber-900 border-amber-400 text-amber-200' : 'bg-black border-amber-500/40 text-amber-300 hover:border-amber-400'}"
+                data-r="${r}" data-c="${c}">
                 ${char}
-              </div>
-            `).join('')).join('')}
-          </div>
-
-          <div class="flex flex-wrap justify-center gap-2">
-            ${words.map(w => `
-              <button class="word-claim-btn px-3 py-2 bg-zinc-900 hover:bg-amber-600 hover:text-black border border-amber-500/40 text-xs font-bold transition ${found.includes(w) ? 'opacity-40 pointer-events-none' : ''}" data-word="${w}">
-                CLAIM "${w}"
               </button>
-            `).join('')}
+            `;
+            }).join('')).join('')}
           </div>
         </div>
       `;
 
       container.querySelector('#close-game-btn').onclick = onClose;
 
-      container.querySelectorAll('.word-claim-btn').forEach(btn => {
-        btn.onclick = (e) => {
-          const w = e.target.dataset.word;
-          if (!found.includes(w)) {
+      container.querySelectorAll('.ws-cell').forEach(btn => {
+        btn.onclick = () => {
+          const cell = { r: parseInt(btn.dataset.r, 10), c: parseInt(btn.dataset.c, 10) };
+
+          if (!selStart) {
+            selStart = cell;
+            soundFx.playClick();
+            render();
+            return;
+          }
+
+          const path = linePath(selStart, cell);
+          selStart = null;
+          if (!path) { render(); return; }
+
+          const letters = path.map(p => grid[p.r][p.c]).join('');
+          const reversed = letters.split('').reverse().join('');
+          const hit = words.find(w => !found.includes(w) && (w === letters || w === reversed));
+
+          if (hit) {
             soundFx.playCoin();
-            found.push(w);
+            found.push(hit);
+            path.forEach(p => foundCells.add(`${p.r},${p.c}`));
             if (found.length === words.length) {
               showResult({
                 container,
@@ -294,9 +329,12 @@ export function renderWordSearch(container, onClose) {
                 onRestart: () => start(),
                 onClose
               });
+              return;
             }
-            render();
+          } else {
+            soundFx.playHit();
           }
+          render();
         };
       });
     }

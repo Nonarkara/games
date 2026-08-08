@@ -290,6 +290,8 @@ export function renderCyberPacman(container, onClose) {
           <div>HIGH: <span id="pac-high" class="text-amber-400 font-extrabold text-base">${high}</span></div>
         </div>
 
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">Arrow keys or the pad below to turn · eat every dot · avoid ghosts, or eat them during ⚡ power mode</div>
+
         <div class="relative flex justify-center mb-4">
           <canvas id="pac-canvas" width="360" height="360" class="bg-black border border-amber-500/60 shadow-inner"></canvas>
         </div>

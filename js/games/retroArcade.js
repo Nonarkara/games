@@ -35,6 +35,8 @@ export function renderRetroSnake(container, onClose) {
           <div>HIGH SCORE: <span id="snake-high" class="text-amber-400 text-base">${high}</span></div>
         </div>
 
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">Arrow keys or the pad below to turn · eat the red square · don't hit a wall or your own tail</div>
+
         <div class="relative flex justify-center mb-4">
           <canvas id="snake-canvas" width="400" height="400" class="bg-black border border-amber-500/60 shadow-inner"></canvas>
         </div>
@@ -207,6 +209,8 @@ export function renderSpaceDefender(container, onClose) {
           <div>WAVE: <span id="space-wave" class="text-amber-400 text-base">1</span></div>
           <div>HIGH: <span id="space-high" class="text-amber-400 text-base">${high}</span></div>
         </div>
+
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">Arrow keys or ◀ ▶ to move · space or 🔥 fire to shoot · clear every alien before they land</div>
 
         <div class="relative flex justify-center mb-4">
           <canvas id="space-canvas" width="400" height="400" class="bg-black border border-amber-500/60 shadow-inner"></canvas>
