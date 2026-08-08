@@ -24,7 +24,7 @@ const server = http.createServer((req, res) => {
   try {
     const host = req.headers.host || 'localhost';
     const parsedUrl = new URL(req.url, `http://${host}`);
-    let reqPath = parsedUrl.pathname === '/' ? '/index.html' : parsedUrl.pathname;
+    let reqPath = parsedUrl.pathname === '/' ? '/index.html' : decodeURIComponent(parsedUrl.pathname);
     let filePath = path.join(__dirname, path.normalize(reqPath));
 
     const ext = path.extname(filePath).toLowerCase();

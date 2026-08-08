@@ -114,6 +114,24 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   // soundFx has no generic play(name) dispatcher — call the method directly.
   soundFx[tone === 'win' ? 'playWin' : 'playGameOver']();
 
+  const qualifies = gameId !== null && score !== null && StorageService.qualifiesForBoard(gameId, score);
+
+  const boardHtml = () => {
+    const board = gameId !== null ? StorageService.getLeaderboard(gameId) : [];
+    if (!board.length) return '';
+    return `
+      <div class="axiom-board">
+        <div class="axiom-board-title">TOP 5</div>
+        ${board.map((e, n) => `
+          <div class="axiom-board-row">
+            <span class="axiom-board-rank">${n + 1}</span>
+            <span class="axiom-board-initials">${e.i}</span>
+            <span class="axiom-board-date">${e.d}</span>
+            <span class="axiom-board-score">${e.s}</span>
+          </div>`).join('')}
+      </div>`;
+  };
+
   const overlay = document.createElement('div');
   overlay.className = 'axiom-result-overlay';
   overlay.innerHTML = `
@@ -123,12 +141,35 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
       ${message ? `<p class="axiom-result-msg">${message}</p>` : ''}
       ${score !== null ? `<div class="axiom-result-score"><span class="axiom-result-score-label">FINAL SCORE</span><span class="axiom-result-score-value">${score}</span></div>` : ''}
       ${isNewHigh ? `<div class="axiom-result-high">▲ NEW HIGH SCORE</div>` : ''}
+      ${qualifies ? `
+        <form class="axiom-initials" id="initials-form">
+          <label class="axiom-initials-label" for="initials-input">YOU MADE THE BOARD — SIGN IT</label>
+          <div class="axiom-initials-row">
+            <input id="initials-input" class="axiom-initials-input" maxlength="5" autocomplete="off"
+                   spellcheck="false" placeholder="AAAAA" value="${StorageService.getLastInitials()}" />
+            <button type="submit" class="axiom-btn axiom-btn-primary axiom-initials-submit">SIGN</button>
+          </div>
+        </form>` : ''}
+      <div id="result-board">${qualifies ? '' : boardHtml()}</div>
       <div class="axiom-result-actions">
         ${onRestart ? `<button class="axiom-btn axiom-btn-primary" id="result-restart">▶ PLAY AGAIN</button>` : ''}
         <button class="axiom-btn axiom-btn-ghost" id="result-close">✕ CLOSE</button>
       </div>
     </div>`;
   container.appendChild(overlay);
+
+  const form = overlay.querySelector('#initials-form');
+  if (form) {
+    const input = overlay.querySelector('#initials-input');
+    input.oninput = () => { input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      StorageService.submitScore(gameId, input.value, score);
+      soundFx.playCoin();
+      form.remove();
+      overlay.querySelector('#result-board').innerHTML = boardHtml();
+    };
+  }
 
   const close = () => { overlay.remove(); if (onClose) onClose(); };
   const restart = () => { overlay.remove(); if (onRestart) onRestart(); };
@@ -137,7 +178,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   const cBtn = overlay.querySelector('#result-close');
   if (rBtn) rBtn.onclick = restart;
   if (cBtn) cBtn.onclick = close;
-  const primary = rBtn || cBtn;
+  const primary = overlay.querySelector('#initials-input') || rBtn || cBtn;
   if (primary) setTimeout(() => primary.focus(), 30);
 }
 

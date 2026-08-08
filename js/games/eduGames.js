@@ -36,10 +36,10 @@ export function renderStroop(container, onClose) {
     function render() {
       const tl = Math.max(1.5, 4 - round * 0.08);
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div><h2 class="text-xl font-black text-amber-400 tracking-wider">STROOP COLOR MATCH</h2><p class="text-[10px] text-amber-500/80 uppercase">COGNITIVE INHIBITION — PICK THE INK COLOR, NOT THE WORD</p></div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ CLOSE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
@@ -88,10 +88,10 @@ export function renderSimon(container, onClose) {
       else { accepting = false; soundFx.playGameOver(); showResult({ container, title:'SEQUENCE BROKEN', message:`Reached round ${round}.`, score:round-1, gameId:'simon-seq', onRestart:()=>start(), onClose }); }
     }
     container.innerHTML = `
-      <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-md mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+      <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-md mx-auto font-mono-hud">
         <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
           <div><h2 class="text-xl font-black text-amber-400 tracking-wider">SIMON SEQUENCE</h2><p class="text-[10px] text-amber-500/80 uppercase">WORKING MEMORY — REPEAT THE PATTERN</p></div>
-          <button id="close-game-btn" class="axiom-close-btn">✕ CLOSE</button>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
         </div>
         <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
           <div>ROUND: <span class="text-white text-base">${round}</span></div>
@@ -127,10 +127,10 @@ export function renderAnagram(container, onClose) {
     }
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div><h2 class="text-xl font-black text-amber-400 tracking-wider">ANAGRAM SCRAMBLE</h2><p class="text-[10px] text-amber-500/80 uppercase">SPELLING & VOCABULARY — UNSCRAMBLE THE WORD</p></div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ CLOSE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
@@ -172,10 +172,10 @@ export function renderPeriodicQuest(container, onClose) {
     function answer(n) { q++; if (n === current.el.n) { score += 10; soundFx.playCoin(); } else soundFx.playHit(); if (q>=max) return showResult({container,title:'SCIENCE COMPLETE',message:`${score}/${max*10} points.`,score,gameId:'periodic-quest',tone:'win',onRestart:()=>start(),onClose}); current = makeQ(); render(); }
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div><h2 class="text-xl font-black text-amber-400 tracking-wider">PERIODIC QUEST</h2><p class="text-[10px] text-amber-500/80 uppercase">CHEMISTRY — WHICH ELEMENT IS THIS?</p></div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ CLOSE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
@@ -202,10 +202,10 @@ export function renderCapitalQuiz(container, onClose) {
     function answer(c) { q++; if (c === current.item.c) { score += 10; soundFx.playCoin(); } else soundFx.playHit(); if (q>=max) return showResult({container,title:'GEO COMPLETE',message:`${score}/${max*10} points.`,score,gameId:'capital-quiz',tone:'win',onRestart:()=>start(),onClose}); current = makeQ(); render(); }
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div><h2 class="text-xl font-black text-amber-400 tracking-wider">CAPITAL QUEST</h2><p class="text-[10px] text-amber-500/80 uppercase">WORLD GEOGRAPHY — CAPITAL OF THIS COUNTRY?</p></div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ CLOSE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
@@ -239,10 +239,10 @@ export function renderNumberChain(container, onClose) {
     function answer(v) { q++; if (v === current.ans) { score += 10; soundFx.playCoin(); } else soundFx.playHit(); if (q>=max) return showResult({container,title:'PATTERN COMPLETE',message:`${score}/${max*10} points.`,score,gameId:'number-chain',tone:'win',onRestart:()=>start(),onClose}); current = makeQ(); render(); }
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div><h2 class="text-xl font-black text-amber-400 tracking-wider">NUMBER CHAIN</h2><p class="text-[10px] text-amber-500/80 uppercase">NUMERICAL REASONING — FIND THE NEXT NUMBER</p></div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ CLOSE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
@@ -275,10 +275,10 @@ export function renderTowerHanoi(container, onClose) {
     function dc(s) { return ['#f59e0b','#22c55e','#3b82f6','#a855f7','#ef4444'][(s-1)%5]; }
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div><h2 class="text-xl font-black text-amber-400 tracking-wider">TOWER OF HANOI</h2><p class="text-[10px] text-amber-500/80 uppercase">PLANNING & LOGIC — MOVE ALL DISKS TO PEG 3</p></div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ CLOSE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>MOVES: <span class="text-white text-base">${moves}</span></div>
@@ -321,10 +321,10 @@ export function renderWordBuilder(container, onClose) {
     function endGame() { over = true; clearInterval(timer); showResult({ container, title:'TIME UP', message:`Found ${found.length} words.`, score, gameId:'word-builder', tone:'win', onRestart:()=>start(), onClose }); }
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div><h2 class="text-xl font-black text-amber-400 tracking-wider">WORD BUILDER</h2><p class="text-[10px] text-amber-500/80 uppercase">SPELLING — BUILD WORDS FROM THE TILES (60s)</p></div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ CLOSE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>

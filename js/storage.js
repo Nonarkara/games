@@ -109,4 +109,36 @@ export class StorageService {
     const data = this.getData();
     return data.customGames || [];
   }
+
+  /* -------------------------------------------------------------------------
+   * Leaderboards — top 5 per game, 5-letter initials, really persisted.
+   * Shape: data.leaderboards[gameId] = [{ i: 'NON', s: 120, d: '2026-08-08' }]
+   * ---------------------------------------------------------------------- */
+  static getLeaderboard(gameId) {
+    const data = this.getData();
+    return (data.leaderboards && data.leaderboards[gameId]) || [];
+  }
+
+  static qualifiesForBoard(gameId, score) {
+    if (!score || score <= 0) return false;
+    const board = this.getLeaderboard(gameId);
+    return board.length < 5 || score > board[board.length - 1].s;
+  }
+
+  static submitScore(gameId, initials, score) {
+    const clean = String(initials || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5) || 'AAAAA';
+    const data = this.getData();
+    data.leaderboards = data.leaderboards || {};
+    const board = data.leaderboards[gameId] || [];
+    board.push({ i: clean, s: score, d: new Date().toISOString().slice(0, 10) });
+    board.sort((a, b) => b.s - a.s);
+    data.leaderboards[gameId] = board.slice(0, 5);
+    data.lastInitials = clean;
+    this.saveData(data);
+    return data.leaderboards[gameId];
+  }
+
+  static getLastInitials() {
+    return this.getData().lastInitials || '';
+  }
 }

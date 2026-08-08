@@ -135,7 +135,7 @@ export function renderPatternBreaker(container, onClose) {
 
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">🔐</span>
@@ -144,7 +144,7 @@ export function renderPatternBreaker(container, onClose) {
                 <p class="text-[10px] text-amber-500/80 uppercase">DEDUCTIVE LOGIC — ADAPTED FROM BREAKLOCK (MIT)</p>
               </div>
             </div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ TERMINATE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
           </div>
 
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -273,7 +273,7 @@ export function renderReflexMatrix(container, onClose) {
 
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">⚡</span>
@@ -282,7 +282,7 @@ export function renderReflexMatrix(container, onClose) {
                 <p class="text-[10px] text-amber-500/80 uppercase">HAND-EYE COORDINATION — REACTION TRAINING</p>
               </div>
             </div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ TERMINATE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
           </div>
 
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -356,7 +356,7 @@ export function renderTypeRush(container, onClose) {
 
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">⌨️</span>
@@ -365,7 +365,7 @@ export function renderTypeRush(container, onClose) {
                 <p class="text-[10px] text-amber-500/80 uppercase">TYPING FLUENCY — ADAPTED FROM TYPER/WORDPLUCK (MIT)</p>
               </div>
             </div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ TERMINATE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
           </div>
 
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
@@ -561,7 +561,7 @@ export function renderSlide2048(container, onClose) {
 
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-md mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-md mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">🔢</span>
@@ -570,7 +570,7 @@ export function renderSlide2048(container, onClose) {
                 <p class="text-[10px] text-amber-500/80 uppercase">SPATIAL STRATEGY — MERGE TO 2048</p>
               </div>
             </div>
-            <button id="close-game-btn" class="axiom-close-btn">✕ TERMINATE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
           </div>
 
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">

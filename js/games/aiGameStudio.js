@@ -33,7 +33,7 @@ export function renderAIGameStudio(container, onClose) {
 
   function renderUI() {
     container.innerHTML = `
-      <div class="relative bg-black border-2 border-amber-500 p-6 text-white max-w-2xl mx-auto shadow-[0_0_30px_rgba(245,158,11,0.3)] font-mono-hud">
+      <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-2xl mx-auto font-mono-hud">
         <div class="flex justify-between items-center mb-6 border-b border-amber-500/40 pb-3">
           <div class="flex items-center gap-3">
             <span class="text-3xl text-amber-400">🤖</span>
@@ -42,7 +42,7 @@ export function renderAIGameStudio(container, onClose) {
               <p class="text-[10px] text-amber-500/80 uppercase">INSPIRED BY TESANA.AI — NATURAL LANGUAGE PROMPT SANDBOX</p>
             </div>
           </div>
-          <button id="close-game-btn" class="axiom-close-btn">✕ TERMINATE</button>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
         </div>
 
         ${!isPlaying ? `

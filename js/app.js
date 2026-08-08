@@ -15,6 +15,8 @@ import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide20
 import { renderStroop, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
 import { renderNonTrivial } from './games/labsGames.js';
 import { renderBlowIntoTheCartridge } from './games/nineties.js';
+import { renderDualNBack, renderSchulteTable, renderAimTrainer } from './games/trainerGames.js';
+import { renderAbout } from './games/about.js';
 import { bindModalUX, GameSession } from './ui.js';
 
 const gamesCatalog = [
@@ -214,7 +216,11 @@ const gamesCatalog = [
   { id: 'number-chain', title: 'Number Chain', category: 'math-logic', badge: '🎯 MATH', icon: '🔗', age: 'Age 10+', desc: 'Numerical reasoning trainer. Identify the pattern and predict the next number in the sequence.', tags: ['Patterns', 'Reasoning', 'Algebra'], renderer: renderNumberChain },
   { id: 'tower-hanoi', title: 'Tower of Hanoi', category: 'math-logic', badge: '🎯 MATH', icon: '🗼', age: 'Age 8+', desc: 'Classic recursive-planning puzzle. Move all disks to peg 3 in the fewest moves possible.', tags: ['Logic', 'Planning', 'Recursive'], renderer: renderTowerHanoi },
   { id: 'non-trivial', title: 'Non-Trivial', category: 'labs', badge: '🧪 LABS', icon: '🧠', age: 'Friends only', desc: 'Personal trivia portal. Five packs hand-curated from 100 days of writing — books, bikes, Shanghai, philosophers, sound. Play with friends. Add your own packs in js/games/labsGames.js.', tags: ['Trivia', 'Personal', 'Multi-pack', 'Friends'], renderer: renderNonTrivial },
-  { id: 'blow-cartridge', title: 'Blow Into The Cartridge', category: 'labs', badge: '🧪 LABS', icon: '🕹', age: 'Party', desc: 'Host-mode 90s/00s trivia for a room. 240 questions across six decks — artifacts, screen, sound, pixels, dial-up, playground. One screen, everyone shouts, score on paper. Nothing repeats until the deck runs dry.', tags: ['Trivia', 'Party', '90s', 'Host mode'], renderer: renderBlowIntoTheCartridge }
+  { id: 'blow-cartridge', title: 'Blow Into The Cartridge', category: 'labs', badge: '🧪 LABS', icon: '🕹', age: 'Party', desc: 'Host-mode 90s/00s trivia for a room. 240 questions across six decks — artifacts, screen, sound, pixels, dial-up, playground. One screen, everyone shouts, score on paper. Nothing repeats until the deck runs dry.', tags: ['Trivia', 'Party', '90s', 'Host mode'], renderer: renderBlowIntoTheCartridge },
+  { id: 'dual-n-back', title: 'Dual N-Back', category: 'memory-focus', badge: '🧠 FOCUS', icon: '🧮', age: 'Teen & Adult', desc: 'The working-memory task from the Jaeggi studies. Press P when the position repeats from 2 steps back, L when the letter does.', tags: ['Working memory', 'N-back', 'Research'], renderer: renderDualNBack },
+  { id: 'schulte-table', title: 'Schulte Table', category: 'memory-focus', badge: '🧠 FOCUS', icon: '🔢', age: 'Teen & Adult', desc: 'Attention-field drill: tap 1→25 in order, eyes fixed on the center, letting peripheral vision do the finding. Under 25 seconds is strong.', tags: ['Attention', 'Speed', 'Peripheral vision'], renderer: renderSchulteTable },
+  { id: 'aim-trainer', title: 'Aim Trainer', category: 'skills', badge: '🎓 SKILL', icon: '🎯', age: 'All Ages', desc: 'Thirty seconds of targets. Hit them as they appear; your average reaction time is measured and kept on the board.', tags: ['Hand-eye', 'Reaction', 'Precision'], renderer: renderAimTrainer },
+  { id: 'about-dr-non', title: 'Why This Exists', category: 'about', badge: '👤 ABOUT', icon: '👤', age: 'Everyone', desc: 'Dr Non, a lifetime of games, and the case against killing time. With the 2007 MIT Wii photo as evidence.', tags: ['Dr Non', 'Gamification', 'Story'], renderer: renderAbout }
 ];
 
 class OmniArcadeApp {
@@ -286,7 +292,7 @@ class OmniArcadeApp {
           <div class="omni-logo">🎮</div>
           <div>
             <h1 class="omni-brand">OmniArcade</h1>
-            <p class="omni-tagline">${gamesCatalog.length} free games · no ads, no logins, progress saved</p>
+            <p class="omni-tagline">KILL TIME WITHOUT KILLING YOUR MIND</p>
           </div>
         </div>
 
@@ -326,7 +332,8 @@ class OmniArcadeApp {
       { id: 'classics', label: '🕹️ Classics' },
       { id: 'retro-vault', label: '🐍 Retro Vault' },
       { id: 'adult-mind', label: '🧠 Mind Games' },
-      { id: 'ai-studio', label: '🤖 AI Builder' }
+      { id: 'ai-studio', label: '🤖 AI Builder' },
+      { id: 'about', label: '👤 About' }
     ];
     const categories = baseCats.map(c => ({
       ...c,

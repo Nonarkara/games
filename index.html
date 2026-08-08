@@ -3,24 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniArcade — Learn by Playing</title>
-  <meta name="description" content="27 educational brain games for math, language, memory, science & focus. Progress saved. No ads. No logins. Play and learn." />
+  <title>OmniArcade — Kill time without killing your mind</title>
+  <meta name="description" content="30 brain-training games for adults: working memory, reaction speed, mental math, attention. Real scoreboards, research references, no ads, no logins." />
+  <meta name="theme-color" content="#0a0e14" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
-<body class="min-h-screen flex flex-col" style="font-family:'Nunito',sans-serif">
+<body class="min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header id="app-header" class="px-6 py-5 sticky top-0 z-30" style="background:rgba(253,246,227,0.95);backdrop-filter:blur(8px);border-bottom:2px solid #d9cbb0">
+  <header id="app-header" class="px-6 py-5 sticky top-0 z-30" style="background:rgba(10,14,20,0.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(230,237,243,0.14)">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
       <div class="flex items-center gap-3">
         <div class="omni-logo">🎮</div>
         <div>
           <h1 class="omni-brand">OmniArcade</h1>
-          <p class="omni-tagline">27 free games · no ads, no logins, progress saved</p>
+          <p class="omni-tagline">KILL TIME WITHOUT KILLING YOUR MIND</p>
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap justify-center">
@@ -41,13 +42,49 @@
   <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8 relative" style="z-index:1">
 
     <!-- Hero -->
-    <section class="mb-8 p-6 md:p-10 relative" style="background:#fffbf0;border:2px solid #d9cbb0;border-radius:18px;box-shadow:0 4px 16px rgba(43,33,24,0.08)">
-      <h2 class="text-3xl md:text-5xl font-black mb-3" style="color:#2b2118;font-family:'Fredoka',sans-serif;line-height:1.1">
-        Brain games that <span style="color:#e76f51">build real skills</span>
+    <section class="mb-4 p-6 md:p-10 relative omni-hero">
+      <h2 class="omni-hero-title">
+        You were going to kill twenty minutes anyway.
       </h2>
-      <p class="text-sm md:text-base max-w-2xl leading-relaxed" style="color:#6b5d4f">
-        Math, language, memory, science, and a full arcade of classics. Every game saves your progress and works offline — for learners of every age.
+      <p class="omni-hero-sub">
+        Spend them on working memory, reaction speed, and mental math instead of the feed.
+        Every game here trains something specific, keeps a real scoreboard, and works offline.
+        No ads, no logins, no algorithm deciding what you see next.
       </p>
+    </section>
+
+    <!-- The Science — collapsible, with references -->
+    <section class="mb-8">
+      <details class="omni-science">
+        <summary class="omni-science-summary">📖 THE SCIENCE — WHAT TRAINING HERE CAN AND CANNOT DO</summary>
+        <div class="omni-science-body">
+          <p class="omni-science-intro">
+            The games in this arcade are built on tasks with a real research record. The honest version of
+            that record: practicing these tasks reliably improves the abilities they exercise — visual attention,
+            processing speed, working-memory span, interference control. Whether those gains transfer broadly
+            to everyday life is still debated, and you should read the skeptics too. What is not debated:
+            twenty minutes here exercises your attention; twenty minutes of an infinite feed spends it.
+          </p>
+          <ul class="omni-science-list">
+            <li>Action video games measurably sharpen visual selective attention.
+              <a href="https://doi.org/10.1038/nature01647" target="_blank" rel="noopener">Green &amp; Bavelier (2003), <em>Nature</em> 423, 534–537</a></li>
+            <li>Dual n-back training improved working memory, with contested gains in fluid intelligence — the task behind our Dual N-Back.
+              <a href="https://doi.org/10.1073/pnas.0801268105" target="_blank" rel="noopener">Jaeggi et al. (2008), <em>PNAS</em> 105, 6829–6833</a></li>
+            <li>Custom video-game training enhanced cognitive control in adults aged 60–85.
+              <a href="https://doi.org/10.1038/nature12486" target="_blank" rel="noopener">Anguera et al. (2013), <em>Nature</em> 501, 97–101</a></li>
+            <li>Two months of platformer play induced measurable gray-matter growth in hippocampus, prefrontal cortex, and cerebellum.
+              <a href="https://doi.org/10.1038/mp.2013.120" target="_blank" rel="noopener">Kühn et al. (2014), <em>Molecular Psychiatry</em> 19, 265–271</a></li>
+            <li>The interference task behind our Stroop game — a lab standard for attention and inhibition since 1935.
+              <a href="https://doi.org/10.1037/h0054651" target="_blank" rel="noopener">Stroop (1935), <em>J. Experimental Psychology</em> 18, 643–662</a></li>
+            <li>Strategy-game training attenuated cognitive decline measures in older adults.
+              <a href="https://doi.org/10.1037/a0013494" target="_blank" rel="noopener">Basak et al. (2008), <em>Psychology and Aging</em> 23, 765–777</a></li>
+            <li>Action-game players show faster processing speed without loss of accuracy.
+              <a href="https://doi.org/10.1111/j.1467-8721.2009.01660.x" target="_blank" rel="noopener">Dye, Green &amp; Bavelier (2009), <em>Current Directions in Psychological Science</em> 18, 321–326</a></li>
+            <li><strong>The caveat, on purpose:</strong> the major skeptical review found strong evidence for improvement on trained tasks and weak evidence for far transfer. This page does not claim otherwise.
+              <a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons et al. (2016), <em>Psychological Science in the Public Interest</em> 17, 103–186</a></li>
+          </ul>
+        </div>
+      </details>
     </section>
 
     <!-- Recommended strip (adaptive) -->
@@ -62,12 +99,12 @@
   </main>
 
   <!-- Footer -->
-  <footer class="py-6 px-6 mt-12 text-center text-xs" style="background:#f5ecd7;border-top:2px solid #d9cbb0;color:#6b5d4f;font-family:'Fredoka',sans-serif">
-    <strong style="color:#e76f51">OmniArcade</strong> · Learn by Playing · 2026
+  <footer class="py-6 px-6 mt-12 text-center text-xs omni-footer">
+    <strong>OmniArcade</strong> · Kill time without killing your mind · 2026
   </footer>
 
   <!-- Game Modal Overlay -->
-  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(43,33,24,0.6);backdrop-filter:blur(6px)">
+  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
     <div id="game-modal-container" class="w-full max-w-3xl my-auto"></div>
   </div>
 

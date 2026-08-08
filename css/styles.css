@@ -1,85 +1,73 @@
 /* ============================================================================
- * OmniArcade — Storybook Arcade Design System
- * Warm cream paper, per-category colors, rounded, hand-friendly, playful.
+ * OmniArcade — AXIOM Console Design System
+ * Near-black console, ONE amber accent, zero radius, hairline borders,
+ * geometric type. Green/red exist only as semantic correct/wrong feedback.
+ * (Token names kept from the storybook era so no class needs renaming.)
  * ========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
 
 :root {
-  /* Paper palette */
-  --paper: #fdf6e3;
-  --paper-deep: #f5ecd7;
-  --ink: #2b2118;
-  --ink-soft: #6b5d4f;
-  --line: #d9cbb0;
+  /* Console palette (legacy token names, console values) */
+  --paper: #0f1420;         /* raised surface */
+  --paper-deep: #161d2b;    /* inset surface */
+  --ink: #e6edf3;           /* data text */
+  --ink-soft: #94a1b2;      /* secondary text */
+  --line: rgba(230, 237, 243, 0.14);  /* hairline */
 
-  /* Category accents */
-  --c-math: #e76f51;
-  --c-language: #2a9d8f;
-  --c-memory: #e9a23b;
-  --c-science: #7b5ea7;
-  --c-skills: #4a8c5e;
-  --c-arcade: #4a90d9;
-  --c-kids: #e08e45;
-  --c-classics: #b8860b;
-  --c-retro: #c04e3d;
-  --c-mind: #5c6bc0;
-  --c-ai: #6a4c93;
-  --c-labs: #5d3fd3;       /* electric violet — the personal-portal signal */
-  --c-music: #2a9d8f;      /* teal — used for the sound & frequency trivia */
+  /* ONE amber. Every former category hue resolves to it — differentiation
+     is typographic, not chromatic. Green/red are semantic feedback only. */
+  --amber: #f59e0b;
+  --c-math: #f85149;        /* semantic: wrong / danger */
+  --c-language: var(--amber);
+  --c-memory: var(--amber);
+  --c-science: var(--amber);
+  --c-skills: #3fb950;      /* semantic: correct / success */
+  --c-arcade: var(--amber);
+  --c-kids: var(--amber);
+  --c-classics: var(--amber);
+  --c-retro: var(--amber);
+  --c-mind: var(--amber);
+  --c-ai: var(--amber);
+  --c-labs: var(--amber);
+  --c-music: var(--amber);
 
-  --accent: var(--c-math);
-  --radius: 14px;
-  --radius-sm: 8px;
-  --shadow-sm: 0 2px 8px rgba(43, 33, 24, 0.08);
-  --shadow: 0 4px 16px rgba(43, 33, 24, 0.12);
-  --shadow-lg: 0 8px 32px rgba(43, 33, 24, 0.16);
+  --accent: var(--amber);
+  --radius: 0;
+  --radius-sm: 0;
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-lg: none;
 }
 
-/* Reset — storybook has soft corners */
 * { box-sizing: border-box; }
 
 body {
-  font-family: 'Nunito', sans-serif;
-  background: var(--paper);
-  background-image:
-    radial-gradient(circle at 20% 50%, rgba(231, 111, 81, 0.03), transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(42, 157, 143, 0.03), transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(123, 94, 167, 0.02), transparent 50%);
+  font-family: 'Source Sans 3', sans-serif;
+  background: #0a0e14;
   color: var(--ink);
   overflow-x: hidden;
 }
 
-/* Paper texture overlay */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.4;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-}
+.font-mono-hud { font-family: 'JetBrains Mono', monospace; }
+.font-retro { font-family: 'JetBrains Mono', monospace; }
 
-.font-mono-hud { font-family: 'Fredoka', sans-serif; }
-.font-retro { font-family: 'Fredoka', sans-serif; }
-
-/* Headings use storybook display font */
-h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
+/* Headings use the display face */
+h1, h2, h3, h4 { font-family: 'Josefin Sans', sans-serif; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: var(--paper-deep); }
-::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 5px; }
+::-webkit-scrollbar-track { background: #0a0e14; }
+::-webkit-scrollbar-thumb { background: var(--paper-deep); border: 1px solid var(--line); }
 
 /* Focus */
-:focus-visible { outline: 3px solid var(--c-arcade); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* ============================================================================
  * Cards — soft, warm, friendly
  * ========================================================================== */
 .axiom-card {
-  background: #fffbf0;
-  border: 2px solid var(--line);
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   box-shadow: var(--shadow-sm);
@@ -126,11 +114,11 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .axiom-close-btn {
   padding: 0.5rem 1rem;
   background: var(--paper-deep);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   color: var(--ink-soft);
   border-radius: var(--radius-sm);
   font-size: 0.8rem;
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -140,16 +128,16 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .axiom-dpad-btn {
   padding: 0.75rem;
   background: var(--paper-deep);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   color: var(--ink);
   font-weight: 700;
   font-size: 0.8rem;
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.1s ease;
 }
-.axiom-dpad-btn:hover { background: var(--c-arcade); color: #fff; border-color: var(--c-arcade); }
+.axiom-dpad-btn:hover { background: var(--amber); color: #0a0e14; border-color: var(--amber); }
 .axiom-dpad-btn:active { transform: scale(0.95); }
 
 /* ============================================================================
@@ -166,15 +154,15 @@ body.axiom-modal-open { overflow: hidden; }
  * ========================================================================== */
 .omni-logo {
   width: 48px; height: 48px;
-  background: #fffbf0;
-  border: 2px solid var(--line);
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.5rem;
   box-shadow: var(--shadow-sm);
 }
 .omni-brand {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-size: 1.65rem;
   font-weight: 700;
   color: var(--ink);
@@ -182,7 +170,7 @@ body.axiom-modal-open { overflow: hidden; }
   letter-spacing: -0.01em;
 }
 .omni-tagline {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
   font-size: 0.7rem;
   color: var(--ink-soft);
   margin-top: 2px;
@@ -205,11 +193,11 @@ body.axiom-modal-open { overflow: hidden; }
   opacity: 0.7;
 }
 .omni-search {
-  background: #fffbf0;
-  border: 2px solid var(--line);
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 0.45rem 0.6rem 0.45rem 2rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
   font-size: 0.85rem;
   color: var(--ink);
   width: 11rem;
@@ -219,17 +207,17 @@ body.axiom-modal-open { overflow: hidden; }
 .omni-search:focus {
   outline: none;
   border-color: var(--c-arcade);
-  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.18);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
 }
 @media (min-width: 768px) { .omni-search { width: 14rem; } }
 
 .omni-pill {
   background: var(--paper-deep);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   color: var(--ink-soft);
   border-radius: var(--radius-sm);
   padding: 0.45rem 0.7rem;
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-weight: 600;
   font-size: 0.75rem;
   cursor: pointer;
@@ -240,13 +228,13 @@ body.axiom-modal-open { overflow: hidden; }
 .omni-stat {
   display: flex; flex-direction: column; align-items: center;
   background: var(--paper-deep);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 0.3rem 0.7rem;
   min-width: 64px;
 }
 .omni-stat-label {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -254,10 +242,10 @@ body.axiom-modal-open { overflow: hidden; }
   text-transform: uppercase;
 }
 .omni-stat-value {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--c-skills);
+  color: var(--amber);
   line-height: 1;
 }
 
@@ -266,12 +254,12 @@ body.axiom-modal-open { overflow: hidden; }
  * ========================================================================== */
 .omni-cat-bar { scrollbar-width: thin; }
 .omni-cat {
-  background: #fffbf0;
-  border: 2px solid var(--line);
+  background: var(--paper);
+  border: 1px solid var(--line);
   color: var(--ink-soft);
-  border-radius: 999px;
+  border-radius: 0;
   padding: 0.45rem 0.9rem;
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-weight: 600;
   font-size: 0.78rem;
   white-space: nowrap;
@@ -281,21 +269,21 @@ body.axiom-modal-open { overflow: hidden; }
 }
 .omni-cat:hover { border-color: var(--c-arcade); color: var(--ink); }
 .omni-cat.is-active {
-  background: var(--c-arcade);
-  border-color: var(--c-arcade);
-  color: #fff;
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #0a0e14;
 }
 .omni-cat-count {
   background: rgba(0,0,0,0.08);
   color: inherit;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.65rem;
   padding: 1px 7px;
   font-weight: 700;
   min-width: 18px;
   text-align: center;
 }
-.omni-cat.is-active .omni-cat-count { background: rgba(255,255,255,0.25); }
+.omni-cat.is-active .omni-cat-count { background: rgba(10,14,20,0.18); }
 
 /* ============================================================================
  * Empty state for the grid
@@ -304,42 +292,42 @@ body.axiom-modal-open { overflow: hidden; }
   grid-column: 1 / -1;
   padding: 3.5rem 1rem;
   text-align: center;
-  background: #fffbf0;
+  background: var(--paper);
   border: 2px dashed var(--line);
   border-radius: var(--radius);
 }
 .omni-empty-icon { font-size: 2.5rem; opacity: 0.6; margin-bottom: 0.5rem; }
-.omni-empty-title { font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; }
-.omni-empty-hint { font-family: 'Nunito', sans-serif; font-size: 0.85rem; color: var(--ink-soft); }
+.omni-empty-title { font-family: 'Josefin Sans', sans-serif; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; }
+.omni-empty-hint { font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; color: var(--ink-soft); }
 
 /* ============================================================================
  * Recommended strip (adaptive)
  * ========================================================================== */
 .omni-recommended {
-  background: #fffbf0;
-  border: 2px solid var(--line);
-  border-left: 4px solid var(--c-skills);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--amber);
   border-radius: var(--radius);
   padding: 1rem 1.25rem;
   box-shadow: var(--shadow-sm);
 }
 .omni-recommended-head { margin-bottom: 0.85rem; }
 .omni-recommended-eyebrow {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--c-skills);
+  color: var(--amber);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .omni-recommended-title {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--ink);
   margin-top: 0.15rem;
 }
-.omni-recommended-title em { color: var(--c-skills); font-style: normal; }
+.omni-recommended-title em { color: var(--amber); font-style: normal; }
 
 .omni-recommended-grid {
   display: grid;
@@ -350,11 +338,11 @@ body.axiom-modal-open { overflow: hidden; }
   display: flex; align-items: center; gap: 0.6rem;
   text-align: left;
   background: var(--paper);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 0.55rem 0.7rem;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
   transition: all 0.15s ease;
 }
 .omni-rec-card:hover { border-color: var(--c-arcade); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
@@ -391,7 +379,7 @@ body.axiom-modal-open { overflow: hidden; }
   font-size: 0.62rem;
   font-weight: 700;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: 0;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -400,7 +388,7 @@ body.axiom-modal-open { overflow: hidden; }
 }
 
 .omni-card-title {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--ink);
@@ -408,10 +396,10 @@ body.axiom-modal-open { overflow: hidden; }
   margin: 0;
   /* prevent title from sitting flush with badge/icon */
 }
-.omni-card:hover .omni-card-title { color: var(--c-skills); }
+.omni-card:hover .omni-card-title { color: var(--amber); }
 
 .omni-card-desc {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
   font-size: 0.8rem;
   color: var(--ink-soft);
   line-height: 1.45;
@@ -439,31 +427,30 @@ body.axiom-modal-open { overflow: hidden; }
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.omni-card-high strong {
-  color: var(--c-skills);
+.omni-card-high strong { /* amber, not green: one accent */
+  color: var(--amber);
   font-weight: 700;
   margin-left: 0.25rem;
   font-size: 0.85rem;
 }
 
 .omni-card-launch {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--amber);
+  color: #0a0e14;
   border: 0;
   padding: 0.5rem 0.95rem;
-  font-family: 'Fredoka', sans-serif;
-  font-weight: 600;
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 700;
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  border-radius: 4px;
   transition: background 0.15s ease, transform 0.1s ease;
   white-space: nowrap;
 }
-.omni-card-launch:hover { background: var(--c-skills); }
+.omni-card-launch:hover { background: #ffb224; }
 .omni-card-launch:active { transform: scale(0.97); }
-.omni-card-launch:focus-visible { outline: 3px solid var(--c-arcade); outline-offset: 2px; }
+.omni-card-launch:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* Per-category badge color: the top stripe and the badge now agree. */
 .omni-card[data-cat="math-logic"]    .omni-card-badge { color: var(--c-math); }
@@ -490,7 +477,7 @@ body.axiom-modal-open { overflow: hidden; }
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: rgba(253, 246, 227, 0.92);
+  background: rgba(10, 14, 20, 0.92);
   backdrop-filter: blur(6px);
   animation: fade-in 0.2s ease;
 }
@@ -498,13 +485,13 @@ body.axiom-modal-open { overflow: hidden; }
 .axiom-result-card {
   width: 100%;
   max-width: 400px;
-  background: #fffbf0;
+  background: var(--paper);
   border: 3px solid var(--accent);
   border-radius: var(--radius);
   padding: 2rem 1.5rem;
   text-align: center;
   box-shadow: var(--shadow-lg);
-  animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: pop-in 0.3s ease-out;
 }
 .axiom-result-card.axiom-result-win { border-color: var(--c-skills); }
 
@@ -548,7 +535,7 @@ body.axiom-modal-open { overflow: hidden; }
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--ink);
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
 }
 
 .axiom-result-high {
@@ -559,7 +546,7 @@ body.axiom-modal-open { overflow: hidden; }
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;
-  border-radius: 20px;
+  border-radius: 0;
   animation: pulse 1.5s ease infinite;
 }
 
@@ -571,7 +558,7 @@ body.axiom-modal-open { overflow: hidden; }
 
 .axiom-btn {
   padding: 0.85rem;
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-weight: 600;
   font-size: 0.95rem;
   border: 2px solid;
@@ -600,15 +587,15 @@ body.axiom-modal-open { overflow: hidden; }
  * Distinct visual: violet, monospaced eyebrow, no-nonsense quiz UI.
  * ========================================================================== */
 .labs-modal {
-  background: #fffbf0;
-  border: 2px solid var(--line);
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-left: 5px solid var(--c-labs);
   border-radius: var(--radius);
   max-width: 720px;
   margin: 0 auto;
   padding: 1.5rem;
   box-shadow: var(--shadow-lg);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
 }
 .labs-modal--quiz { border-left-color: var(--c-arcade); }
 
@@ -625,7 +612,7 @@ body.axiom-modal-open { overflow: hidden; }
   margin-bottom: 0.35rem;
 }
 .labs-title {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-size: 1.7rem;
   font-weight: 700;
   color: var(--ink);
@@ -641,7 +628,7 @@ body.axiom-modal-open { overflow: hidden; }
 .labs-sub code {
   background: var(--paper-deep);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 0.85em;
   color: var(--c-labs);
 }
@@ -660,12 +647,12 @@ body.axiom-modal-open { overflow: hidden; }
   column-gap: 0.75rem;
   text-align: left;
   background: var(--paper);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-left: 5px solid var(--c-arcade);
   border-radius: var(--radius-sm);
   padding: 0.75rem 0.85rem;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
   transition: all 0.15s ease;
 }
 .labs-card--c-language { border-left-color: var(--c-language); }
@@ -676,7 +663,7 @@ body.axiom-modal-open { overflow: hidden; }
 .labs-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--c-labs); }
 .labs-card:focus-visible { outline: 3px solid var(--c-labs); outline-offset: 2px; }
 .labs-card-icon { grid-row: 1 / span 2; font-size: 1.6rem; align-self: center; }
-.labs-card-title { font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); font-size: 1rem; line-height: 1.1; }
+.labs-card-title { font-family: 'Josefin Sans', sans-serif; font-weight: 700; color: var(--ink); font-size: 1rem; line-height: 1.1; }
 .labs-card-sub { font-size: 0.75rem; color: var(--ink-soft); grid-column: 2; line-height: 1.3; }
 .labs-card-meta {
   grid-column: 1 / -1;
@@ -733,7 +720,7 @@ body.axiom-modal-open { overflow: hidden; }
   flex: 1;
   height: 6px;
   background: var(--paper-deep);
-  border-radius: 3px;
+  border-radius: 0;
   overflow: hidden;
 }
 .labs-progress-fill {
@@ -741,11 +728,11 @@ body.axiom-modal-open { overflow: hidden; }
   background: var(--c-arcade);
   transition: width 0.3s ease;
 }
-.labs-progress-score { color: var(--c-skills); font-weight: 700; }
+.labs-progress-score { color: var(--amber); font-weight: 700; }
 .labs-progress-text { color: var(--ink-soft); font-weight: 700; min-width: 4.5em; }
 
 .labs-question {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--ink);
@@ -763,12 +750,12 @@ body.axiom-modal-open { overflow: hidden; }
 .labs-option {
   display: flex; align-items: stretch; gap: 0.75rem;
   background: var(--paper);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 0.7rem 0.85rem;
   cursor: pointer;
   text-align: left;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Source Sans 3', sans-serif;
   font-size: 0.95rem;
   color: var(--ink);
   transition: all 0.12s ease;
@@ -779,8 +766,8 @@ body.axiom-modal-open { overflow: hidden; }
   display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px;
   background: var(--paper-deep);
-  border: 1.5px solid var(--line);
-  border-radius: 4px;
+  border: 1px solid var(--line);
+  border-radius: 0;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
   font-size: 0.8rem;
@@ -827,7 +814,7 @@ body.axiom-modal-open { overflow: hidden; }
   min-height: 44px;
   padding: 0 0.9rem;
   background: var(--paper);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
@@ -862,7 +849,7 @@ body.axiom-modal-open { overflow: hidden; }
 .host-timer-track {
   height: 6px;
   background: var(--paper-deep);
-  border-radius: 3px;
+  border-radius: 0;
   overflow: hidden;
   margin-top: 0.6rem;
 }
@@ -874,7 +861,7 @@ body.axiom-modal-open { overflow: hidden; }
 
 /* The question — display tier */
 .host-question {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Josefin Sans', sans-serif;
   font-size: clamp(1.35rem, 5vw, 2.2rem);
   font-weight: 600;
   color: var(--ink);
@@ -938,3 +925,140 @@ body.axiom-modal-open { overflow: hidden; }
     transition-duration: 0.01ms !important;
   }
 }
+/* ============================================================================
+ * Console chrome — hero, science, footer (AXIOM register)
+ * ========================================================================== */
+.omni-hero {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--amber);
+}
+.omni-hero-title {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.15;
+  text-wrap: balance;
+  margin-bottom: 0.75rem;
+}
+.omni-hero-sub {
+  font-size: 1rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+
+.omni-science {
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+.omni-science-summary {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+  padding: 0.85rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.omni-science-summary::-webkit-details-marker { display: none; }
+.omni-science-summary::before { content: '▸ '; }
+.omni-science[open] .omni-science-summary::before { content: '▾ '; }
+.omni-science-summary:hover { color: #ffb224; }
+.omni-science-body { padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--line); }
+.omni-science-intro {
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.65;
+  max-width: 75ch;
+  padding-top: 1rem;
+  margin-bottom: 1rem;
+}
+.omni-science-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  max-width: 75ch;
+  padding-left: 1rem;
+  list-style: square;
+}
+.omni-science-list a {
+  color: var(--amber);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(245,158,11,0.35);
+}
+.omni-science-list a:hover { border-bottom-color: var(--amber); }
+.omni-science-list strong { color: var(--ink); }
+
+.omni-footer {
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.omni-footer strong { color: var(--amber); }
+
+/* ============================================================================
+ * Scoreboard — initials entry + top-5 table on the result card
+ * ========================================================================== */
+.axiom-initials { margin-bottom: 1rem; }
+.axiom-initials-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+  margin-bottom: 0.5rem;
+}
+.axiom-initials-row { display: flex; gap: 0.5rem; justify-content: center; }
+.axiom-initials-input {
+  width: 9ch;
+  background: var(--paper-deep);
+  border: 1px solid var(--amber);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 0.45rem 0.25rem;
+}
+.axiom-initials-input:focus { outline: 2px solid var(--amber); outline-offset: 1px; }
+.axiom-initials-submit { min-height: 44px; padding: 0.45rem 1.1rem; }
+
+.axiom-board {
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--line);
+  background: var(--paper-deep);
+  padding: 0.75rem 0.9rem;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+}
+.axiom-board-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  margin-bottom: 0.5rem;
+}
+.axiom-board-row {
+  display: grid;
+  grid-template-columns: 1.4rem 6.5ch 1fr auto;
+  gap: 0.6rem;
+  align-items: baseline;
+  font-size: 0.8rem;
+  padding: 0.18rem 0;
+}
+.axiom-board-rank { color: var(--ink-soft); }
+.axiom-board-initials { color: var(--ink); font-weight: 700; letter-spacing: 0.15em; }
+.axiom-board-date { color: var(--ink-soft); font-size: 0.65rem; }
+.axiom-board-score { color: var(--amber); font-weight: 700; }
