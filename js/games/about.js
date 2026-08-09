@@ -1,6 +1,6 @@
 /**
  * OmniArcade — About. Not a game; the reason the floor exists.
- * 16-bit reading surface + sibling network (NST, Games, podcast).
+ * Play-mode surface: warm paper, Spectral for reading, one red Move.
  */
 
 export function renderAbout(container, onClose) {
@@ -51,36 +51,6 @@ export function renderAbout(container, onClose) {
           Play. Sign the board with five letters. Come back and beat yourself.
         </p>
       </div>
-
-      <section class="about-network" aria-labelledby="about-network-title">
-        <header>
-          <p>SIBLING FLOORS</p>
-          <h3 id="about-network-title">Same operator. Different rooms.</h3>
-        </header>
-        <ul>
-          <li>
-            <a href="https://games.nonarkara.org/">
-              <b>OmniArcade</b>
-              <span>games.nonarkara.org · this floor</span>
-            </a>
-          </li>
-          <li>
-            <a href="https://nst.nonarkara.org/" target="_blank" rel="noopener">
-              <b>NST</b>
-              <span>nst.nonarkara.org · news · signal · thinking</span>
-            </a>
-          </li>
-          <li>
-            <a href="https://open.spotify.com/show/0342w6de0LJk5wXCSNCqa3?si=jGar41OPTHak-43L2ltq9w" target="_blank" rel="noopener">
-              <b>20 Minutes with Dr Non</b>
-              <span>Spotify · emerging podcast</span>
-            </a>
-          </li>
-        </ul>
-        <a class="about-podcast-banner" href="https://open.spotify.com/show/0342w6de0LJk5wXCSNCqa3?si=jGar41OPTHak-43L2ltq9w" target="_blank" rel="noopener">
-          <img src="public/20-minutes-with-dr-non.png" alt="20 Minutes with Dr Non podcast banner" width="1600" height="900" />
-        </a>
-      </section>
     </article>
   `;
   container.querySelector('#close-game-btn').onclick = onClose;

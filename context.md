@@ -14,14 +14,6 @@ OmniArcade wins on three things only Dr Non can host together:
 
 Design follows **Axiom Design Core structure** (briefing → play, trunk rooms, one Divine Move) with a named **16-bit Play register**: dark CRT well `#0a0e14`, Press Start 2P + JetBrains Mono, one amber Move `#f59e0b`, scanline overlay, chunky cartridge cells. Editorial warm-paper Play was tried and rejected as too slick — 16-bit is the intentional surface.
 
-## Sibling floors (network strip)
-
-| Surface | URL | Status |
-|---------|-----|--------|
-| OmniArcade | https://games.nonarkara.org/ | Live · this repo |
-| NST | https://nst.nonarkara.org/ | Live |
-| 20 Minutes with Dr Non | https://open.spotify.com/show/0342w6de0LJk5wXCSNCqa3 | Emerging · banner in `public/20-minutes-with-dr-non.png` |
-
 ## Deploy (CDPT)
 
 ```bash
