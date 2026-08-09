@@ -1,68 +1,94 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="masterpiece">
+<html lang="en" data-theme="play">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniArcade — Axiom Design Core [PROTOCOL: OMNI_2026]</title>
-  <meta name="description" content="Axiom Design Core terminal console featuring 34 research & arcade tasks across TRAIN, ARCADE, LEARN, and LABS." />
-  <meta name="theme-color" content="#030508" />
+  <title>OmniArcade — 36 Short Games That Train Real Skills</title>
+  <meta name="description" content="Play 36 free browser games for memory, focus, logic, language, and coordination. Every game explains the skill it practises and the limits of the claim." />
+  <meta name="theme-color" content="#26243F" />
+  <link rel="icon" href="./public/favicon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="https://games.nonarkara.org/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://games.nonarkara.org/" />
+  <meta property="og:title" content="OmniArcade — Play With a Point" />
+  <meta property="og:description" content="36 short games. Learn what each mechanic asks of your brain, play one clean round, then leave when you meant to." />
+  <meta property="og:image" content="https://games.nonarkara.org/public/omniarcade-og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="OmniArcade — Play With a Point" />
+  <meta name="twitter:description" content="36 short games for memory, focus, logic, language, and coordination." />
+  <meta name="twitter:image" content="https://games.nonarkara.org/public/omniarcade-og.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,500;1,500&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "OmniArcade",
+      "url": "https://games.nonarkara.org/",
+      "description": "A free browser arcade that explains the skill each game practises.",
+      "creator": { "@type": "Person", "name": "Non Arkaraprasertkul" }
+    }
+  </script>
 </head>
-<body class="scanlines bg-[#030508] text-[#e6edf3]">
-
-  <!-- Top Tactical Satellite Status Bar -->
-  <div class="bg-[#0c111a] border-b border-[rgba(245,158,11,0.35)] py-1.5 px-4 text-[11px] font-mono-hud text-[#f59e0b] flex flex-wrap justify-between items-center gap-2">
-    <div>[SYSTEM STATUS: ONLINE] — <strong class="text-white">OMNI_ARCADE AXIOM DESIGN CORE</strong></div>
-    <div class="hidden md:block opacity-80">[PROTOCOL: OMNI_2026] · LAT 13.7563° N · LON 100.5018° E · SATELLITE HUD ACTIVE</div>
-    <div>34 TASKS · ZERO ADS · OFFLINE READY</div>
+<body>
+  <div class="arcade-status" role="status">
+    <span><i></i> FLOOR OPEN</span>
+    <span>BANGKOK · 2026</span>
+    <span>36 GAMES · LOCAL SCORES · ZERO ADS</span>
   </div>
 
-  <div class="cabinet">
-    <!-- Left rail: wing select like a cabinet button strip -->
-    <aside class="cabinet-rail" aria-label="Wings">
-      <div class="cabinet-rail-brand">
-        <p class="cabinet-mark font-mono-hud" aria-hidden="true">OA</p>
-        <p class="cabinet-rail-word">SELECT</p>
+  <header id="app-header" class="arcade-header"></header>
+
+  <main>
+    <section id="omni-hud" class="cabinet-attract" aria-label="Featured game"></section>
+
+    <section class="arcade-directory" aria-labelledby="directory-title">
+      <header class="directory-header">
+        <div><p>CARTRIDGE DIRECTORY</p><h2 id="directory-title">Choose your room</h2></div>
+        <p>Four ways to spend a few minutes. Every cartridge opens with a brain briefing before play.</p>
+      </header>
+      <nav id="category-bar" class="cabinet-wings" aria-label="Game rooms"></nav>
+    </section>
+
+    <section id="recommended-strip" hidden></section>
+    <section id="game-grid" class="game-library" aria-label="Game cartridges"></section>
+
+    <section class="evidence-strip" aria-labelledby="evidence-title">
+      <div>
+        <p>THE HONEST VERSION</p>
+        <h2 id="evidence-title">Practice is specific.</h2>
       </div>
-      <nav id="category-bar" class="cabinet-wings"></nav>
-      <details class="cabinet-papers">
-        <summary>Papers</summary>
-        <ol class="cabinet-paper-list">
+      <p>These games exercise the skill named on the cartridge. Near transfer can happen. Broad claims about becoming smarter at unrelated tasks remain contested.</p>
+      <details>
+        <summary>READ THE PAPERS</summary>
+        <ul>
           <li><a href="https://doi.org/10.1073/pnas.0801268105" target="_blank" rel="noopener">Jaeggi 2008 · N-back</a></li>
           <li><a href="https://doi.org/10.1037/h0043158" target="_blank" rel="noopener">Miller 1956 · Span</a></li>
           <li><a href="https://doi.org/10.1037/h0054651" target="_blank" rel="noopener">Stroop 1935</a></li>
-          <li><a href="https://doi.org/10.1016/j.tics.2008.07.005" target="_blank" rel="noopener">Verbruggen 2008 · Go/No-Go</a></li>
+          <li><a href="https://doi.org/10.1016/j.tics.2008.07.005" target="_blank" rel="noopener">Verbruggen 2008 · Go / No-Go</a></li>
           <li><a href="https://doi.org/10.1038/nature01647" target="_blank" rel="noopener">Green &amp; Bavelier 2003</a></li>
-          <li><a href="https://doi.org/10.1111/j.1467-8721.2009.01660.x" target="_blank" rel="noopener">Dye et al. 2009</a></li>
-          <li><a href="https://doi.org/10.1038/nature12486" target="_blank" rel="noopener">Anguera 2013</a></li>
-          <li><a href="https://doi.org/10.1038/mp.2013.120" target="_blank" rel="noopener">Kühn 2014</a></li>
-          <li><a href="https://doi.org/10.1037/a0013494" target="_blank" rel="noopener">Basak 2008</a></li>
-          <li><a href="https://doi.org/10.1146/annurev-psych-113011-143750" target="_blank" rel="noopener">Diamond 2013</a></li>
-          <li><a href="https://doi.org/10.1126/science.1736359" target="_blank" rel="noopener">Baddeley 1992</a></li>
-          <li><a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons 2016 · caveat</a></li>
-        </ol>
+          <li><a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons 2016 · evidence review</a></li>
+        </ul>
       </details>
-      <div id="cabinet-rail-meta" class="cabinet-rail-meta"></div>
-    </aside>
+    </section>
+  </main>
 
-    <div class="cabinet-stage">
-      <header id="app-header" class="cabinet-top"></header>
-      <section id="omni-hud" class="cabinet-attract" aria-label="Attract"></section>
-      <section id="recommended-strip" class="cabinet-cue" hidden></section>
-      <section id="game-grid" class="cabinet-select" aria-label="Game select"></section>
-      <footer class="cabinet-foot">
-        Near transfer is real. Far transfer is contested — Simons 2016 is in Papers on purpose.
-        No ads. No login. Offline-capable.
-      </footer>
-    </div>
-  </div>
+  <footer class="arcade-footer">
+    <div><b>OMNIARCADE</b><span>Kill time. Keep the mind.</span></div>
+    <p>No login. No ads. Scores stay on this device.</p>
+    <details>
+      <summary>OPEN-SOURCE CREDITS</summary>
+      <p><a href="https://github.com/kubowania/breakout" target="_blank" rel="noopener">Breakout · Ania Kubow · MIT</a></p>
+      <p><a href="https://github.com/jakesgordon/javascript-pong" target="_blank" rel="noopener">Pong · Jake Gordon · MIT</a></p>
+      <p><a href="https://github.com/Nonarkara/games/blob/main/CREDITS.md" target="_blank" rel="noopener">Full credits and adaptation notes</a></p>
+    </details>
+  </footer>
 
-  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(0,0,0,0.85)">
-    <div id="game-modal-container" class="w-full max-w-3xl my-auto"></div>
+  <div id="game-modal-overlay" class="game-modal-overlay hidden" role="presentation">
+    <div id="game-modal-container" class="game-modal-container"></div>
   </div>
 
   <script type="module" src="./js/app.js"></script>

@@ -1,0 +1,21 @@
+# Open-source game credits
+
+OmniArcade uses original vanilla-JavaScript renderers inside its own game lifecycle. Where a mechanic or implementation study came from an open-source project, the source and license are named here and inside the relevant game.
+
+## Added in the arcade revival
+
+| Game | Source | Creator | License | What OmniArcade changed |
+|---|---|---|---|---|
+| Breakout 1976 | [kubowania/breakout](https://github.com/kubowania/breakout) | Ania Kubow | MIT | Rebuilt for canvas scaling, touch/keyboard input, rebound control, scoring, lifecycle cleanup, and the Axiom learning layer. |
+| Pong 1972 | [jakesgordon/javascript-pong](https://github.com/jakesgordon/javascript-pong) | Jake Gordon | MIT | Rebuilt as a responsive single-player match with pointer controls, adaptive ball speed, scoring, lifecycle cleanup, and the Axiom learning layer. |
+
+## Existing mechanic studies
+
+| Game | Source | Creator / project | License | Use |
+|---|---|---|---|---|
+| Pattern Breaker | [maxwellito/breaklock](https://github.com/maxwellito/breaklock) | Maxwell Ito | MIT | Mechanic study; reimplemented in OmniArcade. |
+| Type Rush | [ninest/typer](https://github.com/ninest/typer), [knadh/wordpluck](https://github.com/knadh/wordpluck) | ninest; Kailash Nadh | MIT | Mechanic studies; reimplemented in OmniArcade. |
+| Reflex Matrix | [Sagar-Sharma-7/Reaction-Game](https://github.com/Sagar-Sharma-7/Reaction-Game), [zoozf/TestYourReactions](https://github.com/zoozf/TestYourReactions) | Sagar Sharma; zoozf | MIT | Genre studies; reimplemented in OmniArcade. |
+| Slide 2048 | [gabrielecirulli/2048](https://github.com/gabrielecirulli/2048) | Gabriele Cirulli | MIT | Classic mechanic reference; reimplemented in OmniArcade. |
+
+No third-party game is embedded as an iframe. This keeps controls, accessibility, saved scores, and teardown behavior consistent on phones and laptops.

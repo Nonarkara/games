@@ -14,6 +14,7 @@ import { renderFlappyBird, renderMinesweeper } from './games/casualArcade.js';
 import { renderTriviaMaster, renderBlackjack } from './games/adultMind.js';
 import { renderAIGameStudio } from './games/aiGameStudio.js';
 import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide2048 } from './games/curatedGames.js';
+import { renderArcadeBreakout, renderArcadePong } from './games/openSourceGames.js';
 import { renderStroop, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
 import { renderNonTrivial } from './games/labsGames.js';
 import { renderBlowIntoTheCartridge } from './games/nineties.js';
@@ -23,6 +24,7 @@ import {
 } from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
 import { bindModalUX, GameSession } from './ui.js';
+import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
 
 const WINGS = [
   { id: 'all', label: 'ALL', blurb: 'Full floor' },
@@ -57,6 +59,8 @@ const gamesCatalog = [
 
   // ── ARCADE ─────────────────────────────────────────────────────────────
   { id: 'cyber-tetris', code: 'TET', title: 'Cyber Tetris 1984', wing: 'arcade', category: 'classics', domain: 'Spatial', age: 'All', desc: 'Falling tetrominoes, line clears, combo multipliers.', tags: ['Classic', 'Puzzle'], renderer: renderCyberTetris },
+  { id: 'arcade-breakout', code: 'BRK', title: 'Breakout 1976', wing: 'arcade', category: 'classics', domain: 'Prediction', age: 'All', desc: 'Shape rebound angles, keep the rally alive, clear the wall.', tags: ['Classic', 'Open source', 'Touch'], credit: 'Ania Kubow · MIT', source: 'https://github.com/kubowania/breakout', renderer: renderArcadeBreakout },
+  { id: 'arcade-pong', code: 'PNG', title: 'Pong 1972', wing: 'arcade', category: 'classics', domain: 'Anticipation', age: 'All', desc: 'Read the ball early and race the CPU to seven.', tags: ['Classic', 'Open source', 'Touch'], credit: 'Jake Gordon · MIT', source: 'https://github.com/jakesgordon/javascript-pong', renderer: renderArcadePong },
   { id: 'cyber-pacman', code: 'PAC', title: 'Cyber Pac-Man 1980', wing: 'arcade', category: 'classics', domain: 'Maze', age: 'All', desc: 'Dots, power pellets, four ghost AIs.', tags: ['Classic', 'Arcade'], renderer: renderCyberPacman },
   { id: 'cyber-snake', code: 'SNK', title: 'Retro Cyber Snake', wing: 'arcade', category: 'retro-vault', domain: 'Grid', age: 'All', desc: 'Grow, turn, do not bite your own tail.', tags: ['Retro', 'Classic'], renderer: renderRetroSnake },
   { id: 'space-defender', code: 'INV', title: 'Space Defender', wing: 'arcade', category: 'retro-vault', domain: 'Shooter', age: 'All', desc: 'Laser turret vs invader waves.', tags: ['Shooter', 'Space'], renderer: renderSpaceDefender },
@@ -124,24 +128,27 @@ class OmniArcadeApp {
   }
 
   renderRailMeta() {
-    const el = document.querySelector('#cabinet-rail-meta');
-    if (!el) return;
-    const stats = StorageService.getData();
-    el.innerHTML = `
-      <button id="sound-toggle-btn" class="cabinet-rail-btn" type="button" aria-label="Toggle sound">SOUND</button>
-      <p class="cabinet-rail-played font-mono-hud"><span>${stats.gamesPlayed || 0}</span> played</p>
-    `;
+    const played = document.querySelector('#played-count');
+    if (played) played.textContent = StorageService.getData().gamesPlayed || 0;
   }
 
   renderHeader() {
     const headerEl = document.querySelector('#app-header');
     if (!headerEl) return;
+    const stats = StorageService.getData();
     headerEl.innerHTML = `
-      <label class="cabinet-search">
-        <span class="font-mono-hud" aria-hidden="true">/</span>
-        <input id="search-input" type="search" placeholder="Find a title" value="${this.searchQuery}" aria-label="Search games" />
-      </label>
-      <p class="cabinet-top-note font-mono-hud">${this.playableCount()} titles</p>
+      <a class="arcade-brand" href="#top" aria-label="OmniArcade home">
+        <span class="arcade-brand-disc">OA<span></span></span>
+        <span><b>OMNIARCADE</b><small>PLAY WITH A POINT</small></span>
+      </a>
+      <div class="arcade-tools">
+        <label class="arcade-search">
+          <span>FIND</span>
+          <input id="search-input" type="search" placeholder="Title, skill, or code" value="${this.searchQuery}" aria-label="Search games" />
+        </label>
+        <p class="arcade-play-count"><b id="played-count">${stats.gamesPlayed || 0}</b><span>PLAYS</span></p>
+        <button id="sound-toggle-btn" class="arcade-sound" type="button" aria-label="Toggle sound">SOUND</button>
+      </div>
     `;
   }
 
@@ -151,24 +158,28 @@ class OmniArcadeApp {
     const feature = this.featuredGame();
     const high = feature ? StorageService.getHighScore(feature.id) : 0;
     const wingLabel = this.activeWing === 'all' ? 'FULL FLOOR' : (WING_META[this.activeWing]?.title || this.activeWing.toUpperCase());
+    const guide = feature ? getBrainGuide(feature) : null;
 
     el.innerHTML = `
-      <div class="attract-copy">
-        <h1 class="attract-brand">OmniArcade</h1>
-        <p class="attract-line">Kill time without killing your mind.</p>
-        <p class="attract-sub">
-          You were going to spend twenty minutes somewhere.
-          Put them on working memory, inhibition, and reaction speed — not the feed.
-        </p>
+      <div class="attract-copy" id="top">
+        <p class="attract-kicker">36 SHORT GAMES · NO FEED · NO ACCOUNT</p>
+        <h1>Kill time.<br><em>Keep the mind.</em></h1>
+        <p class="attract-line">The old arcade bargain, made honest.</p>
+        <p class="attract-sub">Pick a cartridge. Learn what the mechanic asks of your brain. Play one clean round. Leave when you meant to.</p>
+        <ol class="attract-steps" aria-label="How OmniArcade works">
+          <li><b>01</b><span>CHOOSE<br><small>a game</small></span></li>
+          <li><b>02</b><span>LEARN<br><small>the brain skill</small></span></li>
+          <li><b>03</b><span>PLAY<br><small>one round</small></span></li>
+        </ol>
       </div>
       ${feature ? `
-        <button type="button" class="attract-feature" data-game="${feature.id}" aria-label="Play ${feature.title}">
-          <span class="attract-feature-left">
-            <span class="attract-feature-wing font-mono-hud">${wingLabel} · ${feature.code}</span>
-            <span class="attract-feature-title">${feature.title}</span>
-            <span class="attract-feature-desc">${feature.desc}${feature.paper ? ' · ' + feature.paper : ''} · HI ${high}</span>
-          </span>
-          <span class="attract-feature-cta">INSERT COIN</span>
+        <button type="button" class="attract-feature" data-game="${feature.id}" aria-label="Load ${feature.title}">
+          <span class="attract-feature-ring" aria-hidden="true"></span>
+          <span class="attract-feature-kicker">TODAY'S CARTRIDGE · ${wingLabel}</span>
+          <span class="attract-feature-code">${feature.code}</span>
+          <span class="attract-feature-title">${feature.title}</span>
+          <span class="attract-feature-skill">${guide.label} · ${guide.minutes} · HI ${high}</span>
+          <span class="attract-feature-cta">LOAD GAME</span>
         </button>
       ` : ''}
     `;
@@ -191,10 +202,11 @@ class OmniArcadeApp {
     );
 
     navEl.innerHTML = WINGS.map(w => `
-      <button type="button" class="cabinet-wing ${this.activeWing === w.id ? 'is-active' : ''}"
+      <button type="button" class="cabinet-wing route-${w.id} ${this.activeWing === w.id ? 'is-active' : ''}"
         data-wing="${w.id}" aria-pressed="${this.activeWing === w.id}">
-        <span class="cabinet-wing-label">${w.label}</span>
-        <span class="cabinet-wing-count font-mono-hud">${counts[w.id]}</span>
+        <span class="cabinet-wing-disc">${w.label.slice(0, 1)}</span>
+        <span class="cabinet-wing-copy"><b>${w.label}</b><small>${w.blurb}</small></span>
+        <span class="cabinet-wing-count">${counts[w.id]}</span>
       </button>
     `).join('');
   }
@@ -215,10 +227,10 @@ class OmniArcadeApp {
     if (!gridEl) return;
 
     const filtered = this.filteredGames();
-    gridEl.className = 'cabinet-select';
+    gridEl.className = 'game-library';
 
     if (filtered.length === 0) {
-      gridEl.innerHTML = `<p class="cabinet-empty">Nothing matches. Clear search or pick another wing.</p>`;
+      gridEl.innerHTML = `<p class="cabinet-empty">No cartridge matches. Clear the search or pick another room.</p>`;
       return;
     }
 
@@ -235,21 +247,25 @@ class OmniArcadeApp {
     const showGroupLabels = this.activeWing === 'all' && groups.length > 1;
 
     gridEl.innerHTML = groups.map(({ wing, games }) => `
-      <div class="select-block" data-wing="${wing}">
-        ${showGroupLabels ? `<p class="select-block-label font-mono-hud">${WING_META[wing]?.title || wing}</p>` : ''}
+      <section class="select-block route-${wing}" data-wing="${wing}">
+        <header class="select-block-header">
+          <div><p>ROOM ${String(order.indexOf(wing) + 1).padStart(2, '0')}</p><h2>${WING_META[wing]?.title || wing}</h2></div>
+          <p>${WING_META[wing]?.sub || ''}</p>
+        </header>
         <ul class="select-list" role="listbox" aria-label="${WING_META[wing]?.title || 'Games'}">
           ${games.map(game => this.selectRow(game)).join('')}
         </ul>
-      </div>
+      </section>
     `).join('');
 
     if (this.activeWing === 'all' && !this.searchQuery.trim()) {
       const about = gamesCatalog.find(g => g.id === 'about-dr-non');
       if (about) {
         gridEl.insertAdjacentHTML('beforeend', `
-          <div class="select-block select-block--meta">
+          <section class="select-block select-block--meta route-meta">
+            <header class="select-block-header"><div><p>SIGNAL</p><h2>WHY THIS EXISTS</h2></div><p>The claim, the caveat, and the person behind the floor.</p></header>
             <ul class="select-list">${this.selectRow(about)}</ul>
-          </div>`);
+          </section>`);
       }
     }
 
@@ -278,12 +294,14 @@ class OmniArcadeApp {
   selectRow(game) {
     const high = StorageService.getHighScore(game.id);
     const isFocus = game.id === this.focusId;
+    const guide = getBrainGuide(game);
     return `
       <li class="select-row ${isFocus ? 'is-focus' : ''}" data-game="${game.id}" tabindex="0" role="option" aria-selected="${isFocus}" aria-label="${game.title}">
-        <span class="select-code font-mono-hud">${game.code}</span>
+        <span class="select-card-top"><span class="select-code">${game.code}</span><span class="select-age">${game.age}</span></span>
         <span class="select-name">${game.title}</span>
-        <span class="select-meta font-mono-hud">${game.paper || game.domain}</span>
-        <span class="select-hi font-mono-hud">${high}</span>
+        <span class="select-desc">${game.desc}</span>
+        <span class="select-brain"><small>TRAINS</small>${guide.label}</span>
+        <span class="select-card-bottom"><span>${guide.minutes}</span><span>HI ${high}</span><b>LOAD</b></span>
       </li>`;
   }
 
@@ -326,8 +344,61 @@ class OmniArcadeApp {
     };
 
     this._releaseModalUX = bindModalUX(overlay, closeGame);
-    container._recordScore = (s) => { sessionScore = Math.max(sessionScore, s | 0); };
-    game.renderer(container, closeGame);
+    const guide = getBrainGuide(game);
+    const sourceUrl = game.source || PAPER_LINKS[game.paper];
+    const sourceLabel = game.credit || game.paper;
+
+    const renderBriefing = () => {
+      container.innerHTML = `
+        <article class="brain-briefing route-${game.wing}" aria-labelledby="briefing-title">
+          <header class="briefing-header">
+            <div class="briefing-code">${game.code}</div>
+            <div><p>${game.wing.toUpperCase()} · ${guide.minutes} · ${game.age}</p><h2 id="briefing-title">${game.title}</h2></div>
+            <button class="briefing-close" type="button" aria-label="Close game">CLOSE</button>
+          </header>
+          <div class="briefing-grid">
+            <div class="briefing-primary">
+              <p class="briefing-label">THE BRAIN BRIEFING</p>
+              <h3>${guide.label}</h3>
+              <div class="briefing-step"><b>1</b><div><span>WHAT YOU DO</span><p>${game.desc}</p></div></div>
+              <div class="briefing-step"><b>2</b><div><span>WHAT YOU PRACTISE</span><p>${guide.practice}</p></div></div>
+              <div class="briefing-step"><b>3</b><div><span>WHY IT MATTERS</span><p>${guide.why}</p></div></div>
+            </div>
+            <aside class="briefing-side">
+              <p class="briefing-label">COACH NOTE</p>
+              <blockquote>${guide.tip}</blockquote>
+              <div class="briefing-caveat"><span>HONEST CLAIM</span><p>${TRANSFER_CAVEAT}</p></div>
+              ${sourceUrl ? `<a class="briefing-source" href="${sourceUrl}" target="_blank" rel="noopener">${sourceLabel || 'VIEW SOURCE'}<i></i></a>` : ''}
+              <button class="briefing-play" type="button">START ONE ROUND</button>
+            </aside>
+          </div>
+        </article>`;
+      container.querySelector('.briefing-close').onclick = closeGame;
+      container.querySelector('.briefing-play').onclick = renderGame;
+    };
+
+    const renderGame = () => {
+      container.innerHTML = `
+        <div class="game-session-shell route-${game.wing}">
+          <header class="game-session-bar">
+            <div><b>${game.code}</b><span>${game.title}</span></div>
+            <details>
+              <summary>BRAIN NOTE</summary>
+              <div><b>${guide.label}</b><p>${guide.practice}</p><small>${TRANSFER_CAVEAT}</small></div>
+            </details>
+            <button type="button">EXIT</button>
+          </header>
+          <div class="game-session-stage"></div>
+        </div>`;
+      const stage = container.querySelector('.game-session-stage');
+      const recordScore = (s) => { sessionScore = Math.max(sessionScore, s | 0); };
+      container._recordScore = recordScore;
+      stage._recordScore = recordScore;
+      container.querySelector('.game-session-bar > button').onclick = closeGame;
+      game.renderer(stage, closeGame);
+    };
+
+    renderBriefing();
   }
 
   bindEvents() {
