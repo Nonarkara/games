@@ -1897,10 +1897,8 @@ body {
   height: auto;
   margin: 0;
   overflow-x: hidden;
-  background:
-    linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgba(25,23,18,.035) calc(100% - 1px)) 0 0 / 22px 22px,
-    linear-gradient(transparent 0, transparent calc(100% - 1px), rgba(25,23,18,.035) calc(100% - 1px)) 0 0 / 22px 22px,
-    var(--ax-paper);
+  /* Axiom Play: flat warm paper. No decorative grid gradients. */
+  background: var(--ax-paper);
   color: var(--ax-ink);
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-variant-numeric: tabular-nums;
@@ -2424,6 +2422,216 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   .attract-line { font-size: 17px; }
   .select-list { grid-template-columns: 1fr; }
   .select-row { min-height: 218px; }
+}
+
+/* Tetris / Sudoku / Fifteen / About — Play-mode surfaces */
+.tetris-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  gap: 1px;
+  background: var(--ax-line-2);
+  border-bottom: 1px solid var(--ax-line-2);
+}
+.tetris-stage canvas {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  background: #191712;
+  aspect-ratio: 10 / 20;
+}
+.tetris-pad {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--ax-line-2);
+  align-content: stretch;
+}
+.tetris-pad button {
+  min-height: 72px;
+  border: 0;
+  background: var(--ax-panel);
+  color: var(--ax-ink);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  cursor: pointer;
+}
+.tetris-pad button:hover { background: #f0eee8; }
+.tetris-pad #t-drop { background: var(--ax-red); color: #fff; grid-column: 1 / -1; }
+.tetris-pad #t-drop:hover { background: #8e2924; }
+.oss-game__controls > button {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  letter-spacing: .12em;
+  cursor: pointer;
+}
+
+.sudoku-board,
+.fifteen-board {
+  --n: 4;
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 1px;
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 22px;
+  background: var(--ax-line-2);
+  border-bottom: 1px solid var(--ax-line-2);
+}
+.sudoku-cell,
+.fifteen-tile {
+  aspect-ratio: 1;
+  min-height: 56px;
+  border: 0;
+  background: var(--ax-panel);
+  color: var(--ax-ink);
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sudoku-cell.is-fixed { background: #eeece5; color: var(--ax-ink-2); cursor: default; }
+.sudoku-cell.is-selected { outline: 2px solid var(--ax-red); outline-offset: -2px; }
+.sudoku-cell.is-wrong { color: var(--ax-red); }
+.sudoku-pad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 0 22px 22px;
+  background: var(--ax-paper);
+}
+.sudoku-digit {
+  min-width: 56px;
+  min-height: 48px;
+  flex: 1 1 56px;
+  border: 1px solid var(--ax-line-2);
+  background: var(--ax-panel);
+  color: var(--ax-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sudoku-digit:hover { background: #f0eee8; }
+.fifteen-tile.is-blank {
+  background: #eeece5;
+  color: transparent;
+  cursor: default;
+}
+.fifteen-tile:not(.is-blank):hover { background: #f0eee8; }
+
+.about-panel {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--ax-panel);
+  border: 1px solid var(--ax-line-2);
+  color: var(--ax-ink);
+}
+.about-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid var(--ax-line);
+}
+.about-head p {
+  margin: 0 0 6px;
+  color: var(--ax-ink-3);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .17em;
+}
+.about-head h2 {
+  margin: 0;
+  font-family: 'Spectral', Georgia, serif;
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -.03em;
+}
+.about-close {
+  min-height: 44px;
+  min-width: 72px;
+  border: 1px solid var(--ax-line-2);
+  background: transparent;
+  color: var(--ax-ink-2);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  cursor: pointer;
+}
+.about-close:hover { background: #f0eee8; color: var(--ax-ink); }
+.about-figure { margin: 0; border-bottom: 1px solid var(--ax-line); }
+.about-figure img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+.about-figure figcaption {
+  padding: 10px 22px 12px;
+  color: var(--ax-ink-3);
+  font-size: 11px;
+  letter-spacing: .04em;
+}
+.about-body {
+  padding: 28px 22px 36px;
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.about-body p { margin: 0 0 1.1em; max-width: 58ch; color: var(--ax-ink); }
+.about-close-line { color: var(--ax-red) !important; font-weight: 500; }
+
+.edge-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--ax-line-2);
+  border-top: 0;
+  background: var(--ax-line-2);
+}
+.edge-strip > * { background: var(--ax-panel); padding: 22px 20px; }
+.edge-strip > div:first-child { background: var(--ax-blue); color: #fff; }
+.edge-strip p { margin: 0; }
+.edge-strip .edge-kicker {
+  color: rgba(255,255,255,.55);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .17em;
+}
+.edge-strip h2 {
+  margin: 10px 0 0;
+  max-width: 14ch;
+  font-family: 'Spectral', Georgia, serif;
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.05;
+  font-weight: 500;
+}
+.edge-strip article small {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ax-red);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .14em;
+}
+.edge-strip article p {
+  color: var(--ax-ink-2);
+  font-family: 'Spectral', Georgia, serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .tetris-stage { grid-template-columns: 1fr; }
+  .tetris-stage canvas { max-width: none; margin: 0 auto; }
+  .edge-strip { grid-template-columns: 1fr 1fr; }
+  .edge-strip > div:first-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 720px) {
+  .edge-strip { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

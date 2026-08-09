@@ -1,0 +1,325 @@
+/* ============================================================
+   AXIOM DESIGN CORE — Design Tokens v2.0
+   axiom.nonarkara.org
+
+   Import this file first in any Axiom project:
+     <link rel="stylesheet" href="tokens.css">
+
+   Rules enforced here:
+   • Warm neutrals only — no cool blue-grey
+   • Pure #000 and pure #fff are banned
+   • Two signal colors: --blue (identity, enclosed) --red (Move, bare)
+   • Green retired — absence of red is the good news
+   ============================================================ */
+
+/* Google Fonts — Inter + Spectral */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+
+  /* ── §1 Foundation ──────────────────────────────────────── */
+  --paper:  #f6f5f2;   /* page ground — warm off-white, never #fff      */
+  --panel:  #ffffff;   /* cells / instrument faces                       */
+  --ink:    #191712;   /* primary text, bars, active — warm near-black   */
+  --ink-2:  #6f6c63;   /* secondary text — AA on --paper                 */
+  --ink-3:  #a9a59a;   /* tertiary, labels, meta                         */
+  --line:   #e7e5dd;   /* hairlines, grid gaps, inactive tracks          */
+  --line-2: #d2cfc5;   /* stronger borders, structural dividers          */
+
+  /* ── §2 Signal ──────────────────────────────────────────── */
+  --blue: #26243F;     /* THE LAW — identity, structure. Enclosed only.  */
+  --red:  #A8322B;     /* THE MOVE — live, critical, decision. Bare.     */
+  /* Green retired. Normal/positive needs no color.
+     The absence of red is the good news.                                */
+
+  /* ── §3 Neutral chart ramp (3–5 categories, never hues) ── */
+  --fill-1: #8f8b80;
+  --fill-2: #bdb9ad;
+  --fill-3: #d8d4ca;
+
+  /* ── §4 Trunk subsystem (NYCTA) ────────────────────────── */
+  /* Play mode and multi-board dashboards (5+ parallel boards) only.    */
+  /* Never as decoration on the main identity.                           */
+  --rt-blue:   #0039A6;  /* glyph: #fff  */
+  --rt-orange: #FF6319;  /* glyph: #fff  */
+  --rt-green:  #00853F;  /* glyph: #fff  */
+  --rt-red:    #EE352E;  /* glyph: #fff  */
+  --rt-purple: #B933AD;  /* glyph: #fff  */
+  --rt-yellow: #FCCC0A;  /* glyph: #191712 — white on yellow fails */
+  --rt-grey:   #6D6E71;  /* glyph: #fff  */
+  --rt-brown:  #996633;  /* glyph: #fff  */
+
+  /* ── §5 Typography ──────────────────────────────────────── */
+  --font-sans:  'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-serif: 'Spectral', Georgia, 'Times New Roman', serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* Type scale — do not improvise outside these */
+  --t-hero:    clamp(30px, 5vw, 38px); /* hero metric / page headline   */
+  --t-big:     clamp(19px, 3.4vw, 24px); /* section metric / big value */
+  --t-stat:    20px;   /* stat value in a cell                          */
+  --t-body:    13px;   /* body / row value                              */
+  --t-label:   11px;   /* section header label                          */
+  --t-control: 11px;   /* control / nav                                 */
+  --t-micro:   9px;    /* micro-label / meta                            */
+
+  /* Weight ceiling: 600 for data. Restraint reads as confidence. */
+
+  /* ── §6 Spacing (base unit ~11px and its multiples) ─────── */
+  --gap-2:  2px;
+  --gap-6:  6px;
+  --gap-11: 11px;
+  --gap-13: 13px;
+  --gap-16: 16px;
+  --gap-22: 22px;
+  --gap-44: 44px;
+  --gap-88: 88px;
+
+  /* Cell padding */
+  --cell-pad: 13px 16px;  /* default stat cell */
+
+  /* ── §7 Containers ──────────────────────────────────────── */
+  --max-w-tool: 1360px;   /* wide tool / dashboard                    */
+  --max-w-app:   960px;   /* focused app                              */
+  --max-w-doc:   720px;   /* reading / document                       */
+  --outer-pad:    22px;   /* outer page padding                       */
+
+  /* ── §8 Motion (v2.1 — craft pass, see AXIOM-DNA.md §13) ─── */
+  /* Sourced from Emil Kowalski's design-eng skill + impeccable's
+     motion reference. Same restraint, real curves instead of the
+     browser default. "ease" and one flat duration for everything
+     is itself a templated tell — see §13.4.                       */
+  --ease-out:      cubic-bezier(0.23, 1, 0.32, 1);   /* entrances, reveals   */
+  --ease-in-out:   cubic-bezier(0.77, 0, 0.175, 1);  /* on-screen movement   */
+  --ease-hover:    ease;                              /* hover/color shift    */
+  /* Bounce/elastic curves remain hard-banned — §20.                        */
+
+  --t-press:  100ms;   /* button/control press feedback   */
+  --t-state:  150ms;   /* hover, toggle, small state change (was 120ms)     */
+  --t-layout: 250ms;   /* panel/drawer/expand — layout-level change         */
+
+  /* Legacy alias — kept so existing components using --ease/--t-state
+     keep working; new components should reach for the named tokens above. */
+  --ease: var(--ease-hover);
+}
+
+/* ── Reset ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ── Base typography ──────────────────────────────────────── */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: 1.42;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Selection ────────────────────────────────────────────── */
+::selection {
+  background: var(--red);
+  color: #fff;
+}
+
+/* ── Focus ────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 1px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* ── Live pulse — the only sanctioned continuous animation ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .2; }
+}
+
+/* ── Reduced motion — §19 promised this; now it is actually true ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Utility: wrap ────────────────────────────────────────── */
+.wrap {
+  max-width: var(--max-w-tool);
+  margin: 0 auto;
+  padding: 0 var(--outer-pad);
+}
+
+.wrap--app { max-width: var(--max-w-app); }
+.wrap--doc { max-width: var(--max-w-doc); }
+
+/* ── Utility: hairline grid ────────────────────────────────── */
+/* background is the line color; gap:1px; white cells           */
+.grid-hair {
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.grid-hair > * {
+  background: var(--panel);
+}
+
+/* ── Utility: section header ──────────────────────────────── */
+.s-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 7px;
+  margin-bottom: 14px;
+}
+
+.s-head__name {
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.s-head__meta {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+
+/* ── Utility: stat cell ───────────────────────────────────── */
+.stat-lbl {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.stat-val {
+  font-size: var(--t-stat);
+  font-weight: 600;
+  margin-top: 4px;
+  line-height: 1;
+}
+
+.stat-sub {
+  font-size: 10px;
+  color: var(--ink-3);
+  margin-top: 1px;
+}
+
+/* ── Utility: data row ────────────────────────────────────── */
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  gap: 12px;
+}
+
+.row:last-child { border-bottom: 0; }
+.row__k { font-size: 12px; font-weight: 500; }
+.row__v { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.row__d { font-size: 11px; font-weight: 600; color: var(--red); width: 54px; text-align: right; }
+
+/* ── Utility: buttons ─────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  transition: background var(--t-state) var(--ease),
+              color var(--t-state) var(--ease),
+              border-color var(--t-state) var(--ease);
+}
+
+.btn--primary  { background: var(--ink);  color: var(--paper); border-color: var(--ink); }
+.btn--critical { background: var(--red);  color: #fff;         border-color: var(--red); }
+.btn--ghost    { background: transparent; color: var(--ink);   }
+
+.btn--primary:hover  { opacity: .88; }
+.btn--critical:hover { opacity: .88; }
+.btn--ghost:hover    { border-color: var(--blue); color: var(--blue); }
+
+/* Press feedback — the control must feel heard. Not decoration: the
+   Lined Glass principle applies to touch, not just to read-state.  */
+.btn {
+  transition: background var(--t-state) var(--ease-hover),
+              color var(--t-state) var(--ease-hover),
+              border-color var(--t-state) var(--ease-hover),
+              transform var(--t-press) var(--ease-out);
+}
+.btn:active { transform: scale(0.97); }
+
+/* ── Utility: origin-aware overlay (popover / tooltip) ───────
+   Scale in FROM the trigger, never from the element's own center —
+   center-scale is correct only for true modals (§ modal note below). */
+.overlay-pop {
+  transform-origin: var(--overlay-origin, center);
+  transition: transform var(--t-state) var(--ease-out),
+              opacity var(--t-state) var(--ease-out);
+}
+.overlay-pop[data-state="closed"] { opacity: 0; transform: scale(0.96); }
+/* Modals stay centered — do not set --overlay-origin on .overlay-modal. */
+
+/* ── Utility: live dot ────────────────────────────────────── */
+.dot-live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  display: inline-block;
+  animation: blink 2.4s ease-in-out infinite;
+}
+
+/* ── Utility: disc atom ───────────────────────────────────── */
+.disc {
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.disc--sm  { width: 20px; height: 20px; font-size: 10px; background: var(--blue); }
+.disc--md  { width: 34px; height: 34px; font-size: 16px; background: var(--blue); }
+.disc--lg  { width: 64px; height: 64px; font-size: 28px; background: var(--blue); }
+.disc--hub { background: var(--ink); }  /* home / hub — black disc */
+
+/* ── Utility: bar / meter (Lined Glass) ───────────────────── */
+.bar {
+  height: 6px;
+  background: var(--line);
+  position: relative;
+}
+
+.bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--ink);
+}
+
+.bar--red .bar__fill  { background: var(--red); }
+.bar--blue .bar__fill { background: var(--blue); }

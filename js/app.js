@@ -14,13 +14,14 @@ import { renderFlappyBird, renderMinesweeper } from './games/casualArcade.js';
 import { renderTriviaMaster, renderBlackjack } from './games/adultMind.js';
 import { renderAIGameStudio } from './games/aiGameStudio.js';
 import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide2048 } from './games/curatedGames.js';
-import { renderArcadeBreakout, renderArcadePong } from './games/openSourceGames.js';
+import { renderArcadeBreakout, renderArcadePong, renderSudokuSprint, renderFifteenPuzzle } from './games/openSourceGames.js';
 import { renderStroop, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
 import { renderNonTrivial } from './games/labsGames.js';
 import { renderBlowIntoTheCartridge } from './games/nineties.js';
 import {
   renderDualNBack, renderSchulteTable, renderAimTrainer,
-  renderGoNoGo, renderDigitSpan, renderMentalMath, renderVisualSearch
+  renderGoNoGo, renderDigitSpan, renderMentalMath, renderVisualSearch,
+  renderCorsiBlocks, renderFlanker
 } from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
 import { bindModalUX, GameSession } from './ui.js';
@@ -52,6 +53,8 @@ const gamesCatalog = [
   { id: 'simon-seq', code: 'SIM', title: 'Simon Sequence', wing: 'train', category: 'memory-focus', domain: 'Sequence memory', age: 'All', desc: 'Watch the pattern grow, then play it back.', tags: ['Memory', 'Sequence'], renderer: renderSimon },
   { id: 'schulte-table', code: 'SCH', title: 'Schulte Table', wing: 'train', category: 'memory-focus', domain: 'Attention field', age: 'Teen+', desc: 'Tap 1→25. Eyes on center; peripheral vision does the finding.', tags: ['Attention', 'Peripheral'], renderer: renderSchulteTable },
   { id: 'visual-search', code: 'VSR', title: 'Visual Search', wing: 'train', category: 'memory-focus', domain: 'Selective attention', age: 'Teen+', desc: 'Find the odd rotated letter in growing clutter.', paper: 'Green 2003', tags: ['Attention', 'Search'], renderer: renderVisualSearch },
+  { id: 'corsi-blocks', code: 'CRS', title: 'Corsi Blocks', wing: 'train', category: 'memory-focus', domain: 'Spatial span', age: 'Teen+', desc: 'Watch the path light up, then tap it back. Span grows until it breaks.', paper: 'Corsi 1972', tags: ['Spatial', 'Working memory'], renderer: renderCorsiBlocks },
+  { id: 'flanker', code: 'FLK', title: 'Flanker', wing: 'train', category: 'memory-focus', domain: 'Selective attention', age: 'Teen+', desc: 'Report the center arrow. Ignore the flanks — especially when they disagree.', paper: 'Eriksen 1974', tags: ['Attention', 'Interference'], renderer: renderFlanker },
   { id: 'aim-trainer', code: 'AIM', title: 'Aim Trainer', wing: 'train', category: 'skills', domain: 'Hand-eye', age: 'All', desc: 'Thirty seconds of targets. Average reaction time stays on the board.', paper: 'Dye 2009', tags: ['Reaction', 'Precision'], renderer: renderAimTrainer },
   { id: 'mental-math', code: 'MMX', title: 'Mental Math', wing: 'train', category: 'math-logic', domain: 'Fluency', age: '10+', desc: '45-second arithmetic sprint. Speed under accuracy pressure.', tags: ['Arithmetic', 'Speed'], renderer: renderMentalMath },
   { id: 'type-rush', code: 'TYP', title: 'Type Rush', wing: 'train', category: 'skills', domain: 'Keyboard fluency', age: '8+', desc: '30-second typing drill with live WPM and accuracy.', tags: ['Typing', 'WPM'], renderer: renderTypeRush },
@@ -67,6 +70,8 @@ const gamesCatalog = [
   { id: 'flappy-bird', code: 'FLP', title: 'Flappy Cyber Bird', wing: 'arcade', category: 'casual-friv', domain: 'Timing', age: 'All', desc: 'Tap-to-fly through pipes. Precision over panic.', tags: ['Casual', 'Timing'], renderer: renderFlappyBird },
   { id: 'minesweeper', code: 'MNE', title: 'Minesweeper Pro', wing: 'arcade', category: 'casual-friv', domain: 'Logic', age: '10+', desc: 'Flag mines, read the numbers, clear the grid.', tags: ['Logic', 'Grid'], renderer: renderMinesweeper },
   { id: 'slide-2048', code: '204', title: 'Slide 2048', wing: 'arcade', category: 'casual-friv', domain: 'Planning', age: 'All', desc: 'Merge matching tiles. Reach 2048 without boxing yourself in.', tags: ['Strategy', 'Merge'], renderer: renderSlide2048 },
+  { id: 'sudoku-sprint', code: 'SDK', title: 'Sudoku Sprint', wing: 'learn', category: 'math-logic', domain: 'Constraint logic', age: '10+', desc: 'Fill a small board under a clock. Every digit must earn its cell.', tags: ['Logic', 'Open source'], credit: 'robatron/sudoku.js · MIT', source: 'https://github.com/robatron/sudoku.js', renderer: renderSudokuSprint },
+  { id: 'fifteen-puzzle', code: '15P', title: 'Fifteen Puzzle', wing: 'learn', category: 'math-logic', domain: 'Spatial planning', age: '8+', desc: 'Slide tiles into order. Every move is a plan under a shrinking empty cell.', tags: ['Planning', 'Open source'], credit: 'imshubhamsingh/15-puzzle · MIT', source: 'https://github.com/imshubhamsingh/15-puzzle', renderer: renderFifteenPuzzle },
   { id: 'cyber-blackjack', code: 'BJ21', title: 'Cyber Blackjack 21', wing: 'arcade', category: 'adult-mind', domain: 'Cards', age: '18+', desc: 'Hit, stand, manage the bankroll against the dealer.', tags: ['Cards', 'Casino'], renderer: renderBlackjack },
   { id: 'trivia-master', code: 'TRV', title: 'Trivia Master', wing: 'arcade', category: 'adult-mind', domain: 'Knowledge', age: 'Teen+', desc: 'History, sci-fi, science, gaming culture.', tags: ['Trivia', 'Quiz'], renderer: renderTriviaMaster },
   { id: 'pattern-breaker', code: 'PTN', title: 'Pattern Breaker', wing: 'arcade', category: 'adult-mind', domain: 'Deduction', age: 'Teen+', desc: 'Crack a hidden 4-node path with Mastermind-style hints.', tags: ['Logic', 'Deduction'], renderer: renderPatternBreaker },
@@ -89,7 +94,7 @@ const gamesCatalog = [
   { id: 'blow-cartridge', code: 'BIC', title: 'Blow Into The Cartridge', wing: 'labs', category: 'labs', domain: 'Party host', age: 'Party', desc: '240 questions, six 90s/00s decks. One screen, everyone shouts, score on paper.', tags: ['Party', '90s'], renderer: renderBlowIntoTheCartridge },
 
   // ── META ───────────────────────────────────────────────────────────────
-  { id: 'about-dr-non', code: 'WHY', title: 'Why This Exists', wing: 'meta', category: 'about', domain: 'Signal', age: 'Everyone', desc: 'Dr Non, a lifetime of games, and the case against killing time.', tags: ['Story'], renderer: renderAbout }
+  { id: 'about-dr-non', code: 'WHY', title: 'About Dr Non', wing: 'meta', category: 'about', domain: 'Signal', age: 'Everyone', desc: 'MIT Wii photo, a life of games, and why honesty is the product.', tags: ['Story'], renderer: renderAbout }
 ];
 
 class OmniArcadeApp {
@@ -162,19 +167,13 @@ class OmniArcadeApp {
 
     el.innerHTML = `
       <div class="attract-copy" id="top">
-        <p class="attract-kicker">36 SHORT GAMES · NO FEED · NO ACCOUNT</p>
+        <p class="attract-kicker">${this.playableCount()} CARTRIDGES · BRAIN BRIEFING ON EVERY TITLE · NO ADS</p>
         <h1>Kill time.<br><em>Keep the mind.</em></h1>
-        <p class="attract-line">The old arcade bargain, made honest.</p>
-        <p class="attract-sub">Pick a cartridge. Learn what the mechanic asks of your brain. Play one clean round. Leave when you meant to.</p>
-        <ol class="attract-steps" aria-label="How OmniArcade works">
-          <li><b>01</b><span>CHOOSE<br><small>a game</small></span></li>
-          <li><b>02</b><span>LEARN<br><small>the brain skill</small></span></li>
-          <li><b>03</b><span>PLAY<br><small>one round</small></span></li>
-        </ol>
+        <p class="attract-line">Other portals sell distraction. This floor sells honest practice.</p>
+        <p class="attract-sub">Every cartridge opens with what it actually trains, how long a round takes, and the Simons caveat — far transfer is contested. Near transfer is real. Labs are personal. Scores stay on this device.</p>
       </div>
       ${feature ? `
         <button type="button" class="attract-feature" data-game="${feature.id}" aria-label="Load ${feature.title}">
-          <span class="attract-feature-ring" aria-hidden="true"></span>
           <span class="attract-feature-kicker">TODAY'S CARTRIDGE · ${wingLabel}</span>
           <span class="attract-feature-code">${feature.code}</span>
           <span class="attract-feature-title">${feature.title}</span>
@@ -347,6 +346,12 @@ class OmniArcadeApp {
     const guide = getBrainGuide(game);
     const sourceUrl = game.source || PAPER_LINKS[game.paper];
     const sourceLabel = game.credit || game.paper;
+
+    // About is a reading surface, not a drill — skip the briefing gate.
+    if (game.id === 'about-dr-non') {
+      game.renderer(container, closeGame);
+      return;
+    }
 
     const renderBriefing = () => {
       container.innerHTML = `

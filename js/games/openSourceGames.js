@@ -3,6 +3,8 @@
  *
  * Breakout: adapted from Ania Kubow's `kubowania/breakout` (MIT).
  * Pong: adapted from Jake Gordon's `jakesgordon/javascript-pong` (MIT).
+ * Sudoku Sprint: puzzle set + play loop after studying `robatron/sudoku.js` (MIT).
+ * Fifteen Puzzle: play loop after studying `imshubhamsingh/15-puzzle` (MIT).
  *
  * The renderers and mobile controls are original to OmniArcade. The sources
  * are credited in-game and in CREDITS.md as required by the Ongard Move.
@@ -362,4 +364,254 @@ export function renderArcadePong(container, onClose) {
   };
 
   draw();
+}
+
+/* ===========================================================================
+ * SUDOKU SPRINT — small boards, clock, one clean round
+ * Puzzle construction studied from robatron/sudoku.js (MIT). Boards below
+ * are authored for OmniArcade; the solver library is not bundled.
+ * ======================================================================== */
+const SUDOKU_BOARDS = [
+  {
+    size: 4,
+    puzzle: [
+      1, 0, 0, 4,
+      0, 0, 1, 0,
+      0, 3, 0, 0,
+      2, 0, 0, 3
+    ],
+    solution: [
+      1, 2, 3, 4,
+      3, 4, 1, 2,
+      4, 3, 2, 1,
+      2, 1, 4, 3
+    ]
+  },
+  {
+    size: 4,
+    puzzle: [
+      0, 2, 0, 0,
+      0, 0, 0, 1,
+      4, 0, 0, 0,
+      0, 0, 3, 0
+    ],
+    solution: [
+      1, 2, 4, 3,
+      3, 4, 2, 1,
+      4, 3, 1, 2,
+      2, 1, 3, 4
+    ]
+  },
+  {
+    size: 4,
+    puzzle: [
+      0, 0, 2, 0,
+      3, 0, 0, 0,
+      0, 0, 0, 1,
+      0, 4, 0, 0
+    ],
+    solution: [
+      4, 1, 2, 3,
+      3, 2, 1, 4,
+      2, 3, 4, 1,
+      1, 4, 3, 2
+    ]
+  }
+];
+
+export function renderSudokuSprint(container, onClose) {
+  const credit = { name: 'ROBATRON / SUDOKU.JS', url: 'https://github.com/robatron/sudoku.js' };
+  const board = SUDOKU_BOARDS[Math.floor(Math.random() * SUDOKU_BOARDS.length)];
+  const { size, puzzle, solution } = board;
+  const cells = puzzle.slice();
+  const fixed = puzzle.map(v => v !== 0);
+  let selected = -1;
+  let score = 0;
+  let high = StorageService.getHighScore('sudoku-sprint');
+  let startedAt = performance.now();
+  let mistakes = 0;
+
+  container.innerHTML = `
+    <section class="oss-game" aria-label="Sudoku Sprint">
+      <header class="oss-game__header">
+        <div>
+          <p class="oss-game__eyebrow">OPEN-SOURCE PUZZLE STUDY</p>
+          <h2>SUDOKU SPRINT</h2>
+          <p>${size}×${size} board. Fill every cell. No guessing required.</p>
+        </div>
+        <div class="oss-game__score" aria-live="polite">
+          <span>EMPTY <b id="su-empty">${cells.filter(v => !v).length}</b></span>
+          <span>HIGH <b id="su-high">${high}</b></span>
+        </div>
+      </header>
+      <div class="sudoku-board" style="--n:${size}" role="grid" aria-label="Sudoku grid">
+        ${cells.map((v, i) => `
+          <button type="button" class="sudoku-cell ${fixed[i] ? 'is-fixed' : ''}" data-i="${i}" aria-label="cell ${i + 1}">
+            ${v || ''}
+          </button>`).join('')}
+      </div>
+      <div class="sudoku-pad" role="group" aria-label="Digits">
+        ${Array.from({ length: size }, (_, n) => `<button type="button" class="sudoku-digit" data-n="${n + 1}">${n + 1}</button>`).join('')}
+        <button type="button" class="sudoku-digit" data-n="0">CLR</button>
+      </div>
+      <div class="oss-game__controls">
+        <span>TAP A CELL, THEN A DIGIT</span>
+        <a href="${credit.url}" target="_blank" rel="noopener">SOURCE STUDY: ${credit.name} · MIT</a>
+      </div>
+    </section>`;
+
+  const emptyEl = container.querySelector('#su-empty');
+
+  function paint() {
+    container.querySelectorAll('.sudoku-cell').forEach((btn, i) => {
+      btn.textContent = cells[i] || '';
+      btn.classList.toggle('is-selected', i === selected);
+      btn.classList.toggle('is-wrong', !fixed[i] && cells[i] !== 0 && cells[i] !== solution[i]);
+    });
+    emptyEl.textContent = cells.filter(v => !v).length;
+  }
+
+  function place(n) {
+    if (selected < 0 || fixed[selected]) return;
+    cells[selected] = n;
+    if (n !== 0 && n !== solution[selected]) {
+      mistakes++;
+      soundFx.playHit();
+    } else if (n !== 0) {
+      soundFx.playClick();
+    }
+    paint();
+    if (cells.every((v, i) => v === solution[i])) {
+      const secs = (performance.now() - startedAt) / 1000;
+      score = Math.max(50, Math.round(1200 - secs * 8 - mistakes * 40));
+      high = Math.max(high, score);
+      showResult({
+        container,
+        title: mistakes === 0 ? 'CLEAN GRID' : 'SOLVED',
+        message: `${secs.toFixed(1)}s · ${mistakes} mistake${mistakes === 1 ? '' : 's'}. Constraint satisfaction under a clock.`,
+        score,
+        gameId: 'sudoku-sprint',
+        tone: mistakes === 0 ? 'win' : 'over',
+        onRestart: () => renderSudokuSprint(container, onClose),
+        onClose
+      });
+    }
+  }
+
+  container.querySelectorAll('.sudoku-cell').forEach(btn => {
+    btn.onclick = () => {
+      selected = parseInt(btn.dataset.i, 10);
+      paint();
+    };
+  });
+  container.querySelectorAll('.sudoku-digit').forEach(btn => {
+    btn.onclick = () => place(parseInt(btn.dataset.n, 10));
+  });
+  paint();
+}
+
+/** Count inversions on the 15-puzzle permutation (blank excluded). Even = solvable. */
+export function fifteenSolvable(order) {
+  let inv = 0;
+  for (let i = 0; i < order.length; i++) {
+    if (order[i] === 0) continue;
+    for (let j = i + 1; j < order.length; j++) {
+      if (order[j] !== 0 && order[i] > order[j]) inv++;
+    }
+  }
+  const blankRowFromBottom = 4 - Math.floor(order.indexOf(0) / 4);
+  return blankRowFromBottom % 2 === 0 ? inv % 2 === 1 : inv % 2 === 0;
+}
+
+function shuffleFifteen() {
+  const order = Array.from({ length: 16 }, (_, i) => i);
+  do {
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+  } while (!fifteenSolvable(order) || order.every((v, i) => v === ((i + 1) % 16)));
+  return order;
+}
+
+export function renderFifteenPuzzle(container, onClose) {
+  const credit = { name: 'IMSHUBHAMSINGH / 15-PUZZLE', url: 'https://github.com/imshubhamsingh/15-puzzle' };
+  let tiles = shuffleFifteen();
+  let moves = 0;
+  let high = StorageService.getHighScore('fifteen-puzzle');
+  let startedAt = performance.now();
+
+  container.innerHTML = `
+    <section class="oss-game" aria-label="Fifteen Puzzle">
+      <header class="oss-game__header">
+        <div>
+          <p class="oss-game__eyebrow">OPEN-SOURCE PUZZLE STUDY</p>
+          <h2>FIFTEEN PUZZLE</h2>
+          <p>Slide numbered tiles into order. Only the blank cell moves.</p>
+        </div>
+        <div class="oss-game__score" aria-live="polite">
+          <span>MOVES <b id="fp-moves">0</b></span>
+          <span>BEST <b id="fp-high">${high || '—'}</b></span>
+        </div>
+      </header>
+      <div class="fifteen-board" role="grid" aria-label="Fifteen puzzle">
+        ${tiles.map((v, i) => `
+          <button type="button" class="fifteen-tile ${v === 0 ? 'is-blank' : ''}" data-i="${i}" aria-label="${v === 0 ? 'blank' : `tile ${v}`}">
+            ${v || ''}
+          </button>`).join('')}
+      </div>
+      <div class="oss-game__controls">
+        <button type="button" id="fp-reshuffle">RESHUFFLE</button>
+        <a href="${credit.url}" target="_blank" rel="noopener">SOURCE STUDY: ${credit.name} · MIT</a>
+      </div>
+    </section>`;
+
+  const movesEl = container.querySelector('#fp-moves');
+
+  function paint() {
+    container.querySelectorAll('.fifteen-tile').forEach((btn, i) => {
+      const v = tiles[i];
+      btn.textContent = v || '';
+      btn.classList.toggle('is-blank', v === 0);
+      btn.setAttribute('aria-label', v === 0 ? 'blank' : `tile ${v}`);
+    });
+    movesEl.textContent = moves;
+  }
+
+  function tryMove(i) {
+    const blank = tiles.indexOf(0);
+    const br = Math.floor(blank / 4), bc = blank % 4;
+    const r = Math.floor(i / 4), c = i % 4;
+    if (Math.abs(br - r) + Math.abs(bc - c) !== 1) return;
+    [tiles[blank], tiles[i]] = [tiles[i], tiles[blank]];
+    moves++;
+    soundFx.playClick();
+    paint();
+    if (tiles.every((v, idx) => v === ((idx + 1) % 16))) {
+      const secs = (performance.now() - startedAt) / 1000;
+      const score = Math.max(50, Math.round(2000 - moves * 12 - secs * 4));
+      high = Math.max(high, score);
+      showResult({
+        container,
+        title: moves <= 80 ? 'CLEAN PATH' : 'ORDER RESTORED',
+        message: `${moves} moves · ${secs.toFixed(1)}s. Spatial planning under one empty cell.`,
+        score,
+        gameId: 'fifteen-puzzle',
+        tone: moves <= 80 ? 'win' : 'over',
+        onRestart: () => renderFifteenPuzzle(container, onClose),
+        onClose
+      });
+    }
+  }
+
+  container.querySelectorAll('.fifteen-tile').forEach(btn => {
+    btn.onclick = () => tryMove(parseInt(btn.dataset.i, 10));
+  });
+  container.querySelector('#fp-reshuffle').onclick = () => {
+    tiles = shuffleFifteen();
+    moves = 0;
+    startedAt = performance.now();
+    paint();
+  };
+  paint();
 }

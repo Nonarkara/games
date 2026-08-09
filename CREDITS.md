@@ -8,6 +8,8 @@ OmniArcade uses original vanilla-JavaScript renderers inside its own game lifecy
 |---|---|---|---|---|
 | Breakout 1976 | [kubowania/breakout](https://github.com/kubowania/breakout) | Ania Kubow | MIT | Rebuilt for canvas scaling, touch/keyboard input, rebound control, scoring, lifecycle cleanup, and the Axiom learning layer. |
 | Pong 1972 | [jakesgordon/javascript-pong](https://github.com/jakesgordon/javascript-pong) | Jake Gordon | MIT | Rebuilt as a responsive single-player match with pointer controls, adaptive ball speed, scoring, lifecycle cleanup, and the Axiom learning layer. |
+| Sudoku Sprint | [robatron/sudoku.js](https://github.com/robatron/sudoku.js) | Rob Olson | MIT | Puzzle study; OmniArcade boards and UI are original. Library not bundled. |
+| Fifteen Puzzle | [imshubhamsingh/15-puzzle](https://github.com/imshubhamsingh/15-puzzle) | Shubham Singh | MIT | Solvability / slide study; OmniArcade board, scoring, and UI are original. |
 
 ## Existing mechanic studies
 

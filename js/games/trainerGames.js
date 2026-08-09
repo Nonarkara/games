@@ -8,6 +8,8 @@
  *   Digit Span      → Miller 1956 / Baddeley working-memory capacity
  *   Mental Math     → arithmetic fluency under time pressure
  *   Visual Search   → Green & Bavelier selective attention paradigm
+ *   Corsi Blocks    → visuospatial working memory (Corsi 1972)
+ *   Flanker         → Eriksen selective attention / interference
  */
 import { soundFx } from '../audio.js';
 import { ScopedKeyboard, showResult } from '../ui.js';
@@ -773,5 +775,226 @@ export function renderVisualSearch(container, onClose) {
     }
 
     paintRound();
+  }
+}
+
+/* ===========================================================================
+ * 8. CORSI BLOCKS — tap the sequence in order (visuospatial span)
+ * ======================================================================== */
+export function renderCorsiBlocks(container, onClose) {
+  start();
+
+  function start() {
+    let span = 3, score = 0, lives = 3, phase = 'idle';
+    let sequence = [], step = 0;
+
+    const FRAME = 'relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud';
+
+    container.innerHTML = `
+      <div class="${FRAME}">
+        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+          <div>
+            <h2 class="text-2xl font-black text-amber-400 tracking-wider">CORSI BLOCKS</h2>
+            <p class="text-[10px] text-amber-500/80 uppercase">Visuospatial working memory · Corsi 1972</p>
+          </div>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        </div>
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
+          Watch the blocks light up. Tap them back in the same order. Span grows on success.
+        </div>
+        <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div>SPAN <span id="cb-span" class="text-amber-400 text-base">3</span></div>
+          <div>SCORE <span id="cb-score" class="text-white">0</span></div>
+          <div>LIVES <span id="cb-lives" class="text-white">3</span></div>
+        </div>
+        <div id="cb-status" class="text-center text-xs text-amber-500/80 uppercase mb-3 h-5">WATCH</div>
+        <div class="grid grid-cols-3 gap-2 max-w-[280px] mx-auto">
+          ${Array.from({ length: 9 }, (_, i) =>
+            `<button class="cb-cell aspect-square min-h-[56px] bg-zinc-900 border border-amber-500/30" data-i="${i}" aria-label="block ${i + 1}"></button>`
+          ).join('')}
+        </div>
+      </div>
+    `;
+
+    const cells = [...container.querySelectorAll('.cb-cell')];
+    const status = container.querySelector('#cb-status');
+    const spanEl = container.querySelector('#cb-span');
+    const scoreEl = container.querySelector('#cb-score');
+    const livesEl = container.querySelector('#cb-lives');
+
+    function flash(i, on) {
+      cells[i].classList.toggle('bg-amber-500', on);
+      cells[i].classList.toggle('bg-zinc-900', !on);
+    }
+
+    function playSequence() {
+      phase = 'show';
+      status.textContent = 'WATCH';
+      sequence = [];
+      const pool = Array.from({ length: 9 }, (_, i) => i);
+      for (let i = 0; i < span; i++) {
+        const pick = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+        sequence.push(pick);
+      }
+      let t = 0;
+      const run = () => {
+        if (t > 0) flash(sequence[t - 1], false);
+        if (t >= sequence.length) {
+          phase = 'input';
+          step = 0;
+          status.textContent = 'REPEAT';
+          return;
+        }
+        flash(sequence[t], true);
+        soundFx.playClick();
+        t++;
+        setTimeout(run, 650);
+      };
+      setTimeout(run, 400);
+    }
+
+    function fail() {
+      lives--;
+      livesEl.textContent = lives;
+      soundFx.playHit();
+      phase = 'idle';
+      if (lives <= 0) {
+        showResult({
+          container,
+          title: span >= 6 ? 'SPAN SOLID' : 'CAPACITY CHECK',
+          message: `Peak span ${span}. Adult Corsi spans often land near 5–6. The skill is holding a spatial path, not guessing.`,
+          score,
+          gameId: 'corsi-blocks',
+          tone: span >= 6 ? 'win' : 'over',
+          onRestart: () => start(),
+          onClose
+        });
+        return;
+      }
+      span = Math.max(3, span - 1);
+      spanEl.textContent = span;
+      setTimeout(playSequence, 600);
+    }
+
+    cells.forEach(btn => {
+      btn.onclick = () => {
+        if (phase !== 'input') return;
+        const i = parseInt(btn.dataset.i, 10);
+        flash(i, true);
+        setTimeout(() => flash(i, false), 180);
+        if (i !== sequence[step]) return fail();
+        soundFx.playCoin();
+        step++;
+        if (step >= sequence.length) {
+          score += span * 10;
+          scoreEl.textContent = score;
+          span = Math.min(9, span + 1);
+          spanEl.textContent = span;
+          phase = 'idle';
+          status.textContent = 'GOOD';
+          setTimeout(playSequence, 700);
+        }
+      };
+    });
+
+    container.querySelector('#close-game-btn').onclick = onClose;
+    playSequence();
+  }
+}
+
+/* ===========================================================================
+ * 9. FLANKER — report the center arrow; ignore the flanks
+ * ======================================================================== */
+export function renderFlanker(container, onClose) {
+  start();
+
+  function start() {
+    const TRIALS = 24;
+    let t = 0, score = 0, correct = 0, wrong = 0, reactions = [];
+    let shownAt = 0, target = '>', armed = false;
+
+    const FRAME = 'relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud';
+
+    container.innerHTML = `
+      <div class="${FRAME}">
+        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+          <div>
+            <h2 class="text-2xl font-black text-amber-400 tracking-wider">FLANKER</h2>
+            <p class="text-[10px] text-amber-500/80 uppercase">Selective attention · Eriksen paradigm</p>
+          </div>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        </div>
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
+          Report the CENTER arrow only. Congruent flanks feel easy. Incongruent flanks are the point.
+        </div>
+        <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div>TRIAL <span id="fk-trial" class="text-white">0</span> / ${TRIALS}</div>
+          <div>OK <span id="fk-ok" class="text-amber-400">0</span></div>
+          <div>AVG <span id="fk-avg" class="text-white">—</span></div>
+        </div>
+        <div id="fk-stim" class="h-[120px] flex items-center justify-center text-5xl font-black tracking-[0.35em] text-amber-400 bg-zinc-950 border border-amber-500/40 mb-4">·</div>
+        <div class="flex justify-center gap-3">
+          <button id="fk-left" class="axiom-dpad-btn px-8 py-4 text-xl">◀ LEFT</button>
+          <button id="fk-right" class="axiom-dpad-btn px-8 py-4 text-xl">RIGHT ▶</button>
+        </div>
+      </div>
+    `;
+
+    const stim = container.querySelector('#fk-stim');
+    const trialEl = container.querySelector('#fk-trial');
+    const okEl = container.querySelector('#fk-ok');
+    const avgEl = container.querySelector('#fk-avg');
+
+    function next() {
+      if (t >= TRIALS) {
+        kb.destroy();
+        const avg = reactions.length ? Math.round(reactions.reduce((a, b) => a + b, 0) / reactions.length) : 0;
+        showResult({
+          container,
+          title: correct >= 20 ? 'CLEAN FILTER' : 'SESSION DONE',
+          message: `${correct}/${TRIALS} correct · avg ${avg || '—'}ms. The cost of incongruent flanks is the classic interference signature.`,
+          score,
+          gameId: 'flanker',
+          tone: correct >= 20 ? 'win' : 'over',
+          onRestart: () => start(),
+          onClose
+        });
+        return;
+      }
+      t++;
+      trialEl.textContent = t;
+      const congruent = Math.random() < 0.5;
+      target = Math.random() < 0.5 ? '<' : '>';
+      const flank = congruent ? target : (target === '<' ? '>' : '<');
+      stim.textContent = `${flank}${flank}${target}${flank}${flank}`;
+      armed = true;
+      shownAt = performance.now();
+    }
+
+    function answer(dir) {
+      if (!armed) return;
+      armed = false;
+      const ok = (dir === 'left' && target === '<') || (dir === 'right' && target === '>');
+      const rt = Math.round(performance.now() - shownAt);
+      if (ok) {
+        correct++; score += Math.max(5, 40 - Math.floor(rt / 40));
+        reactions.push(rt);
+        okEl.textContent = correct;
+        avgEl.textContent = `${Math.round(reactions.reduce((a, b) => a + b, 0) / reactions.length)}ms`;
+        soundFx.playCoin();
+      } else {
+        wrong++; score = Math.max(0, score - 6);
+        soundFx.playHit();
+      }
+      stim.textContent = '·';
+      setTimeout(next, 450);
+    }
+
+    const kb = new ScopedKeyboard();
+    kb.on({ ArrowLeft: () => answer('left'), ArrowRight: () => answer('right'), a: () => answer('left'), d: () => answer('right') });
+    container.querySelector('#fk-left').onclick = () => answer('left');
+    container.querySelector('#fk-right').onclick = () => answer('right');
+    container.querySelector('#close-game-btn').onclick = () => { kb.destroy(); onClose(); };
+    setTimeout(next, 500);
   }
 }

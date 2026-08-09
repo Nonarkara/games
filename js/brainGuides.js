@@ -49,11 +49,35 @@ export const BRAIN_GUIDES = {
     why: 'Selective attention prioritizes task-relevant detail when the visual field is noisy.',
     tip: 'Search by rows or quadrants. A plan beats frantic eye movement.'
   },
+  'corsi-blocks': {
+    label: 'Visuospatial span', minutes: '3–5 min',
+    practice: 'Hold an ordered path through space long enough to reproduce it without notes.',
+    why: 'Spatial working memory is a different channel from digit span — useful for maps, diagrams, and layouts.',
+    tip: 'Trace the path with your eyes once before the lights finish.'
+  },
+  'flanker': {
+    label: 'Selective attention', minutes: '2–4 min',
+    practice: 'Report the center stimulus while suppressing conflicting neighbors.',
+    why: 'The incongruent trial is the point: interference makes attention costs measurable.',
+    tip: 'Fixate the center. Do not scan the flanks.'
+  },
   'aim-trainer': {
     label: 'Hand–eye calibration', minutes: '1–3 min',
     practice: 'Map visual target position to a precise hand movement under time pressure.',
     why: 'Repeated aiming gives immediate feedback about speed–accuracy trade-offs.',
     tip: 'Move smoothly to the target center. Overshooting wastes more time than a measured approach.'
+  },
+  'sudoku-sprint': {
+    label: 'Constraint satisfaction', minutes: '3–6 min',
+    practice: 'Place digits that satisfy every row, column, and box rule without contradiction.',
+    why: 'The board rewards elimination over guessing — a compact model of logical planning.',
+    tip: 'Fill forced cells first. Never invent a digit that two clues do not require.'
+  },
+  'fifteen-puzzle': {
+    label: 'Spatial planning', minutes: '2–5 min',
+    practice: 'Reorder a disrupted grid by sliding tiles through a single empty cell.',
+    why: 'Each move changes the whole path — the board punishes local fixes that break the global order.',
+    tip: 'Solve row by row. Protect finished rows; do not reopen them for a cheap swap.'
   },
   'mental-math': {
     label: 'Arithmetic fluency', minutes: '2–4 min',
@@ -237,7 +261,9 @@ export const PAPER_LINKS = {
   'Stroop 1935': 'https://doi.org/10.1037/h0054651',
   'Verbruggen 2008': 'https://doi.org/10.1016/j.tics.2008.07.005',
   'Green 2003': 'https://doi.org/10.1038/nature01647',
-  'Dye 2009': 'https://doi.org/10.1111/j.1467-8721.2009.01660.x'
+  'Dye 2009': 'https://doi.org/10.1111/j.1467-8721.2009.01660.x',
+  'Corsi 1972': 'https://doi.org/10.1016/S0010-9452(72)80024-5',
+  'Eriksen 1974': 'https://doi.org/10.3758/BF03203267'
 };
 
 export function getBrainGuide(game) {

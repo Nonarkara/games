@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniArcade — 36 Short Games That Train Real Skills</title>
-  <meta name="description" content="Play 36 free browser games for memory, focus, logic, language, and coordination. Every game explains the skill it practises and the limits of the claim." />
+  <title>OmniArcade — Honest practice, not another feed</title>
+  <meta name="description" content="Browser arcade with a Brain Briefing on every cartridge: what skill it trains, how long a round takes, and the limit of the claim. No ads. No login." />
   <meta name="theme-color" content="#26243F" />
   <link rel="icon" href="./public/favicon.svg" type="image/svg+xml" />
   <link rel="canonical" href="https://games.nonarkara.org/" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://games.nonarkara.org/" />
   <meta property="og:title" content="OmniArcade — Play With a Point" />
-  <meta property="og:description" content="36 short games. Learn what each mechanic asks of your brain, play one clean round, then leave when you meant to." />
+  <meta property="og:description" content="Brain Briefing on every cartridge. Near transfer is real. Far transfer is contested. Scores stay on this device." />
   <meta property="og:image" content="https://games.nonarkara.org/public/omniarcade-og.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="OmniArcade — Play With a Point" />
-  <meta name="twitter:description" content="36 short games for memory, focus, logic, language, and coordination." />
+  <meta name="twitter:description" content="Honest practice for memory, focus, logic, and coordination — with the papers on the shelf." />
   <meta name="twitter:image" content="https://games.nonarkara.org/public/omniarcade-og.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,500;1,500&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./css/axiom-tokens.css" />
   <link rel="stylesheet" href="./css/styles.css" />
   <script type="application/ld+json">
     {
@@ -37,7 +37,7 @@
   <div class="arcade-status" role="status">
     <span><i></i> FLOOR OPEN</span>
     <span>BANGKOK · 2026</span>
-    <span>36 GAMES · LOCAL SCORES · ZERO ADS</span>
+    <span>BRAIN BRIEFING · LOCAL SCORES · ZERO ADS</span>
   </div>
 
   <header id="app-header" class="arcade-header"></header>
@@ -45,10 +45,29 @@
   <main>
     <section id="omni-hud" class="cabinet-attract" aria-label="Featured game"></section>
 
+    <section class="edge-strip" aria-labelledby="edge-title">
+      <div>
+        <p class="edge-kicker">THE EDGE</p>
+        <h2 id="edge-title">Not more games. Better claims.</h2>
+      </div>
+      <article>
+        <small>BRIEFING</small>
+        <p>Every cartridge names the skill, the round length, and the limit of the claim before play starts.</p>
+      </article>
+      <article>
+        <small>HONESTY</small>
+        <p>Near transfer is real. Far transfer is contested. Simons 2016 stays on the shelf on purpose.</p>
+      </article>
+      <article>
+        <small>LABS</small>
+        <p>Non-Trivial and Blow Into The Cartridge exist only here — personal packs, not another generic feed.</p>
+      </article>
+    </section>
+
     <section class="arcade-directory" aria-labelledby="directory-title">
       <header class="directory-header">
         <div><p>CARTRIDGE DIRECTORY</p><h2 id="directory-title">Choose your room</h2></div>
-        <p>Four ways to spend a few minutes. Every cartridge opens with a brain briefing before play.</p>
+        <p>Four rooms. Every drill opens with a Brain Briefing. Scores never leave this device.</p>
       </header>
       <nav id="category-bar" class="cabinet-wings" aria-label="Game rooms"></nav>
     </section>
@@ -70,6 +89,8 @@
           <li><a href="https://doi.org/10.1037/h0054651" target="_blank" rel="noopener">Stroop 1935</a></li>
           <li><a href="https://doi.org/10.1016/j.tics.2008.07.005" target="_blank" rel="noopener">Verbruggen 2008 · Go / No-Go</a></li>
           <li><a href="https://doi.org/10.1038/nature01647" target="_blank" rel="noopener">Green &amp; Bavelier 2003</a></li>
+          <li><a href="https://doi.org/10.1016/S0010-9452(72)80024-5" target="_blank" rel="noopener">Corsi 1972 · spatial span</a></li>
+          <li><a href="https://doi.org/10.3758/BF03203267" target="_blank" rel="noopener">Eriksen 1974 · flanker</a></li>
           <li><a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons 2016 · evidence review</a></li>
         </ul>
       </details>
@@ -83,7 +104,9 @@
       <summary>OPEN-SOURCE CREDITS</summary>
       <p><a href="https://github.com/kubowania/breakout" target="_blank" rel="noopener">Breakout · Ania Kubow · MIT</a></p>
       <p><a href="https://github.com/jakesgordon/javascript-pong" target="_blank" rel="noopener">Pong · Jake Gordon · MIT</a></p>
-      <p><a href="https://github.com/Nonarkara/games/blob/main/CREDITS.md" target="_blank" rel="noopener">Full credits and adaptation notes</a></p>
+      <p><a href="https://github.com/robatron/sudoku.js" target="_blank" rel="noopener">Sudoku study · robatron/sudoku.js · MIT</a></p>
+      <p><a href="https://github.com/imshubhamsingh/15-puzzle" target="_blank" rel="noopener">Fifteen study · imshubhamsingh/15-puzzle · MIT</a></p>
+      <p><a href="https://github.com/Nonarkara/games/blob/codex/arcade-revival/CREDITS.md" target="_blank" rel="noopener">Full credits and adaptation notes</a></p>
     </details>
   </footer>
 
