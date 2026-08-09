@@ -12,7 +12,7 @@ OmniArcade wins on three things only Dr Non can host together:
 2. **Honesty as product** — near transfer is defended; far transfer is not sold. Papers stay visible.
 3. **Labs** — Non-Trivial and Blow Into The Cartridge are personal packs no generic feed can copy.
 
-Design follows **Axiom Design Core · Play mode** ([Axiom-Design-Core](https://github.com/Nonarkara/Axiom-Design-Core)): warm paper, Inter + Spectral, identity blue `#26243F`, one red Divine Move, trunk route colors for rooms. Inter is intentional here (named Play-mode stack) — not the Instrument/console amber stack.
+Design follows **Axiom Design Core structure** (briefing → play, trunk rooms, one Divine Move) with a named **16-bit Play register**: dark CRT well `#0a0e14`, Press Start 2P + JetBrains Mono, one amber Move `#f59e0b`, scanline overlay, chunky cartridge cells. Editorial warm-paper Play was tried and rejected as too slick — 16-bit is the intentional surface.
 
 ## Deploy (CDPT)
 
@@ -51,7 +51,7 @@ npm run check
 ## Do not
 
 - Use free accent colors outside the sanctioned Play-mode trunk subsystem
-- Add shadows, gradients, glows, or fonts outside Inter + Spectral
+- Add shadows, glows, or fonts outside Press Start 2P + JetBrains Mono (16-bit register)
 - Touch `js/games/labsGames.js` content (Dr Non's personal packs — earned content)
 - Claim brain-training transfer beyond what THE HONEST VERSION section's citations support
 - Iframe third-party games — adapt into the shared briefing → play lifecycle

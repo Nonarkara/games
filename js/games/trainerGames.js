@@ -9,6 +9,7 @@
  *   Mental Math     → arithmetic fluency under time pressure
  *   Visual Search   → Green & Bavelier selective attention paradigm
  *   Corsi Blocks    → visuospatial working memory (Corsi 1972)
+ *   Memory Palace   → method of loci (Yates 1966 / classical mnemonic)
  *   Flanker         → Eriksen selective attention / interference
  */
 import { soundFx } from '../audio.js';
@@ -996,5 +997,198 @@ export function renderFlanker(container, onClose) {
     container.querySelector('#fk-right').onclick = () => answer('right');
     container.querySelector('#close-game-btn').onclick = () => { kb.destroy(); onClose(); };
     setTimeout(next, 500);
+  }
+}
+
+/* ===========================================================================
+ * 10. MEMORY PALACE — method of loci (encode walk → recall walk)
+ * ======================================================================== */
+const PALACE_LOCI = [
+  { id: 'gate', label: 'GATE' },
+  { id: 'hall', label: 'HALL' },
+  { id: 'stove', label: 'STOVE' },
+  { id: 'desk', label: 'DESK' },
+  { id: 'stair', label: 'STAIR' },
+  { id: 'bed', label: 'BED' }
+];
+
+const PALACE_ITEMS = [
+  'KEY', 'COIN', 'BOOK', 'APPLE', 'LAMP', 'CAT',
+  'SWORD', 'BOOT', 'MAP', 'RING', 'CUP', 'FISH',
+  'CROWN', 'BELL', 'ROSE', 'OWL'
+];
+
+function pickItems(n) {
+  const pool = PALACE_ITEMS.slice();
+  const out = [];
+  while (out.length < n && pool.length) {
+    out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+  return out;
+}
+
+export function renderMemoryPalace(container, onClose) {
+  start();
+
+  function start() {
+    let span = 3;
+    let score = 0;
+    let lives = 3;
+    let placed = [];
+    let askIndex = 0;
+    let phase = 'idle';
+    let timers = [];
+
+    const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+
+    container.innerHTML = `
+      <section class="palace-game" aria-label="Memory Palace">
+        <header class="palace-game__head">
+          <div>
+            <p>METHOD OF LOCI · YATES 1966</p>
+            <h2>MEMORY PALACE</h2>
+          </div>
+          <div class="palace-game__stats">
+            <span>SPAN <b id="mp-span">3</b></span>
+            <span>SCORE <b id="mp-score">0</b></span>
+            <span>LIVES <b id="mp-lives">3</b></span>
+          </div>
+        </header>
+        <p class="palace-status" id="mp-status">WALK THE HOUSE. PLANT EACH OBJECT.</p>
+        <div class="palace-map" id="mp-map" role="list">
+          ${PALACE_LOCI.map(l => `
+            <div class="palace-locus" data-locus="${l.id}" role="listitem">
+              <small>${l.label}</small>
+              <strong data-item>—</strong>
+            </div>`).join('')}
+        </div>
+        <div class="palace-choices" id="mp-choices" hidden></div>
+      </section>
+    `;
+
+    const status = container.querySelector('#mp-status');
+    const spanEl = container.querySelector('#mp-span');
+    const scoreEl = container.querySelector('#mp-score');
+    const livesEl = container.querySelector('#mp-lives');
+    const choices = container.querySelector('#mp-choices');
+    const lociEls = [...container.querySelectorAll('.palace-locus')];
+
+    function paintItems(show) {
+      lociEls.forEach((el, i) => {
+        const strong = el.querySelector('[data-item]');
+        const hit = placed[i];
+        strong.textContent = show && hit ? hit.item : '—';
+        el.classList.toggle('is-lit', Boolean(show && hit));
+        el.classList.remove('is-ask');
+      });
+    }
+
+    function endRun(title, tone) {
+      clearTimers();
+      showResult({
+        container,
+        title,
+        message: `Peak span ${span}. The palace is a route you re-enter — weird images stick harder than polite ones.`,
+        score,
+        gameId: 'memory-palace',
+        tone,
+        onRestart: () => start(),
+        onClose
+      });
+    }
+
+    function fail() {
+      lives--;
+      livesEl.textContent = lives;
+      soundFx.playHit();
+      if (lives <= 0) {
+        endRun(span >= 5 ? 'PALACE STANDING' : 'ROUTE LOST', span >= 5 ? 'win' : 'over');
+        return;
+      }
+      span = Math.max(3, span - 1);
+      spanEl.textContent = span;
+      status.textContent = 'MISS. WALK AGAIN.';
+      timers.push(setTimeout(encodeWalk, 900));
+    }
+
+    function askNext() {
+      if (askIndex >= placed.length) {
+        score += span * 15;
+        scoreEl.textContent = score;
+        span = Math.min(PALACE_LOCI.length, span + 1);
+        spanEl.textContent = span;
+        soundFx.playCoin();
+        status.textContent = 'CLEAN WALK. SPAN UP.';
+        timers.push(setTimeout(encodeWalk, 900));
+        return;
+      }
+
+      phase = 'recall';
+      const target = placed[askIndex];
+      paintItems(false);
+      const el = lociEls[target.locus];
+      el.classList.add('is-ask');
+      status.textContent = `WHAT WAS AT THE ${PALACE_LOCI[target.locus].label}?`;
+
+      const decoys = pickItems(3).filter(x => x !== target.item);
+      while (decoys.length < 3) {
+        const extra = PALACE_ITEMS[Math.floor(Math.random() * PALACE_ITEMS.length)];
+        if (extra !== target.item && !decoys.includes(extra)) decoys.push(extra);
+      }
+      const options = [target.item, ...decoys.slice(0, 3)].sort(() => Math.random() - 0.5);
+      choices.hidden = false;
+      choices.innerHTML = options.map(o =>
+        `<button type="button" class="palace-choice" data-item="${o}">${o}</button>`
+      ).join('');
+
+      choices.querySelectorAll('.palace-choice').forEach(btn => {
+        btn.onclick = () => {
+          if (phase !== 'recall') return;
+          phase = 'idle';
+          choices.querySelectorAll('.palace-choice').forEach(b => { b.disabled = true; });
+          if (btn.dataset.item === target.item) {
+            soundFx.playClick();
+            askIndex++;
+            timers.push(setTimeout(askNext, 350));
+          } else {
+            fail();
+          }
+        };
+      });
+    }
+
+    function encodeWalk() {
+      clearTimers();
+      phase = 'encode';
+      choices.hidden = true;
+      choices.innerHTML = '';
+      const items = pickItems(span);
+      placed = items.map((item, i) => ({ locus: i, item }));
+      paintItems(false);
+      status.textContent = 'ENCODE — WATCH EACH LOCUS';
+      let step = 0;
+
+      const showStep = () => {
+        if (step >= placed.length) {
+          paintItems(false);
+          status.textContent = 'RECALL — WALK THE HOUSE';
+          askIndex = 0;
+          timers.push(setTimeout(askNext, 500));
+          return;
+        }
+        paintItems(false);
+        const { locus, item } = placed[step];
+        const el = lociEls[locus];
+        el.classList.add('is-lit');
+        el.querySelector('[data-item]').textContent = item;
+        soundFx.playClick();
+        status.textContent = `${PALACE_LOCI[locus].label} ← ${item}`;
+        step++;
+        timers.push(setTimeout(showStep, 1100));
+      };
+      timers.push(setTimeout(showStep, 400));
+    }
+
+    encodeWalk();
   }
 }

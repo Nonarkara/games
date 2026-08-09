@@ -55,6 +55,12 @@ export const BRAIN_GUIDES = {
     why: 'Spatial working memory is a different channel from digit span — useful for maps, diagrams, and layouts.',
     tip: 'Trace the path with your eyes once before the lights finish.'
   },
+  'memory-palace': {
+    label: 'Method of loci', minutes: '4–7 min',
+    practice: 'Bind each object to a fixed place in a known route, then retrieve by walking the route again.',
+    why: 'Spatial scaffolding turns a bare list into a path you can re-enter — the classic mnemonic palace.',
+    tip: 'Make the image weird. A key melting on the stove sticks harder than a key sitting politely.'
+  },
   'flanker': {
     label: 'Selective attention', minutes: '2–4 min',
     practice: 'Report the center stimulus while suppressing conflicting neighbors.',
@@ -263,7 +269,8 @@ export const PAPER_LINKS = {
   'Green 2003': 'https://doi.org/10.1038/nature01647',
   'Dye 2009': 'https://doi.org/10.1111/j.1467-8721.2009.01660.x',
   'Corsi 1972': 'https://doi.org/10.1016/S0010-9452(72)80024-5',
-  'Eriksen 1974': 'https://doi.org/10.3758/BF03203267'
+  'Eriksen 1974': 'https://doi.org/10.3758/BF03203267',
+  'Yates 1966': 'https://en.wikipedia.org/wiki/Method_of_loci'
 };
 
 export function getBrainGuide(game) {

@@ -21,7 +21,7 @@ import { renderBlowIntoTheCartridge } from './games/nineties.js';
 import {
   renderDualNBack, renderSchulteTable, renderAimTrainer,
   renderGoNoGo, renderDigitSpan, renderMentalMath, renderVisualSearch,
-  renderCorsiBlocks, renderFlanker
+  renderCorsiBlocks, renderFlanker, renderMemoryPalace
 } from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
 import { bindModalUX, GameSession } from './ui.js';
@@ -54,6 +54,7 @@ const gamesCatalog = [
   { id: 'schulte-table', code: 'SCH', title: 'Schulte Table', wing: 'train', category: 'memory-focus', domain: 'Attention field', age: 'Teen+', desc: 'Tap 1→25. Eyes on center; peripheral vision does the finding.', tags: ['Attention', 'Peripheral'], renderer: renderSchulteTable },
   { id: 'visual-search', code: 'VSR', title: 'Visual Search', wing: 'train', category: 'memory-focus', domain: 'Selective attention', age: 'Teen+', desc: 'Find the odd rotated letter in growing clutter.', paper: 'Green 2003', tags: ['Attention', 'Search'], renderer: renderVisualSearch },
   { id: 'corsi-blocks', code: 'CRS', title: 'Corsi Blocks', wing: 'train', category: 'memory-focus', domain: 'Spatial span', age: 'Teen+', desc: 'Watch the path light up, then tap it back. Span grows until it breaks.', paper: 'Corsi 1972', tags: ['Spatial', 'Working memory'], renderer: renderCorsiBlocks },
+  { id: 'memory-palace', code: 'MPL', title: 'Memory Palace', wing: 'train', category: 'memory-focus', domain: 'Method of loci', age: 'Teen+', desc: 'Walk a fixed house. Plant objects at loci. Walk it again and name what lived where.', paper: 'Yates 1966', tags: ['Loci', 'Episodic'], renderer: renderMemoryPalace },
   { id: 'flanker', code: 'FLK', title: 'Flanker', wing: 'train', category: 'memory-focus', domain: 'Selective attention', age: 'Teen+', desc: 'Report the center arrow. Ignore the flanks — especially when they disagree.', paper: 'Eriksen 1974', tags: ['Attention', 'Interference'], renderer: renderFlanker },
   { id: 'aim-trainer', code: 'AIM', title: 'Aim Trainer', wing: 'train', category: 'skills', domain: 'Hand-eye', age: 'All', desc: 'Thirty seconds of targets. Average reaction time stays on the board.', paper: 'Dye 2009', tags: ['Reaction', 'Precision'], renderer: renderAimTrainer },
   { id: 'mental-math', code: 'MMX', title: 'Mental Math', wing: 'train', category: 'math-logic', domain: 'Fluency', age: '10+', desc: '45-second arithmetic sprint. Speed under accuracy pressure.', tags: ['Arithmetic', 'Speed'], renderer: renderMentalMath },
@@ -167,10 +168,10 @@ class OmniArcadeApp {
 
     el.innerHTML = `
       <div class="attract-copy" id="top">
-        <p class="attract-kicker">${this.playableCount()} CARTRIDGES · BRAIN BRIEFING ON EVERY TITLE · NO ADS</p>
-        <h1>Kill time.<br><em>Keep the mind.</em></h1>
-        <p class="attract-line">Other portals sell distraction. This floor sells honest practice.</p>
-        <p class="attract-sub">Every cartridge opens with what it actually trains, how long a round takes, and the Simons caveat — far transfer is contested. Near transfer is real. Labs are personal. Scores stay on this device.</p>
+        <p class="attract-kicker">${this.playableCount()} CARTS · 16-BIT FLOOR · BRIEFING ON EVERY TITLE</p>
+        <h1>INSERT<br><em>COIN</em></h1>
+        <p class="attract-line">Kill time. Keep the mind.</p>
+        <p class="attract-sub">Chunky carts. Honest claims. Every title opens with the skill it trains, how long a round takes, and the Simons caveat — far transfer is contested. Near transfer is real.</p>
       </div>
       ${feature ? `
         <button type="button" class="attract-feature" data-game="${feature.id}" aria-label="Load ${feature.title}">
