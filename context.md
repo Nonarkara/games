@@ -247,3 +247,40 @@ npm run check
 - Touch `js/games/labsGames.js` content (Dr Non's personal packs — earned content)
 - Claim brain-training transfer beyond what THE HONEST VERSION section's citations support
 - Iframe third-party games — adapt into the shared briefing → play lifecycle
+
+
+## Phase 7: 16-bit visual audit (2026-08-10)
+
+`scripts/visual-audit.sh` is the operator for the design register. Scans
+`css/` + `js/` for: non-zero `border-radius`, drop `box-shadow`,
+`backdrop-filter`, `filter: blur`, decorative `linear-gradient`, and
+unapproved fonts. Supports `--strict` (exit 1 on any violation) and
+`--fix` (auto-fix where possible).
+
+Final audit: **0 violations**. The 16-bit register is consistent
+across the floor.
+
+Pass details:
+- Removed `backdrop-filter: blur(6px)` on the modal — replaced with a
+  solid background.
+- Fixed `border-radius: 12px !important` on a code chip → 0.
+- `Josefin Sans` (headings) → `Press Start 2P`.
+- `Source Sans 3` (body) → `Inter`.
+- Token vars (`--radius`, `--shadow-*`) were already 0 / none — no
+  decay to fix there.
+
+## Push operator (Phase 8 part 2, 2026-08-10)
+
+`scripts/push.sh` is the safe-push operator. Refuses to push to
+main/master without `--force`, refuses dirty working trees, shows the
+commit list that will go up, asks for confirmation, then pushes and
+fetches back to report the new remote HEAD. Used to land the
+4-commit backlog on `origin/codex/arcade-revival` (the local was 4
+commits ahead of remote).
+
+## Pre-commit hook (Phase 8 part 3, 2026-08-10)
+
+`.git/hooks/pre-commit` runs `scripts/visual-audit.sh --strict` on
+every commit. If the 16-bit register is violated, the commit is
+blocked. The 16-bit register is now enforced going forward, not just
+measured.
