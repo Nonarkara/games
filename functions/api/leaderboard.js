@@ -5,7 +5,7 @@
  *
  * Tamper resistance (in order of defense):
  *   1. Session must exist, be unused, not expired, and match game_id
- *   2. Initials must be exactly 4 chars, [A-Z0-9]
+ *   2. Initials must be 1–4 chars, [A-Z0-9]
  *   3. Score must satisfy  0 <= score <= GAME_MAX[game_id]
  *   4. UNIQUE(session_id) on scores prevents double-submit even if
  *      a session is somehow reused
@@ -75,7 +75,10 @@ const GAME_MAX = {
   'blow-cartridge':  50
 };
 
-const INITIALS_RE = /^[A-Z0-9]{4}$/;
+// 1–4, not exactly 4. The client caps at INITIALS_LEN but happily submits
+// shorter — someone signing "AB" is a real user, not a malformed request.
+// Requiring exactly 4 here silently dropped those scores from the global board.
+const INITIALS_RE = /^[A-Z0-9]{1,4}$/;
 
 function jsonResponse(obj, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(obj), {
@@ -129,7 +132,7 @@ export async function onRequestPost({ request, env }) {
 
   if (!game_id) return jsonResponse({ error: 'game_id_required' }, 400);
   if (!session_id) return jsonResponse({ error: 'session_id_required' }, 400);
-  if (!INITIALS_RE.test(initials)) return jsonResponse({ error: 'initials_must_be_4_alnum' }, 400);
+  if (!INITIALS_RE.test(initials)) return jsonResponse({ error: 'initials_must_be_1_to_4_alnum' }, 400);
   if (!Number.isFinite(score) || score < 0) return jsonResponse({ error: 'invalid_score' }, 400);
   const max = GAME_MAX[game_id];
   if (max == null) return jsonResponse({ error: 'unknown_game' }, 400);

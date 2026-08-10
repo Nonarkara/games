@@ -42,3 +42,25 @@ const orphans = [...allowed].filter(id => !catalogIds.has(id));
 assert.deepEqual(orphans, [], `GAME_MAX has ceilings for games not in the catalog: ${orphans.join(', ')}`);
 
 console.log(`leaderboard allowlist: ${scoring.length} scoring games, all with ceilings`);
+
+/* ---------------------------------------------------------------------------
+ * Client and server must agree on what a legal set of initials is.
+ * storage.js caps at INITIALS_LEN but submits shorter strings verbatim, so a
+ * server rule of "exactly N" silently drops real users' scores.
+ * ------------------------------------------------------------------------ */
+const storageSource = readFileSync(new URL('../../js/storage.js', import.meta.url), 'utf8');
+const clientLen = Number(storageSource.match(/INITIALS_LEN\s*=\s*(\d+)/)?.[1]);
+assert.ok(Number.isInteger(clientLen) && clientLen > 0, 'client INITIALS_LEN must be a positive integer');
+
+const serverRe = fnSource.match(/const INITIALS_RE\s*=\s*\/([^/]+)\//)?.[1];
+assert.ok(serverRe, 'server INITIALS_RE not found');
+
+const re = new RegExp(serverRe);
+for (let n = 1; n <= clientLen; n++) {
+  const sample = 'A'.repeat(n);
+  assert.ok(re.test(sample), `server rejects ${n}-char initials ("${sample}") that the client can produce`);
+}
+assert.ok(!re.test('A'.repeat(clientLen + 1)), `server must reject initials longer than ${clientLen}`);
+assert.ok(!re.test('a!'), 'server must reject non-alphanumeric initials');
+
+console.log(`initials contract: client caps at ${clientLen}, server accepts 1–${clientLen}`);
