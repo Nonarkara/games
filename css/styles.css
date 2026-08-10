@@ -2104,3 +2104,24 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 .game-modal-container .flex.justify-between > .flex.items-center.gap-3 p {
   overflow-wrap: anywhere;
 }
+
+/* ============================================================================
+ * Contrast repairs — measured on the live floor (§11.10).
+ * The amber TODAY'S CARTRIDGE panel wore white text (2.15:1) and the light
+ * header band wore dark-theme ink (PLAYS count: 1.08:1 — invisible).
+ * Dark lettering on the one amber is also the truer cartridge-label look.
+ * ========================================================================== */
+html[data-theme="sixteen"] .attract-feature { color: #1a1206; }
+html[data-theme="sixteen"] .attract-feature-kicker,
+html[data-theme="sixteen"] .attract-feature-skill { opacity: .82; }
+html[data-theme="sixteen"] .attract-feature-cta {
+  color: #1a1206;
+  border-color: rgba(26, 18, 6, 0.4);
+}
+html[data-theme="sixteen"] .attract-feature-ring,
+html[data-theme="sixteen"] .attract-feature-ring::before,
+html[data-theme="sixteen"] .attract-feature-ring::after { border-color: rgba(26, 18, 6, 0.22); }
+
+.arcade-play-count b { color: #14181f; }
+.arcade-sound { color: #4a5561; }
+.arcade-about-link { color: #b45309; }
