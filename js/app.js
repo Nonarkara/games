@@ -25,6 +25,7 @@ import {
 } from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
 import { renderTrailMaking, renderMentalRotation, renderIowaGambling } from './games/ngsNewTrainers.js';
+import { renderKingsCup, renderNeverHaveIEver, renderMostLikelyTo } from './games/ngsDrinkingGames.js';
 import { renderPosnerCueing, renderChangeBlindness, renderOperationSpan } from './games/ngsAttentionSuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
@@ -41,7 +42,7 @@ const WING_META = {
   train: { title: 'TRAIN', sub: 'Lab tasks with a paper trail. Gains stay closest to what you practice.' },
   arcade: { title: 'ARCADE', sub: 'Classics, shooters, casinos, and the AI sandbox. Scoreboards count.' },
   learn: { title: 'LEARN', sub: 'Math, language, science, and kids drills — fluency under a clock.' },
-  labs: { title: 'LABS', sub: 'Hand-curated rooms. Friends, parties, private packs.' },
+  labs: { title: 'LABS', sub: 'Hand-curated rooms. Friends, parties, private packs, drinking prompts. 18+ for the drinking set.' },
   meta: { title: 'SIGNAL', sub: 'Why this floor exists.' }
 };
 
@@ -101,6 +102,9 @@ const gamesCatalog = [
   // ── LABS ───────────────────────────────────────────────────────────────
   { id: 'non-trivial', code: 'NTR', title: 'Non-Trivial', wing: 'labs', category: 'labs', domain: 'Personal', age: 'Friends', desc: 'Five packs from 100 days of writing — books, bikes, Shanghai, philosophers, sound.', tags: ['Trivia', 'Friends'], renderer: renderNonTrivial },
   { id: 'blow-cartridge', code: 'BIC', title: 'Blow Into The Cartridge', wing: 'labs', category: 'labs', domain: 'Party host', age: 'Party', desc: '240 questions, six 90s/00s decks. One screen, everyone shouts, score on paper.', tags: ['Party', '90s'], renderer: renderBlowIntoTheCartridge },
+  { id: 'kings-cup', code: 'KNG', title: "King's Cup", wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '52-card ring of fire. Each card = a rule. Draw, deal, drink.', tags: ['Party', 'Cards', 'Drinking'], renderer: renderKingsCup },
+  { id: 'never-have-i', code: 'NHI', title: 'Never Have I Ever', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '50 statements. Fingers down if you have. Last finger up wins.', tags: ['Party', 'Confession', 'Drinking'], renderer: renderNeverHaveIEver },
+  { id: 'most-likely', code: 'MLT', title: 'Most Likely To', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '40 prompts. Everyone points. Most fingers pointed drinks.', tags: ['Party', 'Group vote', 'Drinking'], renderer: renderMostLikelyTo },
 
   // ── META ───────────────────────────────────────────────────────────────
   { id: 'about-dr-non', code: 'WHY', title: 'About Dr Non', wing: 'meta', category: 'about', domain: 'Signal', age: 'Everyone', desc: 'MIT Wii photo, a life of games, and why honesty is the product.', tags: ['Story'], renderer: renderAbout }

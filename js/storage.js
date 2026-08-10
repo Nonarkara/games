@@ -58,7 +58,10 @@ const defaultData = {
     'iowa-gambling': 0,
     'posner-cueing': 0,
     'change-blindness': 0,
-    'operation-span': 0
+    'operation-span': 0,
+    'kings-cup': 0,
+    'never-have-i': 0,
+    'most-likely': 0
   },
   favorites: [],
   gamesPlayed: 0,

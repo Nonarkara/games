@@ -304,7 +304,7 @@ export const BRAIN_GUIDES = {
   },
   'kings-cup': {
     label: 'Party card prompts', minutes: '5–15 min',
-    practice: 'Draw a card from a 52-card deck. Each rank has a rule — waterfall, mate, rhyme, question master, king’s cup. Apply the rule at the table.',
+    practice: 'Draw a card from a 52-card deck. Each rank has a rule — waterfall, mate, rhyme, question master, king's cup. Apply the rule at the table.',
     why: 'The web side just removes the printed card deck and the lookup. The game is the social play, not the screen.',
     tip: 'Keep the rules for the WHOLE round, not just the moment. Rhyme and categories only work if everyone remembers.',
     stack: ['werbach', 'thaler', 'clear']

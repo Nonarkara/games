@@ -72,7 +72,10 @@ const GAME_MAX = {
   'fifteen-puzzle':  300,   // inverted
   // LABS
   'non-trivial':     50,
-  'blow-cartridge':  50
+  'blow-cartridge':  50,
+  'kings-cup':       52,    // 52 cards in the deck
+  'never-have-i':    50,    // 50 statements
+  'most-likely':     40     // 40 prompts
 };
 
 // 1–4, not exactly 4. The client caps at INITIALS_LEN but happily submits
