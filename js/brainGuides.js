@@ -7,6 +7,27 @@
  */
 
 export const BRAIN_GUIDES = {
+  'chimp-test': {
+    label: 'Masked visuospatial recall', minutes: '3–5 min',
+    practice: 'Snapshot the positions of numbered cells, then reproduce the sequence after the digits are masked.',
+    why: 'Eidetic-style rapid encoding is the one memory task where a chimpanzee reliably beats adult humans — a hard ceiling worth feeling personally.',
+    tip: 'Take the whole grid in as one picture before touching 1. Reading the digits one by one is already too slow.',
+    stack: ['neuroplasticity', 'werbach']
+  },
+  'calibration': {
+    label: 'Confidence calibration', minutes: '4–6 min',
+    practice: 'State 90% confidence intervals for quantities you half-know, then face the hit rate you actually earn.',
+    why: 'The gap between stated confidence and actual accuracy is the most reproducible bias in judgment research — and the most expensive one in real decisions.',
+    tip: 'If a range feels comfortable, it is too narrow. The skill being trained is deliberate vagueness.',
+    stack: ['kahneman', 'thaler']
+  },
+  'monty-hall': {
+    label: 'Probability intuition', minutes: '4–6 min',
+    practice: 'Play the stay-or-switch dilemma repeatedly while running tallies show which policy actually wins.',
+    why: 'System 1 insists the two closed doors are 50/50; the tallies demonstrate otherwise. Feeling your intuition lose to arithmetic is the lesson.',
+    tip: 'Commit to one policy for five rounds at a time — the sample makes the 2/3 visible.',
+    stack: ['kahneman']
+  },
   'posner-cueing': {
     label: 'Covert attention orienting', minutes: '3–4 min',
     practice: 'Hold your gaze still while attention alone shifts to a cued location, then pays a cost when the cue misleads.',

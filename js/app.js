@@ -27,6 +27,7 @@ import { renderAbout } from './games/about.js';
 import { renderTrailMaking, renderMentalRotation, renderIowaGambling } from './games/ngsNewTrainers.js';
 import { renderKingsCup, renderNeverHaveIEver, renderMostLikelyTo } from './games/ngsDrinkingGames.js';
 import { renderPosnerCueing, renderChangeBlindness, renderOperationSpan } from './games/ngsAttentionSuite.js';
+import { renderChimpTest, renderCalibration, renderMontyHall } from './games/ngsCuriositySuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
 
@@ -70,6 +71,8 @@ const gamesCatalog = [
   { id: 'posner-cueing', code: 'PSN', title: 'Posner Cueing', wing: 'train', category: 'memory-focus', domain: 'Covert attention', age: 'Teen+', desc: 'A box flashes, then a dot. Most flashes tell the truth; some lie. Measures the cost of looking the wrong way.', paper: 'Posner 1980', tags: ['Attention', 'Orienting', 'Reaction'], renderer: renderPosnerCueing },
   { id: 'change-blindness', code: 'CBL', title: 'Change Blindness', wing: 'train', category: 'memory-focus', domain: 'Change detection', age: 'All', desc: 'One square keeps changing. A blank flash hides the motion your eye would normally catch.', paper: 'Rensink 1997', tags: ['Attention', 'Flicker'], renderer: renderChangeBlindness },
   { id: 'operation-span', code: 'OSP', title: 'Operation Span', wing: 'train', category: 'memory-focus', domain: 'Complex span', age: 'Teen+', desc: 'Check an equation, hold a letter, repeat. Recall the letters in order — storage while processing.', paper: 'Turner & Engle 1989', tags: ['Working memory', 'Complex span'], renderer: renderOperationSpan },
+  { id: 'chimp-test', code: 'CHM', title: 'Chimp Test', wing: 'train', category: 'memory-focus', domain: 'Masked recall', age: 'All', desc: 'Digits vanish behind blanks the moment you tap 1. Finish from memory. Ayumu the chimp holds 9.', paper: 'Inoue 2007', tags: ['Working memory', 'Iconic', 'Braggable'], renderer: renderChimpTest },
+  { id: 'calibration', code: 'CAL', title: 'Calibration', wing: 'train', category: 'memory-focus', domain: 'Judgment', age: 'Teen+', desc: 'Ten 90%-confidence intervals. Calibrated people trap 9. Most people trap 4 — that gap runs the world.', paper: 'Lichtenstein 1977', tags: ['Overconfidence', 'Kahneman', 'Judgment'], renderer: renderCalibration },
   // ── ARCADE ─────────────────────────────────────────────────────────────
   { id: 'cyber-tetris', code: 'TET', title: 'Cyber Tetris 1984', wing: 'arcade', category: 'classics', domain: 'Spatial', age: 'All', desc: 'Falling tetrominoes, line clears, combo multipliers.', tags: ['Classic', 'Puzzle'], renderer: renderCyberTetris },
   { id: 'arcade-breakout', code: 'BRK', title: 'Breakout 1976', wing: 'arcade', category: 'classics', domain: 'Prediction', age: 'All', desc: 'Shape rebound angles, keep the rally alive, clear the wall.', tags: ['Classic', 'Open source', 'Touch'], credit: 'Ania Kubow · MIT', source: 'https://github.com/kubowania/breakout', renderer: renderArcadeBreakout },
@@ -89,6 +92,7 @@ const gamesCatalog = [
   { id: 'ai-sandbox', code: 'AIG', title: 'AI Game Builder', wing: 'arcade', category: 'ai-studio', domain: 'Sandbox', age: 'All', desc: 'Prompt or pick a preset; get a playable micro-game live.', tags: ['AI', 'Sandbox'], renderer: renderAIGameStudio },
 
   // ── LEARN ──────────────────────────────────────────────────────────────
+  { id: 'monty-hall', code: 'MTY', title: 'Monty Hall', wing: 'learn', category: 'math-logic', domain: 'Probability', age: 'All', desc: 'Stay or switch? 15 rounds and a running tally settle the argument a thousand PhDs lost in 1990.', paper: 'Selvin 1975', tags: ['Probability', 'Bayes', 'Argument-settler'], renderer: renderMontyHall },
   { id: 'number-chain', code: 'NCH', title: 'Number Chain', wing: 'learn', category: 'math-logic', domain: 'Patterns', age: '10+', desc: 'Spot the rule, predict the next number.', tags: ['Patterns', 'Reasoning'], renderer: renderNumberChain },
   { id: 'tower-hanoi', code: 'HNI', title: 'Tower of Hanoi', wing: 'learn', category: 'math-logic', domain: 'Planning', age: '8+', desc: 'Move every disk to peg 3 in the fewest moves.', tags: ['Logic', 'Recursive'], renderer: renderTowerHanoi },
   { id: 'anagram-scramble', code: 'ANA', title: 'Anagram Scramble', wing: 'learn', category: 'language', domain: 'Spelling', age: '10+', desc: 'Unscramble letters into real words under pressure.', tags: ['Spelling', 'Vocabulary'], renderer: renderAnagram },

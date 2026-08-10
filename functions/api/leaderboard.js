@@ -43,6 +43,9 @@ const GAME_MAX = {
   'posner-cueing':   1200,  // (700 - validRT) + cueEffect*2 - errors*25
   'change-blindness':1200,  // 6 rounds × max(20, 200 - secs*8)
   'operation-span':  600,   // 18 letters × 20 + 4 perfect-set bonuses × 40
+  'chimp-test':      1200,  // 15 trials, best case levels 4→9 then 9s, ×10
+  'calibration':     100,   // 10 intervals × 10
+  'monty-hall':      150,   // 15 rounds × 10
   // ARCADE
   'cyber-tetris':    999999,
   'cyber-pacman':    99999,

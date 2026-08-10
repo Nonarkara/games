@@ -2089,3 +2089,15 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* ============================================================================
+ * Game-frame headers at phone width: the title block shrinks and wraps;
+ * the ✕ CLOSE button (flex-shrink:0) must never be pushed past the frame.
+ * Fixes every cartridge header at once — long subtitles were shoving the
+ * close button ~17px out of the modal at 390px.
+ * ========================================================================== */
+.game-modal-container .flex.justify-between > .flex.items-center.gap-3 { min-width: 0; }
+.game-modal-container .flex.justify-between > .flex.items-center.gap-3 h2,
+.game-modal-container .flex.justify-between > .flex.items-center.gap-3 p {
+  overflow-wrap: anywhere;
+}

@@ -53,8 +53,9 @@ export function renderTrailMaking(container, onClose) {
     }
 
     function render() {
-      positions = placeDots();
-      startedAt = performance.now();
+      // Positions and the clock are fixed per part (set in start) — a trail
+      // you can plan across is the whole task. Re-randomising per click and
+      // restarting the timer made the final time measure only the last click.
       const phase = part;
       const target = labels[targetIdx];
       container.innerHTML = `
@@ -130,6 +131,8 @@ export function renderTrailMaking(container, onClose) {
       const message = `Part B: ${totalSeconds.toFixed(1)}s. Errors: ${errors}.`;
       showResult({ container, title: 'TRAIL COMPLETE', message, score, gameId: 'trail-making', tone: 'win', onRestart: () => start('A'), onClose });
     }
+    positions = placeDots();
+    startedAt = performance.now();
     render();
   }
 }
@@ -145,19 +148,21 @@ export function renderMentalRotation(container, onClose) {
     const TRIALS = 20;
     const TIME_PER_TRIAL = 8000;
     let trial = 0, correct = 0, wrong = 0;
-    let current = makeTrial();
+    let current = null;   // set after SHAPES exists — makeTrial() reads it
     let trialTimer = null;
     let gameTimer = null;
 
     // A shape is an array of unit-cell offsets, e.g. [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:0,y:1}]
-    // The 6 base shapes are L, J, T, S, Z, plus a 4-cell straight.
+    // Chiral shapes ONLY. A mirror-symmetric shape (O, T, I) reflects onto a
+    // rotation of itself, which makes a MIRROR trial visually identical to a
+    // SAME trial — the correct answer would be undecidable.
     const SHAPES = [
       [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:0,y:1}],     // L
       [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:2,y:1}],     // J
-      [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:1,y:1}],     // T
-      [{x:0,y:0},{x:1,y:0},{x:0,y:1},{x:1,y:1}],     // O (used as decoy)
       [{x:0,y:0},{x:1,y:0},{x:1,y:1},{x:2,y:1}],     // S
       [{x:0,y:1},{x:1,y:1},{x:1,y:0},{x:2,y:0}],     // Z
+      [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:3,y:0},{x:0,y:1}],   // long L (pentomino)
+      [{x:0,y:0},{x:0,y:1},{x:1,y:1},{x:1,y:2},{x:2,y:2}],   // W staircase (pentomino)
     ];
     function rotate(shape, k) {
       let s = shape;
@@ -172,18 +177,18 @@ export function renderMentalRotation(container, onClose) {
       const minY = Math.min(...shape.map(p => p.y));
       return shape.map(p => ({ x: p.x - minX, y: p.y - minY })).sort((a, b) => a.y - b.y || a.x - b.x);
     }
-    function shapeKey(s) { return s.map(p => `${p.x},${p.y}`).join('|'); }
-    function renderShape(svg, ox, oy, color) {
-      const cells = s.map(p => `<rect x="${ox + p.x * 28}" y="${oy + p.y * 28}" width="26" height="26" fill="${color}" stroke="#fbbf24" stroke-width="1.5"/>`).join('');
+    function renderShape(svg, shape, ox, oy, color) {
+      const cells = shape.map(p => `<rect x="${ox + p.x * 20}" y="${oy + p.y * 20}" width="18" height="18" fill="${color}" stroke="#fbbf24" stroke-width="1.5"/>`).join('');
       svg.insertAdjacentHTML('beforeend', cells);
     }
 
     function makeTrial() {
       const base = SHAPES[Math.floor(Math.random() * SHAPES.length)];
       const k = [1, 2, 3][Math.floor(Math.random() * 3)];     // 90/180/270 deg
-      const rotated = rotate(base, k);
       const isMirror = Math.random() < 0.5;
-      const other = isMirror ? reflect(base) : rotated;
+      // Mirror trials are ALSO rotated — otherwise "looks unrotated" would
+      // leak the answer and the task stops measuring rotation at all.
+      const other = isMirror ? rotate(reflect(base), k) : rotate(base, k);
       return { base, other, isMirror };
     }
 
@@ -218,8 +223,8 @@ export function renderMentalRotation(container, onClose) {
         </div>`;
       const left = container.querySelector('#mr-left');
       const right = container.querySelector('#mr-right');
-      renderShape(left, 14, 14, '#22d3ee');
-      renderShape(right, 14, 14, '#f472b6');
+      renderShape(left, current.base, 14, 8, '#22d3ee');
+      renderShape(right, current.other, 14, 8, '#f472b6');
       container.querySelector('#close-game-btn').onclick = () => { clearTimeout(trialTimer); clearTimeout(gameTimer); onClose(); };
       container.querySelector('#mr-same').onclick = () => answer(false);
       container.querySelector('#mr-mirror').onclick = () => answer(true);
@@ -248,6 +253,7 @@ export function renderMentalRotation(container, onClose) {
       const score = Math.max(0, correct * 10 - wrong * 5);
       showResult({ container, title: 'ROTATION COMPLETE', message: `${correct} correct · ${wrong} wrong`, score, gameId: 'mental-rotation', tone: 'win', onRestart: start, onClose });
     }
+    current = makeTrial();
     render();
   }
 }

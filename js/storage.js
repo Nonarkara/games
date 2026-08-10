@@ -61,7 +61,10 @@ const defaultData = {
     'operation-span': 0,
     'kings-cup': 0,
     'never-have-i': 0,
-    'most-likely': 0
+    'most-likely': 0,
+    'chimp-test': 0,
+    'calibration': 0,
+    'monty-hall': 0
   },
   favorites: [],
   gamesPlayed: 0,

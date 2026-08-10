@@ -61,12 +61,13 @@ export function renderKingsCup(container, onClose) {
   start();
   function start() {
     const deck = shuffle(KING_DECK);
-    let idx = 0, round = 0;
+    let idx = 0, round = 0, kingsDrawn = 0;
     let timer = null;
     const draw = () => {
       if (idx >= deck.length) { endGame(round); return; }
       const card = deck[idx++];
       round++;
+      if (card.rank === 'K') kingsDrawn++;
       const entry = KING_RULES[card.rank];
       soundFx.playCoin();
       render(card, entry, round);
@@ -86,7 +87,7 @@ export function renderKingsCup(container, onClose) {
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>ROUND: <span class="text-amber-400 text-base">${round}</span></div>
             <div>CARDS LEFT: <span class="text-white text-base">${deck.length - idx}</span></div>
-            <div>KINGS: <span class="text-red-500 text-base">${Math.floor(round / 13) || 0}</span></div>
+            <div>KINGS: <span class="text-red-500 text-base">${kingsDrawn}${kingsDrawn === 4 ? ' — CUP!' : ' / 4'}</span></div>
           </div>
           <div class="bg-zinc-900 border-2 ${red ? 'border-red-500' : 'border-white'} p-8 mb-4 text-center" style="min-height:180px">
             <div class="text-zinc-400 text-xs mb-3">${red ? 'RED SUIT' : 'BLACK SUIT'}</div>
@@ -106,7 +107,8 @@ export function renderKingsCup(container, onClose) {
     }
     function endGame(rounds) {
       clearTimeout(timer);
-      const score = Math.max(0, rounds * 10);
+      // Score = cards drawn, matching the server ceiling of 52.
+      const score = Math.max(0, rounds);
       showResult({ container, title: 'RING CLOSED', message: `${rounds} cards drawn.`, score, gameId: 'kings-cup', tone: 'over', onRestart: start, onClose });
     }
     draw();
@@ -212,7 +214,8 @@ export function renderNeverHaveIEver(container, onClose) {
     }
     function endGame(rounds) {
       clearTimeout(timer);
-      const score = Math.max(0, rounds * 5);
+      // Score = statements seen, matching the server ceiling of 50.
+      const score = Math.max(0, rounds);
       showResult({ container, title: 'GAME OVER', message: `${rounds} statements.`, score, gameId: 'never-have-i', tone: 'over', onRestart: start, onClose });
     }
     next();
@@ -308,7 +311,8 @@ export function renderMostLikelyTo(container, onClose) {
     }
     function endGame(rounds) {
       clearTimeout(timer);
-      const score = Math.max(0, rounds * 5);
+      // Score = prompts seen, matching the server ceiling of 40.
+      const score = Math.max(0, rounds);
       showResult({ container, title: 'GAME OVER', message: `${rounds} prompts.`, score, gameId: 'most-likely', tone: 'over', onRestart: start, onClose });
     }
     next();
