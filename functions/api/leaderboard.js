@@ -78,7 +78,11 @@ const GAME_MAX = {
   'blow-cartridge':  50,
   'kings-cup':       52,    // 52 cards in the deck
   'never-have-i':    50,    // 50 statements
-  'most-likely':     40     // 40 prompts
+  'most-likely':     40,    // 40 prompts
+  'cog-reflection':  30,    // 3 questions * 10
+  'raven-matrices':  80,    // 8 puzzles * 10
+  'sternberg':       240,   // 24 trials * 10
+  'number-sense':    600    // 60 trials * 10
 };
 
 // 1–4, not exactly 4. The client caps at INITIALS_LEN but happily submits

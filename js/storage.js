@@ -64,7 +64,11 @@ const defaultData = {
     'most-likely': 0,
     'chimp-test': 0,
     'calibration': 0,
-    'monty-hall': 0
+    'monty-hall': 0,
+    'cog-reflection': 0,
+    'raven-matrices': 0,
+    'sternberg': 0,
+    'number-sense': 0
   },
   favorites: [],
   gamesPlayed: 0,

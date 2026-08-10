@@ -344,6 +344,34 @@ export const BRAIN_GUIDES = {
     tip: 'Read the prompt out loud, then count to three. Hesitation ruins the joke.',
     stack: ['thaler', 'clear']
   },
+  'cog-reflection': {
+    label: 'Cognitive reflection', minutes: '3–5 min',
+    practice: 'Three problems with a System-1 lure and a System-2 answer. The famous Frederick CRT — bat and ball, lily pads, widgets. The "aha" of catching the lure is the point.',
+    why: 'CRT measures whether you override an intuitive wrong answer with reflection. Three out of three is rare; one out of three is normal.',
+    tip: 'Read the question twice. If the first answer felt too easy, the second read usually surfaces the catch.',
+    stack: ['kahneman', 'thaler', 'clear']
+  },
+  'raven-matrices': {
+    label: 'Fluid reasoning (gF)', minutes: '4–6 min',
+    practice: 'A 3x3 pattern grid with one cell missing. The pattern is one of: count progression, rotation, or color shift. Pick the option that completes the rule.',
+    why: 'Raven\'s matrices are the canonical test of fluid intelligence — reasoning on novel patterns without learned content.',
+    tip: 'Look at the relationship BETWEEN cells in a row, not just within a cell. The rule is usually a consistent transformation left-to-right.',
+    stack: ['plasticity', 'kahneman', 'clear']
+  },
+  'sternberg': {
+    label: 'Working-memory scanning', minutes: '3–5 min',
+    practice: 'Memorize 3-5 letters for 2 seconds. Then a probe letter appears. Was it in the set? Yes or no. Set size escalates 3 -> 5 across the 24 trials.',
+    why: 'Sternberg\'s 1966 paradigm is the foundation of the serial memory-scan model — reaction time scales with set size in a predictable way.',
+    tip: 'Hold the set as a small chunk, not five separate items. The probe is a single yes/no, not a serial scan.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'number-sense': {
+    label: 'Approximate number system', minutes: '1 min',
+    practice: 'Two clouds of dots side by side. Click the side with more. The ratio starts easy (10:9) and narrows toward 10:7 as you succeed. 60 seconds total.',
+    why: 'Halberda\'s work shows that "number sense" — the ability to estimate quantities without counting — is a stable cognitive trait that predicts math achievement.',
+    tip: 'Trust your first glance. Counting destroys the intuition that the ANS is testing.',
+    stack: ['plasticity', 'kahneman', 'clear']
+  },
 };
 
 export const PAPER_LINKS = {
@@ -358,7 +386,11 @@ export const PAPER_LINKS = {
   'Yates 1966': 'https://en.wikipedia.org/wiki/Method_of_loci',
   'Reitan 1958': 'https://doi.org/10.1037/h0043828',
   'Shepard 1971': 'https://doi.org/10.1126/science.5547994',
-  'Bechara 1994': 'https://doi.org/10.1093/cercor/4.8.813'
+  'Bechara 1994': 'https://doi.org/10.1093/cercor/4.8.813',
+  'Frederick 2005': 'https://doi.org/10.1016/j.jesp.2005.02.005',
+  'Raven 1936': 'https://en.wikipedia.org/wiki/Raven%27s_Progressive_Matrices',
+  'Sternberg 1966': 'https://doi.org/10.1126/science.153.3733.652',
+  'Halberda 2008': 'https://doi.org/10.1016/j.cognition.2008.05.007'
 };
 
 export function getBrainGuide(game) {
