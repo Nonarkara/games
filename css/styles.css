@@ -2125,3 +2125,4 @@ html[data-theme="sixteen"] .attract-feature-ring::after { border-color: rgba(26,
 .arcade-play-count b { color: #14181f; }
 .arcade-sound { color: #4a5561; }
 .arcade-about-link { color: #b45309; }
+html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
