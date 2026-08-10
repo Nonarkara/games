@@ -284,3 +284,18 @@ commits ahead of remote).
 every commit. If the 16-bit register is violated, the commit is
 blocked. The 16-bit register is now enforced going forward, not just
 measured.
+## Human audit pass (2026-08-10, Fable 5)
+
+Walked the live floor as a visitor, desktop, with a contrast meter. Fixed and
+shipped: amber attract panel now wears dark lettering (was white at 1.8–2.2:1),
+PLAYS counter was invisible (1.08:1) on the light header band, WHY/SOUND
+legibility. All 67 cartridges launch clean including the 13 newest (CRT, Raven,
+Sternberg, ANS, WCST, Tower of London, Mind in the Eyes, 6 drinking); WCST
+play-tested. Deploy discipline note: HEAD had sat undeployed — always finish a
+build session with `bash scripts/deploy.sh`.
+
+**Queued (blocked by Cloudflare dashboard outage):** zone Browser Cache TTL →
+"Respect Existing Headers" via the dashboard (wrangler OAuth lacks Zone
+Settings:Edit). Kills the 4h stale-asset window for every nonarkara.org
+subdomain. Retry at dash.cloudflare.com → nonarkara.org → Caching →
+Configuration when their console recovers.
