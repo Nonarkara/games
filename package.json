@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "node js/games/nineties-questions.test.mjs && node js/games/openSourceGames.test.mjs && node js/brainGuides.test.mjs",
+    "test": "node js/games/nineties-questions.test.mjs && node js/games/openSourceGames.test.mjs && node js/brainGuides.test.mjs && node functions/api/leaderboard.test.mjs",
     "check": "node --check js/app.js && node --check js/brainGuides.js && node --check js/games/openSourceGames.js && node --check scripts/browser-smoke.mjs",
     "smoke": "node scripts/browser-smoke.mjs"
   },

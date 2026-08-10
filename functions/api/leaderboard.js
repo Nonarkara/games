@@ -40,6 +40,9 @@ const GAME_MAX = {
   'trail-making':    600,   // inverted from seconds (600 - time, lower is better)
   'mental-rotation': 200,   // correct * 10 - wrong * 5, max 200
   'iowa-gambling':   2000,  // net + 1000, range -1000..+1000
+  'posner-cueing':   1200,  // (700 - validRT) + cueEffect*2 - errors*25
+  'change-blindness':1200,  // 6 rounds × max(20, 200 - secs*8)
+  'operation-span':  600,   // 18 letters × 20 + 4 perfect-set bonuses × 40
   // ARCADE
   'cyber-tetris':    999999,
   'cyber-pacman':    99999,
