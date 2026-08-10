@@ -10,7 +10,7 @@ import { BRAIN_GUIDES } from './brainGuides.js';
 
 /** Absolute cutoffs: score < cuts[0] rough, < cuts[1] warming, < cuts[2] solid, else sharp. */
 const CUTS = {
-  'dual-n-back': [4, 8, 14],
+  'dual-n-back': [40, 100, 180],
   'digit-span': [4, 6, 9],
   'stroop-match': [40, 65, 85],
   'go-nogo': [40, 65, 85],
@@ -18,7 +18,7 @@ const CUTS = {
   'schulte-table': [15, 30, 45],
   'visual-search': [40, 65, 85],
   'corsi-blocks': [3, 5, 7],
-  'memory-palace': [10, 22, 35],
+  'memory-palace': [3, 5, 6],
   'flanker': [40, 65, 85],
   'aim-trainer': [80, 140, 200],
   'mental-math': [12, 28, 50],

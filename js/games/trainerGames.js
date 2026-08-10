@@ -448,7 +448,9 @@ export function renderDigitSpan(container, onClose) {
   start();
 
   function start() {
-    let span = 3, score = 0, lives = 3, round = 0;
+    // Board score = peak span cleared (matches GAME_MAX + readout cuts).
+    // Session points stay on-screen only.
+    let span = 3, score = 0, peak = 0, lives = 3, round = 0;
     let phase = 'idle'; // show | input
     let target = [];
     let typed = [];
@@ -521,6 +523,7 @@ export function renderDigitSpan(container, onClose) {
       if (phase !== 'input') return;
       const ok = typed.length === target.length && typed.every((d, i) => d === target[i]);
       if (ok) {
+        peak = Math.max(peak, span);
         score += span * 10;
         scoreEl.innerText = score;
         span = Math.min(9, span + 1);
@@ -535,11 +538,13 @@ export function renderDigitSpan(container, onClose) {
           kb.destroy();
           showResult({
             container,
-            title: span >= 7 ? 'SPAN SOLID' : 'CAPACITY CHECK',
-            message: `Peak span ${span}. Miller's "magical number seven" is the classic adult average — going past 7 under load is strong.`,
-            score,
+            title: peak >= 7 ? 'SPAN SOLID' : 'CAPACITY CHECK',
+            message: peak
+              ? `Peak span ${peak}. Miller's "magical number seven" is the classic adult average — going past 7 under load is strong.`
+              : 'No span cleared this round. Start at three digits, chunk in twos, and say them once before typing.',
+            score: peak,
             gameId: 'digit-span',
-            tone: span >= 7 ? 'win' : 'over',
+            tone: peak >= 7 ? 'win' : 'over',
             onRestart: () => start(),
             onClose
           });
@@ -786,7 +791,8 @@ export function renderCorsiBlocks(container, onClose) {
   start();
 
   function start() {
-    let span = 3, score = 0, lives = 3, phase = 'idle';
+    // Board score = peak span cleared (matches GAME_MAX + readout cuts).
+    let span = 3, score = 0, peak = 0, lives = 3, phase = 'idle';
     let sequence = [], step = 0;
 
     const FRAME = 'relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud';
@@ -862,11 +868,13 @@ export function renderCorsiBlocks(container, onClose) {
       if (lives <= 0) {
         showResult({
           container,
-          title: span >= 6 ? 'SPAN SOLID' : 'CAPACITY CHECK',
-          message: `Peak span ${span}. Adult Corsi spans often land near 5–6. The skill is holding a spatial path, not guessing.`,
-          score,
+          title: peak >= 6 ? 'SPAN SOLID' : 'CAPACITY CHECK',
+          message: peak
+            ? `Peak span ${peak}. Adult Corsi spans often land near 5–6. The skill is holding a spatial path, not guessing.`
+            : 'No span cleared. Watch the path once without tapping, then replay it slowly.',
+          score: peak,
           gameId: 'corsi-blocks',
-          tone: span >= 6 ? 'win' : 'over',
+          tone: peak >= 6 ? 'win' : 'over',
           onRestart: () => start(),
           onClose
         });
@@ -887,6 +895,7 @@ export function renderCorsiBlocks(container, onClose) {
         soundFx.playCoin();
         step++;
         if (step >= sequence.length) {
+          peak = Math.max(peak, span);
           score += span * 10;
           scoreEl.textContent = score;
           span = Math.min(9, span + 1);
@@ -1031,8 +1040,10 @@ export function renderMemoryPalace(container, onClose) {
   start();
 
   function start() {
+    // Board score = peak loci cleared (matches readout span bands).
     let span = 3;
     let score = 0;
+    let peak = 0;
     let lives = 3;
     let placed = [];
     let askIndex = 0;
@@ -1088,8 +1099,10 @@ export function renderMemoryPalace(container, onClose) {
       showResult({
         container,
         title,
-        message: `Peak span ${span}. The palace is a route you re-enter — weird images stick harder than polite ones.`,
-        score,
+        message: peak
+          ? `Peak span ${peak}. The palace is a route you re-enter — weird images stick harder than polite ones.`
+          : 'Route lost before the first clean walk. Name each locus out loud while the item lights.',
+        score: peak,
         gameId: 'memory-palace',
         tone,
         onRestart: () => start(),
@@ -1102,7 +1115,7 @@ export function renderMemoryPalace(container, onClose) {
       livesEl.textContent = lives;
       soundFx.playHit();
       if (lives <= 0) {
-        endRun(span >= 5 ? 'PALACE STANDING' : 'ROUTE LOST', span >= 5 ? 'win' : 'over');
+        endRun(peak >= 5 ? 'PALACE STANDING' : 'ROUTE LOST', peak >= 5 ? 'win' : 'over');
         return;
       }
       span = Math.max(3, span - 1);
@@ -1113,6 +1126,7 @@ export function renderMemoryPalace(container, onClose) {
 
     function askNext() {
       if (askIndex >= placed.length) {
+        peak = Math.max(peak, span);
         score += span * 15;
         scoreEl.textContent = score;
         span = Math.min(PALACE_LOCI.length, span + 1);

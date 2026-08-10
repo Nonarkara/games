@@ -23,15 +23,15 @@
 
 const GAME_MAX = {
   // TRAIN
-  'dual-n-back':     30,    // max N-back level achieved
-  'digit-span':      20,    // max digits recalled
+  'dual-n-back':     400,   // hit points (~15 per correct match)
+  'digit-span':      20,    // peak digits recalled (cleared span)
   'stroop-match':    100,   // accuracy % (×10 internally)
   'go-nogo':         100,   // accuracy %
   'simon-seq':       30,    // max sequence length
   'schulte-table':   60,    // seconds; lower is better — store inverted
   'visual-search':   100,   // accuracy %
-  'corsi-blocks':    12,    // max blocks recalled
-  'memory-palace':   50,    // objects recalled
+  'corsi-blocks':    12,    // peak blocks recalled (cleared span)
+  'memory-palace':   12,    // peak loci cleared (palace has 6 seats; headroom for growth)
   'flanker':         100,   // accuracy %
   'aim-trainer':     300,   // inverted from seconds (300 - time, lower is better)
   'mental-math':     100,   // correct answers

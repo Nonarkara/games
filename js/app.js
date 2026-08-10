@@ -160,7 +160,14 @@ class NgsApp {
       const rec = AnalyticsService.getRecommendations(gamesCatalog, 1)[0];
       if (rec && pool.some(g => g.id === rec.id)) return rec;
     }
-    return pool[0] || gamesCatalog.find(g => g.id === 'dual-n-back');
+    // First visit: rotate a short cart (≤ ~5 min), not Dual N-Back.
+    const shortIds = ['digit-span', 'flanker', 'corsi-blocks', 'aim-trainer', 'simon-seq'];
+    const day = Math.floor(Date.now() / 86400000);
+    const prefer = shortIds[day % shortIds.length];
+    return pool.find(g => g.id === prefer)
+      || pool.find(g => g.id === 'digit-span')
+      || pool[0]
+      || gamesCatalog.find(g => g.id === 'digit-span');
   }
 
   renderRailMeta() {
