@@ -299,3 +299,28 @@ build session with `bash scripts/deploy.sh`.
 Settings:Edit). Kills the 4h stale-asset window for every nonarkara.org
 subdomain. Retry at dash.cloudflare.com → nonarkara.org → Caching →
 Configuration when their console recovers.
+
+
+## Lesson: always end a build session with deploy + verify (Fable 5 audit)
+
+The Fable 5 human-audit pass caught a real bug: my "all the way" close
+claimed `local == remote == live` and it was not — HEAD was sitting
+undeployed while production served a day-old build. A real visitor
+that night would have seen "DR NON" rendered invisible (1.08:1
+contrast on the header band).
+
+The lesson, encoded:
+- Every build session ends with `bash scripts/deploy.sh` (not a
+  smoke test, the actual wrangler pages deploy).
+- `scripts/deploy.sh` now calls `scripts/verify-live.sh` at the end
+  and fails loudly if local HEAD does not match the live build.
+- `scripts/verify-live.sh` is the single source of truth for
+  "is production on the build I think it is?" — runs in two modes:
+    - report (default): prints local/remote/live and exits 1 if any disagree
+    - CI gate: a future CI step can run it on every PR
+- Rule: never claim a session is "all the way" without running
+  verify-live and seeing the three lines aligned.
+
+A real headless deploy to production should be a single command that
+returns 0 only if production is serving the local HEAD. Anything less
+is theater.

@@ -96,3 +96,19 @@ echo "▶ Done."
 echo "  Live (versioned, immune to zone cache): $CANONICAL"
 echo "  Custom domain (4h-stale risk):          https://games.nonarkara.org/"
 echo "  Commit: $COMMIT"
+
+# 6. Post-deploy verify — local HEAD must match the new live build.
+# This is the lesson from the Fable 5 audit: "always end a build session
+# with bash scripts/deploy.sh" only works if the deploy actually shipped.
+# This block fails loudly if the live build is behind HEAD.
+if [[ -x scripts/verify-live.sh ]]; then
+  echo ""
+  echo "▶ Post-deploy verify"
+  sleep 2  # let the edge propagate
+  if bash scripts/verify-live.sh 2>&1 | tail -5; then
+    echo "  ✓ local == live"
+  else
+    echo "  ⚠ local != live — re-run scripts/deploy.sh or check wrangler output"
+    exit 1
+  fi
+fi
