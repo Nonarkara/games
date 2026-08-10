@@ -7,6 +7,7 @@
  */
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
+import { explainScore } from './scoreReadouts.js';
 
 export class ScopedKeyboard {
   constructor() {
@@ -115,6 +116,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   soundFx[tone === 'win' ? 'playWin' : 'playGameOver']();
 
   const qualifies = gameId !== null && score !== null && StorageService.qualifiesForBoard(gameId, score);
+  const readout = explainScore(gameId, score);
 
   const boardHtml = () => {
     const board = gameId !== null ? StorageService.getLeaderboard(gameId) : [];
@@ -140,6 +142,14 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
       <h3 class="axiom-result-title">${title}</h3>
       ${message ? `<p class="axiom-result-msg">${message}</p>` : ''}
       ${score !== null ? `<div class="axiom-result-score"><span class="axiom-result-score-label">FINAL SCORE</span><span class="axiom-result-score-value">${score}</span></div>` : ''}
+      ${readout ? `
+        <aside class="axiom-result-readout axiom-result-readout--${readout.tone}" aria-label="What this score means">
+          <p class="axiom-result-readout-band">${readout.title}</p>
+          <p class="axiom-result-readout-skill">Skill in play: ${readout.skill}</p>
+          <p class="axiom-result-readout-range">${readout.range}</p>
+          <p class="axiom-result-readout-feel">${readout.feel}</p>
+          <p class="axiom-result-readout-tip"><span>NEXT</span> ${readout.tip}</p>
+        </aside>` : ''}
       ${isNewHigh ? `<div class="axiom-result-high">▲ NEW HIGH SCORE</div>` : ''}
       ${qualifies ? `
         <form class="axiom-initials" id="initials-form">
