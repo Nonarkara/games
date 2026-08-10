@@ -175,12 +175,22 @@ class NgsApp {
     const guide = feature ? getBrainGuide(feature) : null;
 
     el.innerHTML = `
-      <div class="attract-copy" id="top">
-        <p class="attract-kicker">${this.playableCount()} CARTS · 16-BIT FLOOR · BRIEFING ON EVERY TITLE</p>
-        <h1>INSERT<br><em>COIN</em></h1>
-        <p class="attract-line">Kill time. Keep the mind.</p>
-        <p class="attract-sub">Chunky carts. Honest claims. Every title opens with the skill it trains, how long a round takes, and the Simons caveat — far transfer is contested. Near transfer is real.</p>
-      </div>
+      <figure class="attract-hero">
+        <img
+          src="./public/insert-coin-hero.jpg"
+          width="1024"
+          height="768"
+          alt="Dr Non in a suit inserting a coin into a Street Fighter II cabinet"
+          decoding="async"
+          fetchpriority="high"
+        />
+        <figcaption class="attract-copy" id="top">
+          <p class="attract-kicker">${this.playableCount()} CARTS · 16-BIT FLOOR · BRIEFING ON EVERY TITLE</p>
+          <h1>INSERT<br><em>COIN</em></h1>
+          <p class="attract-line">Kill time. Keep the mind.</p>
+          <p class="attract-sub">Chunky carts. Honest claims. Every title opens with the skill it trains, how long a round takes, and the Simons caveat — far transfer is contested. Near transfer is real.</p>
+        </figcaption>
+      </figure>
       ${feature ? `
         <button type="button" class="attract-feature" data-game="${feature.id}" aria-label="Load ${feature.title}">
           <span class="attract-feature-kicker">TODAY'S CARTRIDGE · ${wingLabel}</span>
