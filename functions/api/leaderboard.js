@@ -82,7 +82,16 @@ const GAME_MAX = {
   'cog-reflection':  30,    // 3 questions * 10
   'raven-matrices':  80,    // 8 puzzles * 10
   'sternberg':       240,   // 24 trials * 10
-  'number-sense':    600    // 60 trials * 10
+  'number-sense':    600,   // 60 trials * 10
+  'wcst':            240,   // 24 trials * 10
+  'tower-london':    200,   // 4 puzzles * 50
+  'mind-eyes':       80,    // 8 trials * 10
+  'ride-the-bus':    100,   // streak score
+  'power-hour':      600,   // 60 prompts * 10
+  'buzz-21':         100,   // rounds
+  'truth-or-dare':   100,   // rounds
+  'higher-lower':    100,   // streak score
+  'two-truths':      100    // 5 rounds * 20
 };
 
 // 1–4, not exactly 4. The client caps at INITIALS_LEN but happily submits

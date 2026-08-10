@@ -68,7 +68,16 @@ const defaultData = {
     'cog-reflection': 0,
     'raven-matrices': 0,
     'sternberg': 0,
-    'number-sense': 0
+    'number-sense': 0,
+    'wcst': 0,
+    'tower-london': 0,
+    'mind-eyes': 0,
+    'ride-the-bus': 0,
+    'power-hour': 0,
+    'buzz-21': 0,
+    'truth-or-dare': 0,
+    'higher-lower': 0,
+    'two-truths': 0
   },
   favorites: [],
   gamesPlayed: 0,

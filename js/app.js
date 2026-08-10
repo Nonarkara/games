@@ -27,6 +27,8 @@ import { renderAbout } from './games/about.js';
 import { renderTrailMaking, renderMentalRotation, renderIowaGambling } from './games/ngsNewTrainers.js';
 import { renderKingsCup, renderNeverHaveIEver, renderMostLikelyTo } from './games/ngsDrinkingGames.js';
 import { renderCognitiveReflection, renderRavenMatrices, renderSternberg, renderNumberSense } from './games/ngsNewTrainers2.js';
+import { renderRideTheBus, renderPowerHour, renderBuzz, renderTruthOrDare, renderHigherLower, renderTwoTruths } from './games/ngsDrinkingGames2.js';
+import { renderWCST, renderTowerOfLondon, renderMindEyes } from './games/ngsNewTrainers3.js';
 import { renderPosnerCueing, renderChangeBlindness, renderOperationSpan } from './games/ngsAttentionSuite.js';
 import { renderChimpTest, renderCalibration, renderMontyHall } from './games/ngsCuriositySuite.js';
 import { bindModalUX, GameSession } from './ui.js';
@@ -72,7 +74,10 @@ const gamesCatalog = [
   { id: 'cog-reflection', code: 'CRT', title: 'Cognitive Reflection', wing: 'train', category: 'memory-focus', domain: 'System 1 override', age: 'Teen+', desc: 'Three problems with a System-1 lure and a System-2 answer. The classic Frederick 2005 CRT.', paper: 'Frederick 2005', tags: ['Reflection', 'System 1/2', 'Bias'], renderer: renderCognitiveReflection },
   { id: 'raven-matrices', code: 'RPM', title: "Raven's Matrices", wing: 'train', category: 'memory-focus', domain: 'Fluid intelligence', age: 'Teen+', desc: '3x3 pattern grid, one cell missing. Pick the option that completes the rule.', paper: 'Raven 1936', tags: ['Fluid gF', 'Pattern', 'Reasoning'], renderer: renderRavenMatrices },
   { id: 'sternberg', code: 'STM', title: 'Sternberg Memory Scan', wing: 'train', category: 'memory-focus', domain: 'Memory scanning', age: 'Teen+', desc: 'Memorize 3-5 letters. Then a probe: was it in the set? Set size escalates.', paper: 'Sternberg 1966', tags: ['Working memory', 'Scanning', 'Probe'], renderer: renderSternberg },
-  { id: 'number-sense', code: 'ANS', title: 'Number Sense (ANS)', wing: 'train', category: 'memory-focus', domain: 'Approximate number', age: 'All', desc: 'Two dot clouds. Click the side with more. Ratio narrows as you succeed.', paper: 'Halberda 2008', tags: ['Number sense', 'Estimation', 'Ratio'], renderer: renderNumberSense },  { id: 'posner-cueing', code: 'PSN', title: 'Posner Cueing', wing: 'train', category: 'memory-focus', domain: 'Covert attention', age: 'Teen+', desc: 'A box flashes, then a dot. Most flashes tell the truth; some lie. Measures the cost of looking the wrong way.', paper: 'Posner 1980', tags: ['Attention', 'Orienting', 'Reaction'], renderer: renderPosnerCueing },
+  { id: 'number-sense', code: 'ANS', title: 'Number Sense (ANS)', wing: 'train', category: 'memory-focus', domain: 'Approximate number', age: 'All', desc: 'Two dot clouds. Click the side with more. Ratio narrows as you succeed.', paper: 'Halberda 2008', tags: ['Number sense', 'Estimation', 'Ratio'], renderer: renderNumberSense },
+  { id: 'wcst', code: 'WST', title: "Card Sorting (WCST)", wing: 'train', category: 'memory-focus', domain: 'Set shifting', age: 'Teen+', desc: 'Sort by the hidden rule. It changes every 5 correct sorts. Notice the change.', paper: 'Berg 1948', tags: ['Set shifting', 'Flexibility'], renderer: renderWCST },
+  { id: 'tower-london', code: 'TOL', title: 'Tower of London', wing: 'train', category: 'memory-focus', domain: 'Planning', age: 'Teen+', desc: 'Three pegs, three balls. Match the target in the fewest moves.', paper: 'Shallice 1982', tags: ['Planning', 'Executive'], renderer: renderTowerOfLondon },
+  { id: 'mind-eyes', code: 'EYE', title: 'Mind in the Eyes', wing: 'train', category: 'memory-focus', domain: 'Theory of Mind', age: 'Teen+', desc: 'Pick the best word for the expression. Tests empathy and social cognition.', paper: 'Baron-Cohen 2001', tags: ['ToM', 'Emotion', 'Social'], renderer: renderMindEyes },  { id: 'posner-cueing', code: 'PSN', title: 'Posner Cueing', wing: 'train', category: 'memory-focus', domain: 'Covert attention', age: 'Teen+', desc: 'A box flashes, then a dot. Most flashes tell the truth; some lie. Measures the cost of looking the wrong way.', paper: 'Posner 1980', tags: ['Attention', 'Orienting', 'Reaction'], renderer: renderPosnerCueing },
   { id: 'change-blindness', code: 'CBL', title: 'Change Blindness', wing: 'train', category: 'memory-focus', domain: 'Change detection', age: 'All', desc: 'One square keeps changing. A blank flash hides the motion your eye would normally catch.', paper: 'Rensink 1997', tags: ['Attention', 'Flicker'], renderer: renderChangeBlindness },
   { id: 'operation-span', code: 'OSP', title: 'Operation Span', wing: 'train', category: 'memory-focus', domain: 'Complex span', age: 'Teen+', desc: 'Check an equation, hold a letter, repeat. Recall the letters in order — storage while processing.', paper: 'Turner & Engle 1989', tags: ['Working memory', 'Complex span'], renderer: renderOperationSpan },
   { id: 'chimp-test', code: 'CHM', title: 'Chimp Test', wing: 'train', category: 'memory-focus', domain: 'Masked recall', age: 'All', desc: 'Digits vanish behind blanks the moment you tap 1. Finish from memory. Ayumu the chimp holds 9.', paper: 'Inoue 2007', tags: ['Working memory', 'Iconic', 'Braggable'], renderer: renderChimpTest },
@@ -113,7 +118,12 @@ const gamesCatalog = [
   { id: 'kings-cup', code: 'KNG', title: "King's Cup", wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '52-card ring of fire. Each card = a rule. Draw, deal, drink.', tags: ['Party', 'Cards', 'Drinking'], renderer: renderKingsCup },
   { id: 'never-have-i', code: 'NHI', title: 'Never Have I Ever', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '50 statements. Fingers down if you have. Last finger up wins.', tags: ['Party', 'Confession', 'Drinking'], renderer: renderNeverHaveIEver },
   { id: 'most-likely', code: 'MLT', title: 'Most Likely To', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '40 prompts. Everyone points. Most fingers pointed drinks.', tags: ['Party', 'Group vote', 'Drinking'], renderer: renderMostLikelyTo },
-
+  { id: 'ride-the-bus', code: 'BUS', title: 'Ride the Bus', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '4 phases: red/black, higher/lower, inside/outside, guess the suit. Survive all four.', tags: ['Party', 'Cards', 'Drinking'], renderer: renderRideTheBus },
+  { id: 'power-hour', code: 'PWH', title: 'Power Hour', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '60 prompts on a 60-minute timer. One sip per minute.', tags: ['Party', 'Timer', 'Drinking'], renderer: renderPowerHour },
+  { id: 'buzz-21', code: 'BUZ', title: 'Buzz (21)', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: 'Count to 21. +1, +2, or +3 each turn. Whoever says 21 drinks.', tags: ['Party', 'Counting', 'Drinking'], renderer: renderBuzz },
+  { id: 'truth-or-dare', code: 'TOD', title: 'Truth or Dare', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '30 truths, 30 dares. Answer or drink.', tags: ['Party', 'Confession', 'Drinking'], renderer: renderTruthOrDare },
+  { id: 'higher-lower', code: 'HIL', title: 'Higher or Lower', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: 'Single deck streak. Guess the next card. Drink on a wrong guess.', tags: ['Party', 'Cards', 'Drinking'], renderer: renderHigherLower },
+  { id: 'two-truths', code: '2T1', title: '2 Truths & a Lie', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: 'Two true, one false. The group votes on the lie.', tags: ['Party', 'Deception', 'Drinking'], renderer: renderTwoTruths },
   // ── META ───────────────────────────────────────────────────────────────
   { id: 'about-dr-non', code: 'WHY', title: 'About Dr Non', wing: 'meta', category: 'about', domain: 'Signal', age: 'Everyone', desc: 'MIT Wii photo, a life of games, and why honesty is the product.', tags: ['Story'], renderer: renderAbout }
 ];
@@ -173,6 +183,7 @@ class NgsApp {
           <input id="search-input" type="search" placeholder="Title, skill, or code" value="${this.searchQuery}" aria-label="Search games" />
         </label>
         <p class="arcade-play-count"><b id="played-count">${stats.gamesPlayed || 0}</b><span>PLAYS</span></p>
+        <button id="about-link" class="arcade-about-link" type="button" aria-label="Open the About panel">WHY</button>
         <button id="sound-toggle-btn" class="arcade-sound" type="button" aria-label="Toggle sound">SOUND</button>
       </div>
     `;
@@ -461,6 +472,16 @@ class NgsApp {
         soundFx.init();
         const muted = soundFx.toggleMute();
         if (btn) btn.textContent = muted ? 'MUTED' : 'SOUND';
+        return;
+      }
+
+      if (e.target.id === 'about-link' || e.target.closest('#about-link')) {
+        const about = gamesCatalog.find(g => g.id === 'about-dr-non');
+        if (about) {
+          soundFx.playClick();
+          this.launchGame('about-dr-non');
+        }
+        return;
       }
     });
   }

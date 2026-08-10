@@ -372,6 +372,69 @@ export const BRAIN_GUIDES = {
     tip: 'Trust your first glance. Counting destroys the intuition that the ANS is testing.',
     stack: ['plasticity', 'kahneman', 'clear']
   },
+  'wcst': {
+    label: 'Set shifting', minutes: '4–6 min',
+    practice: 'Sort cards into buckets by a hidden rule (color, shape, or count). After 5 correct sorts, the rule changes silently. The challenge is to detect the change and adapt.',
+    why: 'Berg\'s WCST is the canonical test of cognitive flexibility. Perseveration on an old rule is the failure mode.',
+    tip: 'After a wrong sort, treat it as a strong signal the rule has changed. Try a different dimension.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'tower-london': {
+    label: 'Planning', minutes: '4–6 min',
+    practice: 'Three pegs, three colored balls. Move balls to match the target configuration in the fewest moves. No placing a larger ball on a smaller one.',
+    why: 'Shallice\'s ToL measures planning — the ability to look ahead and form a sequence of moves before acting.',
+    tip: 'Work backward from the target. Figure out the LAST move, then the second-to-last, then the first.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'mind-eyes': {
+    label: 'Theory of Mind', minutes: '3–5 min',
+    practice: 'Look at a pair of stylized eyes. Pick the word that best describes the expression (e.g., playful, upset, reflective).',
+    why: 'Baron-Cohen\'s RMIE is the standard measure of social cognition — the ability to read what another person is feeling from minimal cues.',
+    tip: 'Focus on the EYES, not the words. The expression is in the gaze, the brow, the mouth — not in the options.',
+    stack: ['thaler', 'kahneman', 'clear']
+  },
+  'ride-the-bus': {
+    label: 'Party card game', minutes: '5–15 min',
+    practice: 'Four phases. Red or Black, Higher or Lower, Inside or Outside, Guess the Suit. Wrong guess = drink. Survive all four to ride the bus clean.',
+    why: 'The web side just removes the printed card deck and the lookup. The game is the table play.',
+    tip: 'The INSIDE phase is the trickiest. Equal to either card still counts as inside. Use it.',
+    stack: ['werbach', 'thaler', 'clear']
+  },
+  'power-hour': {
+    label: '60-minute timer', minutes: '60 min',
+    practice: 'Sixty prompts on a sixty-minute timer. Most are "take a sip"; some are special (toast, finish, pass it).',
+    why: 'Compressed for the screen — the real game is across an actual hour. The screen just lists what to do at each minute mark.',
+    tip: 'Hydrate between rounds. The game is endurance, not sprint.',
+    stack: ['thaler', 'clear']
+  },
+  'buzz-21': {
+    label: 'Counting game', minutes: '2–5 min',
+    practice: 'Count from 1 to 21. Each turn, advance by 1, 2, or 3. Whoever says 21 drinks.',
+    why: 'Classic bar game. The strategy is to leave your opponent a multiple of 4 (so any 1/2/3 lands on 20, 21, or 22).',
+    tip: 'The optimal move keeps the current count at 17, 13, 9, 5, or 1. Memorize the sequence.',
+    stack: ['thaler', 'kahneman', 'clear']
+  },
+  'truth-or-dare': {
+    label: 'Confession prompts', minutes: '5–15 min',
+    practice: 'A random prompt from 30 truths and 30 dares. Answer the truth, do the dare, or drink. 18+ on every entry.',
+    why: 'The web side generates the prompt. The game is the table play.',
+    tip: 'Lean into the confessions. The best truths are the ones you almost did, not the ones you definitely did.',
+    stack: ['thaler', 'clear']
+  },
+  'higher-lower': {
+    label: 'Streak game', minutes: '2–5 min',
+    practice: 'A card shows. Guess if the next card is higher or lower. Streak until you miss. Equal counts as a miss.',
+    why: 'The web side handles the card. The game is the streak.',
+    tip: 'Use the cards shown so far. The deck is finite. Track which ranks are out.',
+    stack: ['thaler', 'clear']
+  },
+  'two-truths': {
+    label: 'Deception + voting', minutes: '5 min',
+    practice: 'Three statements: two true, one false. The group votes on the lie. 5 rounds. Score = lies caught.',
+    why: 'The web side generates the prompts. The game is the deception and the table read.',
+    tip: 'Pick truths that sound like lies. The lie should be the most boring statement.',
+    stack: ['thaler', 'kahneman', 'clear']
+  },
 };
 
 export const PAPER_LINKS = {
@@ -390,7 +453,10 @@ export const PAPER_LINKS = {
   'Frederick 2005': 'https://doi.org/10.1016/j.jesp.2005.02.005',
   'Raven 1936': 'https://en.wikipedia.org/wiki/Raven%27s_Progressive_Matrices',
   'Sternberg 1966': 'https://doi.org/10.1126/science.153.3733.652',
-  'Halberda 2008': 'https://doi.org/10.1016/j.cognition.2008.05.007'
+  'Halberda 2008': 'https://doi.org/10.1016/j.cognition.2008.05.007',
+  'Berg 1948': 'https://doi.org/10.1037/h0054214',
+  'Shallice 1982': 'https://doi.org/10.1016/0028-3932(82)90101-7',
+  'Baron-Cohen 2001': 'https://doi.org/10.1006/jecp.2000.2612'
 };
 
 export function getBrainGuide(game) {
