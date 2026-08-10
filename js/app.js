@@ -132,7 +132,9 @@ class NgsApp {
   constructor() {
     this.activeWing = 'train';
     this.searchQuery = '';
-    this.focusId = 'dual-n-back';
+    // First visit: a short cart (≤ ~5 min), not Dual N-Back as the default focus.
+    const shortIds = ['digit-span', 'flanker', 'corsi-blocks', 'aim-trainer', 'simon-seq'];
+    this.focusId = shortIds[Math.floor(Date.now() / 86400000) % shortIds.length];
     this._releaseModalUX = null;
     this.initUI();
   }
