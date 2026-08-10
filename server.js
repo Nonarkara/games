@@ -51,5 +51,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🎮 OmniArcade Server running at http://localhost:${PORT}`);
+  console.log(`🎮 Dr Non — Non-Gaming System running at http://localhost:${PORT}`);
 });

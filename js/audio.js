@@ -1,5 +1,5 @@
 /**
- * OmniArcade Web Audio API Sound Synthesizer
+ * Dr Non — Non-Gaming System Web Audio API Sound Synthesizer
  * Generates retro chiptune and arcade sound effects dynamically
  */
 

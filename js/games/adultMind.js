@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Adult & Mind Lounge Suite (Axiom Core Styled)
+ * Dr Non — Non-Gaming System Adult & Mind Lounge Suite (Axiom Core Styled)
  */
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';

@@ -1,5 +1,5 @@
 /**
- * OmniArcade — Trainer Suite (Console Edition)
+ * Dr Non — Non-Gaming System Trainer Suite (Console Edition)
  * Research-anchored trainers, each mapped to a citation in PROTOCOL:
  *   Dual N-Back     → Jaeggi et al. 2008 (working memory)
  *   Schulte Table   → classic attention/peripheral-scan drill

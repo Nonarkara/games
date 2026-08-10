@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Retro Arcade Vault Suite (Axiom Core Styled)
+ * Dr Non — Non-Gaming System Retro Arcade Vault Suite (Axiom Core Styled)
  */
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';

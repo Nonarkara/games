@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Curated Learning & Coordination Suite
+ * Dr Non — Non-Gaming System Curated Learning & Coordination Suite
  *
  * Mechanic attributions (all MIT / public-domain, reimplemented in vanilla JS):
  *  - Pattern Breaker: adapted from `maxwellito/breaklock` (MIT) — Mastermind × pattern-lock

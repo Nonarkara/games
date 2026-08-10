@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Analytics & Adaptive Learning Service
+ * Dr Non — Non-Gaming System Analytics & Adaptive Learning Service
  * Logs every play to localStorage in a backend-ready format.
  * Future: swap localStorage for a REST API — the contract is identical.
  */

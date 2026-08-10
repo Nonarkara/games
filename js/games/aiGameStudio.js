@@ -1,5 +1,5 @@
 /**
- * OmniArcade - AI Game Builder Studio (Axiom Core Styled)
+ * Dr Non — Non-Gaming System AI Game Builder Studio (Axiom Core Styled)
  * Inspired by Tesana.ai — Prompt-to-Play Canvas Engine
  */
 import { soundFx } from '../audio.js';

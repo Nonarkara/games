@@ -6,7 +6,7 @@
  * Sudoku Sprint: puzzle set + play loop after studying `robatron/sudoku.js` (MIT).
  * Fifteen Puzzle: play loop after studying `imshubhamsingh/15-puzzle` (MIT).
  *
- * The renderers and mobile controls are original to OmniArcade. The sources
+ * The renderers and mobile controls are original to NGS. The sources
  * are credited in-game and in CREDITS.md as required by the Ongard Move.
  */
 import { soundFx } from '../audio.js';
@@ -369,7 +369,7 @@ export function renderArcadePong(container, onClose) {
 /* ===========================================================================
  * SUDOKU SPRINT — small boards, clock, one clean round
  * Puzzle construction studied from robatron/sudoku.js (MIT). Boards below
- * are authored for OmniArcade; the solver library is not bundled.
+ * are authored for NGS; the solver library is not bundled.
  * ======================================================================== */
 const SUDOKU_BOARDS = [
   {

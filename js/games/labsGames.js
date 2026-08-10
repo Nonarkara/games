@@ -1,5 +1,5 @@
 /**
- * OmniArcade · Labs
+ * Dr Non — Non-Gaming System Labs
  * ------------------------------------------------------------------
  * Dr Non's personal games portal. The first game is a trivia about
  * the things he likes / engages with — books, philosophy, bikes,

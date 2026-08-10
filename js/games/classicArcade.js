@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Classic Arcade Legends Suite & Custom File Inspector
+ * Dr Non — Non-Gaming System Classic Arcade Legends Suite & Custom File Inspector
  */
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';

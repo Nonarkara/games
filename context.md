@@ -1,4 +1,196 @@
-# OmniArcade — games portal
+# NGS — Non-Gaming System
+
+**Rebrand LIVE (2026-08-10).** https://games.nonarkara.org now serves NGS.
+The npm package is still named `omni-arcade` internally (deliberate — Dr Non
+said not to rename it without his say-so); every user-visible surface is NGS.
+
+⚠️ **Deploying to the custom domain requires `--branch=main`.** `wrangler pages
+deploy` infers the branch from git, so running it from `codex/arcade-revival`
+publishes a **Preview** deploy that never reaches games.nonarkara.org. That is
+exactly how the site sat on a stale build for a day. Always use
+`bash scripts/deploy.sh`, which pins `--branch=main`.
+
+## Phase 6: Server-backed leaderboard (2026-08-10)
+
+Server scaffold is in. Run `bash scripts/server-init.sh` to provision
+the D1 database + apply the schema + patch `wrangler.jsonc`. Run
+`bash scripts/deploy.sh` to ship.
+
+Files:
+
+- `wrangler.jsonc` — D1 binding `DB` → `ngs-leaderboard` (database_id
+  is the placeholder until `server-init.sh` runs)
+- `migrations/0001_init.sql` — two tables: `sessions` (5-min one-time
+  tokens, marked used on consume) and `scores` (UNIQUE session_id
+  prevents double-submit)
+- `functions/api/session.js` — `POST { game_id }` → `{ session_id,
+  expires_at, game_id }`. Rate-limited 1 per IP per 2s.
+- `functions/api/leaderboard.js` — `GET ?game_id=X` for public read;
+  `POST { game_id, initials, score, session_id }` to submit. Validates
+  session + initials (`/^[A-Z0-9]{4}$/`) + score (`0 <= score <=
+  GAME_MAX[game_id]`). `GAME_MAX` is the authoritative per-game ceiling;
+  a cheater who invents a session still can't post above it.
+- `scripts/server-init.sh` — operator: create D1, patch wrangler.jsonc,
+  apply schema, print the binding.
+- `js/storage.js` — adds `submitScoreToServer` + `fetchLeaderboardFromServer`
+  (async, 5s timeout, never throws). `submitScore` is fire-and-forget
+  server-side; the result-screen also refreshes from the server after a
+  successful local submit so the canonical top-5 replaces the local one
+  if it differs.
+- `js/ui.js` — `form.onsubmit` paints the local board first, then
+  asynchronously swaps in the server board if the GET succeeds.
+
+End-to-end: a cheater who calls `/api/leaderboard` directly with a
+fake session still hits the per-game max. They can poison one entry
+per game to the legit ceiling; they cannot flood. The `UNIQUE
+(session_id)` constraint is the backstop.
+
+## Phase 5: 3 new brain games (2026-08-10)
+
+`js/games/ngsNewTrainers.js` adds three research-grade cognitive tasks
+to the TRAIN wing:
+
+- **Trail Making Test** (Reitan 1958) — Part A `1→2→3…`, Part B
+  `1→A→2→B alternating`. Errors reset the trail to that point so they
+  cost real time. Score = time-based (server stores inverted).
+- **Mental Rotation** (Shepard & Metzler 1971, 2D simplification) —
+  two shapes side by side; click SAME (rotated) or MIRROR (reflected).
+  20 trials × 8s.
+- **Iowa Gambling Task** (Bechara 1994) — 40 draws from 4 decks.
+  Decks A/B punish hard, C/D pay small reliably. Score = net profit
+  + 1000 (range 0..2000).
+
+Operator: `bash scripts/new-game.sh <id> <code> <title> <wing>
+<category> <domain> <age> <desc> [paper]` scaffolds a new game file +
+patches `js/app.js`, `js/brainGuides.js`, `js/storage.js`. Idempotent,
+runs `node --check` + the brainGuides test at the end. Proven
+end-to-end on a throwaway id.
+
+## SSDIY operator surface (Phase 4b, 2026-08-10)
+
+`scripts/deploy.sh` is the one-command cpdt cycle:
+
+```bash
+bash scripts/deploy.sh         # lint + test + wrangler deploy + smoke
+bash scripts/deploy.sh --dry   # lint + test, no deploy
+```
+
+It lints every `js/*.js` and `js/games/*.js` with `node --check`, runs
+`npm test`, deploys via `wrangler pages deploy . --branch=main
+--commit-dirty=true --commit-hash=$(git rev-parse --short HEAD)`, then
+smokes the versioned `*.pages.dev` alias (NOT the custom domain — the
+zone cache rewrites JS/CSS to max-age=14400 on `games.nonarkara.org`,
+4h-stale risk). Smoke checks HTTP 200, `<title>` contains "Dr Non",
+`og:title` contains "Dr Non`, and `js/app.js` returns 200.
+
+Two more operators landed with Phases 5 + 6:
+
+- `bash scripts/new-game.sh <args>` — scaffold a new game end-to-end
+  (writes the renderer, patches the catalog, brain guide, storage
+  high-score key, runs the test). Idempotent.
+- `bash scripts/server-init.sh` — provision the D1 leaderboard
+  backend (create DB, patch wrangler.jsonc, apply schema). Idempotent.
+
+## Phase 4: 4-letter initials (2026-08-10)
+
+- `js/storage.js`:
+  - `STORAGE_KEY` renamed to `ngs_data_v1`
+  - `LEGACY_KEY = 'omni_arcade_data_v1'` for one-time read-then-delete
+  - `MIGRATION_KEY = 'ngs_migrated_v2'` flag so the migration runs exactly once
+  - `INITIALS_LEN = 4` constant
+  - `migrateLegacyOnce()` runs at the top of `getData()` — slices any
+    5-letter initials on legacy leaderboard entries to 4, copies to the
+    new key, removes the old key, sets the flag. Idempotent, non-throwing,
+    corrupt-legacy safe (just starts clean).
+  - `submitScore` slices to 4, default fallback `AAAA`
+- `js/ui.js`:
+  - `maxlength="5"` → `4`, `placeholder="AAAAA"` → `AAAA`
+  - `input.oninput` now slices to 4 in the live filter (so the user can't
+    type a 5th letter and have it silently dropped at submit time)
+- About copy already pre-staged in Phase 3 ("sign the board with four letters")
+
+## About deepened (Phase 3, 2026-08-10)
+
+`js/games/about.js` rewritten as a MITF-voice essay, ~700 words. The thread
+is "love for games" — Dr Non's personal arc from Bangkok lanes in the 80s
+through Dragon Quest on the Famicom (dad brought from Singapore, he saved
+for the cartridges) through the IBM laptop mom brought home from the bank
+(middle school, taught himself HTML/BASIC) through CM/SimCity/ISS in high
+school through AFS Dallas 1998 (Zidane headbutt, Beckham red) through MIT
+Wii 2007 to the 2026 World Cup closing the loop (country he first lived in
+at 17) and the Switch 2 last July.
+
+Structure: punchline → lanes → first machine → computer age → 2007/now →
+counter ("Games are killing time") → "So what. Three moves." → "Play." →
+"— Dr Non, Bangkok, 2026". The three moves carry the NGS thesis:
+
+1. NGS exists because games taught me to think — brain expansion, not game system
+2. Every cartridge is built on the five frameworks (Kahneman, Werbach,
+   Thaler, neuroplasticity, Atomic Habits) — love alone isn't enough, you
+   need a science
+3. Sign with four letters. Come back. Beat yourself. The loop. The system.
+
+CSS additions in `css/styles.css` for the new about elements:
+- `.about-punch` — opening line, red emphasis
+- `.about-h` — section h3, hairline divider above
+- `.about-sig` — italic signature
+
+The MIT Wii photo is preserved; the figcaption reads "Playing Wii @ MIT,
+2007. The research question was already forming."
+
+## Rebrand landed (Phase 2, 2026-08-10)
+
+The product is now `Dr Non — Non-Gaming System (NGS)`. "OmniArcade" was the
+codename — the work-in-progress local branch and the future live deploy are
+both under the new name. The brand:
+
+- Title tag: `Dr Non — Non-Gaming System · Brain expansion, not killing time`
+- Hero h1: `NOT A / GAME SYSTEM` (two-line dramatic)
+- Hero line: `Brain expansion, not killing time.`
+- Header brand disc: `NG`, title `DR NON`, subtitle `NON-GAMING SYSTEM`
+- Status bar: `NON-GAMING SYSTEM · BRAIN EXPANSION · 16-BIT · NO LOGIN · NO ADS`
+- Edge-strip: now 4 panels (BRIEFING · HONESTY · STACK · LABS), kicker
+  `THE STACK`, h2 `Not a game system. A brain expansion system.`
+- Footer: `DR NON — Non-Gaming System · Brain expansion, not killing time.`
+- Schema.org: `name = "Dr Non — Non-Gaming System"`, `alternateName = ["NGS", "Dr Non NGS"]`, `creator.alternateName = "Dr Non"`
+
+Internal identifiers kept for now (no destructive changes — data migration
+plan deferred to Phase 6):
+
+- `package.json` name: `omni-arcade` (Dr Non said not to rename without say-so)
+- `STORAGE_KEY = 'omni_arcade_data_v1'` in storage.js (data is on user's device)
+- `LOG_KEY = 'omni_arcade_analytics_v1'` in analytics.js
+- `class NgsApp` is the new app class; old `OmniArcadeApp` is gone
+
+## The stack (Phase 1, shipped 2026-08-10)
+
+`js/theory.js` defines THE STACK — the five theoretical frameworks that
+hold the product up:
+
+1. **Kahneman & Tversky** — System 1 / System 2 (Tversky & Kahneman 1974;
+   Kahneman 2011). Every Stroop / Go-No-Go / Flanker drill is System 2
+   override of System 1. Tetris / Pac-Man / Aim Trainer train System 1.
+2. **Werbach & Hunter** — Gamification (Werbach & Hunter 2012 *For the Win*;
+   Werbach's Coursera "Gamification" course). PBL triad (Points / Badges /
+   Leaderboards) and MDA framework (Mechanics → Dynamics → Aesthetics).
+3. **Thaler & Sunstein** — Nudge + EAST (Thaler & Sunstein 2008; Service
+   et al. 2014). Every screen in NGS is a choice architecture — easy,
+   attractive, social, timely.
+4. **Neuroplasticity** — Maguire 2000 (London taxi drivers); Draganski 2004;
+   Doidge 2007. The hope that practice changes the brain; the honest
+   counter-claim that far transfer is contested (Simons 2016 stays on every
+   briefing).
+5. **James Clear** — *Atomic Habits* (2018). Cue → Craving → Response →
+   Reward. The 4-letter initial is the identity. The daily cartridge is the
+   cue. The 2-minute rule is why every round fits between meetings.
+
+Each `BRAIN_GUIDES[game]` entry in `js/brainGuides.js` now carries a
+`stack: [...]` array of framework IDs it exercises. Helpers:
+- `frameworksForGame(id)` — resolved full entries
+- `buildBriefing(game)` — full briefing object the next surface will use
+  (label + minutes + practice + why + tip + frameworks + paper + caveat)
+
+The rebrand copy and the "Why NGS" surface are wired in Phase 2.
 
 **Live:** https://games.nonarkara.org (custom domain, added 2026-08-08) · alias https://games-bm7.pages.dev
 
@@ -6,7 +198,7 @@
 
 The edge is **not** game count. Other portals already ship infinite free HTML5 titles.
 
-OmniArcade wins on three things only Dr Non can host together:
+NGS wins on three things only Dr Non can host together:
 
 1. **Brain Briefing on every cartridge** — skill practised, round length, coach tip, and the Simons caveat before play.
 2. **Honesty as product** — near transfer is defended; far transfer is not sold. Papers stay visible.
@@ -26,7 +218,7 @@ npx wrangler pages deploy . --project-name=games --commit-dirty=true
 
 ## Architecture
 
-Plain ESM, no build. `index.html` shell → `js/app.js` (`gamesCatalog[]`, one entry per game, `renderer: renderXxx(container, onClose)`) → `js/games/*.js` suites. Shared: `ui.js` (GameSession timer/listener trap, ScopedKeyboard, showResult), `storage.js` (high scores + top-5 leaderboards with 5-letter initials), `analytics.js`, `audio.js`. `server.js` is the local dev server only (port 3000).
+Plain ESM, no build. `index.html` shell → `js/app.js` (`gamesCatalog[]`, one entry per game, `renderer: renderXxx(container, onClose)`) → `js/games/*.js` suites. Shared: `ui.js` (GameSession timer/listener trap, ScopedKeyboard, showResult), `storage.js` (high scores + top-5 leaderboards with 4-letter initials, D1-backed via functions/api), `analytics.js`, `audio.js`. `server.js` is the local dev server only (port 3000).
 
 **Tetris conservation law:** canvas pixel size = `COLS × ROWS × BLOCK_SIZE` (10×20×24 = 240×480). A shorter canvas draws rows off-screen.
 

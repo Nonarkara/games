@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Educational Games Suite
+ * Dr Non — Non-Gaming System Educational Games Suite
  * Public-domain / classic educational mechanics, reimplemented in vanilla JS.
  */
 import { soundFx } from '../audio.js';

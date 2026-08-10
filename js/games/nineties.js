@@ -1,5 +1,5 @@
 /**
- * OmniArcade · Labs — Blow Into The Cartridge
+ * Dr Non — Non-Gaming System Labs — Blow Into The Cartridge
  * ------------------------------------------------------------------
  * Host mode. One screen, everyone shouts, score on paper.
  *

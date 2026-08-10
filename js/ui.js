@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Shared UI Toolkit (Storybook Edition)
+ * Dr Non — Non-Gaming System · Shared UI Toolkit
  * GameSession: the architectural fix for ALL games.
  *   - Wraps setInterval/setTimeout/requestAnimationFrame/addEventListener
  *   - One teardown() kills every stray timer, listener, and animation frame
@@ -145,8 +145,8 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
         <form class="axiom-initials" id="initials-form">
           <label class="axiom-initials-label" for="initials-input">YOU MADE THE BOARD — SIGN IT</label>
           <div class="axiom-initials-row">
-            <input id="initials-input" class="axiom-initials-input" maxlength="5" autocomplete="off"
-                   spellcheck="false" placeholder="AAAAA" value="${StorageService.getLastInitials()}" />
+            <input id="initials-input" class="axiom-initials-input" maxlength="4" autocomplete="off"
+                   spellcheck="false" placeholder="AAAA" value="${StorageService.getLastInitials()}" />
             <button type="submit" class="axiom-btn axiom-btn-primary axiom-initials-submit">SIGN</button>
           </div>
         </form>` : ''}
@@ -161,13 +161,24 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   const form = overlay.querySelector('#initials-form');
   if (form) {
     const input = overlay.querySelector('#initials-input');
-    input.oninput = () => { input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+    input.oninput = () => { input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4); };
     form.onsubmit = (e) => {
       e.preventDefault();
       StorageService.submitScore(gameId, input.value, score);
       soundFx.playCoin();
       form.remove();
       overlay.querySelector('#result-board').innerHTML = boardHtml();
+      // After the local board paints, try the server board. On success
+      // swap in the canonical top-5 across all players. On failure,
+      // the local board stays.
+      if (typeof StorageService.fetchLeaderboardFromServer === 'function') {
+        StorageService.fetchLeaderboardFromServer(gameId).then(serverBoard => {
+          if (serverBoard && serverBoard.length) {
+            const boardEl = overlay.querySelector('#result-board');
+            if (boardEl) boardEl.innerHTML = boardHtml();
+          }
+        }).catch(() => { /* keep local */ });
+      }
     };
   }
 

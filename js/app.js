@@ -1,7 +1,7 @@
 /**
- * OmniArcade — Main coordinator
+ * Dr Non — Non-Gaming System · Main coordinator
  * Floor plan: four wings (TRAIN / ARCADE / LEARN / LABS) + dense bay rows.
- * Category filter bug fixed: clicks bind to .omni-wing / .omni-bay-row.
+ * Wing clicks bind to .cabinet-wing; cartridge rows are .select-row.
  */
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
@@ -24,6 +24,8 @@ import {
   renderCorsiBlocks, renderFlanker, renderMemoryPalace
 } from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
+import { renderTrailMaking, renderMentalRotation, renderIowaGambling } from './games/ngsNewTrainers.js';
+import { renderPosnerCueing, renderChangeBlindness, renderOperationSpan } from './games/ngsAttentionSuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
 
@@ -61,6 +63,12 @@ const gamesCatalog = [
   { id: 'type-rush', code: 'TYP', title: 'Type Rush', wing: 'train', category: 'skills', domain: 'Keyboard fluency', age: '8+', desc: '30-second typing drill with live WPM and accuracy.', tags: ['Typing', 'WPM'], renderer: renderTypeRush },
   { id: 'reflex-matrix', code: 'RFX', title: 'Reflex Matrix', wing: 'train', category: 'casual-friv', domain: 'Coordination', age: 'All', desc: 'Tap glowing cells before they fade. Speed escalates each wave.', tags: ['Reflex', 'Coordination'], renderer: renderReflexMatrix },
 
+  { id: 'trail-making', code: 'TMT', title: 'Trail Making', wing: 'train', category: 'memory-focus', domain: 'Task switching', age: 'Teen+', desc: 'Part A: 1→2→3… Part B: 1→A→2→B alternating. Errors reset the trail.', paper: 'Reitan 1958', tags: ['Task switching', 'Set shifting'], renderer: renderTrailMaking },
+  { id: 'mental-rotation', code: 'ROT', title: 'Mental Rotation', wing: 'train', category: 'memory-focus', domain: 'Spatial rotation', age: 'Teen+', desc: 'Same shape rotated? Or mirrored? 20 trials, 8s each.', paper: 'Shepard 1971', tags: ['Spatial', 'Rotation'], renderer: renderMentalRotation },
+  { id: 'iowa-gambling', code: 'IGT', title: 'Iowa Gambling Task', wing: 'train', category: 'memory-focus', domain: 'Risk learning', age: '18+', desc: '40 cards, 4 decks, two good and two bad. Learn which.', paper: 'Bechara 1994', tags: ['Risk', 'Somatic markers', 'Decision'], renderer: renderIowaGambling },
+  { id: 'posner-cueing', code: 'PSN', title: 'Posner Cueing', wing: 'train', category: 'memory-focus', domain: 'Covert attention', age: 'Teen+', desc: 'A box flashes, then a dot. Most flashes tell the truth; some lie. Measures the cost of looking the wrong way.', paper: 'Posner 1980', tags: ['Attention', 'Orienting', 'Reaction'], renderer: renderPosnerCueing },
+  { id: 'change-blindness', code: 'CBL', title: 'Change Blindness', wing: 'train', category: 'memory-focus', domain: 'Change detection', age: 'All', desc: 'One square keeps changing. A blank flash hides the motion your eye would normally catch.', paper: 'Rensink 1997', tags: ['Attention', 'Flicker'], renderer: renderChangeBlindness },
+  { id: 'operation-span', code: 'OSP', title: 'Operation Span', wing: 'train', category: 'memory-focus', domain: 'Complex span', age: 'Teen+', desc: 'Check an equation, hold a letter, repeat. Recall the letters in order — storage while processing.', paper: 'Turner & Engle 1989', tags: ['Working memory', 'Complex span'], renderer: renderOperationSpan },
   // ── ARCADE ─────────────────────────────────────────────────────────────
   { id: 'cyber-tetris', code: 'TET', title: 'Cyber Tetris 1984', wing: 'arcade', category: 'classics', domain: 'Spatial', age: 'All', desc: 'Falling tetrominoes, line clears, combo multipliers.', tags: ['Classic', 'Puzzle'], renderer: renderCyberTetris },
   { id: 'arcade-breakout', code: 'BRK', title: 'Breakout 1976', wing: 'arcade', category: 'classics', domain: 'Prediction', age: 'All', desc: 'Shape rebound angles, keep the rally alive, clear the wall.', tags: ['Classic', 'Open source', 'Touch'], credit: 'Ania Kubow · MIT', source: 'https://github.com/kubowania/breakout', renderer: renderArcadeBreakout },
@@ -98,7 +106,7 @@ const gamesCatalog = [
   { id: 'about-dr-non', code: 'WHY', title: 'About Dr Non', wing: 'meta', category: 'about', domain: 'Signal', age: 'Everyone', desc: 'MIT Wii photo, a life of games, and why honesty is the product.', tags: ['Story'], renderer: renderAbout }
 ];
 
-class OmniArcadeApp {
+class NgsApp {
   constructor() {
     this.activeWing = 'train';
     this.searchQuery = '';
@@ -143,9 +151,9 @@ class OmniArcadeApp {
     if (!headerEl) return;
     const stats = StorageService.getData();
     headerEl.innerHTML = `
-      <a class="arcade-brand" href="#top" aria-label="OmniArcade home">
-        <span class="arcade-brand-disc">OA<span></span></span>
-        <span><b>OMNIARCADE</b><small>PLAY WITH A POINT</small></span>
+      <a class="arcade-brand" href="#top" aria-label="Dr Non — Non-Gaming System, home">
+        <span class="arcade-brand-disc">NG<span></span></span>
+        <span><b>DR NON</b><small>NON-GAMING SYSTEM</small></span>
       </a>
       <div class="arcade-tools">
         <label class="arcade-search">
@@ -159,7 +167,7 @@ class OmniArcadeApp {
   }
 
   renderAttract() {
-    const el = document.querySelector('#omni-hud');
+    const el = document.querySelector('#ngs-hud');
     if (!el) return;
     const feature = this.featuredGame();
     const high = feature ? StorageService.getHighScore(feature.id) : 0;
@@ -437,7 +445,7 @@ class OmniArcadeApp {
 }
 
 function bootApp() {
-  new OmniArcadeApp();
+  new NgsApp();
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', bootApp);

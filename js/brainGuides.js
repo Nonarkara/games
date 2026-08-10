@@ -1,5 +1,5 @@
 /**
- * Plain-language learning notes for every room in OmniArcade.
+ * Plain-language learning notes for every room in the Non-Gaming System.
  *
  * These describe the skill used while playing. They do not promise broad IQ,
  * academic, or clinical gains. That distinction is repeated in the UI because
@@ -7,6 +7,27 @@
  */
 
 export const BRAIN_GUIDES = {
+  'posner-cueing': {
+    label: 'Covert attention orienting', minutes: '3–4 min',
+    practice: 'Hold your gaze still while attention alone shifts to a cued location, then pays a cost when the cue misleads.',
+    why: 'Attention and eye position are separable: you can attend to a place you are not looking at, and re-orienting from a wrong guess takes measurable time.',
+    tip: 'Keep your eyes locked on the centre cross. If you catch yourself looking at the box, the effect disappears.',
+    stack: ['kahneman']
+  },
+  'change-blindness': {
+    label: 'Change detection', minutes: '3–5 min',
+    practice: 'Compare two alternating scenes across a blank gap that erases the motion signal a change normally produces.',
+    why: 'Without a motion cue, seeing a change requires attending to the right object first — which is why large changes in plain sight can go unnoticed.',
+    tip: 'Scan region by region instead of staring at the whole grid; the change only pops once attention lands on it.',
+    stack: ['kahneman', 'neuroplasticity']
+  },
+  'operation-span': {
+    label: 'Complex working-memory span', minutes: '4–6 min',
+    practice: 'Hold a growing list of letters while a maths check keeps interrupting the rehearsal you would normally rely on.',
+    why: 'Storage plus processing is closer to real cognitive load than storage alone, which is why complex span predicts comprehension better than simple span.',
+    tip: 'Answer the equations honestly. Neglecting them to protect the letters is the exact failure this task is built to detect.',
+    stack: ['kahneman', 'neuroplasticity']
+  },
   'dual-n-back': {
     label: 'Working-memory updating', minutes: '4–6 min',
     practice: 'Track a position and a sound, then replace old information as each new pair arrives.',
@@ -257,8 +278,30 @@ export const BRAIN_GUIDES = {
     label: 'Critical play', minutes: '3 min read',
     practice: 'Examine what games can train, what evidence supports, and where the claims should stop.',
     why: 'Knowing the limit of a claim is part of learning from it.',
-    tip: 'Choose a game for the skill it uses now, not for a promise of becoming smarter at everything.'
-  }
+    tip: 'Choose a game for the skill it uses now, not for a promise of becoming smarter at everything.',
+    stack: ['kahneman', 'werbach', 'thaler', 'plasticity', 'clear']
+  },
+  'trail-making': {
+    label: 'Task switching', minutes: '2–4 min',
+    practice: 'Connect numbered dots in order (Part A), then alternate numbers and letters (Part B). Errors reset the trail to that point so they cost real time.',
+    why: 'Part B is the classic task-switching paradigm — two response sets interleaved, the cost is the switch.',
+    tip: 'Lift the pen between dots. A smooth run on Part A is the warm-up; Part B is where the test lives.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'mental-rotation': {
+    label: 'Spatial rotation', minutes: '3–5 min',
+    practice: 'Two shapes side by side. Decide if the right one is the left one rotated, or mirrored.',
+    why: 'Mental rotation is one of the cleanest measures of spatial transformation. Reaction time scales with the angle of rotation.',
+    tip: 'Lock onto one cell of the shape and rotate just that. The rest follows.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'iowa-gambling': {
+    label: 'Risk learning under uncertainty', minutes: '5–8 min',
+    practice: '40 draws from 4 decks. Two decks pay a small amount reliably; two decks pay a large amount but punish hard. Learn which.',
+    why: 'Bechara’s task is the canonical demonstration of somatic-marker learning — the body decides before the mind.',
+    tip: 'Track not just the wins but the losses. A win is information; a loss is more information.',
+    stack: ['kahneman', 'thaler', 'plasticity', 'clear']
+  },
 };
 
 export const PAPER_LINKS = {
@@ -270,7 +313,10 @@ export const PAPER_LINKS = {
   'Dye 2009': 'https://doi.org/10.1111/j.1467-8721.2009.01660.x',
   'Corsi 1972': 'https://doi.org/10.1016/S0010-9452(72)80024-5',
   'Eriksen 1974': 'https://doi.org/10.3758/BF03203267',
-  'Yates 1966': 'https://en.wikipedia.org/wiki/Method_of_loci'
+  'Yates 1966': 'https://en.wikipedia.org/wiki/Method_of_loci',
+  'Reitan 1958': 'https://doi.org/10.1037/h0043828',
+  'Shepard 1971': 'https://doi.org/10.1126/science.5547994',
+  'Bechara 1994': 'https://doi.org/10.1093/cercor/4.8.813'
 };
 
 export function getBrainGuide(game) {
