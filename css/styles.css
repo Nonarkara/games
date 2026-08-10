@@ -1293,7 +1293,9 @@ a { color: inherit; }
   background: var(--ax-red);
 }
 .arcade-brand > span:last-child { display: flex; flex-direction: column; gap: 3px; }
-.arcade-brand b { font-size: 13px; font-weight: 600; letter-spacing: .12em; }
+/* Explicit dark ink: the header bar is light paper while --ax-ink is the
+   dark-well near-white — inherited, the brand name was white-on-white. */
+.arcade-brand b { font-size: 13px; font-weight: 600; letter-spacing: .12em; color: #14181f; }
 .arcade-brand small { color: var(--ax-ink-3); font-size: 8px; font-weight: 600; letter-spacing: .16em; }
 
 .arcade-tools { min-width: 0; display: flex; align-items: stretch; border-left: 1px solid var(--ax-line); }

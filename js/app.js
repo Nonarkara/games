@@ -184,7 +184,7 @@ class NgsApp {
         </label>
         <p class="arcade-play-count"><b id="played-count">${stats.gamesPlayed || 0}</b><span>PLAYS</span></p>
         <button id="about-link" class="arcade-about-link" type="button" aria-label="Open the About panel">WHY</button>
-        <button id="sound-toggle-btn" class="arcade-sound" type="button" aria-label="Toggle sound">SOUND</button>
+        <button id="sound-toggle-btn" class="arcade-sound" type="button" aria-label="Toggle sound">${soundFx.muted ? 'MUTED' : 'SOUND'}</button>
       </div>
     `;
   }
