@@ -446,19 +446,23 @@ export const BRAIN_GUIDES = {
     label: 'Response cancellation', minutes: '2–3 min',
     practice: 'Prepare a quick left or right response, then cancel it when a delayed stop cue appears on a minority of trials.',
     why: 'Unlike Go / No-Go, the stop cue arrives after the action process has begun. The adaptive delay makes the race between acting and stopping visible.',
-    tip: 'Do not wait for STOP on every trial. Respond normally to the arrows; the staircase only works when the go response is genuine.'
+    tip: 'Do not wait for STOP on every trial. Respond normally to the arrows; the staircase only works when the go response is genuine.',
+    paper: 'Logan 1984',
+    stack: ['kahneman', 'plasticity', 'clear']
   },
   'warehouse-push': {
     label: 'Irreversible spatial planning', minutes: '3–6 min',
     practice: 'Plan routes for both the worker and each crate while avoiding corners from which a crate can never be pulled back.',
     why: 'A move can be legal now but destroy every future solution. That makes the puzzle a compact lesson in consequences and deadlock detection.',
-    tip: 'Before pushing, inspect the square beyond the crate. Keep crates away from non-goal corners.'
+    tip: 'Before pushing, inspect the square beyond the crate. Keep crates away from non-goal corners.',
+    stack: ['kahneman', 'plasticity', 'clear']
   },
   'lights-out': {
     label: 'Parity reasoning', minutes: '2–5 min',
     practice: 'Track how each press flips a cross of cells, using the fact that pressing the same cell twice cancels itself.',
     why: 'The puzzle turns binary state, parity, and reversible operations into immediate visual feedback.',
-    tip: 'Work row by row. Once a row is settled, press beneath its remaining lights instead of reopening it at random.'
+    tip: 'Work row by row. Once a row is settled, press beneath its remaining lights instead of reopening it at random.',
+    stack: ['kahneman', 'plasticity', 'clear']
   },
   'mind-eyes': {
     label: 'Social-inference vocabulary', minutes: '3–5 min',
