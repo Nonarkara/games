@@ -22,6 +22,15 @@
  */
 
 const GAME_MAX = {
+  // ARCADE II + LEARN II (2026-08-11)
+  'asteroids':       99999,
+  'frogger':         9999,   // 100/crossing, escalating speed caps runs
+  'connect-four':    200,    // max(10, 200 - moves*4) on a win
+  'solitaire':       800,    // max(50, 800 - moves*2)
+  'word-guess':      120,    // (6 - guesses + 1) * 20
+  'mate-in-one':     180,    // 6 puzzles * 30
+  'ear-trainer':     120,    // 12 rounds * 10
+  'morse-code':      120,    // 12 rounds * 10
   // TRAIN
   'dual-n-back':     400,   // hit points (~15 per correct match)
   'digit-span':      20,    // peak digits recalled (cleared span)

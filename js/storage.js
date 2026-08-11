@@ -24,6 +24,14 @@ const INITIALS_LEN  = 4;
 
 const defaultData = {
   highScores: {
+    'asteroids': 0,
+    'frogger': 0,
+    'connect-four': 0,
+    'solitaire': 0,
+    'word-guess': 0,
+    'mate-in-one': 0,
+    'ear-trainer': 0,
+    'morse-code': 0,
     'cyber-tetris': 0,
     'cyber-pacman': 0,
     'math-safari': 0,

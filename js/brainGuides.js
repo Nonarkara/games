@@ -7,6 +7,62 @@
  */
 
 export const BRAIN_GUIDES = {
+  'asteroids': {
+    label: 'Spatial control under momentum', minutes: '3–6 min',
+    practice: 'Steer a body that keeps its velocity, so every correction has to be planned one beat before it is needed.',
+    why: 'Tracking your own drift while aiming at moving targets loads visual attention and motor prediction at the same time.',
+    tip: 'Thrust in short taps. Long burns feel powerful and leave you unable to stop.',
+    stack: ['kahneman', 'neuroplasticity']
+  },
+  'frogger': {
+    label: 'Timing and gap judgement', minutes: '3–5 min',
+    practice: 'Read several moving lanes at once and commit to a gap before it opens.',
+    why: 'Judging whether a gap will still be there when you arrive is prediction, not reaction — a different skill from raw speed.',
+    tip: 'Move on the rhythm of the traffic rather than waiting for a gap to look safe.',
+    stack: ['kahneman']
+  },
+  'connect-four': {
+    label: 'Adversarial planning', minutes: '4–8 min',
+    practice: 'Plan a threat while reading an opponent that is planning against you five moves ahead.',
+    why: 'Playing against a search tree forces you to think in forced sequences instead of hopeful moves.',
+    tip: 'Take the centre column early; it sits in more winning lines than any other square.',
+    stack: ['kahneman', 'werbach']
+  },
+  'solitaire': {
+    label: 'Sequencing and patience', minutes: '6–12 min',
+    practice: 'Order a partly hidden deck by holding several possible move chains in mind before committing to one.',
+    why: 'The cost of a move is only visible a few plies later, which trains you to look before taking the obvious card.',
+    tip: 'Uncover face-down cards before tidying the tableau. Information beats neatness.',
+    stack: ['kahneman', 'clear']
+  },
+  'word-guess': {
+    label: 'Constraint-driven vocabulary', minutes: '3–6 min',
+    practice: 'Narrow a word space using positional evidence from each guess rather than guessing words you merely like.',
+    why: 'Each guess is an experiment; the skill is choosing the one that eliminates the most possibilities, not the one most likely to be right.',
+    tip: 'Spend guess one on coverage — three vowels and two common consonants — before trying to win.',
+    stack: ['kahneman']
+  },
+  'mate-in-one': {
+    label: 'Tactical pattern recognition', minutes: '4–7 min',
+    practice: 'Recognise named mating shapes rather than calculating every legal move.',
+    why: 'Expertise in chess is largely stored patterns; seeing a shape once makes it findable on a real board later.',
+    tip: 'Look at the king\u2019s escape squares first. The mate is usually the move that removes the last one.',
+    stack: ['neuroplasticity', 'kahneman']
+  },
+  'ear-trainer': {
+    label: 'Relative pitch', minutes: '4–6 min',
+    practice: 'Identify the distance between two tones without any visual cue to fall back on.',
+    why: 'Relative pitch is one of the clearest cases of adult trainability, unlike absolute pitch which mostly is not.',
+    tip: 'Anchor each interval to a song you already know; naming beats guessing.',
+    stack: ['neuroplasticity', 'clear']
+  },
+  'morse-code': {
+    label: 'Auditory pattern decoding', minutes: '4–6 min',
+    practice: 'Hear a rhythm as a single unit instead of counting the marks inside it.',
+    why: 'Chunking a stream of signals into one perceived shape is the same mechanism behind fluent reading.',
+    tip: 'Do not count dots. Learn each letter as a sound-shape — that is why operators could copy at speed.',
+    stack: ['neuroplasticity', 'clear']
+  },
   'chimp-test': {
     label: 'Masked visuospatial recall', minutes: '3–5 min',
     practice: 'Snapshot the positions of numbered cells, then reproduce the sequence after the digits are masked.',

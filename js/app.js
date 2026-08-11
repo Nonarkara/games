@@ -31,6 +31,8 @@ import { renderRideTheBus, renderPowerHour, renderBuzz, renderTruthOrDare, rende
 import { renderWCST, renderTowerOfLondon, renderMindEyes } from './games/ngsNewTrainers3.js';
 import { renderPosnerCueing, renderChangeBlindness, renderOperationSpan } from './games/ngsAttentionSuite.js';
 import { renderChimpTest, renderCalibration, renderMontyHall } from './games/ngsCuriositySuite.js';
+import { renderAsteroids, renderFrogger, renderConnectFour, renderSolitaire } from './games/ngsArcade2.js';
+import { renderWordGuess, renderMateInOne, renderEarTrainer, renderMorseCode } from './games/ngsLearn2.js';
 import { renderStopSignal, renderWarehousePush, renderLightsOut } from './games/ngsExpansionSuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
@@ -106,7 +108,15 @@ const gamesCatalog = [
 
   // ── LEARN ──────────────────────────────────────────────────────────────
   { id: 'monty-hall', code: 'MTY', title: 'Monty Hall', wing: 'learn', category: 'math-logic', domain: 'Probability', age: 'All', desc: 'Stay or switch? 15 rounds and a running tally settle the argument a thousand PhDs lost in 1990.', paper: 'Selvin 1975', tags: ['Probability', 'Bayes', 'Argument-settler'], renderer: renderMontyHall },
+  { id: 'asteroids', code: 'AST', title: 'Asteroids', wing: 'arcade', category: 'classics', domain: 'Spatial control', age: 'All', desc: 'Rotate, thrust, fire. Rocks split when hit and the screen wraps on both axes.', paper: 'Atari 1979', tags: ['Vector', 'Momentum', 'Classic'], renderer: renderAsteroids },
+  { id: 'frogger', code: 'FRG', title: 'Frogger', wing: 'arcade', category: 'classics', domain: 'Timing', age: 'All', desc: 'Cross five lanes of traffic. Every crossing rebuilds the road faster.', paper: 'Konami 1981', tags: ['Timing', 'Lanes', 'Classic'], renderer: renderFrogger },
+  { id: 'connect-four', code: 'CF4', title: 'Connect Four', wing: 'arcade', category: 'adult-mind', domain: 'Adversarial play', age: 'All', desc: 'The floor\u2019s only real opponent: a minimax search five moves deep, blocking before you build.', tags: ['Opponent', 'Minimax', 'Strategy'], renderer: renderConnectFour },
+  { id: 'solitaire', code: 'KLD', title: 'Klondike', wing: 'arcade', category: 'classics', domain: 'Sequencing', age: 'All', desc: 'Draw one. Alternating colours down the tableau, suits up to the foundations, Kings only into empty columns.', tags: ['Cards', 'Patience', 'Classic'], renderer: renderSolitaire },
   { id: 'number-chain', code: 'NCH', title: 'Number Chain', wing: 'learn', category: 'math-logic', domain: 'Patterns', age: '10+', desc: 'Spot the rule, predict the next number.', tags: ['Patterns', 'Reasoning'], renderer: renderNumberChain },
+  { id: 'word-guess', code: 'WRD', title: 'Word Guess', wing: 'learn', category: 'language', domain: 'Vocabulary', age: '10+', desc: 'Five letters, six tries. Green is placed, amber is present somewhere else.', tags: ['Words', 'Deduction'], renderer: renderWordGuess },
+  { id: 'mate-in-one', code: 'MT1', title: 'Mate in One', wing: 'learn', category: 'math-logic', domain: 'Tactics', age: '8+', desc: 'Six named mating patterns. Find the single move that ends the game.', tags: ['Chess', 'Tactics', 'Pattern'], renderer: renderMateInOne },
+  { id: 'ear-trainer', code: 'EAR', title: 'Ear Trainer', wing: 'learn', category: 'science', domain: 'Relative pitch', age: 'All', desc: 'Two tones, always ascending. Name the interval. Relative pitch is trainable at any age.', tags: ['Audio', 'Music', 'Listening'], renderer: renderEarTrainer },
+  { id: 'morse-code', code: 'MRS', title: 'Morse Code', wing: 'learn', category: 'language', domain: 'Auditory decoding', age: '10+', desc: 'Short is a dit, long is a dah. Learn the alphabet as rhythm, the way operators actually did.', tags: ['Audio', 'Code', 'Rhythm'], renderer: renderMorseCode },
   { id: 'tower-hanoi', code: 'HNI', title: 'Tower of Hanoi', wing: 'learn', category: 'math-logic', domain: 'Planning', age: '8+', desc: 'Move every disk to peg 3 in the fewest moves.', tags: ['Logic', 'Recursive'], renderer: renderTowerHanoi },
   { id: 'lights-out', code: 'LGT', title: 'Lights Out', wing: 'learn', category: 'math-logic', domain: 'Parity', age: '8+', desc: 'Each press flips a cell and its neighbours. Darken a solvable grid.', tags: ['Logic', 'Parity', '1990s'], renderer: renderLightsOut },
   { id: 'anagram-scramble', code: 'ANA', title: 'Anagram Scramble', wing: 'learn', category: 'language', domain: 'Spelling', age: '10+', desc: 'Unscramble letters into real words under pressure.', tags: ['Spelling', 'Vocabulary'], renderer: renderAnagram },

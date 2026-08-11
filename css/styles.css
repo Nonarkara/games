@@ -130,6 +130,11 @@ h1, h2, h3, h4 { font-family: 'Press Start 2P', 'JetBrains Mono', monospace; }
  * Game button classes
  * ========================================================================== */
 .axiom-close-btn {
+  /* The most-tapped control in the app — give it the 44px box too. */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.5rem 1rem;
   background: var(--paper-deep);
   border: 1px solid var(--line);
@@ -144,6 +149,12 @@ h1, h2, h3, h4 { font-family: 'Press Start 2P', 'JetBrains Mono', monospace; }
 .axiom-close-btn:hover { background: var(--ink); color: var(--paper); }
 
 .axiom-dpad-btn {
+  /* 44px is the Apple HIG comfort box (§11.8 r2). Tailwind's py-3 lands at
+     37px, which every game pad on the floor was quietly shipping. */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.75rem;
   background: var(--paper-deep);
   border: 1px solid var(--line);
@@ -2189,3 +2200,24 @@ html[data-theme="sixteen"] .attract-feature-ring::after { border-color: rgba(26,
 .arcade-sound { color: #4a5561; }
 .arcade-about-link { color: #b45309; }
 html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
+
+/* ============================================================================
+ * Phone: game frames trade padding for content width.
+ * A chess board needs 8 × 44px = 352px of usable space; at 390px the frame's
+ * 24px side padding left only 332px, squeezing every square under the comfort
+ * box. Reclaiming that padding fixes the board and gives every cartridge more
+ * room for its own controls.
+ * ========================================================================== */
+@media (max-width: 430px) {
+  /* Three nested frames (shell → stage → cartridge) were spending 88px of a
+     390px screen on padding alone. Trimming each gives every cartridge back
+     ~50px of playfield. */
+  #game-modal-container > div { padding-left: 6px; padding-right: 6px; }
+  .game-session-stage { padding-left: 4px; padding-right: 4px; }
+  .game-session-stage > div { padding-left: 10px; padding-right: 10px; }
+  /* A chess board is 8 fixed columns; let it bleed into the frame padding so
+     each square still clears the 44px comfort box. */
+  /* ID selector: Tailwind CDN injects .mx-auto after styles.css, so a bare
+     class rule loses the cascade here. */
+  #game-modal-container .mio-board { margin-left: -14px; margin-right: -14px; max-width: none; }
+}
