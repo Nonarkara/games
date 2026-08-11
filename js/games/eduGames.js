@@ -46,9 +46,9 @@ export function renderStroop(container, onClose) {
             <div>ROUND: <span class="text-amber-400 text-base">${round + 1}</span></div>
             <div>LIVES: <span class="text-red-500 text-base">${Math.max(0, lives)}/3</span></div>
           </div>
-          <div class="bg-zinc-900 border border-amber-500/60 p-10 text-center mb-6">
+          <div class="bg-zinc-900 border border-amber-500/60 p-5 sm:p-10 text-center mb-6">
             <div class="text-amber-500 text-xs mb-3">CLICK THE COLOR OF THE INK ↓</div>
-            <div class="text-6xl font-black mb-2" style="color:${current.ink.hex}">${current.word.name}</div>
+            <div class="text-4xl sm:text-6xl font-black break-all mb-2" style="color:${current.ink.hex}">${current.word.name}</div>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
             ${current.options.map(c => `<button class="stroop-btn py-5 border font-bold text-xs transition hover:opacity-80" style="border-color:${c.hex};color:${c.hex}" data-hex="${c.hex}">${c.name}</button>`).join('')}

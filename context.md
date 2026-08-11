@@ -364,3 +364,6 @@ Audit coverage:
   on browser errors. Passed all 69 carts at 390×844 and 1440×900.
 - The full sweep exposed and fixed phone overflow in Stroop, Type Rush, Snake,
   Space Defender, AI Game Builder, Anagram, and Word Builder.
+- Production replay also caught Stroop's longest random word escaping its
+  display box; the smoke test now waits for web fonts and reports overflow
+  offenders so random/font-dependent failures are reproducible.

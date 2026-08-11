@@ -103,6 +103,9 @@ try {
   });
   await send('Page.navigate', { url: baseUrl });
   await delay(1200);
+  // Press Start 2P is substantially wider than the system fallback. Waiting
+  // for font swap keeps overflow measurements deterministic in production.
+  await evaluate(`document.fonts.ready.then(() => true)`);
 
   const home = await evaluate(`(() => ({
     title: document.title,
@@ -197,14 +200,27 @@ try {
     await delay(70);
     const mounted = await evaluate(`(() => {
       const stage = document.querySelector('.game-session-stage');
+      const stageRect = stage?.getBoundingClientRect();
+      const offenders = stage && stageRect ? [...stage.querySelectorAll('*')]
+        .map(el => ({ el, rect: el.getBoundingClientRect() }))
+        .filter(({ rect }) => rect.right > stageRect.right + 2)
+        .slice(0, 5)
+        .map(({ el, rect }) => ({
+          tag: el.tagName,
+          className: String(el.className || '').slice(0, 120),
+          text: String(el.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 80),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width)
+        })) : [];
       return {
         mounted: Boolean(stage?.firstElementChild),
         height: stage?.firstElementChild?.getBoundingClientRect().height || 0,
-        overflow: stage ? stage.scrollWidth - stage.clientWidth : 999
+        overflow: stage ? stage.scrollWidth - stage.clientWidth : 999,
+        offenders
       };
     })()`);
     if (!mounted.mounted || mounted.height < 1) throw new Error(`${id} mounted an empty play surface`);
-    if (mounted.overflow > 2) throw new Error(`${id} overflows its ${viewportWidth}px stage by ${mounted.overflow}px`);
+    if (mounted.overflow > 2) throw new Error(`${id} overflows its ${viewportWidth}px stage by ${mounted.overflow}px: ${JSON.stringify(mounted.offenders)}`);
     catalogSweep.push(id);
     await evaluate(`document.querySelector('.game-session-bar > button').click()`);
   }
