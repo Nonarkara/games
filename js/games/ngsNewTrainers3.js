@@ -31,6 +31,16 @@ function makeWCSTCard(color, shape, count) {
 const WCST_COLORS = ['red', 'green', 'blue'];
 const WCST_SHAPES = ['circle', 'triangle', 'star'];
 const WCST_COUNTS = [1, 2, 3];
+const WCST_REFERENCE_CARDS = [
+  makeWCSTCard('red', 'circle', 1),
+  makeWCSTCard('green', 'triangle', 2),
+  makeWCSTCard('blue', 'star', 3)
+];
+
+/** Return the reference-card bucket matching `card` under the hidden rule. */
+export function wcstBucketFor(card, rule) {
+  return WCST_REFERENCE_CARDS.findIndex(reference => reference[rule] === card[rule]);
+}
 
 function drawWCSTCard(svg, card, ox, oy, size = 60) {
   const colorMap = { red: '#ef4444', green: '#22c55e', blue: '#3b82f6' };
@@ -79,16 +89,11 @@ export function renderWCST(container, onClose) {
     const deck = makeDeck();
     let currentRule = RULES[Math.floor(Math.random() * RULES.length)];
     let ruleStreak = 0;
-    let correct = 0, wrong = 0, totalTrials = 0, ruleChanges = 0;
-    let detectedChanges = 0;
+    let correct = 0, wrong = 0, ruleChanges = 0;
     let lastWasWrong = false;
     let timer = null;
     const TRIALS = 24;
     let done = 0;
-    function matchesRule(card, rule) {
-      // For demo: bucket cards by the rule's value
-      return true; // we'll determine match by the chosen bucket
-    }
     function next() {
       if (done >= TRIALS) { endGame(); return; }
       const card = deck[Math.floor(Math.random() * deck.length)];
@@ -121,19 +126,18 @@ export function renderWCST(container, onClose) {
       drawWCSTCard(container.querySelector('#wcst-card'), card, 0, 0, 60);
       container.querySelector('#close-game-btn').onclick = () => { clearTimeout(timer); onClose(); };
       const buckets = container.querySelector('#wcst-buckets');
-      const labels = { color: ['RED', 'GREEN', 'BLUE'], shape: ['CIRCLES', 'TRIANGLES', 'STARS'], count: ['1', '2', '3'] };
-      const keys = currentRule === 'color' ? WCST_COLORS : currentRule === 'shape' ? WCST_SHAPES : WCST_COUNTS;
-      keys.forEach((k, i) => {
+      WCST_REFERENCE_CARDS.forEach((reference, i) => {
         const b = document.createElement('button');
-        b.className = 'py-4 border-2 border-amber-500 text-amber-400 font-black text-sm hover:bg-amber-500 hover:text-black';
-        b.textContent = labels[currentRule][i];
-        b.onclick = () => answer(k, card);
+        b.className = 'py-3 border-2 border-amber-500 text-amber-400 font-black text-sm hover:bg-amber-500 hover:text-black';
+        b.setAttribute('aria-label', `Sort with reference card ${i + 1}`);
+        b.innerHTML = `<svg viewBox="0 0 60 60" width="64" height="64" style="margin:auto" data-reference="${i}"></svg><span class="block mt-2 text-[10px]">PILE ${i + 1}</span>`;
+        drawWCSTCard(b.querySelector('svg'), reference, 0, 0, 60);
+        b.onclick = () => answer(i, card);
         buckets.appendChild(b);
       });
     }
-    function answer(choice, card) {
-      const match = currentRule === 'color' ? choice === card.color : currentRule === 'shape' ? choice === card.shape : choice === String(card.count);
-      totalTrials++;
+    function answer(bucketIndex, card) {
+      const match = bucketIndex === wcstBucketFor(card, currentRule);
       if (match) { correct++; ruleStreak++; soundFx.playCoin(); lastWasWrong = false; }
       else { wrong++; ruleStreak = 0; soundFx.playHit(); lastWasWrong = true; }
       // After 5 correct in a row, change the rule
@@ -160,21 +164,60 @@ export function renderWCST(container, onClose) {
  * configuration in the fewest moves. Tests planning.
  * ======================================================================== */
 
-const TOL_COLORS = ['red', 'green', 'blue'];
 const TOL_BG = { red: '#ef4444', green: '#22c55e', blue: '#3b82f6' };
+export const TOL_CAPACITIES = [3, 2, 1];
+
+function cloneToL(pegs) {
+  return pegs.map(stack => [...stack]);
+}
+
+function toLKey(pegs) {
+  return pegs.map(stack => stack.join('')).join('|');
+}
+
+/** Apply one legal Tower of London move. Ball size is irrelevant; peg capacity is the constraint. */
+export function applyToLMove(pegs, from, to) {
+  if (from === to || !pegs[from]?.length || !pegs[to] || pegs[to].length >= TOL_CAPACITIES[to]) return null;
+  const next = cloneToL(pegs);
+  next[to].push(next[from].pop());
+  return next;
+}
+
+/** Breadth-first shortest path, used both for honest par values and mechanics tests. */
+export function minimumToLMoves(start, target) {
+  const targetKey = toLKey(target);
+  const seen = new Set([toLKey(start)]);
+  const queue = [{ pegs: cloneToL(start), distance: 0 }];
+  while (queue.length) {
+    const { pegs, distance } = queue.shift();
+    if (toLKey(pegs) === targetKey) return distance;
+    for (let from = 0; from < 3; from++) {
+      for (let to = 0; to < 3; to++) {
+        const next = applyToLMove(pegs, from, to);
+        if (!next) continue;
+        const key = toLKey(next);
+        if (!seen.has(key)) {
+          seen.add(key);
+          queue.push({ pegs: next, distance: distance + 1 });
+        }
+      }
+    }
+  }
+  return Infinity;
+}
 
 function makeToLPuzzle() {
-  // Start: balls all on peg 0 stacked (red bottom, green mid, blue top)
-  const start = { 0: ['red', 'green', 'blue'], 1: [], 2: [] };
-  // Target: balls distributed across pegs
+  // Standard three-ball Tower of London: pegs hold 3, 2, and 1 balls.
+  // Unlike Tower of Hanoi, colored balls have no size-order restriction.
+  const start = [['red', 'green'], ['blue'], []];
   const targets = [
-    { 0: ['red', 'green'], 1: ['blue'], 2: [] },
-    { 0: ['red'], 1: ['blue'], 2: ['green'] },
-    { 0: ['green'], 1: ['red', 'blue'], 2: [] },
-    { 0: ['blue'], 1: ['red'], 2: ['green'] }
+    [['red'], ['green'], ['blue']],
+    [['blue', 'green'], ['red'], []],
+    [['green'], ['blue', 'red'], []],
+    [['blue', 'red'], [], ['green']]
   ];
   const target = targets[Math.floor(Math.random() * targets.length)];
-  return { start, target };
+  return { start, target, par: minimumToLMoves(start, target) };
 }
 
 function drawTower(svg, pegs, ox, oy) {
@@ -194,18 +237,6 @@ function drawTower(svg, pegs, ox, oy) {
   }
 }
 
-function isToLValid(pegs) {
-  // A larger ball cannot have a smaller ball on top
-  const order = { red: 0, green: 1, blue: 2 };
-  for (const p of [0, 1, 2]) {
-    const stack = pegs[p] || [];
-    for (let i = 1; i < stack.length; i++) {
-      if (order[stack[i - 1]] > order[stack[i]]) return false;
-    }
-  }
-  return true;
-}
-
 function isToLSolved(pegs, target) {
   for (let p = 0; p < 3; p++) {
     if (JSON.stringify(pegs[p] || []) !== JSON.stringify(target[p] || [])) return false;
@@ -217,8 +248,8 @@ export function renderTowerOfLondon(container, onClose) {
   start();
   function start() {
     let puzzle = makeToLPuzzle();
-    let current = JSON.parse(JSON.stringify(puzzle.start));
-    let moves = 0, selected = null, puzzlesSolved = 0, puzzlesTotal = 0;
+    let current = cloneToL(puzzle.start);
+    let moves = 0, selected = null, puzzlesSolved = 0, puzzlesTotal = 0, totalScore = 0;
     let timer = null;
     const PUZZLES = 4;
     function render() {
@@ -235,7 +266,7 @@ export function renderTowerOfLondon(container, onClose) {
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>PUZZLE: <span class="text-amber-400 text-base">${puzzlesTotal + 1}/${PUZZLES}</span></div>
             <div>SOLVED: <span class="text-green-400 text-base">${puzzlesSolved}</span></div>
-            <div>MOVES: <span class="text-white text-base">${moves}</span></div>
+            <div>MOVES: <span class="text-white text-base">${moves}</span> · PAR ${puzzle.par}</div>
           </div>
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
@@ -268,34 +299,27 @@ export function renderTowerOfLondon(container, onClose) {
       // Move top ball from selected to toPeg
       const fromStack = current[selected];
       if (fromStack.length === 0) { selected = null; render(); return; }
-      const ball = fromStack[fromStack.length - 1];
-      const toStack = current[toPeg] || [];
-      // Check rule: cannot place larger ball on smaller
-      const order = { red: 0, green: 1, blue: 2 };
-      if (toStack.length > 0 && order[toStack[toStack.length - 1]] < order[ball]) {
-        soundFx.playHit(); return; // invalid move
-      }
-      fromStack.pop();
-      toStack.push(ball);
-      current[toPeg] = toStack;
-      current[selected] = fromStack;
+      const next = applyToLMove(current, selected, toPeg);
+      if (!next) { soundFx.playHit(); selected = null; render(); return; }
+      current = next;
       moves++;
       selected = null;
       soundFx.playCoin();
       if (isToLSolved(current, puzzle.target)) {
+        totalScore += Math.max(10, 50 - Math.max(0, moves - puzzle.par) * 5);
         puzzlesSolved++;
         puzzlesTotal++;
         soundFx.playCoin();
         if (puzzlesTotal >= PUZZLES) { endGame(); return; }
         puzzle = makeToLPuzzle();
-        current = JSON.parse(JSON.stringify(puzzle.start));
+        current = cloneToL(puzzle.start);
         moves = 0;
       }
       render();
     }
     function endGame() {
       clearTimeout(timer);
-      const score = Math.max(0, puzzlesSolved * 50 - (puzzlesTotal - puzzlesSolved) * 20);
+      const score = totalScore;
       showResult({ container, title: 'TOWERS COMPLETE', message: `${puzzlesSolved} / ${PUZZLES} puzzles solved.`, score, gameId: 'tower-london', tone: 'over', onRestart: start, onClose });
     }
     render();
@@ -309,22 +333,31 @@ export function renderTowerOfLondon(container, onClose) {
  * ======================================================================== */
 
 const EYES_TRIALS = [
-  { eyes: '↗', word: 'PLAYFUL', options: ['PLAYFUL', 'SERIOUS', 'ANGRY', 'CONFUSED'], correct: 0 },
-  { eyes: '↘', word: 'UPSET', options: ['UPSET', 'EXCITED', 'CALM', 'CURIOUS'], correct: 0 },
-  { eyes: '←', word: 'INSISTENT', options: ['INSISTENT', 'BORED', 'SAD', 'DISTRACTED'], correct: 0 },
-  { eyes: '→', word: 'PREOCCUPIED', options: ['PREOCCUPIED', 'HAPPY', 'AMUSED', 'CURIOUS'], correct: 0 },
-  { eyes: '◠', word: 'REFLECTIVE', options: ['REFLECTIVE', 'EXCITED', 'ANGRY', 'DISTRACTED'], correct: 0 },
-  { eyes: '◡', word: 'SAD', options: ['SAD', 'EXCITED', 'CONFIDENT', 'PLAYFUL'], correct: 0 },
-  { eyes: '◜', word: 'SUSPICIOUS', options: ['SUSPICIOUS', 'CALM', 'FRIENDLY', 'CURIOUS'], correct: 0 },
-  { eyes: '◝', word: 'DISTRACTED', options: ['DISTRACTED', 'FOCUSED', 'CURIOUS', 'AMUSED'], correct: 0 },
-  { eyes: '↑', word: 'DOMINANT', options: ['DOMINANT', 'SUBMISSIVE', 'CALM', 'CURIOUS'], correct: 0 },
-  { eyes: '↓', word: 'SUBMISSIVE', options: ['SUBMISSIVE', 'DOMINANT', 'ANGRY', 'PLAYFUL'], correct: 0 }
+  { eyes: '↗', word: 'PLAYFUL', options: ['PLAYFUL', 'SERIOUS', 'ANGRY', 'CONFUSED'] },
+  { eyes: '↘', word: 'UPSET', options: ['UPSET', 'EXCITED', 'CALM', 'CURIOUS'] },
+  { eyes: '←', word: 'INSISTENT', options: ['INSISTENT', 'BORED', 'SAD', 'DISTRACTED'] },
+  { eyes: '→', word: 'PREOCCUPIED', options: ['PREOCCUPIED', 'HAPPY', 'AMUSED', 'CURIOUS'] },
+  { eyes: '◠', word: 'REFLECTIVE', options: ['REFLECTIVE', 'EXCITED', 'ANGRY', 'DISTRACTED'] },
+  { eyes: '◡', word: 'SAD', options: ['SAD', 'EXCITED', 'CONFIDENT', 'PLAYFUL'] },
+  { eyes: '◜', word: 'SUSPICIOUS', options: ['SUSPICIOUS', 'CALM', 'FRIENDLY', 'CURIOUS'] },
+  { eyes: '◝', word: 'DISTRACTED', options: ['DISTRACTED', 'FOCUSED', 'CURIOUS', 'AMUSED'] },
+  { eyes: '↑', word: 'DOMINANT', options: ['DOMINANT', 'SUBMISSIVE', 'CALM', 'CURIOUS'] },
+  { eyes: '↓', word: 'SUBMISSIVE', options: ['SUBMISSIVE', 'DOMINANT', 'ANGRY', 'PLAYFUL'] }
 ];
+
+export function prepareEyesTrial(trial, random = Math.random) {
+  const options = [...trial.options];
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+  return { ...trial, options, correct: options.indexOf(trial.word) };
+}
 
 export function renderMindEyes(container, onClose) {
   start();
   function start() {
-    const trials = EYES_TRIALS.slice(0, 8);
+    const trials = EYES_TRIALS.slice(0, 8).map(trial => prepareEyesTrial(trial));
     let trial = 0, correct = 0;
     let timer = null;
     function next() {
@@ -338,8 +371,8 @@ export function renderMindEyes(container, onClose) {
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">⊙</span>
-              <div><h2 class="text-xl font-black text-amber-400 tracking-wider">MIND IN THE EYES</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">PICK THE BEST WORD FOR THE EXPRESSION</p></div>
+              <div><h2 class="text-xl font-black text-amber-400 tracking-wider">MIND IN THE EYES · LITE</h2>
+              <p class="text-[10px] text-amber-500/80 uppercase">SCHEMATIC SOCIAL-INFERENCE DRILL · NOT THE CLINICAL RMIE</p></div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>

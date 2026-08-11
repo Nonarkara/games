@@ -346,7 +346,7 @@ export function renderTypeRush(container, onClose) {
         container,
         title: 'TIME UP',
         message: `${wpm} WPM · ${acc}% accuracy · ${correct} chars correct`,
-        score: wpm * 10 + acc,
+        score: wpm,
         gameId: 'type-rush',
         tone: 'win',
         onRestart: () => start(),
@@ -356,16 +356,16 @@ export function renderTypeRush(container, onClose) {
 
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-          <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
-            <div class="flex items-center gap-3">
+        <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
+          <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
+            <div class="flex items-center gap-2 min-w-0">
               <span class="text-3xl text-amber-400">⌨️</span>
-              <div>
-                <h2 class="text-2xl font-black text-amber-400 tracking-wider">TYPE RUSH</h2>
-                <p class="text-[10px] text-amber-500/80 uppercase">TYPING FLUENCY — ADAPTED FROM TYPER/WORDPLUCK (MIT)</p>
+              <div class="min-w-0">
+                <h2 class="text-xl sm:text-2xl font-black text-amber-400 tracking-wider">TYPE RUSH</h2>
+                <p class="text-[9px] text-amber-500/80 uppercase break-words">TYPING FLUENCY · TYPER/WORDPLUCK (MIT)</p>
               </div>
             </div>
-            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
           </div>
 
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
@@ -374,9 +374,9 @@ export function renderTypeRush(container, onClose) {
             <div>HIGH: <span class="text-amber-400 text-base">${high}</span></div>
           </div>
 
-          <div class="bg-zinc-900 border border-amber-500/60 p-8 text-center mb-6">
+          <div class="bg-zinc-900 border border-amber-500/60 p-4 sm:p-8 text-center mb-6">
             <div class="text-amber-500 text-xs mb-3">${!started ? 'START TYPING TO BEGIN — 30 SECOND RUSH' : 'TYPE THE WORD'}</div>
-            <div id="tr-word" class="text-4xl font-extrabold tracking-widest mb-2">
+            <div id="tr-word" class="text-2xl sm:text-4xl font-extrabold tracking-wider sm:tracking-widest break-all mb-2">
               ${currentWord.split('').map((ch, i) => {
                 const got = inputValue[i];
                 const cls = got === undefined ? 'text-zinc-600' : got === ch ? 'text-emerald-400' : 'text-red-500';

@@ -31,6 +31,7 @@ import { renderRideTheBus, renderPowerHour, renderBuzz, renderTruthOrDare, rende
 import { renderWCST, renderTowerOfLondon, renderMindEyes } from './games/ngsNewTrainers3.js';
 import { renderPosnerCueing, renderChangeBlindness, renderOperationSpan } from './games/ngsAttentionSuite.js';
 import { renderChimpTest, renderCalibration, renderMontyHall } from './games/ngsCuriositySuite.js';
+import { renderStopSignal, renderWarehousePush, renderLightsOut } from './games/ngsExpansionSuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
 
@@ -77,11 +78,13 @@ const gamesCatalog = [
   { id: 'number-sense', code: 'ANS', title: 'Number Sense (ANS)', wing: 'train', category: 'memory-focus', domain: 'Approximate number', age: 'All', desc: 'Two dot clouds. Click the side with more. Ratio narrows as you succeed.', paper: 'Halberda 2008', tags: ['Number sense', 'Estimation', 'Ratio'], renderer: renderNumberSense },
   { id: 'wcst', code: 'WST', title: "Card Sorting (WCST)", wing: 'train', category: 'memory-focus', domain: 'Set shifting', age: 'Teen+', desc: 'Sort by the hidden rule. It changes every 5 correct sorts. Notice the change.', paper: 'Berg 1948', tags: ['Set shifting', 'Flexibility'], renderer: renderWCST },
   { id: 'tower-london', code: 'TOL', title: 'Tower of London', wing: 'train', category: 'memory-focus', domain: 'Planning', age: 'Teen+', desc: 'Three pegs, three balls. Match the target in the fewest moves.', paper: 'Shallice 1982', tags: ['Planning', 'Executive'], renderer: renderTowerOfLondon },
-  { id: 'mind-eyes', code: 'EYE', title: 'Mind in the Eyes', wing: 'train', category: 'memory-focus', domain: 'Theory of Mind', age: 'Teen+', desc: 'Pick the best word for the expression. Tests empathy and social cognition.', paper: 'Baron-Cohen 2001', tags: ['ToM', 'Emotion', 'Social'], renderer: renderMindEyes },  { id: 'posner-cueing', code: 'PSN', title: 'Posner Cueing', wing: 'train', category: 'memory-focus', domain: 'Covert attention', age: 'Teen+', desc: 'A box flashes, then a dot. Most flashes tell the truth; some lie. Measures the cost of looking the wrong way.', paper: 'Posner 1980', tags: ['Attention', 'Orienting', 'Reaction'], renderer: renderPosnerCueing },
+  { id: 'mind-eyes', code: 'EYE', title: 'Mind in the Eyes · Lite', wing: 'train', category: 'memory-focus', domain: 'Social inference', age: 'Teen+', desc: 'Match schematic gaze cues to emotion words. A vocabulary drill inspired by RMIE, not the clinical test.', paper: 'Baron-Cohen 2001', tags: ['Emotion', 'Social', 'Schematic'], renderer: renderMindEyes },
+  { id: 'posner-cueing', code: 'PSN', title: 'Posner Cueing', wing: 'train', category: 'memory-focus', domain: 'Covert attention', age: 'Teen+', desc: 'A box flashes, then a dot. Most flashes tell the truth; some lie. Measures the cost of looking the wrong way.', paper: 'Posner 1980', tags: ['Attention', 'Orienting', 'Reaction'], renderer: renderPosnerCueing },
   { id: 'change-blindness', code: 'CBL', title: 'Change Blindness', wing: 'train', category: 'memory-focus', domain: 'Change detection', age: 'All', desc: 'One square keeps changing. A blank flash hides the motion your eye would normally catch.', paper: 'Rensink 1997', tags: ['Attention', 'Flicker'], renderer: renderChangeBlindness },
   { id: 'operation-span', code: 'OSP', title: 'Operation Span', wing: 'train', category: 'memory-focus', domain: 'Complex span', age: 'Teen+', desc: 'Check an equation, hold a letter, repeat. Recall the letters in order — storage while processing.', paper: 'Turner & Engle 1989', tags: ['Working memory', 'Complex span'], renderer: renderOperationSpan },
   { id: 'chimp-test', code: 'CHM', title: 'Chimp Test', wing: 'train', category: 'memory-focus', domain: 'Masked recall', age: 'All', desc: 'Digits vanish behind blanks the moment you tap 1. Finish from memory. Ayumu the chimp holds 9.', paper: 'Inoue 2007', tags: ['Working memory', 'Iconic', 'Braggable'], renderer: renderChimpTest },
   { id: 'calibration', code: 'CAL', title: 'Calibration', wing: 'train', category: 'memory-focus', domain: 'Judgment', age: 'Teen+', desc: 'Ten 90%-confidence intervals. Calibrated people trap 9. Most people trap 4 — that gap runs the world.', paper: 'Lichtenstein 1977', tags: ['Overconfidence', 'Kahneman', 'Judgment'], renderer: renderCalibration },
+  { id: 'stop-signal', code: 'SST', title: 'Stop Signal', wing: 'train', category: 'memory-focus', domain: 'Response cancellation', age: 'Teen+', desc: 'Start a left/right response, then cancel it when a delayed STOP signal appears.', paper: 'Logan 1984', tags: ['Inhibition', 'Reaction', 'Adaptive'], renderer: renderStopSignal },
   // ── ARCADE ─────────────────────────────────────────────────────────────
   { id: 'cyber-tetris', code: 'TET', title: 'Cyber Tetris 1984', wing: 'arcade', category: 'classics', domain: 'Spatial', age: 'All', desc: 'Falling tetrominoes, line clears, combo multipliers.', tags: ['Classic', 'Puzzle'], renderer: renderCyberTetris },
   { id: 'arcade-breakout', code: 'BRK', title: 'Breakout 1976', wing: 'arcade', category: 'classics', domain: 'Prediction', age: 'All', desc: 'Shape rebound angles, keep the rally alive, clear the wall.', tags: ['Classic', 'Open source', 'Touch'], credit: 'Ania Kubow · MIT', source: 'https://github.com/kubowania/breakout', renderer: renderArcadeBreakout },
@@ -99,11 +102,13 @@ const gamesCatalog = [
   { id: 'pattern-breaker', code: 'PTN', title: 'Pattern Breaker', wing: 'arcade', category: 'adult-mind', domain: 'Deduction', age: 'Teen+', desc: 'Crack a hidden 4-node path with Mastermind-style hints.', tags: ['Logic', 'Deduction'], renderer: renderPatternBreaker },
   { id: 'rom-loader', code: 'ROM', title: 'ROM / SWF Inspector', wing: 'arcade', category: 'classics', domain: 'Files', age: 'All', desc: 'Drop a legal .nes / .gb / .sfc / .swf backup — header metadata only.', tags: ['Local', 'Inspector'], renderer: renderRomLoader },
   { id: 'ai-sandbox', code: 'AIG', title: 'AI Game Builder', wing: 'arcade', category: 'ai-studio', domain: 'Sandbox', age: 'All', desc: 'Prompt or pick a preset; get a playable micro-game live.', tags: ['AI', 'Sandbox'], renderer: renderAIGameStudio },
+  { id: 'warehouse-push', code: 'WHK', title: 'Warehouse Push', wing: 'arcade', category: 'classics', domain: 'Spatial planning', age: '8+', desc: 'Push every crate onto a target. You can undo a step, but you can never pull.', tags: ['Classic', 'Planning', 'Open source'], credit: 'Steven Lambert · CC0', source: 'https://gist.github.com/straker/2fddb507d4bb6bec54ea2fdb022d020c', renderer: renderWarehousePush },
 
   // ── LEARN ──────────────────────────────────────────────────────────────
   { id: 'monty-hall', code: 'MTY', title: 'Monty Hall', wing: 'learn', category: 'math-logic', domain: 'Probability', age: 'All', desc: 'Stay or switch? 15 rounds and a running tally settle the argument a thousand PhDs lost in 1990.', paper: 'Selvin 1975', tags: ['Probability', 'Bayes', 'Argument-settler'], renderer: renderMontyHall },
   { id: 'number-chain', code: 'NCH', title: 'Number Chain', wing: 'learn', category: 'math-logic', domain: 'Patterns', age: '10+', desc: 'Spot the rule, predict the next number.', tags: ['Patterns', 'Reasoning'], renderer: renderNumberChain },
   { id: 'tower-hanoi', code: 'HNI', title: 'Tower of Hanoi', wing: 'learn', category: 'math-logic', domain: 'Planning', age: '8+', desc: 'Move every disk to peg 3 in the fewest moves.', tags: ['Logic', 'Recursive'], renderer: renderTowerHanoi },
+  { id: 'lights-out', code: 'LGT', title: 'Lights Out', wing: 'learn', category: 'math-logic', domain: 'Parity', age: '8+', desc: 'Each press flips a cell and its neighbours. Darken a solvable grid.', tags: ['Logic', 'Parity', '1990s'], renderer: renderLightsOut },
   { id: 'anagram-scramble', code: 'ANA', title: 'Anagram Scramble', wing: 'learn', category: 'language', domain: 'Spelling', age: '10+', desc: 'Unscramble letters into real words under pressure.', tags: ['Spelling', 'Vocabulary'], renderer: renderAnagram },
   { id: 'word-builder', code: 'WRD', title: 'Word Builder', wing: 'learn', category: 'language', domain: 'Phonics', age: '7+', desc: 'Build valid words from 7 tiles in 60 seconds.', tags: ['Phonics', 'Timed'], renderer: renderWordBuilder },
   { id: 'periodic-quest', code: 'ELM', title: 'Periodic Quest', wing: 'learn', category: 'science', domain: 'Chemistry', age: '12+', desc: 'Match element symbols to names across 10 rounds.', tags: ['Chemistry', 'Recall'], renderer: renderPeriodicQuest },
@@ -177,6 +182,29 @@ class NgsApp {
     if (played) played.textContent = StorageService.getData().gamesPlayed || 0;
   }
 
+  discoveryPick(mode) {
+    const visible = this.filteredGames().filter(game => game.wing !== 'meta');
+    const fallback = gamesCatalog.filter(game => game.wing !== 'meta');
+    const pool = visible.length ? visible : fallback;
+    const played = new Set(AnalyticsService.getLog().map(entry => entry.gameId));
+    const unplayed = pool.filter(game => !played.has(game.id));
+    let candidates = unplayed.length ? unplayed : pool;
+
+    if (mode === 'quick') {
+      const quick = candidates.filter(game => Number.parseInt(getBrainGuide(game).minutes, 10) <= 3);
+      const globalQuick = fallback.filter(game => !played.has(game.id) && Number.parseInt(getBrainGuide(game).minutes, 10) <= 3);
+      if (quick.length) candidates = quick;
+      else if (globalQuick.length) candidates = globalQuick;
+    }
+    if (mode === 'recommended') {
+      const recommended = AnalyticsService.getRecommendations(fallback, 3);
+      if (recommended.length) candidates = recommended;
+    }
+
+    const pick = candidates[Math.floor(Math.random() * candidates.length)] || pool[0];
+    if (pick) this.launchGame(pick.id);
+  }
+
   renderHeader() {
     const headerEl = document.querySelector('#app-header');
     if (!headerEl) return;
@@ -221,6 +249,11 @@ class NgsApp {
           <h1>INSERT<br><em>COIN</em></h1>
           <p class="attract-line">Kill time. Keep the mind.</p>
           <p class="attract-sub">Chunky carts. Honest claims. Every title opens with the skill it trains, how long a round takes, and the Simons caveat — far transfer is contested. Near transfer is real.</p>
+          <div class="attract-picks" aria-label="Fast ways to choose a game">
+            <button type="button" data-discovery="quick"><b>QUICK HIT</b><span>Starts around 1–3 min</span></button>
+            <button type="button" data-discovery="recommended"><b>PICK FOR ME</b><span>Least-practised skill</span></button>
+            <button type="button" data-discovery="surprise"><b>SURPRISE</b><span>Prefers an unplayed cart</span></button>
+          </div>
         </figcaption>
       </figure>
       ${feature ? `
@@ -236,6 +269,9 @@ class NgsApp {
 
     const feat = el.querySelector('.attract-feature');
     if (feat) feat.onclick = () => this.launchGame(feat.dataset.game);
+    el.querySelectorAll('[data-discovery]').forEach(button => {
+      button.onclick = () => this.discoveryPick(button.dataset.discovery);
+    });
   }
 
   renderWingBar() {
@@ -277,6 +313,7 @@ class NgsApp {
     if (!gridEl) return;
 
     const filtered = this.filteredGames();
+    this._playedIds = new Set(AnalyticsService.getLog().map(entry => entry.gameId));
     gridEl.className = 'game-library';
 
     if (filtered.length === 0) {
@@ -345,9 +382,11 @@ class NgsApp {
     const high = StorageService.getHighScore(game.id);
     const isFocus = game.id === this.focusId;
     const guide = getBrainGuide(game);
+    const isNew = ['stop-signal', 'warehouse-push', 'lights-out'].includes(game.id);
+    const hasPlayed = this._playedIds?.has(game.id);
     return `
       <li class="select-row ${isFocus ? 'is-focus' : ''}" data-game="${game.id}" tabindex="0" role="option" aria-selected="${isFocus}" aria-label="${game.title}">
-        <span class="select-card-top"><span class="select-code">${game.code}</span><span class="select-age">${game.age}</span></span>
+        <span class="select-card-top"><span class="select-code">${game.code}</span><span class="select-state">${isNew ? '<b>NEW</b>' : (hasPlayed ? '<i>PLAYED</i>' : '')}<span class="select-age">${game.age}</span></span></span>
         <span class="select-name">${game.title}</span>
         <span class="select-desc">${game.desc}</span>
         <span class="select-brain"><small>TRAINS</small>${guide.label}</span>
@@ -379,12 +418,15 @@ class NgsApp {
     container.innerHTML = '';
 
     const session = new GameSession();
-    const startedAt = Date.now();
+    let startedAt = null;
+    let didStart = false;
     let sessionScore = 0;
 
     const closeGame = () => {
-      const durationMs = Date.now() - startedAt;
-      try { AnalyticsService.log(game.id, game.category, sessionScore, durationMs); } catch (e) { /* ignore */ }
+      const durationMs = startedAt ? Date.now() - startedAt : 0;
+      if (didStart) {
+        try { AnalyticsService.log(game.id, game.category, sessionScore, durationMs); } catch (e) { /* ignore */ }
+      }
       session.teardown();
       overlay.classList.add('hidden');
       container.innerHTML = '';
@@ -434,6 +476,8 @@ class NgsApp {
     };
 
     const renderGame = () => {
+      didStart = true;
+      startedAt = Date.now();
       container.innerHTML = `
         <div class="game-session-shell route-${game.wing}">
           <header class="game-session-bar">

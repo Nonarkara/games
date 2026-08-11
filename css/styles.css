@@ -1429,6 +1429,12 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 .attract-copy h1 em { color: var(--ax-red); font-style: normal; }
 .attract-line { margin: 0 0 10px; color: #e6edf3; font-family: var(--ax-pixel); font-size: clamp(10px, 1.4vw, 14px); line-height: 1.6; font-weight: 400; }
 .attract-sub { max-width: 48ch; margin: 0; color: rgba(230, 237, 243, 0.78); font-family: var(--ax-body); font-size: 13px; line-height: 1.65; }
+.attract-picks { display: flex; flex-wrap: wrap; gap: 1px; max-width: 620px; margin-top: 20px; background: rgba(230,237,243,.2); border: 1px solid rgba(230,237,243,.2); }
+.attract-picks button { min-width: 140px; flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 11px 12px; border: 0; background: rgba(5,7,12,.88); color: #e6edf3; text-align: left; cursor: pointer; }
+.attract-picks button:hover { background: var(--ax-red); color: #fff; }
+.attract-picks button:focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
+.attract-picks b { font-size: 8px; letter-spacing: .12em; }
+.attract-picks span { color: rgba(230,237,243,.66); font-family: var(--ax-body); font-size: 10px; }
 .attract-steps { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 590px; gap: 1px; margin: 42px 0 0; padding: 0; background: var(--ax-line); border: 1px solid var(--ax-line); list-style: none; }
 .attract-steps li { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px; background: var(--ax-panel); }
 .attract-steps b { color: var(--ax-red); font-size: 10px; font-weight: 600; }
@@ -1584,6 +1590,9 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   letter-spacing: .08em;
 }
 .select-age { color: var(--ax-ink-3); font-size: 8px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.select-state { display: flex; align-items: center; gap: 8px; }
+.select-state > b { padding: 4px 5px 3px; background: var(--ax-red); color: #fff; font-size: 7px; line-height: 1; letter-spacing: .1em; }
+.select-state > i { color: var(--ax-ink-3); font-size: 7px; font-style: normal; letter-spacing: .1em; }
 .select-name { margin-top: 22px; color: var(--ax-ink); font-family: var(--ax-pixel); font-size: 11px; line-height: 1.45; font-weight: 400; letter-spacing: 0; }
 .select-row.is-focus .select-name { color: var(--ax-red); }
 .select-desc { margin-top: 8px; color: var(--ax-ink-2); font-family: var(--ax-body); font-size: 12px; line-height: 1.45; }
@@ -1763,6 +1772,8 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   .attract-copy h1 em { white-space: nowrap; }
   .attract-line { color: var(--ax-ink); }
   .attract-sub { color: var(--ax-ink-2); font-size: 12px; }
+  .attract-picks { background: var(--ax-line); border-color: var(--ax-line); }
+  .attract-picks button { background: #1a2430; }
   .attract-steps { margin-top: 30px; }
   .attract-steps li { flex-direction: column; gap: 4px; padding: 10px; }
   .attract-feature { min-height: 390px; padding: 30px 22px; }

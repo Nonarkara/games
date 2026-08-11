@@ -230,14 +230,16 @@ Plain ESM, no build. `index.html` shell → `js/app.js` (`gamesCatalog[]`, one e
 | Pong 1972 | jakesgordon/javascript-pong | Adapted lifecycle + touch |
 | Sudoku Sprint | robatron/sudoku.js | Study only; boards original |
 | Fifteen Puzzle | imshubhamsingh/15-puzzle | Study only; board original |
+| Warehouse Push | straker/basic-sokoban | CC0 format/movement study; levels + engine original |
 
 See `CREDITS.md`.
 
 ## Tests
 
 ```bash
-npm test   # trivia conservation + open-source physics + guide coverage
+npm test   # trivia + open-source physics + mechanics + guides + scores + leaderboard
 npm run check
+npm run smoke  # all 69 playable carts at the requested viewport
 ```
 
 ## Do not
@@ -324,3 +326,41 @@ The lesson, encoded:
 A real headless deploy to production should be a single command that
 returns 0 only if production is serving the local HEAD. Anything less
 is theater.
+
+## Mechanics + discovery audit (2026-08-11)
+
+Floor: **70 catalog entries / 69 playable carts**.
+
+Added three mechanics that were not already represented:
+- Stop Signal: 24-trial adaptive cancellation task; staircase delay stays
+  inside 100–500 ms and uses a documented Logan 1984 source.
+- Warehouse Push: three solvable touch/keyboard rooms, undo/reset, CC0 source
+  credit, and a reachability test for every shipped level.
+- Lights Out: generated-by-press solvable boards, parity-aware hints that stay
+  valid after player moves, reset, and reversible-state tests.
+
+Corrected rule-fidelity defects found by source audit:
+- WCST no longer prints the hidden sorting dimension on its buckets; fixed the
+  count comparison that could never score; stable reference cards now carry
+  the hidden rule.
+- Tower of London now uses the real 3/2/1 peg-capacity constraint, not Tower of
+  Hanoi's size ordering. Every target gets a BFS-derived minimum-move par.
+- Mind in the Eyes Lite no longer puts the answer first on every trial and is
+  explicitly framed as a schematic vocabulary drill, not the validated RMIE.
+- Type Rush signs the board with the WPM shown to the player, not a hidden
+  WPM×10 + accuracy composite that the leaderboard ceiling rejected.
+
+Discovery is deliberately non-coercive: QUICK HIT removes time uncertainty,
+PICK FOR ME uses the least-practised category, SURPRISE prefers unplayed carts,
+and cards show NEW / PLAYED state. Closing a briefing without starting no
+longer marks the cart as played.
+
+Audit coverage:
+- `js/games/mechanics.test.mjs` checks WCST mappings, Tower rules + par,
+  randomized social-inference options, stop staircase bounds, warehouse
+  reachability, Lights Out reversibility/solvability, and WPM scoring.
+- `scripts/browser-smoke.mjs` now opens every briefing, starts every renderer,
+  checks non-empty layout + horizontal overflow, exits each session, and fails
+  on browser errors. Passed all 69 carts at 390×844 and 1440×900.
+- The full sweep exposed and fixed phone overflow in Stroop, Type Rush, Snake,
+  Space Defender, AI Game Builder, Anagram, and Word Builder.

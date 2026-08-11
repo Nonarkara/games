@@ -10,6 +10,7 @@ Dr Non's Non-Gaming System (NGS) uses original vanilla-JavaScript renderers insi
 | Pong 1972 | [jakesgordon/javascript-pong](https://github.com/jakesgordon/javascript-pong) | Jake Gordon | MIT | Rebuilt as a responsive single-player match with pointer controls, adaptive ball speed, scoring, lifecycle cleanup, and the Axiom learning layer. |
 | Sudoku Sprint | [robatron/sudoku.js](https://github.com/robatron/sudoku.js) | Rob Olson | MIT | Puzzle study; NGS boards and UI are original. Library not bundled. |
 | Fifteen Puzzle | [imshubhamsingh/15-puzzle](https://github.com/imshubhamsingh/15-puzzle) | Shubham Singh | MIT | Solvability / slide study; NGS board, scoring, and UI are original. |
+| Warehouse Push | [straker/basic-sokoban](https://gist.github.com/straker/2fddb507d4bb6bec54ea2fdb022d020c) | Steven Lambert | CC0 1.0 | Format and movement study; NGS levels, state engine, undo, scoring, responsive UI, and solvability tests are original. The mechanic traces to Hiroyuki Imabayashi's 1982 Sokoban. |
 
 ## Existing mechanic studies
 

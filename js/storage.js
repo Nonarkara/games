@@ -64,6 +64,7 @@ const defaultData = {
     'most-likely': 0,
     'chimp-test': 0,
     'calibration': 0,
+    'stop-signal': 0,
     'monty-hall': 0,
     'cog-reflection': 0,
     'raven-matrices': 0,
@@ -77,7 +78,9 @@ const defaultData = {
     'buzz-21': 0,
     'truth-or-dare': 0,
     'higher-lower': 0,
-    'two-truths': 0
+    'two-truths': 0,
+    'warehouse-push': 0,
+    'lights-out': 0
   },
   favorites: [],
   gamesPlayed: 0,

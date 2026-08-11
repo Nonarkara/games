@@ -36,21 +36,21 @@ export function renderStroop(container, onClose) {
     function render() {
       const tl = Math.max(1.5, 4 - round * 0.08);
       container.innerHTML = `
-        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-          <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
-            <div><h2 class="text-xl font-black text-amber-400 tracking-wider">STROOP COLOR MATCH</h2><p class="text-[10px] text-amber-500/80 uppercase">COGNITIVE INHIBITION — PICK THE INK COLOR, NOT THE WORD</p></div>
-            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
+          <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
+            <div class="min-w-0"><h2 class="text-base sm:text-xl font-black text-amber-400 tracking-wider">STROOP COLOR MATCH</h2><p class="text-[9px] text-amber-500/80 uppercase">PICK THE INK COLOR · IGNORE THE WORD</p></div>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
             <div>ROUND: <span class="text-amber-400 text-base">${round + 1}</span></div>
-            <div>LIVES: <span class="text-red-500 text-base">${'❤️'.repeat(Math.max(0,lives))}</span></div>
+            <div>LIVES: <span class="text-red-500 text-base">${Math.max(0, lives)}/3</span></div>
           </div>
           <div class="bg-zinc-900 border border-amber-500/60 p-10 text-center mb-6">
             <div class="text-amber-500 text-xs mb-3">CLICK THE COLOR OF THE INK ↓</div>
             <div class="text-6xl font-black mb-2" style="color:${current.ink.hex}">${current.word.name}</div>
           </div>
-          <div class="grid grid-cols-5 gap-2">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
             ${current.options.map(c => `<button class="stroop-btn py-5 border font-bold text-xs transition hover:opacity-80" style="border-color:${c.hex};color:${c.hex}" data-hex="${c.hex}">${c.name}</button>`).join('')}
           </div>
         </div>`;
@@ -127,21 +127,21 @@ export function renderAnagram(container, onClose) {
     }
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-          <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
-            <div><h2 class="text-xl font-black text-amber-400 tracking-wider">ANAGRAM SCRAMBLE</h2><p class="text-[10px] text-amber-500/80 uppercase">SPELLING & VOCABULARY — UNSCRAMBLE THE WORD</p></div>
-            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
+          <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
+            <div class="min-w-0"><h2 class="text-base sm:text-xl font-black text-amber-400 tracking-wider">ANAGRAM SCRAMBLE</h2><p class="text-[9px] text-amber-500/80 uppercase">UNSCRAMBLE THE WORD</p></div>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
             <div>SOLVED: <span class="text-amber-400 text-base">${solved}</span></div>
             <div>TRIES: <span class="text-red-500 text-base">${attempts}</span></div>
           </div>
-          <div class="bg-zinc-900 border border-amber-500/60 p-10 text-center mb-6">
+          <div class="bg-zinc-900 border border-amber-500/60 p-5 sm:p-10 text-center mb-6">
             <div class="text-amber-500 text-xs mb-3">UNSCRAMBLE THESE LETTERS</div>
-            <div class="text-5xl font-black tracking-[0.3em] text-white">${current.scrambled.toUpperCase()}</div>
+            <div class="text-3xl sm:text-5xl font-black tracking-[0.15em] sm:tracking-[0.3em] text-white break-all">${current.scrambled.toUpperCase()}</div>
           </div>
-          <form id="anagram-form" class="flex gap-2">
+          <form id="anagram-form" class="flex flex-col sm:flex-row gap-2">
             <input id="anagram-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="type the word..." class="flex-1 bg-black border border-amber-500/60 px-4 py-3 text-lg text-amber-200 focus:outline-none focus:border-amber-400 font-mono uppercase tracking-widest" />
             <button class="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-black font-black text-sm uppercase">SUBMIT</button>
           </form>
@@ -321,10 +321,10 @@ export function renderWordBuilder(container, onClose) {
     function endGame() { over = true; clearInterval(timer); showResult({ container, title:'TIME UP', message:`Found ${found.length} words.`, score, gameId:'word-builder', tone:'win', onRestart:()=>start(), onClose }); }
     function render() {
       container.innerHTML = `
-        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-          <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
-            <div><h2 class="text-xl font-black text-amber-400 tracking-wider">WORD BUILDER</h2><p class="text-[10px] text-amber-500/80 uppercase">SPELLING — BUILD WORDS FROM THE TILES (60s)</p></div>
-            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
+          <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
+            <div class="min-w-0"><h2 class="text-base sm:text-xl font-black text-amber-400 tracking-wider">WORD BUILDER</h2><p class="text-[9px] text-amber-500/80 uppercase">BUILD WORDS FROM 7 TILES · 60S</p></div>
+            <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
@@ -335,7 +335,7 @@ export function renderWordBuilder(container, onClose) {
             <div class="text-amber-500 text-xs mb-3">YOUR LETTER TILES</div>
             <div class="flex justify-center gap-2 flex-wrap">${tiles.map(t=>`<div class="w-12 h-12 bg-black border-2 border-amber-500 flex items-center justify-center text-2xl font-black text-white">${t}</div>`).join('')}</div>
           </div>
-          <form id="wb-form" class="flex gap-2 mb-4">
+          <form id="wb-form" class="flex flex-col sm:flex-row gap-2 mb-4">
             <input id="wb-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="type a word..." class="flex-1 bg-black border border-amber-500/60 px-4 py-3 text-lg text-amber-200 focus:outline-none focus:border-amber-400 font-mono uppercase tracking-widest" />
             <button class="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-black font-black text-sm uppercase">SUBMIT</button>
           </form>

@@ -18,16 +18,16 @@ export function renderRetroSnake(container, onClose) {
     let over = false;
 
     container.innerHTML = `
-      <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
-          <div class="flex items-center gap-3">
+      <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
+        <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
+          <div class="flex items-center gap-2 min-w-0">
             <span class="text-3xl text-amber-400">🐍</span>
-            <div>
-              <h2 class="text-2xl font-black text-amber-400 tracking-wider">RETRO CYBER SNAKE</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">SYSTEM PROTOCOL [GRID_SNAKE_V1] — NEON TRAIL</p>
+            <div class="min-w-0">
+              <h2 class="text-base sm:text-2xl font-black text-amber-400 tracking-wider">RETRO CYBER SNAKE</h2>
+              <p class="text-[9px] text-amber-500/80 uppercase">GRID SNAKE · NEON TRAIL</p>
             </div>
           </div>
-          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
         </div>
 
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -38,7 +38,7 @@ export function renderRetroSnake(container, onClose) {
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">Arrow keys or the pad below to turn · eat the red square · don't hit a wall or your own tail</div>
 
         <div class="relative flex justify-center mb-4">
-          <canvas id="snake-canvas" width="400" height="400" class="bg-black border border-amber-500/60 shadow-inner"></canvas>
+          <canvas id="snake-canvas" width="400" height="400" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:400px;aspect-ratio:1"></canvas>
         </div>
 
         <div class="grid grid-cols-3 gap-2 max-w-xs mx-auto">
@@ -192,16 +192,16 @@ export function renderSpaceDefender(container, onClose) {
     let won = false;
 
     container.innerHTML = `
-      <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
-          <div class="flex items-center gap-3">
+      <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
+        <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
+          <div class="flex items-center gap-2 min-w-0">
             <span class="text-3xl text-amber-400">👾</span>
-            <div>
-              <h2 class="text-2xl font-black text-amber-400 tracking-wider">SPACE DEFENDER</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">RETRO VAULT [SPACE_INVADERS_8BIT]</p>
+            <div class="min-w-0">
+              <h2 class="text-base sm:text-2xl font-black text-amber-400 tracking-wider">SPACE DEFENDER</h2>
+              <p class="text-[9px] text-amber-500/80 uppercase">RETRO VAULT · INVADER WAVE</p>
             </div>
           </div>
-          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
         </div>
 
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -213,13 +213,13 @@ export function renderSpaceDefender(container, onClose) {
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">Arrow keys or ◀ ▶ to move · space or 🔥 fire to shoot · clear every alien before they land</div>
 
         <div class="relative flex justify-center mb-4">
-          <canvas id="space-canvas" width="400" height="400" class="bg-black border border-amber-500/60 shadow-inner"></canvas>
+          <canvas id="space-canvas" width="400" height="400" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:400px;aspect-ratio:1"></canvas>
         </div>
 
-        <div class="flex justify-center gap-2">
-          <button id="space-left" class="axiom-dpad-btn px-5 py-3">◀ LEFT</button>
-          <button id="space-shoot" class="px-8 py-3 bg-amber-600 border border-amber-400 text-black hover:bg-amber-500 font-black text-base">🔥 FIRE</button>
-          <button id="space-right" class="axiom-dpad-btn px-5 py-3">RIGHT ▶</button>
+        <div class="grid grid-cols-3 gap-2">
+          <button id="space-left" class="axiom-dpad-btn px-2 sm:px-5 py-3">◀ LEFT</button>
+          <button id="space-shoot" class="px-2 sm:px-8 py-3 bg-amber-600 border border-amber-400 text-black hover:bg-amber-500 font-black text-sm">FIRE</button>
+          <button id="space-right" class="axiom-dpad-btn px-2 sm:px-5 py-3">RIGHT ▶</button>
         </div>
       </div>
     `;

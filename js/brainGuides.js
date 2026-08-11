@@ -381,16 +381,34 @@ export const BRAIN_GUIDES = {
   },
   'tower-london': {
     label: 'Planning', minutes: '4–6 min',
-    practice: 'Three pegs, three colored balls. Move balls to match the target configuration in the fewest moves. No placing a larger ball on a smaller one.',
+    practice: 'Three colored balls move between pegs that hold three, two, and one ball. Match the target in as few moves as possible.',
     why: 'Shallice\'s ToL measures planning — the ability to look ahead and form a sequence of moves before acting.',
     tip: 'Work backward from the target. Figure out the LAST move, then the second-to-last, then the first.',
     stack: ['kahneman', 'plasticity', 'clear']
   },
+  'stop-signal': {
+    label: 'Response cancellation', minutes: '2–3 min',
+    practice: 'Prepare a quick left or right response, then cancel it when a delayed stop cue appears on a minority of trials.',
+    why: 'Unlike Go / No-Go, the stop cue arrives after the action process has begun. The adaptive delay makes the race between acting and stopping visible.',
+    tip: 'Do not wait for STOP on every trial. Respond normally to the arrows; the staircase only works when the go response is genuine.'
+  },
+  'warehouse-push': {
+    label: 'Irreversible spatial planning', minutes: '3–6 min',
+    practice: 'Plan routes for both the worker and each crate while avoiding corners from which a crate can never be pulled back.',
+    why: 'A move can be legal now but destroy every future solution. That makes the puzzle a compact lesson in consequences and deadlock detection.',
+    tip: 'Before pushing, inspect the square beyond the crate. Keep crates away from non-goal corners.'
+  },
+  'lights-out': {
+    label: 'Parity reasoning', minutes: '2–5 min',
+    practice: 'Track how each press flips a cross of cells, using the fact that pressing the same cell twice cancels itself.',
+    why: 'The puzzle turns binary state, parity, and reversible operations into immediate visual feedback.',
+    tip: 'Work row by row. Once a row is settled, press beneath its remaining lights instead of reopening it at random.'
+  },
   'mind-eyes': {
-    label: 'Theory of Mind', minutes: '3–5 min',
-    practice: 'Look at a pair of stylized eyes. Pick the word that best describes the expression (e.g., playful, upset, reflective).',
-    why: 'Baron-Cohen\'s RMIE is the standard measure of social cognition — the ability to read what another person is feeling from minimal cues.',
-    tip: 'Focus on the EYES, not the words. The expression is in the gaze, the brow, the mouth — not in the options.',
+    label: 'Social-inference vocabulary', minutes: '3–5 min',
+    practice: 'Look at a schematic gaze cue and distinguish closely related emotion and intention words.',
+    why: 'The drill is inspired by the vocabulary-choice structure of Baron-Cohen\'s RMIE, but schematic symbols are not equivalent to the validated photographic assessment.',
+    tip: 'Compare all four words before choosing. The options move each round, so position is never a strategy.',
     stack: ['thaler', 'kahneman', 'clear']
   },
   'ride-the-bus': {
@@ -456,7 +474,8 @@ export const PAPER_LINKS = {
   'Halberda 2008': 'https://doi.org/10.1016/j.cognition.2008.05.007',
   'Berg 1948': 'https://doi.org/10.1037/h0054214',
   'Shallice 1982': 'https://doi.org/10.1016/0028-3932(82)90101-7',
-  'Baron-Cohen 2001': 'https://doi.org/10.1006/jecp.2000.2612'
+  'Baron-Cohen 2001': 'https://doi.org/10.1006/jecp.2000.2612',
+  'Logan 1984': 'https://doi.org/10.1037/0096-1523.10.2.276'
 };
 
 export function getBrainGuide(game) {

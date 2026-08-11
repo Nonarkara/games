@@ -68,7 +68,16 @@ socket.onmessage = event => {
 function send(method, params = {}) {
   const id = ++callId;
   socket.send(JSON.stringify({ id, method, params }));
-  return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      pending.delete(id);
+      reject(new Error(`CDP ${method} timed out after 5s`));
+    }, 5000);
+    pending.set(id, {
+      resolve: value => { clearTimeout(timer); resolve(value); },
+      reject: error => { clearTimeout(timer); reject(error); }
+    });
+  });
 }
 
 async function evaluate(expression) {
@@ -159,11 +168,52 @@ try {
     sampledGames.push(sample);
   }
 
+  // Full floor: every scoring cartridge must pass its briefing gate, mount a
+  // non-empty play surface, stay within the viewport, and tear down cleanly.
+  await evaluate(`document.querySelector('.game-session-bar > button').click()`);
+  await evaluate(`document.querySelector('[data-wing="all"]').click()`);
+  const catalogIds = await evaluate(`[...document.querySelectorAll('.select-row[data-game]')]
+    .map(row => row.dataset.game)
+    .filter(id => id !== 'about-dr-non')`);
+  const catalogSweep = [];
+  for (const id of catalogIds) {
+    process.stdout.write(`  sweep ${catalogSweep.length + 1}/${catalogIds.length} ${id}\n`);
+    const opened = await evaluate(`(() => {
+      const row = document.querySelector('.select-row[data-game="${id}"]');
+      if (!row) return { found: false };
+      row.click();
+      return {
+        found: true,
+        title: document.querySelector('#briefing-title')?.textContent || '',
+        hasPractice: Boolean(document.querySelector('.briefing-step:nth-of-type(2) p')?.textContent),
+        hasCaveat: /not promised/i.test(document.querySelector('.briefing-caveat')?.textContent || ''),
+        hasStart: Boolean(document.querySelector('.briefing-play'))
+      };
+    })()`);
+    if (!opened.found || !opened.title || !opened.hasPractice || !opened.hasCaveat || !opened.hasStart) {
+      throw new Error(`${id} has an incomplete briefing: ${JSON.stringify(opened)}`);
+    }
+    await evaluate(`document.querySelector('.briefing-play').click()`);
+    await delay(70);
+    const mounted = await evaluate(`(() => {
+      const stage = document.querySelector('.game-session-stage');
+      return {
+        mounted: Boolean(stage?.firstElementChild),
+        height: stage?.firstElementChild?.getBoundingClientRect().height || 0,
+        overflow: stage ? stage.scrollWidth - stage.clientWidth : 999
+      };
+    })()`);
+    if (!mounted.mounted || mounted.height < 1) throw new Error(`${id} mounted an empty play surface`);
+    if (mounted.overflow > 2) throw new Error(`${id} overflows its ${viewportWidth}px stage by ${mounted.overflow}px`);
+    catalogSweep.push(id);
+    await evaluate(`document.querySelector('.game-session-bar > button').click()`);
+  }
+
   if (browserErrors.length) throw new Error(`browser errors: ${browserErrors.join(' | ')}`);
-  console.log(JSON.stringify({ home, briefing, game, sampledGames, screenshots }, null, 2));
+  console.log(JSON.stringify({ home, briefing, game, sampledGames, catalogSweep: { count: catalogSweep.length, ids: catalogSweep }, screenshots }, null, 2));
 } finally {
   try { await send('Browser.close'); } catch { chrome.kill(); }
   socket.close();
   await delay(100);
-  rmSync(profile, { recursive: true, force: true });
+  rmSync(profile, { recursive: true, force: true, maxRetries: 4, retryDelay: 100 });
 }

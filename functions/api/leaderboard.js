@@ -45,6 +45,7 @@ const GAME_MAX = {
   'operation-span':  600,   // 18 letters × 20 + 4 perfect-set bonuses × 40
   'chimp-test':      1200,  // 15 trials, best case levels 4→9 then 9s, ×10
   'calibration':     100,   // 10 intervals × 10
+  'stop-signal':     150,   // 18 go hits × 5 + 6 successful stops × 10
   'monty-hall':      150,   // 15 rounds × 10
   // ARCADE
   'cyber-tetris':    999999,
@@ -61,6 +62,7 @@ const GAME_MAX = {
   'arcade-pong':     21,
   'rom-loader':      1,
   'ai-sandbox':      1,
+  'warehouse-push':  600,   // 3 rooms × max 200
   // LEARN
   'number-chain':    50,
   'tower-hanoi':     1000,  // inverted
@@ -73,6 +75,7 @@ const GAME_MAX = {
   'word-search':     300,   // inverted
   'sudoku-sprint':   600,   // inverted
   'fifteen-puzzle':  300,   // inverted
+  'lights-out':      600,   // 3 grids × max 200
   // LABS
   'non-trivial':     50,
   'blow-cartridge':  50,
