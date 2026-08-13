@@ -37,9 +37,13 @@ echo ""
 
 # 1. Lint
 echo "▶ Lint (node --check)"
+# nullglob: globs with no matches expand to nothing (otherwise node --check
+# receives the literal pattern and errors with MODULE_NOT_FOUND).
+shopt -s nullglob
 for f in js/*.js js/games/*.js functions/_shared/*.js functions/api/*.js functions/api/auth/*.js functions/api/auth/google/*.js; do
   node --check "$f" || { echo "  ✗ lint fail: $f"; exit 1; }
 done
+shopt -u nullglob
 echo "  ✓ js + js/games parse"
 echo ""
 

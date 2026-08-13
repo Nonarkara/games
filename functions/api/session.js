@@ -19,7 +19,14 @@ const SESSION_TTL_MS = 5 * 60 * 1000;  // 5 minutes
 const RATE_LIMIT_MS  = 2 * 1000;       // 1 per IP per 2s
 import { ALLOWED_GAME_IDS } from '../_shared/games.js';
 import { json, readJson, sameOrigin } from '../_shared/http.js';
-import { sha256 } from '../_shared/auth.js';
+
+// sha256 hex via Web Crypto. Inlined here because the only caller (rate
+// limiting) lives in this file; the rest of the auth helpers were removed
+// when the account system was reverted.
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
+}
 
 function randHex(bytes) {
   const arr = new Uint8Array(bytes);
