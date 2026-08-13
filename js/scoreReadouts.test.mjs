@@ -31,6 +31,11 @@ assert.equal(corsiWarm.band, 'warming');
 const palaceSolid = explainScore('memory-palace', 5);
 assert.equal(palaceSolid.band, 'solid');
 
+const backwardSolid = explainScore('backward-span', 5);
+assert.equal(backwardSolid.band, 'solid');
+const reactionClean = explainScore('reaction-gate', 400);
+assert.equal(reactionClean.band, 'sharp');
+
 const aim = explainScore('aim-trainer', 160);
 assert.ok(['warming', 'solid', 'sharp'].includes(aim.band));
 assert.match(aim.skill, /hand|aim|calibration|reaction/i);

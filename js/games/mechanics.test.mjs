@@ -12,6 +12,21 @@ import {
   toggleLights,
   warehouseSolved
 } from './ngsExpansionSuite.js';
+import {
+  MAKE_24_PUZZLES,
+  NONOGRAM_PUZZLES,
+  applyNimMove,
+  combine24,
+  nonogramClues,
+  nonogramSolved,
+  optimalNimMove
+} from './ngsLogicSuite.js';
+import {
+  isOneBackMatch,
+  reverseDigits,
+  scoreOddball,
+  scoreReactionGate
+} from './ngsDailySuite.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
 const probe = { color: 'green', shape: 'star', count: 1 };
@@ -74,10 +89,56 @@ for (const size of [3, 4, 5]) {
   assert.ok(lightsSolved(solved), `${size}x${size} generated puzzle must be solvable`);
 }
 
+// Nonogram clues must reproduce each answer, and filling the answer solves it.
+for (const puzzle of NONOGRAM_PUZZLES) {
+  const clues = nonogramClues(puzzle.cells);
+  assert.equal(clues.rows.length, 5);
+  assert.equal(clues.columns.length, 5);
+  const state = [...puzzle.cells.join('')].map(cell => cell === '1' ? 1 : 2);
+  assert.ok(nonogramSolved(state, puzzle.cells), `${puzzle.name} answer must satisfy its grid`);
+  state[0] = state[0] === 1 ? 2 : 1;
+  assert.ok(!nonogramSolved(state, puzzle.cells), `${puzzle.name} must reject a wrong cell`);
+}
+
+// An optimal Nim move always reaches xor zero when a winning move exists.
+for (const heaps of [[3, 4, 5], [1, 5, 7], [2, 6, 7]]) {
+  const move = optimalNimMove(heaps);
+  const next = applyNimMove(heaps, move.heap, move.count);
+  assert.ok(next, 'optimal Nim move must be legal');
+  if (heaps.reduce((value, heap) => value ^ heap, 0)) {
+    assert.equal(next.reduce((value, heap) => value ^ heap, 0), 0, 'winning Nim move must leave xor zero');
+  }
+}
+assert.equal(applyNimMove([1, 2, 3], 0, 2), null, 'cannot remove more tokens than a heap holds');
+
+// Every Make 24 puzzle is solvable using all numbers once.
+function canMake24(values) {
+  if (values.length === 1) return Math.abs(values[0] - 24) < 1e-9;
+  for (let i = 0; i < values.length; i++) for (let j = 0; j < values.length; j++) {
+    if (i === j) continue;
+    const rest = values.filter((_, index) => index !== i && index !== j);
+    for (const op of ['+', '−', '×', '÷']) {
+      const value = combine24(values[i], op, values[j]);
+      if (value !== null && Number.isFinite(value) && canMake24([...rest, value])) return true;
+    }
+  }
+  return false;
+}
+MAKE_24_PUZZLES.forEach(numbers => assert.ok(canMake24(numbers), `Make 24 puzzle ${numbers.join(',')} must be solvable`));
+
+assert.equal(scoreReactionGate({ hits: 20, falseStarts: 0 }), 400);
+assert.equal(scoreReactionGate({ hits: 10, falseStarts: 4 }), 140);
+assert.equal(isOneBackMatch(3, 3), true);
+assert.equal(isOneBackMatch(3, 4), false);
+assert.equal(isOneBackMatch(null, 0), false);
+assert.deepEqual(reverseDigits([1, 4, 9]), [9, 4, 1]);
+assert.equal(scoreOddball({ hits: 6, falseAlarms: 0, misses: 0 }), 120);
+assert.equal(scoreOddball({ hits: 4, falseAlarms: 2, misses: 1 }), 36);
+
 // Type Rush signs the board with WPM—the metric named in its UI—not a hidden composite.
 const curatedSource = readFileSync(new URL('./curatedGames.js', import.meta.url), 'utf8');
 const typeRushSource = curatedSource.split('export function renderTypeRush')[1].split('export function renderSlide2048')[0];
 assert.match(typeRushSource, /score:\s*wpm[,\n]/);
 assert.doesNotMatch(typeRushSource, /score:\s*wpm\s*\*/);
 
-console.log('mechanics: WCST secrecy, ToL rules, eye-option shuffle, stop staircase, warehouse reachability, Lights Out parity, and WPM scoring passed');
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, and WPM scoring passed');

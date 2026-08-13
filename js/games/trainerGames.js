@@ -13,7 +13,7 @@
  *   Flanker         → Eriksen selective attention / interference
  */
 import { soundFx } from '../audio.js';
-import { ScopedKeyboard, showResult } from '../ui.js';
+import { ScopedKeyboard, showResult, attachReady } from '../ui.js';
 
 const FRAME = 'relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud';
 
@@ -56,8 +56,7 @@ export function renderDualNBack(container, onClose) {
         </div>
 
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          Watch the square and the letter. If the POSITION repeats the one from ${N} steps back, press P.
-          If the LETTER repeats, press L. Both can be true at once.
+          Watch the lit square and the letter. If either matches two turns ago, tap that button. Both can match at once.
         </div>
 
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -71,8 +70,8 @@ export function renderDualNBack(container, onClose) {
         <div id="nb-letter" class="text-center text-4xl font-black text-white h-12 mb-3">&nbsp;</div>
 
         <div class="flex justify-center gap-3">
-          <button id="nb-pos" class="axiom-dpad-btn px-6 py-3">P · POSITION MATCH</button>
-          <button id="nb-let" class="axiom-dpad-btn px-6 py-3">L · LETTER MATCH</button>
+          <button id="nb-pos" class="axiom-dpad-btn px-6 py-3">SQUARE MATCHED</button>
+          <button id="nb-let" class="axiom-dpad-btn px-6 py-3">LETTER MATCHED</button>
         </div>
       </div>
     `;
@@ -132,7 +131,7 @@ export function renderDualNBack(container, onClose) {
     container.querySelector('#nb-let').onclick = () => claim('let');
     container.querySelector('#close-game-btn').onclick = () => { clearTimeout(timer); kb.destroy(); onClose(); };
 
-    step();
+    attachReady(container.firstElementChild, step);
   }
 }
 
@@ -298,11 +297,7 @@ export function renderAimTrainer(container, onClose) {
       soundFx.playHit();
     };
 
-    countdown = setInterval(() => {
-      left--;
-      container.querySelector('#aim-time').innerText = left;
-      if (left <= 0) end();
-    }, 1000);
+    countdown = null;
 
     function end() {
       over = true;
@@ -322,7 +317,14 @@ export function renderAimTrainer(container, onClose) {
     }
 
     container.querySelector('#close-game-btn').onclick = () => { clearInterval(countdown); onClose(); };
-    placeTarget();
+    attachReady(container.firstElementChild, () => {
+      placeTarget();
+      countdown = setInterval(() => {
+        left--;
+        container.querySelector('#aim-time').innerText = left;
+        if (left <= 0) end();
+      }, 1000);
+    });
   }
 }
 
@@ -437,7 +439,7 @@ export function renderGoNoGo(container, onClose) {
     container.querySelector('#close-game-btn').onclick = () => {
       clearTimeout(timer); clearTimeout(gapTimer); kb.destroy(); onClose();
     };
-    advance();
+    attachReady(container.firstElementChild, advance);
   }
 }
 
@@ -472,8 +474,8 @@ export function renderDigitSpan(container, onClose) {
           <div>SCORE <span id="ds-score" class="text-white">0</span></div>
           <div>LIVES <span id="ds-lives" class="text-white">3</span></div>
         </div>
-        <div id="ds-display" class="h-[100px] flex items-center justify-center text-5xl font-black tracking-[0.35em] text-amber-400 bg-zinc-950 border border-amber-500/40 mb-4">—</div>
-        <div id="ds-input" class="h-12 flex items-center justify-center text-2xl font-bold tracking-[0.3em] text-white mb-4 min-h-[44px]">&nbsp;</div>
+        <div id="ds-display" class="font-mono-hud h-[100px] flex items-center justify-center text-5xl font-black tracking-widest text-amber-400 bg-zinc-950 border border-amber-500/40 mb-4" style="font-family:'JetBrains Mono',monospace">—</div>
+        <div id="ds-input" class="font-mono-hud h-12 flex items-center justify-center text-2xl font-bold tracking-widest text-white mb-4 min-h-[44px]" style="font-family:'JetBrains Mono',monospace">&nbsp;</div>
         <div class="grid grid-cols-5 gap-2 max-w-[280px] mx-auto">
           ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button class="ds-key axiom-dpad-btn" data-n="${n}">${n}</button>`).join('')}
         </div>
@@ -581,7 +583,7 @@ export function renderDigitSpan(container, onClose) {
     kb.on(digitHandlers);
 
     container.querySelector('#close-game-btn').onclick = () => { kb.destroy(); onClose(); };
-    nextRound();
+    attachReady(container.firstElementChild, nextRound);
   }
 }
 

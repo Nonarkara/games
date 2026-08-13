@@ -1,7 +1,7 @@
 /**
  * Guards the server-side score allowlist against drift.
  *
- * Why this test exists: GAME_MAX in leaderboard.js is a hand-maintained map.
+ * Why this test exists: the shared GAME_MAX map is hand-maintained.
  * Adding a cartridge to gamesCatalog without adding it here makes the game
  * look fine locally — localStorage still records the score — while every
  * submission to the global board is silently rejected with `unknown_game`.
@@ -13,12 +13,12 @@
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { GAME_MAX } from '../_shared/games.js';
 
 const fnSource = readFileSync(new URL('./leaderboard.js', import.meta.url), 'utf8');
 const appSource = readFileSync(new URL('../../js/app.js', import.meta.url), 'utf8');
 
-const maxBlock = fnSource.split('const GAME_MAX = {')[1].split('};')[0];
-const allowed = new Set([...maxBlock.matchAll(/'([^']+)'\s*:/g)].map(m => m[1]));
+const allowed = new Set(Object.keys(GAME_MAX));
 
 const catalogBlock = appSource.split('const gamesCatalog = [')[1].split('\n];')[0];
 const entries = [...catalogBlock.matchAll(/\{\s*id:\s*'([^']+)'[^}]*?wing:\s*'([^']+)'/g)]
@@ -31,9 +31,8 @@ const missing = scoring.filter(e => !allowed.has(e.id)).map(e => e.id);
 assert.deepEqual(missing, [], `games missing a GAME_MAX ceiling (scores would be rejected as unknown_game): ${missing.join(', ')}`);
 
 // Every ceiling must be a positive finite number, or a valid score can never pass.
-for (const [, id, raw] of maxBlock.matchAll(/'([^']+)'\s*:\s*([0-9_]+)/g)) {
-  const n = Number(raw.replace(/_/g, ''));
-  assert.ok(Number.isFinite(n) && n > 0, `ceiling for ${id} must be a positive number, got ${raw}`);
+for (const [id, n] of Object.entries(GAME_MAX)) {
+  assert.ok(Number.isFinite(n) && n > 0, `ceiling for ${id} must be a positive number, got ${n}`);
 }
 
 // Ceilings that no longer map to a catalog entry are dead weight — flag them.

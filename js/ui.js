@@ -203,6 +203,27 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   if (primary) setTimeout(() => primary.focus(), 30);
 }
 
+/**
+ * Timed trainers must not steal the first trial. Overlay TAP TO START on
+ * the painted frame, then run `onGo` once.
+ */
+export function attachReady(root, onGo) {
+  if (!root || typeof onGo !== 'function') return;
+  const gate = document.createElement('button');
+  gate.type = 'button';
+  gate.className = 'ngs-ready-gate';
+  gate.textContent = 'TAP TO START';
+  gate.setAttribute('aria-label', 'Tap to start this round');
+  const go = () => {
+    if (!gate.isConnected) return;
+    gate.remove();
+    onGo();
+  };
+  gate.onclick = go;
+  root.style.position = root.style.position || 'relative';
+  root.appendChild(gate);
+}
+
 /* ===========================================================================
  * bindModalUX — backdrop + ESC close.
  * ========================================================================== */

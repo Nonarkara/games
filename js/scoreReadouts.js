@@ -10,6 +10,9 @@ import { BRAIN_GUIDES } from './brainGuides.js';
 
 /** Absolute cutoffs: score < cuts[0] rough, < cuts[1] warming, < cuts[2] solid, else sharp. */
 const CUTS = {
+  'nonogram': [100, 240, 380],
+  'nim': [1, 100, 200],
+  'make-24': [40, 120, 200],
   'dual-n-back': [40, 100, 180],
   'digit-span': [4, 6, 9],
   'stroop-match': [40, 65, 85],
@@ -40,6 +43,10 @@ const CUTS = {
   'chimp-test': [150, 400, 700],
   'calibration': [30, 55, 80],
   'stop-signal': [35, 70, 115],
+  'reaction-gate': [80, 180, 300],
+  'one-back': [40, 100, 180],
+  'oddball': [40, 100, 180],
+  'backward-span': [3, 5, 7],
   'monty-hall': [40, 80, 120],
   'cyber-tetris': [800, 2500, 8000],
   'arcade-breakout': [200, 800, 2500],

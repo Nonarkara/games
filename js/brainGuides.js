@@ -7,6 +7,48 @@
  */
 
 export const BRAIN_GUIDES = {
+  'reaction-gate': {
+    label: 'Simple reaction time', minutes: '2–3 min',
+    practice: 'Hold still until the colour change, then tap. Anticipation is scored as a miss.',
+    why: 'Waiting without guessing is a different skill from tapping fast. Daily use makes the wait visible.',
+    tip: 'Look at the box, not the clock. Move only after amber, never before.'
+  },
+  'one-back': {
+    label: 'Working-memory updating', minutes: '2–3 min',
+    practice: 'Keep only the last square. When a new one lights, compare it to the one you are holding.',
+    why: 'This is Dual N-Back with one item and one turn of lag — the same update, less load.',
+    tip: 'Say “same” or “moved” out loud for the first five trials. Then drop the voice.'
+  },
+  'oddball': {
+    label: 'Rare-target attention', minutes: '2–3 min',
+    practice: 'Let the common square pass. Fire only when the diamond appears.',
+    why: 'Most of attention is withholding. Catching a rare event is the part people notice; ignoring the rest is the work.',
+    tip: 'Keep a finger ready, but do not bounce. The miss that costs is tapping the square.'
+  },
+  'backward-span': {
+    label: 'Working-memory reversal', minutes: '2–4 min',
+    practice: 'Hold the digits, then reverse them before typing. Echo memory is not enough.',
+    why: 'Repeating forward can be a loop in the ear. Reversing forces you to use the workspace.',
+    tip: 'Chunk in twos from the end: last pair first, then the pair before that.'
+  },
+  'nonogram': {
+    label: 'Constraint deduction', minutes: '3–6 min',
+    practice: 'Cross-check row clues with column clues, mark what must be filled, and rule out cells that cannot fit a run.',
+    why: 'Constraint problems become easier when each confirmed fact reduces several possibilities at once.',
+    tip: 'Start with the longest clues. Mark impossible cells with × so you do not reconsider them.'
+  },
+  'nim': {
+    label: 'Strategic reasoning', minutes: '2–4 min',
+    practice: 'Compare several heaps, predict the reply to each move, and leave a position the opponent cannot repair.',
+    why: 'Nim shows how a simple hidden pattern can turn trial and error into a reliable strategy.',
+    tip: 'Look for moves that make the heaps balance in pairs. The result screen reveals the exact binary rule.'
+  },
+  'make-24': {
+    label: 'Flexible arithmetic', minutes: '3–6 min',
+    practice: 'Recombine the same four numbers in different pairs while tracking operation order and intermediate values.',
+    why: 'Arithmetic fluency is more useful when you can rearrange a problem instead of following one memorized route.',
+    tip: 'Work backward from 24: try to build 6×4, 8×3, 12×2, or 25−1.'
+  },
   'asteroids': {
     label: 'Spatial control under momentum', minutes: '3–6 min',
     practice: 'Steer a body that keeps its velocity, so every correction has to be planned one beat before it is needed.',
@@ -535,7 +577,10 @@ export const PAPER_LINKS = {
   'Berg 1948': 'https://doi.org/10.1037/h0054214',
   'Shallice 1982': 'https://doi.org/10.1016/0028-3932(82)90101-7',
   'Baron-Cohen 2001': 'https://doi.org/10.1006/jecp.2000.2612',
-  'Logan 1984': 'https://doi.org/10.1037/0096-1523.10.2.276'
+  'Logan 1984': 'https://doi.org/10.1037/0096-1523.10.2.276',
+  'Dinges 1997': 'https://doi.org/10.1093/sleep/20.4.267',
+  'Kirchner 1958': 'https://doi.org/10.1037/h0045046',
+  'Squires 1975': 'https://doi.org/10.1126/science.1188367'
 };
 
 export function getBrainGuide(game) {
