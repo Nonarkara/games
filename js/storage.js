@@ -24,6 +24,9 @@ const INITIALS_LEN  = 4;
 
 const defaultData = {
   highScores: {
+    'nonogram': 0,
+    'nim': 0,
+    'make-24': 0,
     'asteroids': 0,
     'frogger': 0,
     'connect-four': 0,
@@ -88,9 +91,14 @@ const defaultData = {
     'higher-lower': 0,
     'two-truths': 0,
     'warehouse-push': 0,
-    'lights-out': 0
+    'lights-out': 0,
+    'reaction-gate': 0,
+    'one-back': 0,
+    'oddball': 0,
+    'backward-span': 0
   },
   favorites: [],
+  favoriteStates: {},
   gamesPlayed: 0,
   theme: 'cyber', // 'cyber' | 'retro' | 'light'
   customGames: []
@@ -145,7 +153,17 @@ export class StorageService {
     try {
       migrateLegacyOnce();
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? { ...defaultData, ...JSON.parse(stored) } : defaultData;
+      const parsed = stored ? JSON.parse(stored) : {};
+      return {
+        ...defaultData,
+        ...parsed,
+        highScores: { ...defaultData.highScores, ...(parsed.highScores || {}) },
+        favorites: Array.isArray(parsed.favorites) ? parsed.favorites : [],
+        favoriteStates: parsed.favoriteStates && typeof parsed.favoriteStates === 'object'
+          ? parsed.favoriteStates
+          : Object.fromEntries((Array.isArray(parsed.favorites) ? parsed.favorites : []).map(id => [id, { value: true, updatedAt: 0 }])),
+        customGames: Array.isArray(parsed.customGames) ? parsed.customGames : []
+      };
     } catch (e) {
       console.warn('[NGS] LocalStorage access error:', e);
       return defaultData;
@@ -155,6 +173,7 @@ export class StorageService {
   static saveData(data) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('ngs:data-changed'));
     } catch (e) {
       console.warn('[NGS] LocalStorage save error:', e);
     }
@@ -187,6 +206,8 @@ export class StorageService {
     } else {
       data.favorites.push(gameId);
     }
+    data.favoriteStates = data.favoriteStates || {};
+    data.favoriteStates[gameId] = { value: data.favorites.includes(gameId), updatedAt: Date.now() };
     this.saveData(data);
     return data.favorites.includes(gameId);
   }
@@ -207,6 +228,42 @@ export class StorageService {
   static getCustomGames() {
     const data = this.getData();
     return data.customGames || [];
+  }
+
+  /** Only progress data crosses devices. Themes, custom code, and cached
+   * public leaderboards remain local to avoid surprising data collection. */
+  static getSyncSnapshot() {
+    const data = this.getData();
+    return {
+      highScores: { ...data.highScores },
+      favorites: [...data.favorites],
+      favoriteStates: { ...(data.favoriteStates || {}) },
+      gamesPlayed: data.gamesPlayed || 0,
+      lastInitials: data.lastInitials || ''
+    };
+  }
+
+  static mergeSyncSnapshot(remote = {}) {
+    const data = this.getData();
+    for (const [gameId, score] of Object.entries(remote.highScores || {})) {
+      const value = Number(score);
+      if (Number.isFinite(value)) data.highScores[gameId] = Math.max(data.highScores[gameId] || 0, value);
+    }
+    const localStates = data.favoriteStates || {};
+    const remoteStates = remote.favoriteStates || Object.fromEntries((remote.favorites || []).map(id => [id, { value: true, updatedAt: 0 }]));
+    for (const [gameId, state] of Object.entries(remoteStates)) {
+      const localTime = Number(localStates[gameId]?.updatedAt) || 0;
+      const remoteTime = Number(state?.updatedAt) || 0;
+      if (!localStates[gameId] || remoteTime > localTime) {
+        localStates[gameId] = { value: Boolean(state?.value), updatedAt: remoteTime };
+      }
+    }
+    data.favoriteStates = localStates;
+    data.favorites = Object.entries(localStates).filter(([, state]) => state.value).map(([gameId]) => gameId);
+    data.gamesPlayed = Math.max(data.gamesPlayed || 0, Number(remote.gamesPlayed) || 0);
+    if (!data.lastInitials && remote.lastInitials) data.lastInitials = remote.lastInitials;
+    this.saveData(data);
+    return this.getSyncSnapshot();
   }
 
   /* -------------------------------------------------------------------------

@@ -37,7 +37,7 @@ echo ""
 
 # 1. Lint
 echo "▶ Lint (node --check)"
-for f in js/*.js js/games/*.js; do
+for f in js/*.js js/games/*.js functions/_shared/*.js functions/api/*.js functions/api/auth/*.js functions/api/auth/google/*.js; do
   node --check "$f" || { echo "  ✗ lint fail: $f"; exit 1; }
 done
 echo "  ✓ js + js/games parse"
@@ -56,12 +56,18 @@ if $DRY_RUN; then
   exit 0
 fi
 
-# 3. Deploy
+# 3. Apply forward-only D1 migrations. Wrangler records applied files, so
+# repeating the deploy is safe and never re-runs an account migration.
+echo "▶ Database migrations (remote D1)"
+npx wrangler d1 migrations apply ngs-leaderboard --remote
+echo ""
+
+# 4. Deploy
 echo "▶ Deploy (wrangler pages, production branch)"
 npx wrangler pages deploy . --project-name="$PROJECT" --branch=main \
   --commit-dirty=true --commit-hash="$COMMIT" --commit-message="$COMMIT_MSG"
 
-# 4. Smoke — versioned alias (immune to 4h-stale zone cache)
+# 5. Smoke — versioned alias (immune to 4h-stale zone cache)
 echo ""
 echo "▶ Smoke test ($CANONICAL)"
 sleep 2  # edge propagation beat
@@ -91,13 +97,13 @@ echo "  ✓ og:title: $OG"
 echo "  ✓ js/app.js: $APP_JS"
 echo ""
 
-# 5. Print
+# 6. Print
 echo "▶ Done."
 echo "  Live (versioned, immune to zone cache): $CANONICAL"
 echo "  Custom domain (4h-stale risk):          https://games.nonarkara.org/"
 echo "  Commit: $COMMIT"
 
-# 6. Post-deploy verify — local HEAD must match the new live build.
+# 7. Post-deploy verify — local HEAD must match the new live build.
 # This is the lesson from the Fable 5 audit: "always end a build session
 # with bash scripts/deploy.sh" only works if the deploy actually shipped.
 # This block fails loudly if the live build is behind HEAD.

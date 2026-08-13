@@ -239,7 +239,7 @@ See `CREDITS.md`.
 ```bash
 npm test   # trivia + open-source physics + mechanics + guides + scores + leaderboard
 npm run check
-npm run smoke  # all 69 playable carts at the requested viewport
+npm run smoke  # every playable cart + guest save panel at the requested viewport
 ```
 
 ## Do not
@@ -367,3 +367,46 @@ Audit coverage:
 - Production replay also caught Stroop's longest random word escaping its
   display box; the smoke test now waits for web fonts and reports overflow
   offenders so random/font-dependent failures are reproducible.
+
+## Accounts, hardening, copy + logic expansion (2026-08-12)
+
+Floor: **81 catalog entries / 80 playable carts**.
+
+Identity remains optional. Guests keep scores and history in localStorage until
+they clear this site's data or use private browsing. Google OAuth links that
+progress across devices. The server uses authorization-code + PKCE + one-time
+state + nonce, verifies Google's RS256 ID token against Google's JWKS, keys
+users by stable `sub`, and issues its own 30-day `__Host-` HttpOnly cookie.
+Google access/refresh tokens and passwords are never stored. Synced fields are
+limited to high scores, timestamped favourite state, play count, initials, and
+the last 500 practice events; custom game code and theme stay local. Players
+can delete the cloud save from the account panel.
+
+Production Google credentials are not configured yet. Add a Google Web client
+with redirect URI `https://games.nonarkara.org/api/auth/google/callback`, then
+set Cloudflare Pages secrets `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+Until then the UI says `SETUP PENDING`; guest play is fully operational.
+
+Hardening shipped:
+- shared game allowlist for session issuance + score ceilings
+- same-origin writes, bounded JSON bodies, integer/ceiling checks
+- persistent D1 rate limit with hashed client key; no raw IP stored
+- generic service errors (no database details leak)
+- one-time score sessions and unique replay backstop
+- CSP, frame denial, nosniff, referrer, permissions, and HSTS headers
+- revision-checked sync writes, event deduplication, bounded server payloads
+- forward-only D1 migrations run before every production deploy
+
+Copy audit is executable: `js/catalog.test.mjs` requires every playable
+description to be 30–90 characters, action-led, and free of unexplained lab or
+developer jargon. All 80 pass. Every game still has a full Brain Briefing.
+
+New original mechanics:
+- Nonogram: four verified 5×5 pictures; row/column clue and answer tests.
+- Nim: legal-move tests and an optimal xor-zero computer reply.
+- Make 24: every shipped number set is solver-proven possible.
+
+Browser audit passed all 80 carts and the guest save panel at 390×844 and
+1280×900 with zero overflow or console errors. The three new games were also
+interactively played: Nonogram cycles cell state, Nim returns a CPU move, and
+Make 24 reduces four values to three after a valid operation.

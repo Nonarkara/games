@@ -17,12 +17,9 @@
 
 const SESSION_TTL_MS = 5 * 60 * 1000;  // 5 minutes
 const RATE_LIMIT_MS  = 2 * 1000;       // 1 per IP per 2s
-const ALLOWED_GAMES  = null;           // null = any game_id accepted; set to an array to lock down
-
-// In-memory rate-limit ledger. Edge runtime = single instance per region,
-// good enough for a hobby leaderboard. For a real prod system, swap for
-// Durable Objects or a CF rate-limit rule.
-const rateLimit = new Map();
+import { ALLOWED_GAME_IDS } from '../_shared/games.js';
+import { json, readJson, sameOrigin } from '../_shared/http.js';
+import { sha256 } from '../_shared/auth.js';
 
 function randHex(bytes) {
   const arr = new Uint8Array(bytes);
@@ -39,24 +36,28 @@ function clientIp(request) {
 }
 
 export async function onRequestPost({ request, env }) {
-  let body;
-  try { body = await request.json(); }
-  catch { return jsonResponse({ error: 'invalid_json' }, 400); }
+  if (!sameOrigin(request, env.PUBLIC_ORIGIN)) return json({ error: 'origin_rejected' }, 403);
+  const parsed = await readJson(request, 2048);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.value;
 
   const game_id = String(body?.game_id || '').trim();
-  if (!game_id) return jsonResponse({ error: 'game_id_required' }, 400);
-  if (ALLOWED_GAMES && !ALLOWED_GAMES.includes(game_id)) {
-    return jsonResponse({ error: 'unknown_game' }, 400);
-  }
+  if (!game_id) return json({ error: 'game_id_required' }, 400);
+  if (!ALLOWED_GAME_IDS.has(game_id)) return json({ error: 'unknown_game' }, 400);
 
   // Rate limit
-  const ip = clientIp(request);
   const now = Date.now();
-  const last = rateLimit.get(ip) || 0;
-  if (now - last < RATE_LIMIT_MS) {
-    return jsonResponse({ error: 'rate_limited', retry_after_ms: RATE_LIMIT_MS - (now - last) }, 429);
+  const keyHash = await sha256(`score:${env.RATE_LIMIT_SALT || 'ngs-score-v1'}:${clientIp(request)}`);
+  try {
+    const limit = await env.DB.prepare(
+      `INSERT INTO api_rate_limits (key_hash, last_seen_at) VALUES (?1, ?2)
+       ON CONFLICT(key_hash) DO UPDATE SET last_seen_at = excluded.last_seen_at
+       WHERE api_rate_limits.last_seen_at <= ?3`
+    ).bind(keyHash, now, now - RATE_LIMIT_MS).run();
+    if (!limit.meta?.changes) return json({ error: 'rate_limited', retry_after_ms: RATE_LIMIT_MS }, 429);
+  } catch {
+    return json({ error: 'service_unavailable' }, 503);
   }
-  rateLimit.set(ip, now);
 
   const session_id = randHex(32);
   const issued_at  = now;
@@ -67,18 +68,8 @@ export async function onRequestPost({ request, env }) {
       'INSERT INTO sessions (session_id, game_id, issued_at, expires_at, used) VALUES (?1, ?2, ?3, ?4, 0)'
     ).bind(session_id, game_id, issued_at, expires_at).run();
   } catch (e) {
-    return jsonResponse({ error: 'db_error', detail: String(e?.message || e) }, 500);
+    return json({ error: 'service_unavailable' }, 503);
   }
 
-  return jsonResponse({ session_id, expires_at, game_id });
-}
-
-function jsonResponse(obj, status = 200) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store'
-    }
-  });
+  return json({ session_id, expires_at, game_id });
 }

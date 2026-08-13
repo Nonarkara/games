@@ -5,6 +5,11 @@
  */
 const LOG_KEY = 'omni_arcade_analytics_v1';
 
+function eventId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 14)}`;
+}
+
 const CATEGORY_SKILLS = {
   'math-logic': 'Mathematical Reasoning',
   'language': 'Language & Literacy',
@@ -23,7 +28,7 @@ const CATEGORY_SKILLS = {
 export class AnalyticsService {
   static log(gameId, category, score, durationMs) {
     const entry = {
-      gameId, category, score,
+      eventId: eventId(), gameId, category, score,
       skill: CATEGORY_SKILLS[category] || 'General',
       durationMs,
       timestamp: Date.now()
@@ -33,10 +38,29 @@ export class AnalyticsService {
     // Cap at 500 entries to avoid bloat.
     if (log.length > 500) log.splice(0, log.length - 500);
     try { localStorage.setItem(LOG_KEY, JSON.stringify(log)); } catch (e) {}
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('ngs:analytics-changed'));
   }
 
   static getLog() {
-    try { return JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); } catch (e) { return []; }
+    try {
+      const log = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+      let changed = false;
+      for (const entry of log) {
+        if (!entry.eventId) { entry.eventId = eventId(); changed = true; }
+      }
+      if (changed) localStorage.setItem(LOG_KEY, JSON.stringify(log));
+      return Array.isArray(log) ? log : [];
+    } catch (e) { return []; }
+  }
+
+  static mergeLog(remote = []) {
+    const merged = new Map();
+    for (const entry of [...this.getLog(), ...(Array.isArray(remote) ? remote : [])]) {
+      if (entry?.eventId) merged.set(entry.eventId, entry);
+    }
+    const log = [...merged.values()].sort((a, b) => a.timestamp - b.timestamp).slice(-500);
+    try { localStorage.setItem(LOG_KEY, JSON.stringify(log)); } catch (e) {}
+    return log;
   }
 
   /** Returns a skill profile: { skill: { plays, avgScore, lastPlayed } } */

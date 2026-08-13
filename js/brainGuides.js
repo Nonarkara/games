@@ -11,43 +11,57 @@ export const BRAIN_GUIDES = {
     label: 'Simple reaction time', minutes: '2–3 min',
     practice: 'Hold still until the colour change, then tap. Anticipation is scored as a miss.',
     why: 'Waiting without guessing is a different skill from tapping fast. Daily use makes the wait visible.',
-    tip: 'Look at the box, not the clock. Move only after amber, never before.'
+    tip: 'Look at the box, not the clock. Move only after amber, never before.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'one-back': {
     label: 'Working-memory updating', minutes: '2–3 min',
     practice: 'Keep only the last square. When a new one lights, compare it to the one you are holding.',
     why: 'This is Dual N-Back with one item and one turn of lag — the same update, less load.',
-    tip: 'Say “same” or “moved” out loud for the first five trials. Then drop the voice.'
+    tip: 'Say “same” or “moved” out loud for the first five trials. Then drop the voice.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'oddball': {
     label: 'Rare-target attention', minutes: '2–3 min',
     practice: 'Let the common square pass. Fire only when the diamond appears.',
     why: 'Most of attention is withholding. Catching a rare event is the part people notice; ignoring the rest is the work.',
-    tip: 'Keep a finger ready, but do not bounce. The miss that costs is tapping the square.'
+    tip: 'Keep a finger ready, but do not bounce. The miss that costs is tapping the square.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'backward-span': {
     label: 'Working-memory reversal', minutes: '2–4 min',
     practice: 'Hold the digits, then reverse them before typing. Echo memory is not enough.',
     why: 'Repeating forward can be a loop in the ear. Reversing forces you to use the workspace.',
-    tip: 'Chunk in twos from the end: last pair first, then the pair before that.'
+    tip: 'Chunk in twos from the end: last pair first, then the pair before that.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'nonogram': {
     label: 'Constraint deduction', minutes: '3–6 min',
     practice: 'Cross-check row clues with column clues, mark what must be filled, and rule out cells that cannot fit a run.',
     why: 'Constraint problems become easier when each confirmed fact reduces several possibilities at once.',
-    tip: 'Start with the longest clues. Mark impossible cells with × so you do not reconsider them.'
+    tip: 'Start with the longest clues. Mark impossible cells with × so you do not reconsider them.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'nim': {
     label: 'Strategic reasoning', minutes: '2–4 min',
     practice: 'Compare several heaps, predict the reply to each move, and leave a position the opponent cannot repair.',
     why: 'Nim shows how a simple hidden pattern can turn trial and error into a reliable strategy.',
-    tip: 'Look for moves that make the heaps balance in pairs. The result screen reveals the exact binary rule.'
+    tip: 'Look for moves that make the heaps balance in pairs. The result screen reveals the exact binary rule.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'make-24': {
     label: 'Flexible arithmetic', minutes: '3–6 min',
     practice: 'Recombine the same four numbers in different pairs while tracking operation order and intermediate values.',
     why: 'Arithmetic fluency is more useful when you can rearrange a problem instead of following one memorized route.',
-    tip: 'Work backward from 24: try to build 6×4, 8×3, 12×2, or 25−1.'
+    tip: 'Work backward from 24: try to build 6×4, 8×3, 12×2, or 25−1.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'asteroids': {
     label: 'Spatial control under momentum', minutes: '3–6 min',
@@ -151,247 +165,329 @@ export const BRAIN_GUIDES = {
     label: 'Working-memory updating', minutes: '4–6 min',
     practice: 'Track a position and a sound, then replace old information as each new pair arrives.',
     why: 'Working memory is the small mental workspace used to hold and update information during a task.',
-    tip: 'Accuracy first. Add speed only when two-back feels stable.'
+    tip: 'Accuracy first. Add speed only when two-back feels stable.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'digit-span': {
     label: 'Short-term recall', minutes: '3–5 min',
     practice: 'Hold an ordered string of digits long enough to reproduce it without external cues.',
     why: 'The task makes memory load visible: one more digit can be the difference between holding and losing the sequence.',
-    tip: 'Group digits into chunks, then notice when chunking stops helping.'
+    tip: 'Group digits into chunks, then notice when chunking stops helping.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'stroop-match': {
     label: 'Response inhibition', minutes: '2–4 min',
     practice: 'Answer with the ink color while suppressing the faster, automatic urge to read the word.',
     why: 'Inhibition helps keep an irrelevant but tempting response from taking over the action you intended.',
-    tip: 'Pause for one beat when the word and ink disagree.'
+    tip: 'Pause for one beat when the word and ink disagree.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'go-nogo': {
     label: 'Impulse control', minutes: '2–3 min',
     practice: 'Build a fast response, then withhold it when a no-go signal appears.',
     why: 'Good control is not only reacting quickly. It is also stopping a prepared action at the right moment.',
-    tip: 'Treat false starts as the main error, not slow correct presses.'
+    tip: 'Treat false starts as the main error, not slow correct presses.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'simon-seq': {
     label: 'Sequence memory', minutes: '3–5 min',
     practice: 'Encode an ordered pattern, retain it, and replay it as the sequence grows.',
     why: 'Order matters in instructions, music, language, and multi-step routines.',
-    tip: 'Name or rhythmically group each color instead of memorizing isolated flashes.'
+    tip: 'Name or rhythmically group each color instead of memorizing isolated flashes.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'schulte-table': {
     label: 'Visual scanning', minutes: '2–4 min',
     practice: 'Search a crowded field in order while resisting the urge to scan randomly.',
     why: 'A systematic search strategy reduces missed targets and repeated checking.',
-    tip: 'Keep your gaze near the center and let peripheral vision find the next number.'
+    tip: 'Keep your gaze near the center and let peripheral vision find the next number.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'visual-search': {
     label: 'Selective attention', minutes: '2–4 min',
     practice: 'Separate one target from increasingly similar distractors.',
     why: 'Selective attention prioritizes task-relevant detail when the visual field is noisy.',
-    tip: 'Search by rows or quadrants. A plan beats frantic eye movement.'
+    tip: 'Search by rows or quadrants. A plan beats frantic eye movement.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'corsi-blocks': {
     label: 'Visuospatial span', minutes: '3–5 min',
     practice: 'Hold an ordered path through space long enough to reproduce it without notes.',
     why: 'Spatial working memory is a different channel from digit span — useful for maps, diagrams, and layouts.',
-    tip: 'Trace the path with your eyes once before the lights finish.'
+    tip: 'Trace the path with your eyes once before the lights finish.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'memory-palace': {
     label: 'Method of loci', minutes: '4–7 min',
     practice: 'Bind each object to a fixed place in a known route, then retrieve by walking the route again.',
     why: 'Spatial scaffolding turns a bare list into a path you can re-enter — the classic mnemonic palace.',
-    tip: 'Make the image weird. A key melting on the stove sticks harder than a key sitting politely.'
+    tip: 'Make the image weird. A key melting on the stove sticks harder than a key sitting politely.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'flanker': {
     label: 'Selective attention', minutes: '2–4 min',
     practice: 'Report the center stimulus while suppressing conflicting neighbors.',
     why: 'The incongruent trial is the point: interference makes attention costs measurable.',
-    tip: 'Fixate the center. Do not scan the flanks.'
+    tip: 'Fixate the center. Do not scan the flanks.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'aim-trainer': {
     label: 'Hand–eye calibration', minutes: '1–3 min',
     practice: 'Map visual target position to a precise hand movement under time pressure.',
     why: 'Repeated aiming gives immediate feedback about speed–accuracy trade-offs.',
-    tip: 'Move smoothly to the target center. Overshooting wastes more time than a measured approach.'
+    tip: 'Move smoothly to the target center. Overshooting wastes more time than a measured approach.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'sudoku-sprint': {
     label: 'Constraint satisfaction', minutes: '3–6 min',
     practice: 'Place digits that satisfy every row, column, and box rule without contradiction.',
     why: 'The board rewards elimination over guessing — a compact model of logical planning.',
-    tip: 'Fill forced cells first. Never invent a digit that two clues do not require.'
+    tip: 'Fill forced cells first. Never invent a digit that two clues do not require.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'fifteen-puzzle': {
     label: 'Spatial planning', minutes: '2–5 min',
     practice: 'Reorder a disrupted grid by sliding tiles through a single empty cell.',
     why: 'Each move changes the whole path — the board punishes local fixes that break the global order.',
-    tip: 'Solve row by row. Protect finished rows; do not reopen them for a cheap swap.'
+    tip: 'Solve row by row. Protect finished rows; do not reopen them for a cheap swap.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'mental-math': {
     label: 'Arithmetic fluency', minutes: '2–4 min',
     practice: 'Retrieve number facts and choose efficient operations without writing every intermediate step.',
     why: 'Fluent basics leave more working memory available for the structure of a harder problem.',
-    tip: 'Break awkward numbers into tens and ones before calculating.'
+    tip: 'Break awkward numbers into tens and ones before calculating.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'type-rush': {
     label: 'Motor fluency', minutes: '2–4 min',
     practice: 'Coordinate visual word recognition with accurate, increasingly automatic finger sequences.',
     why: 'When keystrokes become automatic, attention can stay on composing the thought.',
-    tip: 'Accuracy is the route to speed. Correct the weak keys instead of chasing raw WPM.'
+    tip: 'Accuracy is the route to speed. Correct the weak keys instead of chasing raw WPM.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'reflex-matrix': {
     label: 'Reaction control', minutes: '2–3 min',
     practice: 'Detect a brief signal, select its location, and execute a controlled response.',
     why: 'The score exposes the balance between quick detection and precise movement.',
-    tip: 'Keep your pointer near the center so every target is within a similar reach.'
+    tip: 'Keep your pointer near the center so every target is within a similar reach.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'cyber-tetris': {
     label: 'Mental rotation', minutes: '5–10 min',
     practice: 'Rotate shapes mentally, compare possible placements, and plan around future constraints.',
     why: 'Spatial reasoning depends on imagining how parts fit before physically moving them.',
-    tip: 'Look at the next piece before locking the current one.'
+    tip: 'Look at the next piece before locking the current one.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'cyber-pacman': {
     label: 'Route planning', minutes: '4–8 min',
     practice: 'Track moving threats, update safe routes, and switch plans when the maze state changes.',
     why: 'Dynamic planning combines attention, prediction, and fast course correction.',
-    tip: 'Plan to the next intersection, not only to the next dot.'
+    tip: 'Plan to the next intersection, not only to the next dot.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'cyber-snake': {
     label: 'Prospective planning', minutes: '3–6 min',
     practice: 'Commit to a movement path while protecting the space your longer future self will need.',
     why: 'The mechanic rewards thinking one or two consequences beyond the immediate reward.',
-    tip: 'Preserve open lanes. The shortest route to food is not always the safest.'
+    tip: 'Preserve open lanes. The shortest route to food is not always the safest.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'space-defender': {
     label: 'Visual tracking', minutes: '3–6 min',
     practice: 'Track several moving objects, predict trajectories, and time a response.',
     why: 'Fast arcade play makes attention allocation and prediction visible through immediate misses and hits.',
-    tip: 'Aim where the target will be, not where it is.'
+    tip: 'Aim where the target will be, not where it is.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'flappy-bird': {
     label: 'Timing calibration', minutes: '1–4 min',
     practice: 'Estimate momentum and make small corrections instead of overreacting.',
     why: 'The narrow control loop teaches how delayed physical effects follow a brief input.',
-    tip: 'Use a steady rhythm and correct early with small taps.'
+    tip: 'Use a steady rhythm and correct early with small taps.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'minesweeper': {
     label: 'Deductive reasoning', minutes: '4–10 min',
     practice: 'Combine local numerical clues to rule possibilities in or out.',
     why: 'Deduction turns several incomplete facts into one justified next move.',
-    tip: 'Separate certain moves from guesses. Flag only what the clues force.'
+    tip: 'Separate certain moves from guesses. Flag only what the clues force.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'slide-2048': {
     label: 'Constraint planning', minutes: '4–8 min',
     practice: 'Preserve maneuvering room while arranging a sequence of future merges.',
     why: 'The board rewards delayed gratification: a smaller move now can protect a larger plan later.',
-    tip: 'Keep the largest tile in one corner and avoid filling every lane.'
+    tip: 'Keep the largest tile in one corner and avoid filling every lane.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'cyber-blackjack': {
     label: 'Risk estimation', minutes: '4–8 min',
     practice: 'Compare an uncertain payoff with the cost of drawing one more card.',
     why: 'The game is a compact lesson in probability, expected outcomes, and stopping decisions—not a gambling strategy course.',
-    tip: 'Explain your hit-or-stand reason before revealing the next card.'
+    tip: 'Explain your hit-or-stand reason before revealing the next card.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'trivia-master': {
     label: 'Retrieval practice', minutes: '4–7 min',
     practice: 'Pull stored facts from memory instead of merely recognizing them during rereading.',
     why: 'Trying to retrieve an answer exposes what is available now and what needs another pass.',
-    tip: 'After a miss, say the correct answer once in a full sentence.'
+    tip: 'After a miss, say the correct answer once in a full sentence.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'pattern-breaker': {
     label: 'Hypothesis testing', minutes: '4–7 min',
     practice: 'Use partial feedback to eliminate paths and choose the next informative guess.',
     why: 'Good deduction updates a model after every result instead of repeating a hunch.',
-    tip: 'Change one part of a promising guess so the next clue tells you more.'
+    tip: 'Change one part of a promising guess so the next clue tells you more.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'rom-loader': {
     label: 'Digital literacy', minutes: '2–4 min',
     practice: 'Inspect file headers and distinguish metadata from executable game content.',
     why: 'Understanding formats makes old media less mysterious and encourages safer handling of local files.',
-    tip: 'Use only backups you own. Compare the extension with the detected header.'
+    tip: 'Use only backups you own. Compare the extension with the detected header.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'ai-sandbox': {
     label: 'Systems thinking', minutes: '5–10 min',
     practice: 'Describe rules, observe the resulting system, then revise the prompt from concrete behavior.',
     why: 'Designing a small game turns vague intentions into testable rules and feedback loops.',
-    tip: 'Change one rule at a time so you know what caused the new behavior.'
+    tip: 'Change one rule at a time so you know what caused the new behavior.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'arcade-breakout': {
     label: 'Prediction and control', minutes: '3–7 min',
     practice: 'Predict rebound angles while moving the paddle to a future interception point.',
     why: 'Breakout couples visual tracking with timed motor correction and strategic target selection.',
-    tip: 'Hit the ball away from the paddle center to control its exit angle.'
+    tip: 'Hit the ball away from the paddle center to control its exit angle.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'arcade-pong': {
     label: 'Anticipation', minutes: '3–6 min',
     practice: 'Read velocity, forecast the intercept, and correct your paddle before the ball arrives.',
     why: 'Pong strips visuomotor prediction down to one moving object and one decisive response.',
-    tip: 'Watch the ball after contact. Start moving before it crosses mid-court.'
+    tip: 'Watch the ball after contact. Start moving before it crosses mid-court.',
+    stack: ['werbach', 'thaler', 'clear']
+
   },
   'number-chain': {
     label: 'Pattern reasoning', minutes: '3–5 min',
     practice: 'Compare changes between terms and test a candidate rule against the whole sequence.',
     why: 'Pattern reasoning is stronger when the rule explains every step, not only the last pair.',
-    tip: 'Check differences first, then ratios, then alternating rules.'
+    tip: 'Check differences first, then ratios, then alternating rules.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'tower-hanoi': {
     label: 'Recursive planning', minutes: '4–8 min',
     practice: 'Break one large goal into repeated smaller goals while respecting a fixed constraint.',
     why: 'The puzzle makes hierarchical planning concrete: solve the smaller tower to move the larger disk.',
-    tip: 'Before each move, name which disk you are trying to free.'
+    tip: 'Before each move, name which disk you are trying to free.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'anagram-scramble': {
     label: 'Orthographic flexibility', minutes: '3–5 min',
     practice: 'Recombine letter positions while testing familiar spelling patterns.',
     why: 'Flexible word-form search supports spelling awareness and vocabulary retrieval.',
-    tip: 'Find common endings and consonant pairs before guessing whole words.'
+    tip: 'Find common endings and consonant pairs before guessing whole words.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'word-builder': {
     label: 'Vocabulary retrieval', minutes: '3–6 min',
     practice: 'Search known word patterns under a letter constraint and a clock.',
     why: 'Generating words requires active retrieval rather than passive recognition.',
-    tip: 'Build short words first, then reuse their letter clusters inside longer ones.'
+    tip: 'Build short words first, then reuse their letter clusters inside longer ones.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'periodic-quest': {
     label: 'Symbol recall', minutes: '3–5 min',
     practice: 'Retrieve the stable mapping between element names and chemical symbols.',
     why: 'Fast access to notation reduces friction when later chemistry problems become more complex.',
-    tip: 'For a miss, connect the symbol to the element’s Latin or historical name when relevant.'
+    tip: 'For a miss, connect the symbol to the element’s Latin or historical name when relevant.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'capital-quiz': {
     label: 'Geographic recall', minutes: '3–5 min',
     practice: 'Retrieve place-name pairs and strengthen the cue between a country and its capital.',
     why: 'Repeated recall builds a more usable mental map than repeated rereading alone.',
-    tip: 'Attach each capital to a region, river, coast, or neighboring country.'
+    tip: 'Attach each capital to a region, river, coast, or neighboring country.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'math-safari': {
     label: 'Number fluency', minutes: '3–6 min',
     practice: 'Solve short arithmetic problems with immediate corrective feedback.',
     why: 'Automatic basic facts free attention for later multi-step reasoning.',
-    tip: 'Say the operation aloud before entering the answer.'
+    tip: 'Say the operation aloud before entering the answer.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'memory-match': {
     label: 'Location memory', minutes: '3–6 min',
     practice: 'Encode what appeared and where, then update that map after each turn.',
     why: 'The game rewards deliberate encoding more than random flipping.',
-    tip: 'Name each card and its rough position when it appears.'
+    tip: 'Name each card and its rough position when it appears.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'word-search': {
     label: 'Visual word recognition', minutes: '4–7 min',
     practice: 'Scan letter fields for familiar sequences in several orientations.',
     why: 'The task combines systematic visual search with rapid recognition of spelling patterns.',
-    tip: 'Search for the rarest letter in the target word first.'
+    tip: 'Search for the rarest letter in the target word first.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
   },
   'non-trivial': {
     label: 'Elaborative recall', minutes: '5–10 min',
     practice: 'Retrieve facts from themed stories and connect answers to books, places, and lived context.',
     why: 'Rich cues make memory more meaningful than isolated fact drilling.',
-    tip: 'Explain why the answer fits the theme, even after choosing correctly.'
+    tip: 'Explain why the answer fits the theme, even after choosing correctly.',
+    stack: ['thaler', 'werbach', 'clear']
+
   },
   'blow-cartridge': {
     label: 'Social retrieval', minutes: '10–30 min',
     practice: 'Use cultural cues to retrieve shared memories, then explain them to other players.',
     why: 'Conversation adds context, disagreement, and stories that a solitary quiz cannot.',
-    tip: 'Let each answer trigger one memory before moving to the next card.'
+    tip: 'Let each answer trigger one memory before moving to the next card.',
+    stack: ['thaler', 'werbach', 'clear']
+
   },
   'about-dr-non': {
     label: 'Critical play', minutes: '3 min read',

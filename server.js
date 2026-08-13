@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -24,8 +24,24 @@ const server = http.createServer((req, res) => {
   try {
     const host = req.headers.host || 'localhost';
     const parsedUrl = new URL(req.url, `http://${host}`);
+    // Local development has no Pages Functions runtime. Mirror the one public
+    // auth read so the UI can enter honest guest mode without a noisy 404.
+    if (req.method === 'GET' && parsedUrl.pathname === '/api/auth/status') {
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff'
+      });
+      res.end(JSON.stringify({ authenticated: false, google_available: false, user: null }));
+      return;
+    }
     let reqPath = parsedUrl.pathname === '/' ? '/index.html' : decodeURIComponent(parsedUrl.pathname);
-    let filePath = path.join(__dirname, path.normalize(reqPath));
+    const filePath = path.resolve(__dirname, `.${path.normalize(reqPath)}`);
+    if (filePath !== __dirname && !filePath.startsWith(`${__dirname}${path.sep}`)) {
+      res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Forbidden');
+      return;
+    }
 
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';

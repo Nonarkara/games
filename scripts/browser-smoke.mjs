@@ -119,6 +119,20 @@ try {
   if (home.overflow > 1) throw new Error(`mobile home overflows by ${home.overflow}px`);
   await screenshot(screenshots.home);
 
+  const account = await evaluate(`(() => {
+    document.querySelector('#account-link')?.click();
+    const panel = document.querySelector('.account-panel');
+    return {
+      mounted: Boolean(panel),
+      guestCopy: /stay in this browser/i.test(panel?.textContent || ''),
+      optionalCopy: /Google|setup pending/i.test(panel?.textContent || ''),
+      overflow: panel ? panel.scrollWidth - panel.clientWidth : 999
+    };
+  })()`);
+  if (!account.mounted || !account.guestCopy || !account.optionalCopy) throw new Error(`guest save panel is incomplete: ${JSON.stringify(account)}`);
+  if (account.overflow > 1) throw new Error(`account panel overflows by ${account.overflow}px`);
+  await evaluate(`document.querySelector('[data-account-close]')?.click()`);
+
   const briefing = await evaluate(`(() => {
     document.querySelector('[data-wing="arcade"]').click();
     document.querySelector('[data-game="arcade-breakout"]').click();
@@ -226,7 +240,7 @@ try {
   }
 
   if (browserErrors.length) throw new Error(`browser errors: ${browserErrors.join(' | ')}`);
-  console.log(JSON.stringify({ home, briefing, game, sampledGames, catalogSweep: { count: catalogSweep.length, ids: catalogSweep }, screenshots }, null, 2));
+  console.log(JSON.stringify({ home, account, briefing, game, sampledGames, catalogSweep: { count: catalogSweep.length, ids: catalogSweep }, screenshots }, null, 2));
 } finally {
   try { await send('Browser.close'); } catch { chrome.kill(); }
   socket.close();
