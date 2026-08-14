@@ -651,6 +651,27 @@ export const BRAIN_GUIDES = {
     tip: 'Pick truths that sound like lies. The lie should be the most boring statement.',
     stack: ['thaler', 'kahneman', 'clear']
   },
+  'tic-tac-toe': {
+    label: 'Adversarial lookahead', minutes: '2–5 min',
+    practice: 'Read the opponent\u2019s threats while building your own — every move both attacks and blocks.',
+    why: 'Perfect play always draws. The drill is detecting forks and double-threats before they resolve, the same lookahead used in any turn-based contest.',
+    tip: 'Take the center first. On hard mode, accept that a draw is the win — the CPU never errs.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'rock-paper-scissors': {
+    label: 'Pattern prediction', minutes: '1–3 min',
+    practice: 'Outguess an opponent that watches your habits. Humans are bad at being random — the skill is noticing your own patterns.',
+    why: 'Mixed-strategy equilibrium says play each option a third of the time. Almost nobody does; exploiting that bias is the game.',
+    tip: 'After losing, switch to the throw that just beat you. Losers escalate; winners repeat.',
+    stack: ['kahneman', 'thaler', 'clear']
+  },
+  'memory-matrix': {
+    label: 'Parallel spatial encoding', minutes: '2–4 min',
+    practice: 'Snapshot multiple lit positions at once, then reproduce them after the grid clears.',
+    why: 'Unlike Corsi (a path) or Simon (a sequence), this tests simultaneous encoding of several locations — a different load on visuospatial working memory.',
+    tip: 'Group the lit cells into shapes or pairs before the grid hides them. A cluster of three is easier than three singles.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
 };
 
 export const PAPER_LINKS = {

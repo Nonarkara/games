@@ -35,6 +35,9 @@ import { renderAsteroids, renderFrogger, renderConnectFour, renderSolitaire } fr
 import { renderWordGuess, renderMateInOne, renderEarTrainer, renderMorseCode } from './games/ngsLearn2.js';
 import { renderStopSignal, renderWarehousePush, renderLightsOut } from './games/ngsExpansionSuite.js';
 import { renderNonogram, renderNim, renderMake24 } from './games/ngsLogicSuite.js';
+import { renderTicTacToe } from './games/ticTacToe.js';
+import { renderRockPaperScissors } from './games/rockPaperScissors.js';
+import { renderMemoryMatrix } from './games/memoryMatrix.js';
 import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } from './games/ngsDailySuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
@@ -93,6 +96,7 @@ const gamesCatalog = [
   { id: 'one-back', code: 'NB1', title: 'One-Back', wing: 'train', category: 'memory-focus', domain: 'Working memory', age: 'All', desc: 'Tap MATCH if the square is in the same place as last turn.', paper: 'Kirchner 1958', tags: ['N-back', 'On-ramp', 'Daily'], renderer: renderOneBack },
   { id: 'oddball', code: 'ODD', title: 'Oddball', wing: 'train', category: 'memory-focus', domain: 'Rare-target attention', age: 'All', desc: 'Tap only when the rare shape appears. Ignore the common one.', paper: 'Squires 1975', tags: ['Attention', 'P300', 'Daily'], renderer: renderOddball },
   { id: 'backward-span', code: 'BDS', title: 'Backward Span', wing: 'train', category: 'memory-focus', domain: 'Working memory', age: 'Teen+', desc: 'Watch digits, then type them back in reverse order.', paper: 'Miller 1956', tags: ['Capacity', 'Recall', 'Daily'], renderer: renderBackwardSpan },
+  { id: 'memory-matrix', code: 'MMG', title: 'Memory Matrix', wing: 'train', category: 'memory-focus', domain: 'Spatial pattern', age: 'All', desc: 'Watch cells light up, then tap the same cells from memory before the grid clears.', tags: ['Memory', 'Spatial', 'Pattern'], renderer: renderMemoryMatrix },
   // ── ARCADE ─────────────────────────────────────────────────────────────
   { id: 'cyber-tetris', code: 'TET', title: 'Cyber Tetris 1984', wing: 'arcade', category: 'classics', domain: 'Spatial', age: 'All', desc: 'Rotate falling blocks to complete rows without leaving gaps.', tags: ['Classic', 'Puzzle'], renderer: renderCyberTetris },
   { id: 'arcade-breakout', code: 'BRK', title: 'Breakout 1976', wing: 'arcade', category: 'classics', domain: 'Prediction', age: 'All', desc: 'Shape rebound angles, keep the rally alive, clear the wall.', tags: ['Classic', 'Open source', 'Touch'], credit: 'Ania Kubow · MIT', source: 'https://github.com/kubowania/breakout', renderer: renderArcadeBreakout },
@@ -111,6 +115,7 @@ const gamesCatalog = [
   { id: 'rom-loader', code: 'ROM', title: 'ROM / SWF Inspector', wing: 'arcade', category: 'classics', domain: 'Files', age: 'All', desc: 'Drop a legal .nes / .gb / .sfc / .swf backup — header metadata only.', tags: ['Local', 'Inspector'], renderer: renderRomLoader },
   { id: 'ai-sandbox', code: 'AIG', title: 'AI Game Builder', wing: 'arcade', category: 'ai-studio', domain: 'Sandbox', age: 'All', desc: 'Prompt or pick a preset; get a playable micro-game live.', tags: ['AI', 'Sandbox'], renderer: renderAIGameStudio },
   { id: 'warehouse-push', code: 'WHK', title: 'Warehouse Push', wing: 'arcade', category: 'classics', domain: 'Spatial planning', age: '8+', desc: 'Push every crate onto a target. You can undo a step, but you can never pull.', tags: ['Classic', 'Planning', 'Open source'], credit: 'Steven Lambert · CC0', source: 'https://gist.github.com/straker/2fddb507d4bb6bec54ea2fdb022d020c', renderer: renderWarehousePush },
+  { id: 'rock-paper-scissors', code: 'RPS', title: 'Rock Paper Scissors', wing: 'arcade', category: 'casual-friv', domain: 'Prediction', age: 'All', desc: 'Pick rock, paper, or scissors. The CPU reads your habits — mix it up.', tags: ['Casual', 'Prediction'], renderer: renderRockPaperScissors },
 
   // ── LEARN ──────────────────────────────────────────────────────────────
   { id: 'monty-hall', code: 'MTY', title: 'Monty Hall', wing: 'learn', category: 'math-logic', domain: 'Probability', age: 'All', desc: 'Pick a door, see one empty door opened, then choose whether to stay or switch.', paper: 'Selvin 1975', tags: ['Probability', 'Bayes', 'Argument-settler'], renderer: renderMontyHall },
@@ -128,6 +133,7 @@ const gamesCatalog = [
   { id: 'nonogram', code: 'NGR', title: 'Nonogram', wing: 'learn', category: 'math-logic', domain: 'Visual deduction', age: '8+', desc: 'Fill a 5×5 picture using the number clues beside each row and column.', tags: ['Logic', 'Deduction', 'Picture'], renderer: renderNonogram },
   { id: 'nim', code: 'NIM', title: 'Nim', wing: 'learn', category: 'math-logic', domain: 'Strategy', age: '8+', desc: 'Take any number from one heap. Whoever takes the final token wins.', tags: ['Strategy', 'Binary', 'Classic'], renderer: renderNim },
   { id: 'make-24', code: 'M24', title: 'Make 24', wing: 'learn', category: 'math-logic', domain: 'Arithmetic', age: '10+', desc: 'Combine four numbers with +, −, ×, or ÷ to make exactly 24.', tags: ['Arithmetic', 'Planning', 'Puzzle'], renderer: renderMake24 },
+  { id: 'tic-tac-toe', code: 'TTT', title: 'Tic-Tac-Toe', wing: 'learn', category: 'math-logic', domain: 'Strategy', age: 'All', desc: 'Place three in a row before the CPU does. Hard mode is unbeatable.', tags: ['Strategy', 'Classic', 'Pattern'], renderer: renderTicTacToe },
   { id: 'anagram-scramble', code: 'ANA', title: 'Anagram Scramble', wing: 'learn', category: 'language', domain: 'Spelling', age: '10+', desc: 'Unscramble letters into real words under pressure.', tags: ['Spelling', 'Vocabulary'], renderer: renderAnagram },
   { id: 'word-builder', code: 'WBD', title: 'Word Builder', wing: 'learn', category: 'language', domain: 'Phonics', age: '7+', desc: 'Build valid words from 7 tiles in 60 seconds.', tags: ['Phonics', 'Timed'], renderer: renderWordBuilder },
   { id: 'periodic-quest', code: 'ELM', title: 'Periodic Quest', wing: 'learn', category: 'science', domain: 'Chemistry', age: '12+', desc: 'Match element symbols to names across 10 rounds.', tags: ['Chemistry', 'Recall'], renderer: renderPeriodicQuest },

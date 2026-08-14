@@ -27,6 +27,9 @@ import {
   scoreOddball,
   scoreReactionGate
 } from './ngsDailySuite.js';
+import { checkWinner, findWinningMove, minimaxMove, easyMove, LINES } from './ticTacToe.js';
+import { resolveRPS, predictCPU, CHOICES } from './rockPaperScissors.js';
+import { generatePattern, checkPattern } from './memoryMatrix.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
 const probe = { color: 'green', shape: 'star', count: 1 };
@@ -141,4 +144,73 @@ const typeRushSource = curatedSource.split('export function renderTypeRush')[1].
 assert.match(typeRushSource, /score:\s*wpm[,\n]/);
 assert.doesNotMatch(typeRushSource, /score:\s*wpm\s*\*/);
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, and WPM scoring passed');
+// ── Tic-Tac-Toe: win detection, minimax unbeatability, easy-mode logic ──
+// All 8 winning lines are distinct
+assert.equal(LINES.length, 8);
+assert.equal(new Set(LINES.map(l => l.join(','))).size, 8, 'winning lines must be unique');
+
+// Horizontal win
+assert.equal(checkWinner(['X','X','X', null,null,null, null,null,null]), 'X');
+// Diagonal win
+assert.equal(checkWinner(['O',null,null, null,'O',null, null,null,'O']), 'O');
+// Draw
+assert.equal(checkWinner(['X','O','X','O','X','O','O','X','O']), 'draw');
+// Ongoing
+assert.equal(checkWinner(['X','O',null,null,null,null,null,null,null]), null);
+
+// findWinningMove detects an immediate win
+assert.equal(findWinningMove(['X','X',null, 'O','O',null, null,null,null], 'X'), 2);
+
+// Minimax must be unbeatable: AI playing 'O' against a two-X threat must defend
+const threat = ['X','X',null, null,null,null, null,null,null];
+const defense = minimaxMove(threat, 'O');
+assert.equal(defense, 2, 'minimax must block a two-in-a-row threat');
+
+// Easy mode also blocks immediate threats
+const easyDefense = easyMove(threat, 'O');
+assert.equal(easyDefense, 2, 'easy mode must block an immediate win');
+
+// Easy mode takes a win when available
+const winMove = easyMove(['O','O',null, null,null,null, null,null,null], 'O');
+assert.equal(winMove, 2, 'easy mode must take an immediate win');
+
+// ── Rock-Paper-Scissors: resolution + AI prediction ──
+assert.equal(resolveRPS('rock','scissors'), 'win');
+assert.equal(resolveRPS('paper','rock'), 'win');
+assert.equal(resolveRPS('scissors','paper'), 'win');
+assert.equal(resolveRPS('rock','paper'), 'lose');
+assert.equal(resolveRPS('rock','rock'), 'draw');
+
+// predictCPU returns a valid choice
+assert.ok(CHOICES.includes(predictCPU([])));
+assert.ok(CHOICES.includes(predictCPU(['rock','rock','rock'])));
+
+// Heavy rock history → CPU should counter with paper (deterministically over many calls)
+let paperCount = 0;
+for (let i = 0; i < 1000; i++) {
+  if (predictCPU(['rock','rock','rock','rock','rock']) === 'paper') paperCount++;
+}
+assert.ok(paperCount > 400, 'CPU should mostly counter rock-heavy history with paper');
+
+// ── Memory Matrix: pattern generation + checking ──
+const pattern4 = generatePattern(4, 3); // 4×4, 3 lit cells
+assert.equal(pattern4.size, 3, 'pattern should have exactly 3 cells');
+assert.ok([...pattern4].every(i => i >= 0 && i < 16), 'cells must be in bounds');
+
+// Perfect match
+const check = checkPattern([0, 1, 2], new Set([0, 1, 2]));
+assert.equal(check.correct, 3);
+assert.equal(check.missed, 0);
+assert.equal(check.wrong, 0);
+
+// One wrong, one missed
+const check2 = checkPattern([0, 3, 2], new Set([0, 1, 2]));
+assert.equal(check2.correct, 2);
+assert.equal(check2.wrong, 1);
+assert.equal(check2.missed, 1);
+
+// Duplicate taps should not count as correct
+const check3 = checkPattern([0, 0, 1], new Set([0, 1]));
+assert.equal(check3.correct, 2, 'duplicates collapse to one');
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, and Memory Matrix passed');

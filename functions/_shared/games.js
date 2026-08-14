@@ -18,6 +18,9 @@ export const GAME_MAX = Object.freeze({
   'nonogram': 500,
   'nim': 300,
   'make-24': 240,
+  'tic-tac-toe': 500,
+  'rock-paper-scissors': 100,
+  'memory-matrix': 1200,
 
   // TRAIN
   'dual-n-back': 400,

@@ -84,6 +84,9 @@ const CUTS = {
   'truth-or-dare': [10, 30, 60],
   'higher-lower': [15, 40, 70],
   'two-truths': [20, 50, 80],
+  'tic-tac-toe': [100, 240, 380],
+  'rock-paper-scissors': [20, 50, 80],
+  'memory-matrix': [60, 250, 600],
   'rom-loader': [0, 0, 1],
   'ai-sandbox': [0, 0, 1]
 };

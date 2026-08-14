@@ -95,7 +95,10 @@ const defaultData = {
     'reaction-gate': 0,
     'one-back': 0,
     'oddball': 0,
-    'backward-span': 0
+    'backward-span': 0,
+    'tic-tac-toe': 0,
+    'rock-paper-scissors': 0,
+    'memory-matrix': 0
   },
   favorites: [],
   favoriteStates: {},
