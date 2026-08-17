@@ -8,3 +8,18 @@
 
 /api/*
   Cache-Control: no-store
+
+# Filenames here are unhashed, so Pages' 4h default means a deploy stays
+# invisible in an already-open browser for four hours. That is how a fix
+# reads as never shipped. Revalidate every load — the etag makes it a 304.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/css/*
+  Cache-Control: public, max-age=0, must-revalidate
