@@ -530,7 +530,10 @@ class NgsApp {
           </header>
           <div class="briefing-grid">
             <div class="briefing-primary">
-              <p class="briefing-label">THE BRAIN BRIEFING</p>
+              <div class="briefing-lead">
+                ${spriteImg(game.id, 'briefing-sprite')}
+                <p class="briefing-label">THE BRAIN BRIEFING</p>
+              </div>
               <h3>${guide.label}</h3>
               <div class="briefing-step"><b>1</b><div><span>WHAT YOU DO</span><p>${game.desc}</p></div></div>
               <div class="briefing-step"><b>2</b><div><span>WHAT YOU PRACTISE</span><p>${guide.practice}</p></div></div>

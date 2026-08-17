@@ -999,63 +999,6 @@ body.axiom-modal-open { overflow: hidden; }
   max-width: 46ch;
 }
 
-.attract-feature {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  width: 100%;
-  padding: 1.1rem 1.75rem;
-  background: #0c111a;
-  border: 0;
-  border-top: 1px solid var(--line);
-  box-shadow: inset 3px 0 0 var(--amber);
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.12s ease;
-}
-.attract-feature:hover { background: #121a26; }
-.attract-feature:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
-.attract-feature:active { transform: scale(0.995); }
-.attract-feature-left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-}
-.attract-feature-wing {
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  color: var(--amber);
-}
-.attract-feature-title {
-  font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
-  font-size: clamp(1.35rem, 2.8vw, 1.85rem);
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.1;
-}
-.attract-feature-desc {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  line-height: 1.4;
-  max-width: 62ch;
-}
-.attract-feature-cta {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 1.1rem;
-  background: var(--amber);
-  color: #0a0e14;
-  font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
-  font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-}
-
 /* Select list — machine menu, not cards */
 .cabinet-select {
   flex: 1;
@@ -1733,6 +1676,11 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 .briefing-grid { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(290px, 1fr); gap: 1px; background: var(--ax-line-2); }
 .briefing-primary { padding: clamp(28px, 5vw, 56px); background: var(--ax-panel); }
 .briefing-primary > h3 { max-width: 16ch; margin: 10px 0 36px; font-family: var(--ax-pixel); font-size: clamp(16px, 3vw, 26px); line-height: 1.35; font-weight: 400; letter-spacing: 0; }
+/* The hand-drawn 8-bit sprite next to the briefing label. Same tone
+   selection as the cart cards (amber on a dark panel) — the featured
+   panel uses the ink variant because its panel is amber, not dark. */
+.briefing-lead { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.briefing-sprite { width: 40px; height: 40px; image-rendering: pixelated; flex-shrink: 0; }
 .briefing-step { display: grid; grid-template-columns: 34px 1fr; gap: 14px; padding: 16px 0; border-top: 1px solid var(--ax-line); }
 .briefing-step > b { color: var(--route-color, var(--ax-blue)); font-size: 11px; font-weight: 600; }
 .briefing-step span { color: var(--ax-ink-3); font-size: 8px; font-weight: 600; letter-spacing: .15em; }
@@ -1870,6 +1818,8 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   .briefing-grid { grid-template-columns: 1fr; }
   .briefing-primary { padding: 30px 20px 22px; }
   .briefing-primary > h3 { margin-bottom: 25px; font-size: 42px; }
+  .briefing-sprite { width: 32px; height: 32px; }
+  .briefing-lead { gap: 10px; }
   .briefing-side { min-height: 360px; padding: 28px 20px; }
   .briefing-side { padding-bottom: 140px; }
   .briefing-play { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; min-height: 64px; margin: 0; }
