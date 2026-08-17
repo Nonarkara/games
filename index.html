@@ -21,7 +21,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <!-- ?v= is a one-time cache break. Browsers that loaded these before the
+       max-age=0 headers shipped are holding a four-hour-old bundle; a new URL
+       is the only thing that reaches them. Not needed on future deploys. -->
+  <link rel="stylesheet" href="./css/styles.css?v=2" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -128,6 +131,6 @@
     <div id="game-modal-container" class="game-modal-container"></div>
   </div>
 
-  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./js/app.js?v=2"></script>
 </body>
 </html>
