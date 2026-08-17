@@ -42,6 +42,7 @@ import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } 
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
 import { aliasesFor } from './searchAliases.js';
+import { spriteImg } from './sprites.js';
 
 const WINGS = [
   { id: 'all', label: 'ALL', blurb: 'Full floor' },
@@ -285,6 +286,7 @@ class NgsApp {
       ${feature ? `
         <button type="button" class="attract-feature" data-game="${feature.id}" aria-label="Load ${feature.title}">
           <span class="attract-feature-kicker">TODAY'S CARTRIDGE · ${wingLabel}</span>
+          ${spriteImg(feature.id, 'cart-sprite cart-sprite--hero', 'ink')}
           <span class="attract-feature-code">${feature.code}</span>
           <span class="attract-feature-title">${feature.title}</span>
           <span class="attract-feature-skill">${guide.label} · ${guide.minutes} · HI ${high}</span>
@@ -458,6 +460,7 @@ class NgsApp {
     return `
       <li class="select-row ${isFocus ? 'is-focus' : ''}" data-game="${game.id}" tabindex="0" role="option" aria-selected="${isFocus}" aria-label="${game.title}">
         <span class="select-card-top"><span class="select-code">${game.code}</span><span class="select-state">${isNew ? '<b>NEW</b>' : (hasPlayed ? '<i>PLAYED</i>' : '')}<span class="select-age">${game.age}</span></span></span>
+        ${spriteImg(game.id, 'cart-sprite')}
         <span class="select-name">${game.title}</span>
         <span class="select-desc">${game.desc}</span>
         <span class="select-brain"><small>TRAINS</small>${guide.label}</span>

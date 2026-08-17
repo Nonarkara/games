@@ -2309,3 +2309,29 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
   cursor: pointer;
 }
 .search-summary button:hover { border-color: var(--ax-red); color: var(--ax-red); }
+
+/* Cartridge sprites — the 8-bit logo on each cart. `pixelated` is the whole
+   point: a smoothed 12×12 drawing is a smudge, not a sprite. The card
+   already reserved this space above the title, so nothing reflows. */
+.cart-sprite {
+  width: 40px;
+  height: 40px;
+  margin-top: 16px;
+  image-rendering: pixelated;
+  /* Grow from the left rail, not the centre: a centre-anchored scale pushes
+     the sprite 2px past the edge the code chip and title both sit on, and
+     an orphan edge is a defect (§14 r11). */
+  transform-origin: left center;
+  opacity: .82;
+  transition: opacity var(--t-state) var(--ease-out), transform var(--t-state) var(--ease-out);
+}
+.select-row:hover .cart-sprite,
+.select-row.is-focus .cart-sprite { opacity: 1; transform: scale(1.08); }
+.select-name { margin-top: 12px; }
+.cart-sprite--hero { width: 56px; height: 56px; opacity: 1; }
+@media (min-width: 900px) { .cart-sprite { width: 48px; height: 48px; } }
+@media (prefers-reduced-motion: reduce) {
+  .cart-sprite { transition: opacity var(--t-state) ease; }
+  .select-row:hover .cart-sprite,
+  .select-row.is-focus .cart-sprite { transform: none; }
+}
