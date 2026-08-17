@@ -41,6 +41,7 @@ import { renderMemoryMatrix } from './games/memoryMatrix.js';
 import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } from './games/ngsDailySuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
+import { aliasesFor } from './searchAliases.js';
 
 const WINGS = [
   { id: 'all', label: 'ALL', blurb: 'Full floor' },
@@ -63,7 +64,7 @@ const gamesCatalog = [
   // ── TRAIN ──────────────────────────────────────────────────────────────
   { id: 'dual-n-back', code: 'NBK', title: 'Dual N-Back', wing: 'train', category: 'memory-focus', domain: 'Working memory', age: 'Teen+', desc: 'Watch each square and letter. Tap when either matches two turns ago.', paper: 'Jaeggi 2008', tags: ['N-back', 'Research'], renderer: renderDualNBack },
   { id: 'digit-span', code: 'DSP', title: 'Digit Span', wing: 'train', category: 'memory-focus', domain: 'Capacity', age: 'Teen+', desc: 'Watch digits, type them back. Span grows until it breaks.', paper: 'Miller 1956', tags: ['Capacity', 'Recall'], renderer: renderDigitSpan },
-  { id: 'stroop-match', code: 'STR', title: 'Stroop Match', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: '8+', desc: 'Name the ink, ignore the word. Lab-standard interference since 1935.', paper: 'Stroop 1935', tags: ['Inhibition', 'Focus'], renderer: renderStroop },
+  { id: 'stroop-match', code: 'STR', title: 'Colour Match', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: '8+', desc: 'The word says RED but the ink is BLUE — tap the colour of the ink, not the word it spells.', paper: 'Stroop 1935', tags: ['Colour', 'Inhibition', 'Focus'], renderer: renderStroop },
   { id: 'go-nogo', code: 'GNG', title: 'Go / No-Go', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: 'Teen+', desc: 'Press on GO. Withhold on NO-GO. False starts cost more than slow hits.', paper: 'Verbruggen 2008', tags: ['Inhibition', 'Impulse'], renderer: renderGoNoGo },
   { id: 'simon-seq', code: 'SIM', title: 'Simon Sequence', wing: 'train', category: 'memory-focus', domain: 'Sequence memory', age: 'All', desc: 'Watch the pattern grow, then play it back.', tags: ['Memory', 'Sequence'], renderer: renderSimon },
   { id: 'schulte-table', code: 'SCH', title: 'Schulte Table', wing: 'train', category: 'memory-focus', domain: 'Attention field', age: 'Teen+', desc: 'Tap 1→25. Eyes on center; peripheral vision does the finding.', tags: ['Attention', 'Peripheral'], renderer: renderSchulteTable },
@@ -122,7 +123,7 @@ const gamesCatalog = [
   { id: 'asteroids', code: 'AST', title: 'Asteroids', wing: 'arcade', category: 'classics', domain: 'Spatial control', age: 'All', desc: 'Rotate, thrust, fire. Rocks split when hit and the screen wraps on both axes.', paper: 'Atari 1979', tags: ['Vector', 'Momentum', 'Classic'], renderer: renderAsteroids },
   { id: 'frogger', code: 'FRG', title: 'Frogger', wing: 'arcade', category: 'classics', domain: 'Timing', age: 'All', desc: 'Cross five lanes of traffic. Every crossing rebuilds the road faster.', paper: 'Konami 1981', tags: ['Timing', 'Lanes', 'Classic'], renderer: renderFrogger },
   { id: 'connect-four', code: 'CF4', title: 'Connect Four', wing: 'arcade', category: 'adult-mind', domain: 'Adversarial play', age: 'All', desc: 'Drop discs into columns and connect four before the computer does.', tags: ['Opponent', 'Minimax', 'Strategy'], renderer: renderConnectFour },
-  { id: 'solitaire', code: 'KLD', title: 'Klondike', wing: 'arcade', category: 'classics', domain: 'Sequencing', age: 'All', desc: 'Build alternating-color stacks, then move each suit from Ace to King.', tags: ['Cards', 'Patience', 'Classic'], renderer: renderSolitaire },
+  { id: 'solitaire', code: 'KLD', title: 'Klondike Solitaire', wing: 'arcade', category: 'classics', domain: 'Sequencing', age: 'All', desc: 'Build alternating-color stacks, then move each suit from Ace to King.', tags: ['Cards', 'Patience', 'Classic'], renderer: renderSolitaire },
   { id: 'number-chain', code: 'NCH', title: 'Number Chain', wing: 'learn', category: 'math-logic', domain: 'Patterns', age: '10+', desc: 'Find the rule linking a number sequence, then enter the next number.', tags: ['Patterns', 'Reasoning'], renderer: renderNumberChain },
   { id: 'word-guess', code: 'WRD', title: 'Word Guess', wing: 'learn', category: 'language', domain: 'Vocabulary', age: '10+', desc: 'Guess a five-letter word in six tries using green and amber letter clues.', tags: ['Words', 'Deduction'], renderer: renderWordGuess },
   { id: 'mate-in-one', code: 'MT1', title: 'Mate in One', wing: 'learn', category: 'math-logic', domain: 'Tactics', age: '8+', desc: 'Six named mating patterns. Find the single move that ends the game.', tags: ['Chess', 'Tactics', 'Pattern'], renderer: renderMateInOne },
@@ -242,7 +243,7 @@ class NgsApp {
       <div class="arcade-tools">
         <label class="arcade-search">
           <span>FIND</span>
-          <input id="search-input" type="search" placeholder="Title, skill, or code" value="${this.searchQuery}" aria-label="Search games" />
+          <input id="search-input" type="search" placeholder="colour, pacman, chess, memory…" value="${this.searchQuery}" aria-label="Search games" />
         </label>
         <p class="arcade-play-count"><b id="played-count">${stats.gamesPlayed || 0}</b><span>PLAYS</span></p>
         <button id="about-link" class="arcade-about-link" type="button" aria-label="Open the About panel">WHY</button>
@@ -322,14 +323,41 @@ class NgsApp {
     `).join('');
   }
 
+  /**
+   * Search haystack for one game. Includes alias keywords (search-only) and
+   * the wing name, so "arcade" or "labs" narrows the floor too.
+   */
+  haystackFor(g) {
+    return [
+      g.title, g.desc, g.domain, g.code, g.tags.join(' '),
+      g.paper || '', g.age || '', aliasesFor(g.id).join(' '),
+      WING_META[g.wing]?.title || ''
+    ].join(' ');
+  }
+
   filteredGames() {
-    const q = this.searchQuery.toLowerCase().trim();
+    const raw = this.searchQuery.trim();
+    // Punctuation-insensitive: "pac-man" and "pacman" and "pac man" are one
+    // query. `words` keeps separators for token matching; `squash` drops them
+    // entirely so a run-together query still lands.
+    const words = s => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const squash = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const q = words(raw);
+    const qSquashed = squash(raw);
+
     return gamesCatalog.filter(g => {
       if (g.wing === 'meta' && !q) return false;
-      if (this.activeWing !== 'all' && g.wing !== this.activeWing) return false;
+      // A search covers the WHOLE floor. Confining it to the open room is how
+      // a cartridge that plainly exists reads as missing: you are standing in
+      // TRAIN, you type "pacman", you get nothing, and you conclude the game
+      // was never built. Rooms filter browsing; search overrides them.
+      if (!q && this.activeWing !== 'all' && g.wing !== this.activeWing) return false;
       if (!q) return true;
-      const hay = `${g.title} ${g.desc} ${g.domain} ${g.code} ${g.tags.join(' ')} ${g.paper || ''}`.toLowerCase();
-      return hay.includes(q);
+      const hay = this.haystackFor(g);
+      // Every typed word must appear somewhere — so "tower london" finds the
+      // right tower, and word order never matters.
+      const allWords = q.split(' ').every(t => words(hay).includes(t));
+      return allWords || squash(hay).includes(qSquashed);
     });
   }
 
@@ -342,7 +370,7 @@ class NgsApp {
     gridEl.className = 'game-library';
 
     if (filtered.length === 0) {
-      gridEl.innerHTML = `<p class="cabinet-empty">No cartridge matches. Clear the search or pick another room.</p>`;
+      gridEl.innerHTML = `<p class="cabinet-empty">Nothing matches “${this.searchQuery}”.<br><span style="opacity:.7">Try what the game <em>is</em> — colour, cards, chess, typing, drinking, reaction — or clear the search.</span></p>`;
       return;
     }
 
@@ -358,7 +386,17 @@ class NgsApp {
 
     const showGroupLabels = this.activeWing === 'all' && groups.length > 1;
 
-    gridEl.innerHTML = groups.map(({ wing, games }) => `
+    // A search spans every room, so say so — otherwise the still-highlighted
+    // room chip contradicts the list underneath it.
+    const searching = this.searchQuery.trim();
+    const summary = searching
+      ? `<div class="search-summary">
+           <span><b>${filtered.length}</b> ${filtered.length === 1 ? 'cartridge' : 'cartridges'} match “${searching}” · all rooms</span>
+           <button id="search-clear" type="button">✕ CLEAR</button>
+         </div>`
+      : '';
+
+    gridEl.innerHTML = summary + groups.map(({ wing, games }) => `
       <section class="select-block route-${wing}" data-wing="${wing}">
         <header class="select-block-header">
           <div><p>ROOM ${String(order.indexOf(wing) + 1).padStart(2, '0')}</p><h2>${WING_META[wing]?.title || wing}</h2></div>
@@ -369,6 +407,14 @@ class NgsApp {
         </ul>
       </section>
     `).join('');
+
+    const clearBtn = gridEl.querySelector('#search-clear');
+    if (clearBtn) clearBtn.onclick = () => {
+      this.searchQuery = '';
+      const inp = document.querySelector('#search-input');
+      if (inp) { inp.value = ''; inp.focus(); }
+      this.renderGameBay();
+    };
 
     if (this.activeWing === 'all' && !this.searchQuery.trim()) {
       const about = gamesCatalog.find(g => g.id === 'about-dr-non');
