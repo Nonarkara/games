@@ -52,17 +52,22 @@ socket.onmessage = event => {
   }
 };
 
-function send(method, params = {}) {
+// 5s is right for a CDP round-trip, but not for an evaluate that awaits real
+// work in the page. A cold headless profile resolves document.fonts.ready only
+// after three external round-trips (two Google Fonts sheets + the Tailwind CDN)
+// and routinely takes ~18s, which killed the whole audit before it measured
+// anything. Callers that await page work pass their own budget.
+function send(method, params = {}, timeoutMs = 5000) {
   const id = ++callId;
   socket.send(JSON.stringify({ id, method, params }));
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP ${method} timed out`)); }, 5000);
+    const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP ${method} timed out after ${timeoutMs}ms`)); }, timeoutMs);
     pending.set(id, { resolve: v => { clearTimeout(timer); resolve(v); }, reject: e => { clearTimeout(timer); reject(e); } });
   });
 }
 
-async function evaluate(expression) {
-  const result = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+async function evaluate(expression, timeoutMs = 30000) {
+  const result = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }, timeoutMs);
   if (result.exceptionDetails) {
     throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text || 'unknown');
   }

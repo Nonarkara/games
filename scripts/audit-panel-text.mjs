@@ -3,6 +3,9 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const chromePath = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+// Same env knob as audit-hero-sprite.mjs. Without it this audits whatever
+// happens to hold port 3000, which is not necessarily this project.
+const baseUrl = process.env.SMOKE_URL || 'http://127.0.0.1:3000';
 const profile = mkdtempSync(join(tmpdir(), 'ngs-txt-'));
 const chrome = spawn(chromePath, [
   '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run',
@@ -10,7 +13,7 @@ const chrome = spawn(chromePath, [
 ], { stdio: 'ignore' });
 const delay = ms => new Promise(r => setTimeout(r, ms));
 for (let i = 0; i < 40; i++) { try { const r = await fetch('http://127.0.0.1:9560/json/version'); if (r.ok) break; } catch {} await delay(100); }
-const page = await fetch('http://127.0.0.1:9560/json/new?' + encodeURIComponent('http://127.0.0.1:3000'), { method: 'PUT' }).then(r => r.json());
+const page = await fetch('http://127.0.0.1:9560/json/new?' + encodeURIComponent(baseUrl), { method: 'PUT' }).then(r => r.json());
 const sock = new WebSocket(page.webSocketDebuggerUrl);
 await new Promise((res, rej) => { sock.onopen = res; sock.onerror = rej; });
 let id = 0; const pend = new Map();
@@ -19,7 +22,7 @@ const send = (method, params = {}) => new Promise((resolve, reject) => { const i
 await send('Page.enable');
 await send('Runtime.enable');
 await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-await send('Page.navigate', { url: 'http://127.0.0.1:3000' });
+await send('Page.navigate', { url: baseUrl });
 await delay(2000);
 const r = await send('Runtime.evaluate', { expression: `(() => {
   const panel = document.querySelector('.attract-feature');
