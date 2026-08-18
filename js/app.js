@@ -42,6 +42,7 @@ import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } 
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
 import { aliasesFor } from './searchAliases.js';
+import { MOODS, moodById, gamesForMood, moodsForGame } from './moods.js';
 import { spriteImg } from './sprites.js';
 
 const WINGS = [
@@ -209,6 +210,27 @@ class NgsApp {
     if (played) played.textContent = StorageService.getData().gamesPlayed || 0;
   }
 
+  /**
+   * Mood pick: a random cartridge that fits the visitor's head-space, not
+   * their history. Prefers unplayed carts exactly like SURPRISE — the
+   * non-coercive rule — but falls back to the whole mood pool when
+   * everything in it has been played. Launches through the briefing gate.
+   */
+  moodPick(moodId) {
+    const mood = moodById(moodId);
+    if (!mood) return;
+    // Use the module's own selector so moods.test.mjs exercises the exact
+    // code path the button runs — an inline copy would let the test pass
+    // while the live pool silently diverged.
+    const pool = gamesForMood(mood, gamesCatalog);
+    if (!pool.length) return;
+    const played = new Set(AnalyticsService.getLog().map(entry => entry.gameId));
+    const unplayed = pool.filter(game => !played.has(game.id));
+    const candidates = unplayed.length ? unplayed : pool;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    if (pick) this.launchGame(pick.id);
+  }
+
   discoveryPick(mode) {
     const visible = this.filteredGames().filter(game => game.wing !== 'meta');
     const fallback = gamesCatalog.filter(game => game.wing !== 'meta');
@@ -261,7 +283,21 @@ class NgsApp {
     const wingLabel = this.activeWing === 'all' ? 'FULL FLOOR' : (WING_META[this.activeWing]?.title || this.activeWing.toUpperCase());
     const guide = feature ? getBrainGuide(feature) : null;
 
-    el.innerHTML = `
+    // The car remembers where you parked. A returning player came back for
+    // the thing they were playing, not for today's recommendation — so the
+    // last cartridge is one tap, above everything, before the pitch.
+    const lastId = AnalyticsService.getLog().at(-1)?.gameId;
+    const last = lastId ? gamesCatalog.find(g => g.id === lastId && g.wing !== 'meta') : null;
+    const cont = last ? `
+      <button type="button" class="attract-continue" data-game="${last.id}" aria-label="Continue ${last.title}">
+        ${spriteImg(last.id, 'cart-sprite cart-sprite--continue')}
+        <span class="attract-continue-label">CONTINUE</span>
+        <span class="attract-continue-title">${last.title}</span>
+        <span class="attract-continue-meta">HI ${StorageService.getHighScore(last.id)} · ${getBrainGuide(last).minutes}</span>
+        <span class="attract-continue-cta">PLAY ▶</span>
+      </button>` : '';
+
+    el.innerHTML = cont + `
       <figure class="attract-hero">
         <img
           src="./public/insert-coin-hero.jpg"
@@ -281,6 +317,10 @@ class NgsApp {
             <button type="button" data-discovery="recommended"><b>PICK FOR ME</b><span>Least-practised skill</span></button>
             <button type="button" data-discovery="surprise"><b>SURPRISE</b><span>Prefers an unplayed cart</span></button>
           </div>
+          <div class="attract-moods" aria-label="Pick a random game for your mood">
+            <p class="attract-moods-label">OR PICK BY MOOD — RANDOM CART, YOUR HEAD-SPACE</p>
+            ${MOODS.map(m => `<button type="button" data-mood="${m.id}"><b>${m.label}</b><span>${m.blurb}</span></button>`).join('')}
+          </div>
         </figcaption>
       </figure>
       ${feature ? `
@@ -297,8 +337,13 @@ class NgsApp {
 
     const feat = el.querySelector('.attract-feature');
     if (feat) feat.onclick = () => this.launchGame(feat.dataset.game);
+    const contBtn = el.querySelector('.attract-continue');
+    if (contBtn) contBtn.onclick = () => this.launchGame(contBtn.dataset.game);
     el.querySelectorAll('[data-discovery]').forEach(button => {
       button.onclick = () => this.discoveryPick(button.dataset.discovery);
+    });
+    el.querySelectorAll('[data-mood]').forEach(button => {
+      button.onclick = () => this.moodPick(button.dataset.mood);
     });
   }
 
@@ -326,14 +371,16 @@ class NgsApp {
   }
 
   /**
-   * Search haystack for one game. Includes alias keywords (search-only) and
-   * the wing name, so "arcade" or "labs" narrows the floor too.
+   * Search haystack for one game. Includes alias keywords (search-only),
+   * the wing name, and the mood labels — so "nostalgia" or "party" narrows
+   * the floor to the same carts the mood picker would random-pick from.
    */
   haystackFor(g) {
     return [
       g.title, g.desc, g.domain, g.code, g.tags.join(' '),
       g.paper || '', g.age || '', aliasesFor(g.id).join(' '),
-      WING_META[g.wing]?.title || ''
+      WING_META[g.wing]?.title || '',
+      moodsForGame(g).map(m => m.label).join(' ')
     ].join(' ');
   }
 
@@ -507,6 +554,7 @@ class NgsApp {
       if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
       this.renderRailMeta();
       this.renderGameBay();
+      if (didStart) this.renderAttract();
     };
 
     this._releaseModalUX = bindModalUX(overlay, closeGame);
