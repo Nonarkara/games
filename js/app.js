@@ -15,7 +15,7 @@ import { renderTriviaMaster, renderBlackjack } from './games/adultMind.js';
 import { renderAIGameStudio } from './games/aiGameStudio.js';
 import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide2048 } from './games/curatedGames.js';
 import { renderArcadeBreakout, renderArcadePong, renderSudokuSprint, renderFifteenPuzzle } from './games/openSourceGames.js';
-import { renderStroop, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
+import { renderStroop, renderStroopPro, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
 import { renderNonTrivial } from './games/labsGames.js';
 import { renderBlowIntoTheCartridge } from './games/nineties.js';
 import {
@@ -67,6 +67,7 @@ const gamesCatalog = [
   { id: 'dual-n-back', code: 'NBK', title: 'Dual N-Back', wing: 'train', category: 'memory-focus', domain: 'Working memory', age: 'Teen+', desc: 'Watch each square and letter. Tap when either matches two turns ago.', paper: 'Jaeggi 2008', tags: ['N-back', 'Research'], renderer: renderDualNBack },
   { id: 'digit-span', code: 'DSP', title: 'Digit Span', wing: 'train', category: 'memory-focus', domain: 'Capacity', age: 'Teen+', desc: 'Watch digits, type them back. Span grows until it breaks.', paper: 'Miller 1956', tags: ['Capacity', 'Recall'], renderer: renderDigitSpan },
   { id: 'stroop-match', code: 'STR', title: 'Colour Match', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: '8+', desc: 'The word says RED but the ink is BLUE — tap the colour of the ink, not the word it spells.', paper: 'Stroop 1935', tags: ['Colour', 'Inhibition', 'Focus'], renderer: renderStroop },
+  { id: 'stroop-match-pro', code: 'CMP', title: 'Colour Match Pro', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: 'Teen+', desc: 'Tap the ink colour. All answers are white, so the buttons cannot hint.', paper: 'Stroop 1935', tags: ['Colour', 'Inhibition', 'Focus'], renderer: renderStroopPro },
   { id: 'go-nogo', code: 'GNG', title: 'Go / No-Go', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: 'Teen+', desc: 'Press on GO. Withhold on NO-GO. False starts cost more than slow hits.', paper: 'Verbruggen 2008', tags: ['Inhibition', 'Impulse'], renderer: renderGoNoGo },
   { id: 'simon-seq', code: 'SIM', title: 'Simon Sequence', wing: 'train', category: 'memory-focus', domain: 'Sequence memory', age: 'All', desc: 'Watch the pattern grow, then play it back.', tags: ['Memory', 'Sequence'], renderer: renderSimon },
   { id: 'schulte-table', code: 'SCH', title: 'Schulte Table', wing: 'train', category: 'memory-focus', domain: 'Attention field', age: 'Teen+', desc: 'Tap 1→25. Eyes on center; peripheral vision does the finding.', tags: ['Attention', 'Peripheral'], renderer: renderSchulteTable },

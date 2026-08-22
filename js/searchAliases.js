@@ -21,7 +21,9 @@
 export const SEARCH_ALIASES = {
   /* ── the one that started this ─────────────────────────────────────── */
   'stroop-match': ['colour', 'color', 'colours', 'colors', 'red', 'blue', 'green', 'yellow',
-                   'ink', 'word colour', 'stroop', 'name the colour', 'coloured words'],
+                   'orange', 'amber', 'ink', 'word colour', 'stroop', 'name the colour', 'coloured words'],
+  'stroop-match-pro': ['pro', 'white', 'harder stroop', 'colour match pro', 'color match pro',
+                      'white answers', 'orange'],
 
   /* ── TRAIN ─────────────────────────────────────────────────────────── */
   'dual-n-back': ['nback', 'n back', 'working memory', 'jaeggi', 'brain training'],

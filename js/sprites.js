@@ -98,6 +98,22 @@ export const SPRITES = {
     '.ggg.ggg.gg.'
   ],
 
+  // Same joke, white keys: the word still lies, the answers give nothing away.
+  'stroop-match-pro': [
+    '............',
+    '.##...####..',
+    '.#.#..#...#.',
+    '.##...####..',
+    '.#.#..#...#.',
+    '.##...#...#.',
+    '............',
+    '.++.++.++.++',
+    '.++.++.++.++',
+    '............',
+    '.++.++.++.++',
+    '............'
+  ],
+
   // A traffic light having a crisis: both lamps lit at once.
   'go-nogo': [
     '..--------..',

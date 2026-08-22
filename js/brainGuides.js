@@ -179,9 +179,17 @@ export const BRAIN_GUIDES = {
   },
   'stroop-match': {
     label: 'Response inhibition', minutes: '2–4 min',
-    practice: 'Answer with the ink color while suppressing the faster, automatic urge to read the word.',
+    practice: 'Answer with the ink colour while suppressing the faster, automatic urge to read the word.',
     why: 'Inhibition helps keep an irrelevant but tempting response from taking over the action you intended.',
     tip: 'Pause for one beat when the word and ink disagree.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
+  },
+  'stroop-match-pro': {
+    label: 'Response inhibition', minutes: '2–4 min',
+    practice: 'Name the ink colour when the answer keys are all white — no colour on the button to lean on.',
+    why: 'Without a colour-matched key, you have to hold the ink name in mind and pick it from words alone.',
+    tip: 'Say the ink colour out loud before you tap. Do not look for a matching hue.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },

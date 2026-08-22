@@ -4,18 +4,22 @@
  */
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';
-import { showResult } from '../ui.js';
+import { attachReady, showResult } from '../ui.js';
 
-/* 1. STROOP COLOR MATCH (Cognitive inhibition) */
-export function renderStroop(container, onClose) {
+/** Five ink names. ORANGE, not AMBER — Thai players know orange. */
+export const STROOP_COLORS = [
+  { name: 'RED', hex: '#ef4444' },
+  { name: 'GREEN', hex: '#22c55e' },
+  { name: 'BLUE', hex: '#3b82f6' },
+  { name: 'ORANGE', hex: '#f59e0b' },
+  { name: 'PURPLE', hex: '#a855f7' }
+];
+
+function renderStroopMode(container, onClose, { gameId, title, subtitle, hint, whiteAnswers }) {
   start();
   function start() {
-    const COLORS = [
-      { name: 'RED', hex: '#ef4444' }, { name: 'GREEN', hex: '#22c55e' },
-      { name: 'BLUE', hex: '#3b82f6' }, { name: 'AMBER', hex: '#f59e0b' },
-      { name: 'PURPLE', hex: '#a855f7' }
-    ];
-    let score = 0, lives = 3, round = 0, timer = null;
+    const COLORS = STROOP_COLORS;
+    let score = 0, lives = 3, round = 0, timer = null, armed = false;
     let current = makeRound();
     function makeRound() {
       const word = COLORS[Math.floor(Math.random() * COLORS.length)];
@@ -23,6 +27,7 @@ export function renderStroop(container, onClose) {
       return { word, ink, options: [...COLORS].sort(() => Math.random() - 0.5) };
     }
     function answer(hex) {
+      if (!armed) return;
       clearTimeout(timer);
       if (hex === current.ink.hex) { score += 10; soundFx.playCoin(); } else { lives--; soundFx.playHit(); }
       round++;
@@ -30,15 +35,27 @@ export function renderStroop(container, onClose) {
       current = makeRound(); render();
     }
     function endGame() {
+      armed = false;
       clearTimeout(timer);
-      showResult({ container, title: 'STROOP COMPLETE', message: `${round} rounds.`, score, gameId: 'stroop-match', tone: 'win', onRestart: () => start(), onClose });
+      showResult({ container, title: `${title} COMPLETE`, message: `${round} rounds.`, score, gameId, tone: 'win', onRestart: () => start(), onClose });
     }
-    function render() {
+    function armTimer() {
+      armed = true;
       const tl = Math.max(1.5, 4 - round * 0.08);
+      timer = setTimeout(() => {
+        lives--; soundFx.playHit(); round++;
+        if (lives <= 0) return endGame();
+        current = makeRound(); render();
+      }, tl * 1000);
+    }
+    function render({ wait } = {}) {
+      const btnStyle = c => whiteAnswers
+        ? 'border-color:#e6edf3;color:#e6edf3'
+        : `border-color:${c.hex};color:${c.hex}`;
       container.innerHTML = `
         <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
           <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
-            <div class="min-w-0"><h2 class="text-base sm:text-xl font-black text-amber-400 tracking-wider">STROOP COLOR MATCH</h2><p class="text-[9px] text-amber-500/80 uppercase">PICK THE INK COLOR · IGNORE THE WORD</p></div>
+            <div class="min-w-0"><h2 class="text-base sm:text-xl font-black text-amber-400 tracking-wider">${title}</h2><p class="text-[9px] text-amber-500/80 uppercase">${subtitle}</p></div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
@@ -47,19 +64,40 @@ export function renderStroop(container, onClose) {
             <div>LIVES: <span class="text-red-500 text-base">${Math.max(0, lives)}/3</span></div>
           </div>
           <div class="bg-zinc-900 border border-amber-500/60 p-5 sm:p-10 text-center mb-6">
-            <div class="text-amber-500 text-xs mb-3">CLICK THE COLOR OF THE INK ↓</div>
+            <div class="text-amber-500 text-xs mb-3">${hint}</div>
             <div class="text-4xl sm:text-6xl font-black break-all mb-2" style="color:${current.ink.hex}">${current.word.name}</div>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            ${current.options.map(c => `<button class="stroop-btn py-5 border font-bold text-xs transition hover:opacity-80" style="border-color:${c.hex};color:${c.hex}" data-hex="${c.hex}">${c.name}</button>`).join('')}
+            ${current.options.map(c => `<button class="stroop-btn py-5 border font-bold text-xs transition hover:opacity-80" style="${btnStyle(c)}" data-hex="${c.hex}">${c.name}</button>`).join('')}
           </div>
         </div>`;
       container.querySelector('#close-game-btn').onclick = () => { clearTimeout(timer); onClose(); };
       container.querySelectorAll('.stroop-btn').forEach(b => b.onclick = () => answer(b.dataset.hex));
-      timer = setTimeout(() => { lives--; soundFx.playHit(); round++; if (lives <= 0) return endGame(); current = makeRound(); render(); }, tl * 1000);
+      if (wait) attachReady(container.firstElementChild, armTimer);
+      else armTimer();
     }
-    render();
+    render({ wait: true });
   }
+}
+
+export function renderStroop(container, onClose) {
+  renderStroopMode(container, onClose, {
+    gameId: 'stroop-match',
+    title: 'COLOUR MATCH',
+    subtitle: 'PICK THE INK COLOUR · IGNORE THE WORD',
+    hint: 'TAP THE COLOUR OF THE INK ↓',
+    whiteAnswers: false
+  });
+}
+
+export function renderStroopPro(container, onClose) {
+  renderStroopMode(container, onClose, {
+    gameId: 'stroop-match-pro',
+    title: 'COLOUR MATCH PRO',
+    subtitle: 'ALL ANSWERS WHITE · TAP THE INK COLOUR',
+    hint: 'TAP THE INK COLOUR · BUTTONS ARE WHITE ↓',
+    whiteAnswers: true
+  });
 }
 
 /* 2. SIMON SEQUENCE (Auditory working memory) */

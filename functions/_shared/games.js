@@ -26,6 +26,7 @@ export const GAME_MAX = Object.freeze({
   'dual-n-back': 400,
   'digit-span': 20,
   'stroop-match': 100,
+  'stroop-match-pro': 100,
   'go-nogo': 100,
   'simon-seq': 30,
   'schulte-table': 60,

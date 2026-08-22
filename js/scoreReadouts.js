@@ -16,6 +16,7 @@ const CUTS = {
   'dual-n-back': [40, 100, 180],
   'digit-span': [4, 6, 9],
   'stroop-match': [40, 65, 85],
+  'stroop-match-pro': [30, 55, 75],
   'go-nogo': [40, 65, 85],
   'simon-seq': [4, 8, 14],
   'schulte-table': [15, 30, 45],

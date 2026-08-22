@@ -51,6 +51,7 @@ const defaultData = {
     'trivia-master': 0,
     'cyber-blackjack': 1000,
     'stroop-match': 0,
+    'stroop-match-pro': 0,
     'simon-seq': 0,
     'anagram-scramble': 0,
     'word-builder': 0,

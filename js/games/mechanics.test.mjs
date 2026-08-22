@@ -30,6 +30,7 @@ import {
 import { checkWinner, findWinningMove, minimaxMove, easyMove, LINES } from './ticTacToe.js';
 import { resolveRPS, predictCPU, CHOICES } from './rockPaperScissors.js';
 import { generatePattern, checkPattern } from './memoryMatrix.js';
+import { STROOP_COLORS } from './eduGames.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
 const probe = { color: 'green', shape: 'star', count: 1 };
@@ -213,4 +214,9 @@ assert.equal(check2.missed, 1);
 const check3 = checkPattern([0, 0, 1], new Set([0, 1]));
 assert.equal(check3.correct, 2, 'duplicates collapse to one');
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, and Memory Matrix passed');
+assert.equal(STROOP_COLORS.some(c => c.name === 'AMBER'), false, 'Thai players need ORANGE, not AMBER');
+assert.ok(STROOP_COLORS.some(c => c.name === 'ORANGE'));
+assert.equal(new Set(STROOP_COLORS.map(c => c.name)).size, STROOP_COLORS.length);
+assert.equal(new Set(STROOP_COLORS.map(c => c.hex)).size, STROOP_COLORS.length);
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, and Colour Match passed');
