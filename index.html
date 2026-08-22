@@ -1,70 +1,137 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="masterpiece">
+<html lang="en" data-theme="sixteen">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniArcade — Axiom Design Core [PROTOCOL: OMNI_2026]</title>
-  <meta name="description" content="Axiom Design Core terminal console featuring 34 research & arcade tasks across TRAIN, ARCADE, LEARN, and LABS." />
-  <meta name="theme-color" content="#030508" />
+  <title>Dr Non — Non-Gaming System · Brain expansion, not killing time</title>
+  <meta name="description" content="Brain expansion, not killing time. Dr Non's Non-Gaming System — a 16-bit brain expansion system. Every cartridge explains how to play, what it practises, and the limit of the claim. No ads. No login required." />
+  <meta name="theme-color" content="#0a0e14" />
+  <link rel="icon" href="./public/favicon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="https://games.nonarkara.org/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://games.nonarkara.org/" />
+  <meta property="og:title" content="Dr Non — Non-Gaming System" />
+  <meta property="og:description" content="Brain expansion, not killing time. A 16-bit brain expansion system. Every cartridge opens with the skill it trains and the limit of the claim. Built on five frameworks: Kahneman, Werbach, Thaler, neuroplasticity, Atomic Habits." />
+  <meta property="og:image" content="https://games.nonarkara.org/public/insert-coin-hero.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Dr Non — Non-Gaming System" />
+  <meta name="twitter:description" content="Brain expansion, not killing time. Every cartridge explains the play and the practice. No login required. No ads." />
+  <meta name="twitter:image" content="https://games.nonarkara.org/public/insert-coin-hero.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/styles.css" />
+  <!-- Bump ?v= on every deploy that touches these two files. The _headers
+       rules ask for max-age=0, but the Cloudflare zone overrides them with a
+       4h browser TTL, so a new URL is the only thing that reaches an
+       already-open tab. Drop this once the zone respects existing headers. -->
+  <link rel="stylesheet" href="./css/styles.css?v=4" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Dr Non — Non-Gaming System",
+      "alternateName": ["NGS", "Dr Non NGS"],
+      "url": "https://games.nonarkara.org/",
+      "description": "A 16-bit brain expansion system. Every cartridge explains how to play, what it practises, and the limit of the claim. No login required. No ads.",
+      "creator": {
+        "@type": "Person",
+        "name": "Non Arkaraprasertkul",
+        "alternateName": "Dr Non"
+      }
+    }
+  </script>
 </head>
-<body class="scanlines bg-[#030508] text-[#e6edf3]">
-
-  <!-- Top Tactical Satellite Status Bar -->
-  <div class="bg-[#0c111a] border-b border-[rgba(245,158,11,0.35)] py-1.5 px-4 text-[11px] font-mono-hud text-[#f59e0b] flex flex-wrap justify-between items-center gap-2">
-    <div>[SYSTEM STATUS: ONLINE] — <strong class="text-white">OMNI_ARCADE AXIOM DESIGN CORE</strong></div>
-    <div class="hidden md:block opacity-80">[PROTOCOL: OMNI_2026] · LAT 13.7563° N · LON 100.5018° E · SATELLITE HUD ACTIVE</div>
-    <div>34 TASKS · ZERO ADS · OFFLINE READY</div>
+<body>
+  <div class="arcade-status" role="status">
+    <span><i></i> FLOOR OPEN</span>
+    <span>BANGKOK · 2026</span>
+    <span>NON-GAMING SYSTEM · 16-BIT · NO LOGIN REQUIRED · NO ADS</span>
   </div>
 
-  <div class="cabinet">
-    <!-- Left rail: wing select like a cabinet button strip -->
-    <aside class="cabinet-rail" aria-label="Wings">
-      <div class="cabinet-rail-brand">
-        <p class="cabinet-mark font-mono-hud" aria-hidden="true">OA</p>
-        <p class="cabinet-rail-word">SELECT</p>
+  <header id="app-header" class="arcade-header"></header>
+
+  <main>
+    <section id="ngs-hud" class="cabinet-attract" aria-label="Featured game"></section>
+
+    <section class="edge-strip" aria-labelledby="edge-title">
+      <div>
+        <p class="edge-kicker">THE STACK</p>
+        <h2 id="edge-title">Not a game system. A brain expansion system.</h2>
       </div>
-      <nav id="category-bar" class="cabinet-wings"></nav>
-      <details class="cabinet-papers">
-        <summary>Papers</summary>
-        <ol class="cabinet-paper-list">
+      <article>
+        <small>BRIEFING</small>
+        <p>Every cartridge names the skill, the round length, and the limit of the claim before play starts.</p>
+      </article>
+      <article>
+        <small>HONESTY</small>
+        <p>Near transfer is real. Far transfer is contested. Simons 2016 stays on the shelf on purpose.</p>
+      </article>
+      <article>
+        <small>STACK</small>
+        <p>Five frameworks, one loop. Kahneman, Werbach, Thaler, neuroplasticity, Atomic Habits. Every round short enough to fit between meetings.</p>
+      </article>
+      <article>
+        <small>LABS</small>
+        <p>Non-Trivial and Blow Into The Cartridge exist only here — personal packs, not another generic feed.</p>
+      </article>
+    </section>
+
+    <section class="arcade-directory" aria-labelledby="directory-title">
+      <header class="directory-header">
+        <div><p>CARTRIDGE DIRECTORY</p><h2 id="directory-title">Choose your room</h2></div>
+        <p>Four rooms. Every drill opens with a plain-language Brain Briefing. Play as a guest, or sign in to sync progress across devices.</p>
+      </header>
+      <nav id="category-bar" class="cabinet-wings" aria-label="Game rooms"></nav>
+    </section>
+
+    <section id="recommended-strip" hidden></section>
+    <section id="game-grid" class="game-library" aria-label="Game cartridges"></section>
+
+    <section class="evidence-strip" aria-labelledby="evidence-title">
+      <div>
+        <p>THE HONEST VERSION</p>
+        <h2 id="evidence-title">Practice is specific.</h2>
+      </div>
+      <p>These games exercise the skill named on the cartridge. Near transfer can happen. Broad claims about becoming smarter at unrelated tasks remain contested.</p>
+      <details>
+        <summary>READ THE PAPERS</summary>
+        <ul>
           <li><a href="https://doi.org/10.1073/pnas.0801268105" target="_blank" rel="noopener">Jaeggi 2008 · N-back</a></li>
           <li><a href="https://doi.org/10.1037/h0043158" target="_blank" rel="noopener">Miller 1956 · Span</a></li>
           <li><a href="https://doi.org/10.1037/h0054651" target="_blank" rel="noopener">Stroop 1935</a></li>
-          <li><a href="https://doi.org/10.1016/j.tics.2008.07.005" target="_blank" rel="noopener">Verbruggen 2008 · Go/No-Go</a></li>
+          <li><a href="https://doi.org/10.1016/j.tics.2008.07.005" target="_blank" rel="noopener">Verbruggen 2008 · Go / No-Go</a></li>
           <li><a href="https://doi.org/10.1038/nature01647" target="_blank" rel="noopener">Green &amp; Bavelier 2003</a></li>
-          <li><a href="https://doi.org/10.1111/j.1467-8721.2009.01660.x" target="_blank" rel="noopener">Dye et al. 2009</a></li>
-          <li><a href="https://doi.org/10.1038/nature12486" target="_blank" rel="noopener">Anguera 2013</a></li>
-          <li><a href="https://doi.org/10.1038/mp.2013.120" target="_blank" rel="noopener">Kühn 2014</a></li>
-          <li><a href="https://doi.org/10.1037/a0013494" target="_blank" rel="noopener">Basak 2008</a></li>
-          <li><a href="https://doi.org/10.1146/annurev-psych-113011-143750" target="_blank" rel="noopener">Diamond 2013</a></li>
-          <li><a href="https://doi.org/10.1126/science.1736359" target="_blank" rel="noopener">Baddeley 1992</a></li>
-          <li><a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons 2016 · caveat</a></li>
-        </ol>
+          <li><a href="https://doi.org/10.1016/S0010-9452(72)80024-5" target="_blank" rel="noopener">Corsi 1972 · spatial span</a></li>
+          <li><a href="https://doi.org/10.3758/BF03203267" target="_blank" rel="noopener">Eriksen 1974 · flanker</a></li>
+          <li><a href="https://en.wikipedia.org/wiki/Method_of_loci" target="_blank" rel="noopener">Yates 1966 · method of loci</a></li>
+          <li><a href="https://doi.org/10.1016/j.cub.2007.10.027" target="_blank" rel="noopener">Inoue &amp; Matsuzawa 2007 · chimp memory</a></li>
+          <li><a href="https://doi.org/10.1016/0030-5073(77)90001-0" target="_blank" rel="noopener">Lichtenstein &amp; Fischhoff 1977 · calibration</a></li>
+          <li><a href="https://en.wikipedia.org/wiki/Monty_Hall_problem" target="_blank" rel="noopener">Selvin 1975 · Monty Hall</a></li>
+          <li><a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons 2016 · evidence review</a></li>
+        </ul>
       </details>
-      <div id="cabinet-rail-meta" class="cabinet-rail-meta"></div>
-    </aside>
+    </section>
+  </main>
 
-    <div class="cabinet-stage">
-      <header id="app-header" class="cabinet-top"></header>
-      <section id="omni-hud" class="cabinet-attract" aria-label="Attract"></section>
-      <section id="recommended-strip" class="cabinet-cue" hidden></section>
-      <section id="game-grid" class="cabinet-select" aria-label="Game select"></section>
-      <footer class="cabinet-foot">
-        Near transfer is real. Far transfer is contested — Simons 2016 is in Papers on purpose.
-        No ads. No login. Offline-capable.
-      </footer>
-    </div>
+  <footer class="arcade-footer">
+    <div><b>DR NON</b><span>Non-Gaming System · Brain expansion, not killing time.</span></div>
+    <p>No login required. Guest progress stays in this browser; optional Google sign-in syncs it across devices. No ads.</p>
+    <details>
+      <summary>OPEN-SOURCE CREDITS</summary>
+      <p><a href="https://github.com/kubowania/breakout" target="_blank" rel="noopener">Breakout · Ania Kubow · MIT</a></p>
+      <p><a href="https://github.com/jakesgordon/javascript-pong" target="_blank" rel="noopener">Pong · Jake Gordon · MIT</a></p>
+      <p><a href="https://github.com/robatron/sudoku.js" target="_blank" rel="noopener">Sudoku study · robatron/sudoku.js · MIT</a></p>
+      <p><a href="https://github.com/imshubhamsingh/15-puzzle" target="_blank" rel="noopener">Fifteen study · imshubhamsingh/15-puzzle · MIT</a></p>
+      <p><a href="https://gist.github.com/straker/2fddb507d4bb6bec54ea2fdb022d020c" target="_blank" rel="noopener">Warehouse Push study · Steven Lambert · CC0</a></p>
+      <p><a href="https://github.com/Nonarkara/games/blob/codex/arcade-revival/CREDITS.md" target="_blank" rel="noopener">Full credits and adaptation notes</a></p>
+    </details>
+  </footer>
+
+  <div id="game-modal-overlay" class="game-modal-overlay hidden" role="presentation">
+    <div id="game-modal-container" class="game-modal-container"></div>
   </div>
 
-  <div id="game-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden overflow-y-auto" style="background:rgba(0,0,0,0.85)">
-    <div id="game-modal-container" class="w-full max-w-3xl my-auto"></div>
-  </div>
-
-  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./js/app.js?v=4"></script>
 </body>
 </html>

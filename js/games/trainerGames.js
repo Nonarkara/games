@@ -1,5 +1,5 @@
 /**
- * OmniArcade — Trainer Suite (Console Edition)
+ * Dr Non — Non-Gaming System Trainer Suite (Console Edition)
  * Research-anchored trainers, each mapped to a citation in PROTOCOL:
  *   Dual N-Back     → Jaeggi et al. 2008 (working memory)
  *   Schulte Table   → classic attention/peripheral-scan drill
@@ -8,9 +8,12 @@
  *   Digit Span      → Miller 1956 / Baddeley working-memory capacity
  *   Mental Math     → arithmetic fluency under time pressure
  *   Visual Search   → Green & Bavelier selective attention paradigm
+ *   Corsi Blocks    → visuospatial working memory (Corsi 1972)
+ *   Memory Palace   → method of loci (Yates 1966 / classical mnemonic)
+ *   Flanker         → Eriksen selective attention / interference
  */
 import { soundFx } from '../audio.js';
-import { ScopedKeyboard, showResult } from '../ui.js';
+import { ScopedKeyboard, showResult, attachReady } from '../ui.js';
 
 const FRAME = 'relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud';
 
@@ -53,8 +56,7 @@ export function renderDualNBack(container, onClose) {
         </div>
 
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          Watch the square and the letter. If the POSITION repeats the one from ${N} steps back, press P.
-          If the LETTER repeats, press L. Both can be true at once.
+          Watch the lit square and the letter. If either matches two turns ago, tap that button. Both can match at once.
         </div>
 
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -68,8 +70,8 @@ export function renderDualNBack(container, onClose) {
         <div id="nb-letter" class="text-center text-4xl font-black text-white h-12 mb-3">&nbsp;</div>
 
         <div class="flex justify-center gap-3">
-          <button id="nb-pos" class="axiom-dpad-btn px-6 py-3">P · POSITION MATCH</button>
-          <button id="nb-let" class="axiom-dpad-btn px-6 py-3">L · LETTER MATCH</button>
+          <button id="nb-pos" class="axiom-dpad-btn px-6 py-3">SQUARE MATCHED</button>
+          <button id="nb-let" class="axiom-dpad-btn px-6 py-3">LETTER MATCHED</button>
         </div>
       </div>
     `;
@@ -129,7 +131,7 @@ export function renderDualNBack(container, onClose) {
     container.querySelector('#nb-let').onclick = () => claim('let');
     container.querySelector('#close-game-btn').onclick = () => { clearTimeout(timer); kb.destroy(); onClose(); };
 
-    step();
+    attachReady(container.firstElementChild, step);
   }
 }
 
@@ -295,11 +297,7 @@ export function renderAimTrainer(container, onClose) {
       soundFx.playHit();
     };
 
-    countdown = setInterval(() => {
-      left--;
-      container.querySelector('#aim-time').innerText = left;
-      if (left <= 0) end();
-    }, 1000);
+    countdown = null;
 
     function end() {
       over = true;
@@ -319,7 +317,14 @@ export function renderAimTrainer(container, onClose) {
     }
 
     container.querySelector('#close-game-btn').onclick = () => { clearInterval(countdown); onClose(); };
-    placeTarget();
+    attachReady(container.firstElementChild, () => {
+      placeTarget();
+      countdown = setInterval(() => {
+        left--;
+        container.querySelector('#aim-time').innerText = left;
+        if (left <= 0) end();
+      }, 1000);
+    });
   }
 }
 
@@ -434,7 +439,7 @@ export function renderGoNoGo(container, onClose) {
     container.querySelector('#close-game-btn').onclick = () => {
       clearTimeout(timer); clearTimeout(gapTimer); kb.destroy(); onClose();
     };
-    advance();
+    attachReady(container.firstElementChild, advance);
   }
 }
 
@@ -445,7 +450,9 @@ export function renderDigitSpan(container, onClose) {
   start();
 
   function start() {
-    let span = 3, score = 0, lives = 3, round = 0;
+    // Board score = peak span cleared (matches GAME_MAX + readout cuts).
+    // Session points stay on-screen only.
+    let span = 3, score = 0, peak = 0, lives = 3, round = 0;
     let phase = 'idle'; // show | input
     let target = [];
     let typed = [];
@@ -467,8 +474,8 @@ export function renderDigitSpan(container, onClose) {
           <div>SCORE <span id="ds-score" class="text-white">0</span></div>
           <div>LIVES <span id="ds-lives" class="text-white">3</span></div>
         </div>
-        <div id="ds-display" class="h-[100px] flex items-center justify-center text-5xl font-black tracking-[0.35em] text-amber-400 bg-zinc-950 border border-amber-500/40 mb-4">—</div>
-        <div id="ds-input" class="h-12 flex items-center justify-center text-2xl font-bold tracking-[0.3em] text-white mb-4 min-h-[44px]">&nbsp;</div>
+        <div id="ds-display" class="font-mono-hud h-[100px] flex items-center justify-center text-5xl font-black tracking-widest text-amber-400 bg-zinc-950 border border-amber-500/40 mb-4" style="font-family:'JetBrains Mono',monospace">—</div>
+        <div id="ds-input" class="font-mono-hud h-12 flex items-center justify-center text-2xl font-bold tracking-widest text-white mb-4 min-h-[44px]" style="font-family:'JetBrains Mono',monospace">&nbsp;</div>
         <div class="grid grid-cols-5 gap-2 max-w-[280px] mx-auto">
           ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button class="ds-key axiom-dpad-btn" data-n="${n}">${n}</button>`).join('')}
         </div>
@@ -518,6 +525,7 @@ export function renderDigitSpan(container, onClose) {
       if (phase !== 'input') return;
       const ok = typed.length === target.length && typed.every((d, i) => d === target[i]);
       if (ok) {
+        peak = Math.max(peak, span);
         score += span * 10;
         scoreEl.innerText = score;
         span = Math.min(9, span + 1);
@@ -532,11 +540,13 @@ export function renderDigitSpan(container, onClose) {
           kb.destroy();
           showResult({
             container,
-            title: span >= 7 ? 'SPAN SOLID' : 'CAPACITY CHECK',
-            message: `Peak span ${span}. Miller's "magical number seven" is the classic adult average — going past 7 under load is strong.`,
-            score,
+            title: peak >= 7 ? 'SPAN SOLID' : 'CAPACITY CHECK',
+            message: peak
+              ? `Peak span ${peak}. Miller's "magical number seven" is the classic adult average — going past 7 under load is strong.`
+              : 'No span cleared this round. Start at three digits, chunk in twos, and say them once before typing.',
+            score: peak,
             gameId: 'digit-span',
-            tone: span >= 7 ? 'win' : 'over',
+            tone: peak >= 7 ? 'win' : 'over',
             onRestart: () => start(),
             onClose
           });
@@ -573,7 +583,7 @@ export function renderDigitSpan(container, onClose) {
     kb.on(digitHandlers);
 
     container.querySelector('#close-game-btn').onclick = () => { kb.destroy(); onClose(); };
-    nextRound();
+    attachReady(container.firstElementChild, nextRound);
   }
 }
 
@@ -773,5 +783,428 @@ export function renderVisualSearch(container, onClose) {
     }
 
     paintRound();
+  }
+}
+
+/* ===========================================================================
+ * 8. CORSI BLOCKS — tap the sequence in order (visuospatial span)
+ * ======================================================================== */
+export function renderCorsiBlocks(container, onClose) {
+  start();
+
+  function start() {
+    // Board score = peak span cleared (matches GAME_MAX + readout cuts).
+    let span = 3, score = 0, peak = 0, lives = 3, phase = 'idle';
+    let sequence = [], step = 0;
+
+    const FRAME = 'relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud';
+
+    container.innerHTML = `
+      <div class="${FRAME}">
+        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+          <div>
+            <h2 class="text-2xl font-black text-amber-400 tracking-wider">CORSI BLOCKS</h2>
+            <p class="text-[10px] text-amber-500/80 uppercase">Visuospatial working memory · Corsi 1972</p>
+          </div>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        </div>
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
+          Watch the blocks light up. Tap them back in the same order. Span grows on success.
+        </div>
+        <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div>SPAN <span id="cb-span" class="text-amber-400 text-base">3</span></div>
+          <div>SCORE <span id="cb-score" class="text-white">0</span></div>
+          <div>LIVES <span id="cb-lives" class="text-white">3</span></div>
+        </div>
+        <div id="cb-status" class="text-center text-xs text-amber-500/80 uppercase mb-3 h-5">WATCH</div>
+        <div class="grid grid-cols-3 gap-2 max-w-[280px] mx-auto">
+          ${Array.from({ length: 9 }, (_, i) =>
+            `<button class="cb-cell aspect-square min-h-[56px] bg-zinc-900 border border-amber-500/30" data-i="${i}" aria-label="block ${i + 1}"></button>`
+          ).join('')}
+        </div>
+      </div>
+    `;
+
+    const cells = [...container.querySelectorAll('.cb-cell')];
+    const status = container.querySelector('#cb-status');
+    const spanEl = container.querySelector('#cb-span');
+    const scoreEl = container.querySelector('#cb-score');
+    const livesEl = container.querySelector('#cb-lives');
+
+    function flash(i, on) {
+      cells[i].classList.toggle('bg-amber-500', on);
+      cells[i].classList.toggle('bg-zinc-900', !on);
+    }
+
+    function playSequence() {
+      phase = 'show';
+      status.textContent = 'WATCH';
+      sequence = [];
+      const pool = Array.from({ length: 9 }, (_, i) => i);
+      for (let i = 0; i < span; i++) {
+        const pick = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+        sequence.push(pick);
+      }
+      let t = 0;
+      const run = () => {
+        if (t > 0) flash(sequence[t - 1], false);
+        if (t >= sequence.length) {
+          phase = 'input';
+          step = 0;
+          status.textContent = 'REPEAT';
+          return;
+        }
+        flash(sequence[t], true);
+        soundFx.playClick();
+        t++;
+        setTimeout(run, 650);
+      };
+      setTimeout(run, 400);
+    }
+
+    function fail() {
+      lives--;
+      livesEl.textContent = lives;
+      soundFx.playHit();
+      phase = 'idle';
+      if (lives <= 0) {
+        showResult({
+          container,
+          title: peak >= 6 ? 'SPAN SOLID' : 'CAPACITY CHECK',
+          message: peak
+            ? `Peak span ${peak}. Adult Corsi spans often land near 5–6. The skill is holding a spatial path, not guessing.`
+            : 'No span cleared. Watch the path once without tapping, then replay it slowly.',
+          score: peak,
+          gameId: 'corsi-blocks',
+          tone: peak >= 6 ? 'win' : 'over',
+          onRestart: () => start(),
+          onClose
+        });
+        return;
+      }
+      span = Math.max(3, span - 1);
+      spanEl.textContent = span;
+      setTimeout(playSequence, 600);
+    }
+
+    cells.forEach(btn => {
+      btn.onclick = () => {
+        if (phase !== 'input') return;
+        const i = parseInt(btn.dataset.i, 10);
+        flash(i, true);
+        setTimeout(() => flash(i, false), 180);
+        if (i !== sequence[step]) return fail();
+        soundFx.playCoin();
+        step++;
+        if (step >= sequence.length) {
+          peak = Math.max(peak, span);
+          score += span * 10;
+          scoreEl.textContent = score;
+          span = Math.min(9, span + 1);
+          spanEl.textContent = span;
+          phase = 'idle';
+          status.textContent = 'GOOD';
+          setTimeout(playSequence, 700);
+        }
+      };
+    });
+
+    container.querySelector('#close-game-btn').onclick = onClose;
+    playSequence();
+  }
+}
+
+/* ===========================================================================
+ * 9. FLANKER — report the center arrow; ignore the flanks
+ * ======================================================================== */
+export function renderFlanker(container, onClose) {
+  start();
+
+  function start() {
+    const TRIALS = 24;
+    let t = 0, score = 0, correct = 0, wrong = 0, reactions = [];
+    let shownAt = 0, target = '>', armed = false;
+
+    const FRAME = 'relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud';
+
+    container.innerHTML = `
+      <div class="${FRAME}">
+        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+          <div>
+            <h2 class="text-2xl font-black text-amber-400 tracking-wider">FLANKER</h2>
+            <p class="text-[10px] text-amber-500/80 uppercase">Selective attention · Eriksen paradigm</p>
+          </div>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
+        </div>
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
+          Report the CENTER arrow only. Congruent flanks feel easy. Incongruent flanks are the point.
+        </div>
+        <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div>TRIAL <span id="fk-trial" class="text-white">0</span> / ${TRIALS}</div>
+          <div>OK <span id="fk-ok" class="text-amber-400">0</span></div>
+          <div>AVG <span id="fk-avg" class="text-white">—</span></div>
+        </div>
+        <div id="fk-stim" class="h-[120px] flex items-center justify-center text-5xl font-black tracking-[0.35em] text-amber-400 bg-zinc-950 border border-amber-500/40 mb-4">·</div>
+        <div class="flex justify-center gap-3">
+          <button id="fk-left" class="axiom-dpad-btn px-8 py-4 text-xl">◀ LEFT</button>
+          <button id="fk-right" class="axiom-dpad-btn px-8 py-4 text-xl">RIGHT ▶</button>
+        </div>
+      </div>
+    `;
+
+    const stim = container.querySelector('#fk-stim');
+    const trialEl = container.querySelector('#fk-trial');
+    const okEl = container.querySelector('#fk-ok');
+    const avgEl = container.querySelector('#fk-avg');
+
+    function next() {
+      if (t >= TRIALS) {
+        kb.destroy();
+        const avg = reactions.length ? Math.round(reactions.reduce((a, b) => a + b, 0) / reactions.length) : 0;
+        showResult({
+          container,
+          title: correct >= 20 ? 'CLEAN FILTER' : 'SESSION DONE',
+          message: `${correct}/${TRIALS} correct · avg ${avg || '—'}ms. The cost of incongruent flanks is the classic interference signature.`,
+          score,
+          gameId: 'flanker',
+          tone: correct >= 20 ? 'win' : 'over',
+          onRestart: () => start(),
+          onClose
+        });
+        return;
+      }
+      t++;
+      trialEl.textContent = t;
+      const congruent = Math.random() < 0.5;
+      target = Math.random() < 0.5 ? '<' : '>';
+      const flank = congruent ? target : (target === '<' ? '>' : '<');
+      stim.textContent = `${flank}${flank}${target}${flank}${flank}`;
+      armed = true;
+      shownAt = performance.now();
+    }
+
+    function answer(dir) {
+      if (!armed) return;
+      armed = false;
+      const ok = (dir === 'left' && target === '<') || (dir === 'right' && target === '>');
+      const rt = Math.round(performance.now() - shownAt);
+      if (ok) {
+        correct++; score += Math.max(5, 40 - Math.floor(rt / 40));
+        reactions.push(rt);
+        okEl.textContent = correct;
+        avgEl.textContent = `${Math.round(reactions.reduce((a, b) => a + b, 0) / reactions.length)}ms`;
+        soundFx.playCoin();
+      } else {
+        wrong++; score = Math.max(0, score - 6);
+        soundFx.playHit();
+      }
+      stim.textContent = '·';
+      setTimeout(next, 450);
+    }
+
+    const kb = new ScopedKeyboard();
+    kb.on({ ArrowLeft: () => answer('left'), ArrowRight: () => answer('right'), a: () => answer('left'), d: () => answer('right') });
+    container.querySelector('#fk-left').onclick = () => answer('left');
+    container.querySelector('#fk-right').onclick = () => answer('right');
+    container.querySelector('#close-game-btn').onclick = () => { kb.destroy(); onClose(); };
+    setTimeout(next, 500);
+  }
+}
+
+/* ===========================================================================
+ * 10. MEMORY PALACE — method of loci (encode walk → recall walk)
+ * ======================================================================== */
+const PALACE_LOCI = [
+  { id: 'gate', label: 'GATE' },
+  { id: 'hall', label: 'HALL' },
+  { id: 'stove', label: 'STOVE' },
+  { id: 'desk', label: 'DESK' },
+  { id: 'stair', label: 'STAIR' },
+  { id: 'bed', label: 'BED' }
+];
+
+const PALACE_ITEMS = [
+  'KEY', 'COIN', 'BOOK', 'APPLE', 'LAMP', 'CAT',
+  'SWORD', 'BOOT', 'MAP', 'RING', 'CUP', 'FISH',
+  'CROWN', 'BELL', 'ROSE', 'OWL'
+];
+
+function pickItems(n) {
+  const pool = PALACE_ITEMS.slice();
+  const out = [];
+  while (out.length < n && pool.length) {
+    out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+  return out;
+}
+
+export function renderMemoryPalace(container, onClose) {
+  start();
+
+  function start() {
+    // Board score = peak loci cleared (matches readout span bands).
+    let span = 3;
+    let score = 0;
+    let peak = 0;
+    let lives = 3;
+    let placed = [];
+    let askIndex = 0;
+    let phase = 'idle';
+    let timers = [];
+
+    const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+
+    container.innerHTML = `
+      <section class="palace-game" aria-label="Memory Palace">
+        <header class="palace-game__head">
+          <div>
+            <p>METHOD OF LOCI · YATES 1966</p>
+            <h2>MEMORY PALACE</h2>
+          </div>
+          <div class="palace-game__stats">
+            <span>SPAN <b id="mp-span">3</b></span>
+            <span>SCORE <b id="mp-score">0</b></span>
+            <span>LIVES <b id="mp-lives">3</b></span>
+          </div>
+        </header>
+        <p class="palace-status" id="mp-status">WALK THE HOUSE. PLANT EACH OBJECT.</p>
+        <div class="palace-map" id="mp-map" role="list">
+          ${PALACE_LOCI.map(l => `
+            <div class="palace-locus" data-locus="${l.id}" role="listitem">
+              <small>${l.label}</small>
+              <strong data-item>—</strong>
+            </div>`).join('')}
+        </div>
+        <div class="palace-choices" id="mp-choices" hidden></div>
+      </section>
+    `;
+
+    const status = container.querySelector('#mp-status');
+    const spanEl = container.querySelector('#mp-span');
+    const scoreEl = container.querySelector('#mp-score');
+    const livesEl = container.querySelector('#mp-lives');
+    const choices = container.querySelector('#mp-choices');
+    const lociEls = [...container.querySelectorAll('.palace-locus')];
+
+    function paintItems(show) {
+      lociEls.forEach((el, i) => {
+        const strong = el.querySelector('[data-item]');
+        const hit = placed[i];
+        strong.textContent = show && hit ? hit.item : '—';
+        el.classList.toggle('is-lit', Boolean(show && hit));
+        el.classList.remove('is-ask');
+      });
+    }
+
+    function endRun(title, tone) {
+      clearTimers();
+      showResult({
+        container,
+        title,
+        message: peak
+          ? `Peak span ${peak}. The palace is a route you re-enter — weird images stick harder than polite ones.`
+          : 'Route lost before the first clean walk. Name each locus out loud while the item lights.',
+        score: peak,
+        gameId: 'memory-palace',
+        tone,
+        onRestart: () => start(),
+        onClose
+      });
+    }
+
+    function fail() {
+      lives--;
+      livesEl.textContent = lives;
+      soundFx.playHit();
+      if (lives <= 0) {
+        endRun(peak >= 5 ? 'PALACE STANDING' : 'ROUTE LOST', peak >= 5 ? 'win' : 'over');
+        return;
+      }
+      span = Math.max(3, span - 1);
+      spanEl.textContent = span;
+      status.textContent = 'MISS. WALK AGAIN.';
+      timers.push(setTimeout(encodeWalk, 900));
+    }
+
+    function askNext() {
+      if (askIndex >= placed.length) {
+        peak = Math.max(peak, span);
+        score += span * 15;
+        scoreEl.textContent = score;
+        span = Math.min(PALACE_LOCI.length, span + 1);
+        spanEl.textContent = span;
+        soundFx.playCoin();
+        status.textContent = 'CLEAN WALK. SPAN UP.';
+        timers.push(setTimeout(encodeWalk, 900));
+        return;
+      }
+
+      phase = 'recall';
+      const target = placed[askIndex];
+      paintItems(false);
+      const el = lociEls[target.locus];
+      el.classList.add('is-ask');
+      status.textContent = `WHAT WAS AT THE ${PALACE_LOCI[target.locus].label}?`;
+
+      const decoys = pickItems(3).filter(x => x !== target.item);
+      while (decoys.length < 3) {
+        const extra = PALACE_ITEMS[Math.floor(Math.random() * PALACE_ITEMS.length)];
+        if (extra !== target.item && !decoys.includes(extra)) decoys.push(extra);
+      }
+      const options = [target.item, ...decoys.slice(0, 3)].sort(() => Math.random() - 0.5);
+      choices.hidden = false;
+      choices.innerHTML = options.map(o =>
+        `<button type="button" class="palace-choice" data-item="${o}">${o}</button>`
+      ).join('');
+
+      choices.querySelectorAll('.palace-choice').forEach(btn => {
+        btn.onclick = () => {
+          if (phase !== 'recall') return;
+          phase = 'idle';
+          choices.querySelectorAll('.palace-choice').forEach(b => { b.disabled = true; });
+          if (btn.dataset.item === target.item) {
+            soundFx.playClick();
+            askIndex++;
+            timers.push(setTimeout(askNext, 350));
+          } else {
+            fail();
+          }
+        };
+      });
+    }
+
+    function encodeWalk() {
+      clearTimers();
+      phase = 'encode';
+      choices.hidden = true;
+      choices.innerHTML = '';
+      const items = pickItems(span);
+      placed = items.map((item, i) => ({ locus: i, item }));
+      paintItems(false);
+      status.textContent = 'ENCODE — WATCH EACH LOCUS';
+      let step = 0;
+
+      const showStep = () => {
+        if (step >= placed.length) {
+          paintItems(false);
+          status.textContent = 'RECALL — WALK THE HOUSE';
+          askIndex = 0;
+          timers.push(setTimeout(askNext, 500));
+          return;
+        }
+        paintItems(false);
+        const { locus, item } = placed[step];
+        const el = lociEls[locus];
+        el.classList.add('is-lit');
+        el.querySelector('[data-item]').textContent = item;
+        soundFx.playClick();
+        status.textContent = `${PALACE_LOCI[locus].label} ← ${item}`;
+        step++;
+        timers.push(setTimeout(showStep, 1100));
+      };
+      timers.push(setTimeout(showStep, 400));
+    }
+
+    encodeWalk();
   }
 }

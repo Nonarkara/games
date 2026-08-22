@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Shared UI Toolkit (Storybook Edition)
+ * Dr Non — Non-Gaming System · Shared UI Toolkit
  * GameSession: the architectural fix for ALL games.
  *   - Wraps setInterval/setTimeout/requestAnimationFrame/addEventListener
  *   - One teardown() kills every stray timer, listener, and animation frame
@@ -7,6 +7,7 @@
  */
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
+import { explainScore } from './scoreReadouts.js';
 
 export class ScopedKeyboard {
   constructor() {
@@ -115,6 +116,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   soundFx[tone === 'win' ? 'playWin' : 'playGameOver']();
 
   const qualifies = gameId !== null && score !== null && StorageService.qualifiesForBoard(gameId, score);
+  const readout = explainScore(gameId, score);
 
   const boardHtml = () => {
     const board = gameId !== null ? StorageService.getLeaderboard(gameId) : [];
@@ -140,13 +142,21 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
       <h3 class="axiom-result-title">${title}</h3>
       ${message ? `<p class="axiom-result-msg">${message}</p>` : ''}
       ${score !== null ? `<div class="axiom-result-score"><span class="axiom-result-score-label">FINAL SCORE</span><span class="axiom-result-score-value">${score}</span></div>` : ''}
+      ${readout ? `
+        <aside class="axiom-result-readout axiom-result-readout--${readout.tone}" aria-label="What this score means">
+          <p class="axiom-result-readout-band">${readout.title}</p>
+          <p class="axiom-result-readout-skill">Skill in play: ${readout.skill}</p>
+          <p class="axiom-result-readout-range">${readout.range}</p>
+          <p class="axiom-result-readout-feel">${readout.feel}</p>
+          <p class="axiom-result-readout-tip"><span>NEXT</span> ${readout.tip}</p>
+        </aside>` : ''}
       ${isNewHigh ? `<div class="axiom-result-high">▲ NEW HIGH SCORE</div>` : ''}
       ${qualifies ? `
         <form class="axiom-initials" id="initials-form">
           <label class="axiom-initials-label" for="initials-input">YOU MADE THE BOARD — SIGN IT</label>
           <div class="axiom-initials-row">
-            <input id="initials-input" class="axiom-initials-input" maxlength="5" autocomplete="off"
-                   spellcheck="false" placeholder="AAAAA" value="${StorageService.getLastInitials()}" />
+            <input id="initials-input" class="axiom-initials-input" maxlength="4" autocomplete="off"
+                   spellcheck="false" placeholder="AAAA" value="${StorageService.getLastInitials()}" />
             <button type="submit" class="axiom-btn axiom-btn-primary axiom-initials-submit">SIGN</button>
           </div>
         </form>` : ''}
@@ -161,13 +171,24 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   const form = overlay.querySelector('#initials-form');
   if (form) {
     const input = overlay.querySelector('#initials-input');
-    input.oninput = () => { input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+    input.oninput = () => { input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4); };
     form.onsubmit = (e) => {
       e.preventDefault();
       StorageService.submitScore(gameId, input.value, score);
       soundFx.playCoin();
       form.remove();
       overlay.querySelector('#result-board').innerHTML = boardHtml();
+      // After the local board paints, try the server board. On success
+      // swap in the canonical top-5 across all players. On failure,
+      // the local board stays.
+      if (typeof StorageService.fetchLeaderboardFromServer === 'function') {
+        StorageService.fetchLeaderboardFromServer(gameId).then(serverBoard => {
+          if (serverBoard && serverBoard.length) {
+            const boardEl = overlay.querySelector('#result-board');
+            if (boardEl) boardEl.innerHTML = boardHtml();
+          }
+        }).catch(() => { /* keep local */ });
+      }
     };
   }
 
@@ -180,6 +201,27 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   if (cBtn) cBtn.onclick = close;
   const primary = overlay.querySelector('#initials-input') || rBtn || cBtn;
   if (primary) setTimeout(() => primary.focus(), 30);
+}
+
+/**
+ * Timed trainers must not steal the first trial. Overlay TAP TO START on
+ * the painted frame, then run `onGo` once.
+ */
+export function attachReady(root, onGo) {
+  if (!root || typeof onGo !== 'function') return;
+  const gate = document.createElement('button');
+  gate.type = 'button';
+  gate.className = 'ngs-ready-gate';
+  gate.textContent = 'TAP TO START';
+  gate.setAttribute('aria-label', 'Tap to start this round');
+  const go = () => {
+    if (!gate.isConnected) return;
+    gate.remove();
+    onGo();
+  };
+  gate.onclick = go;
+  root.style.position = root.style.position || 'relative';
+  root.appendChild(gate);
 }
 
 /* ===========================================================================

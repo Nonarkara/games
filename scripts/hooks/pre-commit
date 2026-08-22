@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# .git/hooks/pre-commit — enforce the 16-bit register on every commit.
+#
+# Runs scripts/visual-audit.sh --strict. If it reports any violation,
+# the commit is blocked.
+#
+# Install: this hook ships in the repo. If it is not executable, run
+#   chmod +x .git/hooks/pre-commit
+# For a system-wide install, symlink it to ~/.git-templates/hooks/.
+
+set -e
+cd "$(git rev-parse --show-toplevel)"
+
+if [[ -x scripts/visual-audit.sh ]]; then
+  if ! bash scripts/visual-audit.sh --strict 2>&1 | tail -20; then
+    echo ""
+    echo "✗ pre-commit: 16-bit visual register violation(s) — fix or update the approved list"
+    exit 1
+  fi
+fi

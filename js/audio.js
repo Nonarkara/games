@@ -1,12 +1,15 @@
 /**
- * OmniArcade Web Audio API Sound Synthesizer
+ * Dr Non — Non-Gaming System Web Audio API Sound Synthesizer
  * Generates retro chiptune and arcade sound effects dynamically
  */
+
+const MUTE_KEY = 'ngs_muted';
 
 class SoundFxManager {
   constructor() {
     this.ctx = null;
-    this.muted = false;
+    // A muted arcade must stay muted tomorrow — the preference persists.
+    try { this.muted = localStorage.getItem(MUTE_KEY) === '1'; } catch { this.muted = false; }
     this.volume = 0.3;
   }
 
@@ -24,6 +27,7 @@ class SoundFxManager {
 
   toggleMute() {
     this.muted = !this.muted;
+    try { localStorage.setItem(MUTE_KEY, this.muted ? '1' : '0'); } catch { /* private mode */ }
     return this.muted;
   }
 

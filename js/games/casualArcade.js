@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Casual & Friv Arcade Suite (Axiom Core Styled)
+ * Dr Non — Non-Gaming System Casual & Friv Arcade Suite (Axiom Core Styled)
  */
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';

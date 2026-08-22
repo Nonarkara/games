@@ -1,5 +1,5 @@
 /**
- * OmniArcade - AI Game Builder Studio (Axiom Core Styled)
+ * Dr Non — Non-Gaming System AI Game Builder Studio (Axiom Core Styled)
  * Inspired by Tesana.ai — Prompt-to-Play Canvas Engine
  */
 import { soundFx } from '../audio.js';
@@ -33,16 +33,16 @@ export function renderAIGameStudio(container, onClose) {
 
   function renderUI() {
     container.innerHTML = `
-      <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-2xl mx-auto font-mono-hud">
-        <div class="flex justify-between items-center mb-6 border-b border-amber-500/40 pb-3">
-          <div class="flex items-center gap-3">
+      <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-2xl mx-auto font-mono-hud">
+        <div class="flex justify-between items-center gap-2 mb-6 border-b border-amber-500/40 pb-3">
+          <div class="flex items-center gap-2 min-w-0">
             <span class="text-3xl text-amber-400">🤖</span>
-            <div>
-              <h2 class="text-2xl font-black text-amber-400 tracking-wider">AI GAME BUILDER STUDIO</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">INSPIRED BY TESANA.AI — NATURAL LANGUAGE PROMPT SANDBOX</p>
+            <div class="min-w-0">
+              <h2 class="text-base sm:text-2xl font-black text-amber-400 tracking-wider">AI GAME BUILDER</h2>
+              <p class="text-[9px] text-amber-500/80 uppercase">PROMPT SANDBOX · RULES TO PLAY</p>
             </div>
           </div>
-          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
         </div>
 
         ${!isPlaying ? `
@@ -50,19 +50,19 @@ export function renderAIGameStudio(container, onClose) {
             <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
               ✨ PROMPT YOUR CUSTOM GAME IDEA:
             </label>
-            <div class="flex gap-2 mb-4">
+            <div class="flex flex-col sm:flex-row gap-2 mb-4">
               <input id="ai-prompt-input" type="text" value="${promptText}" class="w-full bg-black border border-amber-500/60 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400" placeholder="e.g. A cyber knight dodging falling meteors..." />
-              <button id="ai-generate-btn" class="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-black font-black text-xs uppercase whitespace-nowrap shadow-lg">
+              <button id="ai-generate-btn" class="w-full sm:w-auto px-4 sm:px-6 py-3 bg-amber-600 hover:bg-amber-500 text-black font-black text-xs uppercase whitespace-nowrap shadow-lg">
                 ⚡ BUILD & PLAY
               </button>
             </div>
 
             <div class="text-xs font-bold text-zinc-400 mb-2">CHOOSE AN AI PRESET:</div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               ${presets.map((p, idx) => `
                 <button class="ai-preset-btn p-3 bg-zinc-900 hover:bg-amber-950 border border-zinc-800 hover:border-amber-500 text-left transition flex items-center gap-3" data-idx="${idx}">
                   <span class="text-2xl">${p.player}</span>
-                  <div>
+                  <div class="min-w-0">
                     <div class="font-bold text-xs text-amber-400">${p.title}</div>
                     <div class="text-[10px] text-zinc-400 truncate">${p.prompt}</div>
                   </div>
@@ -71,7 +71,7 @@ export function renderAIGameStudio(container, onClose) {
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-3 bg-zinc-950 p-4 border border-amber-500/40 mb-6 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-zinc-950 p-4 border border-amber-500/40 mb-6 text-xs">
             <div>
               <span class="text-zinc-400 block mb-1">HERO AVATAR:</span>
               <input id="param-player" type="text" value="${playerSprite}" class="w-full bg-black border border-zinc-700 p-2 text-center text-lg" />
@@ -86,14 +86,14 @@ export function renderAIGameStudio(container, onClose) {
             </div>
           </div>
         ` : `
-          <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div class="flex flex-wrap justify-between items-center gap-3 bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>SCORE: <span id="ai-score" class="text-white text-base">0</span></div>
             <div>HIGH SCORE: <span id="ai-high" class="text-amber-400 text-base">${high}</span></div>
             <button id="ai-stop-btn" class="px-3 py-1 bg-zinc-900 border border-amber-500/40 text-amber-400 hover:bg-amber-900 text-xs">⚙️ REDESIGN</button>
           </div>
 
           <div class="relative flex justify-center mb-4">
-            <canvas id="ai-canvas" width="500" height="320" class="bg-black border border-amber-500/60 shadow-inner"></canvas>
+            <canvas id="ai-canvas" width="500" height="320" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:500px;aspect-ratio:25/16"></canvas>
           </div>
 
           <div class="flex justify-center">

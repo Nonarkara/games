@@ -1,5 +1,5 @@
 /**
- * OmniArcade - Classic Arcade Legends Suite & Custom File Inspector
+ * Dr Non — Non-Gaming System Classic Arcade Legends Suite & Custom File Inspector
  */
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';
@@ -18,60 +18,50 @@ export function renderCyberTetris(container, onClose) {
     let high = StorageService.getHighScore('cyber-tetris');
 
     container.innerHTML = `
-      <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl text-amber-400">🧱</span>
-            <div>
-              <h2 class="text-2xl font-black text-amber-400 tracking-wider">CYBER TETRIS</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">PROTOCOL [TETRIS_CORE_V1] — ROTATE & CLEAR LINES</p>
-            </div>
+      <section class="oss-game tetris-play" aria-label="Cyber Tetris">
+        <header class="oss-game__header">
+          <div>
+            <p class="oss-game__eyebrow">CLASSIC WELL · 10×20</p>
+            <h2>CYBER TETRIS</h2>
+            <p>Rotate, stack, clear. The well is fully on screen — every row counts.</p>
           </div>
-          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
-        </div>
-
-        <div class="grid grid-cols-3 gap-4 mb-4">
-          <div class="col-span-2 relative flex justify-center">
-            <canvas id="tetris-canvas" width="240" height="400" class="bg-slate-950 border border-amber-500/60 shadow-inner"></canvas>
+          <div class="oss-game__score" aria-live="polite">
+            <span>SCORE <b id="tetris-score">0</b></span>
+            <span>HIGH <b id="tetris-high">${high}</b></span>
+            <span>LINES <b id="tetris-lines">0</b></span>
+            <span>LEVEL <b id="tetris-level">1</b></span>
           </div>
-
-          <div class="flex flex-col justify-between bg-zinc-950 border border-amber-500/40 p-4 text-xs">
-            <div>
-              <div class="text-amber-500 font-bold mb-1">SCORE:</div>
-              <div id="tetris-score" class="text-2xl font-black text-white mb-4">0</div>
-              <div class="text-amber-500 font-bold mb-1">HIGH SCORE:</div>
-              <div id="tetris-high" class="text-lg font-bold text-amber-400 mb-4">${high}</div>
-              <div class="text-amber-500 font-bold mb-1">LINES:</div>
-              <div id="tetris-lines" class="text-base text-white mb-4">0</div>
-              <div class="text-amber-500 font-bold mb-1">LEVEL:</div>
-              <div id="tetris-level" class="text-base text-white">1</div>
-            </div>
-            <div class="text-[10px] text-zinc-500 border-t border-amber-500/30 pt-2 mt-3 leading-relaxed">
-              CONTROLS:<br/>
-              ◀ ▶ Move · ▲ Rotate<br/>
-              ▼ Soft · SPACE Hard
-            </div>
+        </header>
+        <div class="tetris-stage">
+          <canvas id="tetris-canvas" width="240" height="480" aria-label="Tetris playfield"></canvas>
+          <div class="tetris-pad" role="group" aria-label="Tetris controls">
+            <button type="button" id="t-left">LEFT</button>
+            <button type="button" id="t-rotate">ROTATE</button>
+            <button type="button" id="t-right">RIGHT</button>
+            <button type="button" id="t-drop">DROP</button>
           </div>
         </div>
-
-        <div class="grid grid-cols-4 gap-2">
-          <button id="t-left" class="axiom-dpad-btn">◀ LEFT</button>
-          <button id="t-rotate" class="axiom-dpad-btn">🔄 ROTATE</button>
-          <button id="t-right" class="axiom-dpad-btn">RIGHT ▶</button>
-          <button id="t-drop" class="py-3 bg-amber-600 border border-amber-400 text-black hover:bg-amber-500 font-black text-xs">⚡ DROP</button>
+        <div class="oss-game__controls">
+          <span>ARROWS MOVE · UP ROTATE · SPACE HARD DROP</span>
+          <button type="button" id="close-game-btn">EXIT</button>
         </div>
-      </div>
+      </section>
     `;
 
     const canvas = container.querySelector('#tetris-canvas');
     const ctx = canvas.getContext('2d');
+    // Conservation: canvas pixels must equal the well. 10×20 × 24px = 240×480.
+    // The old 400px height let rows 17–20 draw below the visible surface.
     const COLS = 10, ROWS = 20, BLOCK_SIZE = 24;
+    canvas.width = COLS * BLOCK_SIZE;
+    canvas.height = ROWS * BLOCK_SIZE;
 
     const SHAPES = [
       [[1,1,1,1]], [[1,1],[1,1]], [[0,1,0],[1,1,1]],
       [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[0,1,1],[1,1,0]], [[1,1,0],[0,1,1]]
     ];
-    const COLORS = ['#06b6d4', '#facc15', '#a855f7', '#f97316', '#3b82f6', '#22c55e', '#ef4444'];
+    // Axiom Play palette — identity blue, move red, warm neutrals. No rainbow defaults.
+    const COLORS = ['#26243F', '#A8322B', '#6f6c63', '#0039A6', '#996633', '#8f8b80', '#191712'];
 
     let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     let currentPiece = getRandomPiece();
