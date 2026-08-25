@@ -2384,3 +2384,119 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
   .attract-moods { order: 1; margin-top: 12px; }
   .attract-moods button { min-width: calc(50% - 1px); }
 }
+
+/* ============================================================================
+ * Phone read — last in the file so source order wins for same-specificity
+ * rules that follow the base .select-row / .attract-* blocks above.
+ *
+ * Goal: less text per element, no floating whitespace, every control
+ * still passes §11.8 (44px tap targets). The desktop view is untouched.
+ * ========================================================================== */
+@media (max-width: 420px) {
+  /* Cart card: 218 → 60. The desktop card has 6 children; on phone we
+     show sprite + title + brain (one line). Everything else is one
+     tap away in the briefing. */
+  .select-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    padding: 8px 14px;
+    background: var(--ax-panel);
+  }
+  .select-card-top { display: none; }            /* code + age + NEW/PLAYED */
+  .select-desc { display: none; }                /* "Watch each square..." */
+  .select-card-bottom { display: none; }         /* HI / LOAD / time row */
+  .select-brain {
+    display: block;
+    margin: 2px 0 0;
+    padding: 0;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--ax-ink-2);
+    font-family: var(--ax-body);
+    font-weight: 500;
+  }
+  .select-brain small { display: none; }          /* "TRAINS" eyebrow */
+  .select-name {
+    margin: 0;
+    font-family: var(--ax-pixel);
+    font-size: 11px;
+    line-height: 1.3;
+  }
+  .select-row .cart-sprite {
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  /* Directory header — drop the prose. The cart list below is the directory. */
+  .directory-header > div > p:first-of-type,
+  .directory-header > p { display: none; }
+  .directory-header h2 { font-size: 13px; }
+  .directory-header { padding: 1.5rem 1.25rem 0.75rem; }
+
+  /* Search summary row — the prose goes, the count + clear button stay. */
+  .search-summary > span { font-size: 10px; }
+  .search-summary > button { padding: 6px 10px; min-height: 36px; }
+
+  /* Attract hero: cap the photo so the rest of the page is reachable
+     without scrolling past one image. */
+  .attract-hero > img { max-height: 200px; object-fit: cover; }
+  .attract-hero { display: flex; flex-direction: column; }
+  .attract-hero > img { order: 1; }
+  .attract-copy { order: 2; padding: 14px 16px; }
+  .attract-copy h1 { font-size: 22px; line-height: 1.05; }
+  .attract-line { font-size: 9px; }
+
+  /* Hide the explanatory paragraph. The line ("Kill time.") carries
+     the voice; the sub paragraph is the same idea in 4 more sentences
+     and phones don't have 4 more sentences of room. */
+  .attract-sub { display: none; }
+
+  /* Picks row: 3 actions, 1 line each, no secondary blurb. */
+  .attract-picks { gap: 4px; margin-top: 10px; }
+  .attract-picks button {
+    padding: 10px 6px;
+    min-height: 44px;
+    font-size: 9px;
+    gap: 0;
+  }
+  .attract-picks button b { font-size: 9px; }
+  .attract-picks button span { display: none; }   /* "Starts around 1–3 min" */
+
+  /* Moods: 2 per row, label only, tighter padding. The blurb per mood
+     lives in the briefing if you tap one. */
+  .attract-moods { margin-top: 8px; gap: 1px; }
+  .attract-moods-label { font-size: 8px; padding: 6px 10px; letter-spacing: 0.08em; }
+  .attract-moods button {
+    padding: 8px 6px;
+    min-height: 44px;
+    min-width: calc(50% - 1px);
+    flex: 1 1 calc(50% - 1px);
+    gap: 0;
+  }
+  .attract-moods button b { font-size: 8px; letter-spacing: 0; }
+  .attract-moods button span { display: none; }   /* "Round fits three minutes" */
+
+  /* Feature panel (today's cartridge): hide the giant 3-letter code —
+     the desktop "PLAY register" idea doesn't fit a 390px column.
+     Also let the panel hug its content instead of being stretched to
+     fill half the viewport. */
+  .attract-feature { padding: 14px 16px; justify-content: flex-start; min-height: 0; }
+  .attract-feature-code { display: none; }
+  .attract-feature-title { font-size: 14px; max-width: 16ch; margin-top: 6px; }
+  .attract-feature-skill { font-size: 9px; margin-top: 4px; }
+  .attract-feature-cta { font-size: 9px; padding: 8px 10px; min-height: 36px; }
+  .attract-feature .cart-sprite--hero { width: 44px; height: 44px; margin-top: 0; }
+  .attract-feature-ring { display: none; }
+
+  /* Continue row: same idea — sprite, title, HI, no chotchkies. */
+  .attract-continue { padding: 10px 14px; gap: 10px; }
+  .attract-continue-title { font-size: 10px; }
+  .attract-continue-meta { font-size: 9px; }
+  .attract-continue-cta { font-size: 9px; padding: 6px 8px; min-height: 36px; }
+  .attract-continue .cart-sprite--continue { width: 32px; height: 32px; }
+}
