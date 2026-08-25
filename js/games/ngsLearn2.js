@@ -222,9 +222,9 @@ const MATE_PUZZLES = [
   },
   {
     name: 'Anastasia',
-    pieces: { e7: '♖', h8: '♚', g7: '♟', h7: '♟', h1: '♔', d5: '♘' },
+    pieces: { e7: '♖', h8: '♚', g7: '♟', h7: '♟', h1: '♔', g5: '♘' },
     from: 'e7', to: 'h7',
-    why: 'The rook is immune on h7 because the knight covers the recapture — Anastasia\'s mate, named for a 1803 novel.'
+    why: 'The rook takes h7 with check; the knight on g5 guards h7 against the recapture, g7 blocks its own king — Anastasia\'s mate, named for a 1803 novel.'
   }
 ];
 

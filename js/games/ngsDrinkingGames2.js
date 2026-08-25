@@ -119,11 +119,16 @@ export function renderRideTheBus(container, onClose) {
         const hi = Math.max(last.value, secondLast.value);
         correct = (guess === 'inside') ? (card.value >= lo && card.value <= hi) : (card.value < lo || card.value > hi);
       } else if (phase === 3) correct = guess === card.suit;
-      if (correct) { streak++; soundFx.playCoin(); }
-      else { drinks++; soundFx.playHit(); streak = 0; phase = Math.min(phase + 1, RTB_PHASES.length - 1); }
+      // Correct answers advance through the four phases; a miss costs a
+      // drink and keeps you in the same phase. Surviving phase 4 wins.
+      if (correct) {
+        streak++; soundFx.playCoin();
+        if (phase < RTB_PHASES.length - 1) { phase++; }
+        else { secondLast = last; last = card; endGame(); return; }
+      } else {
+        drinks++; soundFx.playHit(); streak = 0;
+      }
       secondLast = last; last = card;
-      if (!correct || phase > phase) { /* advance */ }
-      if (phase === 3 && correct) { endGame(); return; }
       if (drinks >= 4) { endGame(); return; }
       next();
     }
@@ -208,6 +213,29 @@ export function renderPowerHour(container, onClose) {
     let minute = 0;
     let timer = null;
     const totalMinutes = POWER_HOUR_PROMPTS.length;
+    // Optional minute clock: 60s per prompt, like the real Power Hour.
+    // Party hosts who prefer manual control can toggle it off.
+    let auto = false;
+    let tickInterval = null;
+    let secondsLeft = 60;
+    function stopClock() { if (tickInterval) { clearInterval(tickInterval); tickInterval = null; } }
+    function startClock() {
+      stopClock();
+      secondsLeft = 60;
+      tickInterval = setInterval(() => {
+        secondsLeft--;
+        const el = container.querySelector('#ph-clock');
+        if (el) el.textContent = `${secondsLeft}s`;
+        if (secondsLeft <= 0) advance();
+      }, 1000);
+    }
+    function advance() {
+      minute++;
+      if (minute >= totalMinutes) { endGame(); return; }
+      soundFx.playCoin();
+      if (auto) startClock();
+      render();
+    }
     function next() {
       if (minute >= totalMinutes) { endGame(); return; }
       render();
@@ -225,9 +253,10 @@ export function renderPowerHour(container, onClose) {
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
-          <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>MINUTE: <span class="text-amber-400 text-base">${min}/${totalMinutes}</span></div>
             <div>DRINKS: <span class="text-red-500 text-base">${min}</span></div>
+            <button id="ph-auto" style="border:1px solid rgba(245,158,11,0.5);color:#f59e0b;font-size:10px;font-weight:700;padding:4px 8px">${auto ? 'CLOCK ON · <span id=\'ph-clock\'>60s</span>' : 'START CLOCK'}</button>
           </div>
           <div class="bg-amber-500/10 border-2 border-amber-500 p-10 mb-4 text-center" style="min-height:200px">
             <div class="text-zinc-400 text-xs mb-3">MINUTE ${min} OF ${totalMinutes}</div>
@@ -237,11 +266,19 @@ export function renderPowerHour(container, onClose) {
             ${min >= totalMinutes ? 'FINISH' : 'NEXT MINUTE →'}
           </button>
         </div>`;
-      container.querySelector('#close-game-btn').onclick = () => { clearTimeout(timer); onClose(); };
-      container.querySelector('#ph-next').onclick = () => { minute++; soundFx.playCoin(); if (minute >= totalMinutes) endGame(); else render(); };
+      container.querySelector('#close-game-btn').onclick = () => { stopClock(); onClose(); };
+      container.querySelector('#ph-auto').onclick = () => {
+        auto = !auto;
+        if (auto) startClock(); else stopClock();
+        render();
+      };
+      container.querySelector('#ph-next').onclick = () => {
+        if (min >= totalMinutes) { stopClock(); endGame(); return; }
+        advance();
+      };
     }
     function endGame() {
-      clearTimeout(timer);
+      stopClock();
       const score = totalMinutes * 10;
       showResult({ container, title: 'POWER HOUR COMPLETE', message: `60 minutes. 60 sips. You did it.`, score, gameId: 'power-hour', tone: 'win', onRestart: start, onClose });
     }
@@ -262,18 +299,20 @@ export function renderBuzz(container, onClose) {
     let timer = null;
     function playerMove(advance) {
       current += advance;
-      if (current >= TARGET) { endGame(false); return; }
+      // Whoever's count reaches 21 drinks — including you.
+      if (current >= TARGET) { endGame(true); return; }
       computerMove();
     }
     function computerMove() {
-      // Optimal strategy: leave the player a multiple of 4 (so any 1/2/3 lands on 20, 21, or 22 — we want them to take 22 which is a loss)
-      // Actually: leave them at 21 mod 4 = 1. The player can't avoid eventually hitting 21.
+      // Optimal: always leave a multiple of 4. From any residue the player
+      // is then forced onto 20 → whatever they add, the CPU can restore
+      // %4 === 0, and 21 lands on whoever answers at 20 + 1..3.
       const choices = [1, 2, 3];
-      const move = choices[(TARGET - current - 1) % 4] || 1;
-      // Simpler: just play badly (random) for fun
-      const m = choices[Math.floor(Math.random() * 3)];
+      const optimal = choices.find(m => (current + m) % 4 === 0);
+      const m = optimal || choices[Math.floor(Math.random() * 3)];
       current += m;
       rounds++;
+      if (current >= TARGET) { render(`Computer says ${TARGET}. You survive.`); endGame(false); return; }
       render(`Computer says +${m}`);
     }
     function render(note) {
@@ -308,7 +347,7 @@ export function renderBuzz(container, onClose) {
     }
     function endGame(playerLost) {
       clearTimeout(timer);
-      const score = (rounds * 5) + (playerLost ? 0 : 50);
+      const score = Math.min(100, (rounds * 5) + (playerLost ? 0 : 50));
       const msg = playerLost ? `You said 21. Drink.` : `You survived! The computer said 21.`;
       showResult({ container, title: playerLost ? 'YOU DRINK' : 'YOU SURVIVED', message: msg, score, gameId: 'buzz-21', tone: playerLost ? 'over' : 'win', onRestart: start, onClose });
     }
@@ -391,9 +430,13 @@ export function renderTruthOrDare(container, onClose) {
   function start() {
     const truths = shuffle(TOD_TRUTHS);
     const dares = shuffle(TOD_DARES);
+    // A finite session of ten rounds, so the cartridge ends and signs the
+    // board like every other cart instead of cycling prompts forever.
+    const TOTAL_ROUNDS = 10;
     let truthIdx = 0, dareIdx = 0, round = 0;
     let timer = null;
     function choose() {
+      if (round >= TOTAL_ROUNDS) { endGame(); return; }
       const pickTruth = Math.random() < 0.5;
       const list = pickTruth ? truths : dares;
       const idx = pickTruth ? truthIdx++ : dareIdx++;
@@ -434,8 +477,8 @@ export function renderTruthOrDare(container, onClose) {
     }
     function endGame() {
       clearTimeout(timer);
-      const score = round * 10;
-      showResult({ container, title: 'GAME OVER', message: `${round} rounds.`, score, gameId: 'truth-or-dare', tone: 'over', onRestart: start, onClose });
+      const score = Math.min(100, round * 10);
+      showResult({ container, title: 'GAME OVER', message: `${round} rounds survived.`, score, gameId: 'truth-or-dare', tone: 'over', onRestart: start, onClose });
     }
     choose();
   }
@@ -570,9 +613,19 @@ export function renderTwoTruths(container, onClose) {
   function start() {
     let round = 0, correct = 0, vote = null, revealed = false;
     let timer = null;
-    const pack = TTL_PACKS[Math.floor(Math.random() * TTL_PACKS.length)];
-    const lieIdx = Math.floor(Math.random() * 3);
-    const statements = pack.map((s, i) => ({ text: s, isLie: i === lieIdx }));
+    // Fresh pack and a fresh lie position every round — replaying the same
+    // statements with the same lie told the group nothing rounds 2-5.
+    const usedPacks = new Set();
+    function dealRound() {
+      if (usedPacks.size < TTL_PACKS.length) {
+        let packIdx;
+        do { packIdx = Math.floor(Math.random() * TTL_PACKS.length); } while (usedPacks.has(packIdx));
+        usedPacks.add(packIdx);
+      }
+      return { pack: TTL_PACKS[[...usedPacks].at(-1)], lieIdx: Math.floor(Math.random() * 3) };
+    }
+    let current = dealRound();
+    let statements = current.pack.map((s, i) => ({ text: s, isLie: i === current.lieIdx }));
     function render() {
       container.innerHTML = `
         <div class="${FRAME}">
@@ -610,7 +663,15 @@ export function renderTwoTruths(container, onClose) {
         if (reveal) reveal.onclick = () => { revealed = true; if (vote === lieIdx) { correct++; soundFx.playCoin(); } else { soundFx.playHit(); } render(); };
       } else {
         const next = container.querySelector('#ttl-next');
-        if (next) next.onclick = () => { if (round + 1 >= 5) endGame(); else { round++; revealed = false; vote = null; render(); } };
+        if (next) next.onclick = () => {
+          if (round + 1 >= 5) endGame();
+          else {
+            round++; revealed = false; vote = null;
+            current = dealRound();
+            statements = current.pack.map((s, i) => ({ text: s, isLie: i === current.lieIdx }));
+            render();
+          }
+        };
       }
     }
     function endGame() {

@@ -14,6 +14,13 @@
 # shadows, no blur, no gradients on bodies — only the scanline effect
 # (the CRT overlay) and the amber Move are the sanctioned accents.
 #
+# css/tailwind.static.css is EXCLUDED: it is a generated artifact (see
+# tailwind.config.cjs) that compiles exactly the utility classes the game
+# templates already used through the old cdn.tailwindcss.com runtime. The
+# rendered output is unchanged; the scanner previously could not see those
+# rules because the CDN injected them at runtime. Hand-written surfaces
+# remain fully audited.
+#
 # Usage:
 #   bash scripts/visual-audit.sh             # report only, exit 0
 #   bash scripts/visual-audit.sh --strict    # exit 1 on any violation
@@ -61,7 +68,7 @@ while IFS= read -r match; do
     continue
   fi
   report "BORDER-RADIUS" "$file" "$line" "$snippet"
-done < <(grep -rn "border-radius:" css/ js/ 2>/dev/null | grep -v "node_modules")
+done < <(grep -rn "border-radius:" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css")
 
 # 2. box-shadow with non-inset, non-none
 while IFS= read -r match; do
@@ -78,7 +85,7 @@ while IFS= read -r match; do
     continue
   fi
   report "BOX-SHADOW" "$file" "$line" "$snippet"
-done < <(grep -rn "box-shadow:" css/ js/ 2>/dev/null | grep -v "node_modules")
+done < <(grep -rn "box-shadow:" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css")
 
 # 3. backdrop-filter (any non-none value is a violation)
 while IFS= read -r match; do
@@ -88,7 +95,7 @@ while IFS= read -r match; do
   snippet=$(echo "$match" | cut -d: -f3-)
   if echo "$snippet" | grep -qE "backdrop-filter:\s*none"; then continue; fi
   report "BACKDROP-FILTER" "$file" "$line" "$snippet"
-done < <(grep -rn "backdrop-filter" css/ js/ 2>/dev/null | grep -v "node_modules")
+done < <(grep -rn "backdrop-filter" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css")
 
 # 4. filter: blur (real blur effects)
 while IFS= read -r match; do
@@ -97,7 +104,7 @@ while IFS= read -r match; do
   line=$(echo "$match" | cut -d: -f2)
   snippet=$(echo "$match" | cut -d: -f3-)
   report "FILTER-BLUR" "$file" "$line" "$snippet"
-done < <(grep -rnE "filter:\s*blur\(" css/ js/ 2>/dev/null | grep -v "node_modules")
+done < <(grep -rnE "filter:\s*blur\(" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css")
 
 # 5. linear-gradient used outside the scanline / atmospheric use cases
 # The sanctioned uses: the CRT scanline overlay (rgba 18,16,16, etc.) and
@@ -113,7 +120,7 @@ while IFS= read -r match; do
   if echo "$snippet" | grep -qE "rgba\("; then continue; fi
   if echo "$snippet" | grep -qE "repeating-linear-gradient"; then continue; fi
   report "GRADIENT" "$file" "$line" "$snippet"
-done < <(grep -rnE "linear-gradient" css/ js/ 2>/dev/null | grep -v "node_modules")
+done < <(grep -rnE "linear-gradient" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css")
 
 # 6. Rounded font tokens
 # The floor uses Press Start 2P + JetBrains Mono. Flag any new font-family
@@ -137,7 +144,7 @@ while IFS= read -r match; do
   if ! $ok; then
     report "FONT-FAMILY" "$file" "$line" "$snippet"
   fi
-done < <(grep -rnE "font-family:" css/ js/ 2>/dev/null | grep -v "node_modules")
+done < <(grep -rnE "font-family:" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css")
 
 # Report
 echo

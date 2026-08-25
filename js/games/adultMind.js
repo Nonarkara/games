@@ -69,6 +69,10 @@ export function renderTriviaMaster(container, onClose) {
 
       container.querySelectorAll('.trivia-opt-btn').forEach(btn => {
         btn.onclick = () => {
+          // Lock the board during the reveal — a second click used to
+          // re-score and skip a question.
+          if (btn.disabled) return;
+          container.querySelectorAll('.trivia-opt-btn').forEach(b => { b.disabled = true; });
           const selected = parseInt(btn.dataset.idx, 10);
           const correct = selected === qObj.answer;
 
@@ -124,16 +128,41 @@ export function renderBlackjack(container, onClose) {
     let gameState = 'betting'; // 'betting' | 'playing' | 'dealer' | 'ended'
     let message = 'PLACE YOUR BET TO DEAL CARDS';
     let bustNotice = null;
+    let handsPlayed = 0;
+    let peak = bankroll;
 
-    function drawCard() {
+    // Six-deck shoe, shuffled once per session. An infinite random deck made
+    // card counting impossible while the table implied real decks.
+    const shoe = [];
+    function buildShoe() {
       const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
       const suits = ['♠', '♥', '♦', '♣'];
-      const rank = ranks[Math.floor(Math.random() * ranks.length)];
-      const suit = suits[Math.floor(Math.random() * suits.length)];
-      let val = parseInt(rank, 10);
-      if (['J','Q','K'].includes(rank)) val = 10;
-      if (rank === 'A') val = 11;
-      return { rank, suit, val };
+      for (let d = 0; d < 6; d++) {
+        for (const suit of suits) {
+          for (let rank of ranks) {
+            let val = parseInt(rank, 10);
+            if (['J','Q','K'].includes(rank)) val = 10;
+            if (rank === 'A') val = 11;
+            shoe.push({ rank, suit, val });
+          }
+        }
+      }
+      for (let i = shoe.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shoe[i], shoe[j]] = [shoe[j], shoe[i]];
+      }
+    }
+    buildShoe();
+
+    function drawCard() {
+      if (shoe.length < 20) buildShoe();
+      return shoe.pop();
+    }
+
+    function notePeak() {
+      handsPlayed++;
+      if (bankroll > peak) peak = bankroll;
+      StorageService.updateHighScore('cyber-blackjack', Math.min(10000, bankroll));
     }
 
     function getHandTotal(hand) {
@@ -213,7 +242,21 @@ export function renderBlackjack(container, onClose) {
         </div>
       `;
 
-      container.querySelector('#close-game-btn').onclick = onClose;
+      container.querySelector('#close-game-btn').onclick = () => {
+        // Leaving the table cashes you out: the session's peak bankroll is
+        // the score that gets signed. Closing before any deal is a plain exit.
+        if (!handsPlayed) { onClose(); return; }
+        showResult({
+          container,
+          title: 'CASHED OUT',
+          message: `Peak bankroll $${peak} across ${handsPlayed} hand${handsPlayed === 1 ? '' : 's'}.`,
+          score: Math.min(10000, peak),
+          gameId: 'cyber-blackjack',
+          tone: peak > 1000 ? 'win' : 'over',
+          onRestart: () => start(),
+          onClose
+        });
+      };
 
       if (gameState === 'betting') {
         container.querySelector('#bet-down').onclick = () => { bet = Math.max(25, bet - 25); render(); };
@@ -234,6 +277,19 @@ export function renderBlackjack(container, onClose) {
           bankroll -= bet;
           playerHand = [drawCard(), drawCard()];
           dealerHand = [drawCard()];
+          if (getHandTotal(playerHand) === 21) {
+            // Natural pays 3 to 2, like the table says.
+            const payout = bet + Math.round(bet * 1.5);
+            bankroll += payout;
+            gameState = 'ended';
+            handsPlayed++;
+            if (bankroll > peak) peak = bankroll;
+            StorageService.updateHighScore('cyber-blackjack', Math.min(10000, bankroll));
+            message = `♠ BLACKJACK — PAYS 3 TO 2 (+$${payout})`;
+            render();
+            setTimeout(() => { gameState = 'betting'; render(); }, 1800);
+            return;
+          }
           gameState = 'playing';
           message = 'HIT OR STAND?';
           render();
@@ -247,7 +303,7 @@ export function renderBlackjack(container, onClose) {
             soundFx.playHit();
             gameState = 'ended';
             message = '💥 BUST! Hand exceeded 21.';
-            StorageService.updateHighScore('cyber-blackjack', bankroll);
+            notePeak();
             render();
             setTimeout(() => { gameState = 'betting'; render(); }, 1600);
           } else {
@@ -288,7 +344,7 @@ export function renderBlackjack(container, onClose) {
       }
 
       gameState = 'ended';
-      StorageService.updateHighScore('cyber-blackjack', bankroll);
+      notePeak();
       render();
       setTimeout(() => {
         if (bankroll <= 0) {

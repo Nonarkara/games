@@ -25,7 +25,7 @@ const FRAME = 'relative bg-black border border-amber-500/40 p-6 text-white max-w
  * ======================================================================== */
 export function renderTrailMaking(container, onClose) {
   start('A');
-  function start(part) {
+  function start(part, partASeconds) {
     const N = part === 'A' ? 8 : 6;            // 1..N for A; 1..N + A..N for B
     const labels = part === 'A'
       ? Array.from({ length: N }, (_, i) => String(i + 1))
@@ -120,15 +120,18 @@ export function renderTrailMaking(container, onClose) {
           <p class="text-zinc-200 text-sm mb-4">Part A complete in ${prevTime.toFixed(1)}s with ${errors} error${errors === 1 ? '' : 's'}. Part B alternates numbers and letters. Click continue when ready.</p>
           <button id="tmt-continue" class="w-full py-4 bg-amber-500 text-black font-black tracking-widest text-sm hover:opacity-90">CONTINUE TO PART B →</button>
         </div>`;
-      container.querySelector('#tmt-continue').onclick = () => start('B');
+      container.querySelector('#tmt-continue').onclick = () => start('B', prevTime);
     }
 
     function endGame(extra) {
-      const totalSeconds = extra; // Part B elapsed only; Part A time folded in via the renderPartIntro
+      // Total trail time = Part A + Part B. Part A used to be dropped here,
+      // which flattened the score toward the ceiling no matter how slow the
+      // first half went.
+      const totalSeconds = (partASeconds || 0) + extra;
       // For a single score: server treats lower-time-better; we send seconds, the leaderboard can invert
       clearTimeout(timer);
       const score = Math.max(0, Math.round(600 - totalSeconds));
-      const message = `Part B: ${totalSeconds.toFixed(1)}s. Errors: ${errors}.`;
+      const message = `Total: ${totalSeconds.toFixed(1)}s. Errors: ${errors}.`;
       showResult({ container, title: 'TRAIL COMPLETE', message, score, gameId: 'trail-making', tone: 'win', onRestart: () => start('A'), onClose });
     }
     positions = placeDots();
@@ -269,11 +272,14 @@ export function renderIowaGambling(container, onClose) {
   function start() {
     const TRIALS = 40;
     // Each deck is a function: returns { win, loss } per draw
-    // Net over 10 draws: A = -250, B = -250, C = +250, D = +250
+    // Net over any 10 draws: A = -250, B = -250, C = +250, D = +250
+    // (Bechara 1994 schedules: A/C lose across five cards per ten, B/D in
+    // one lump. The old ranges charged A/C every single draw, which made A
+    // catastrophic (-200/draw) and C a wash instead of advantageous.)
     const DECKS = [
-      { id: 'A', label: 'DECK A', win: 100, lossRange: [100, 500], lossEvery: 0, color: '#ef4444' },
+      { id: 'A', label: 'DECK A', win: 100, lossCycle: [0, 150, 0, 0, 150, 0, 150, 0, 300, 500], color: '#ef4444' },
       { id: 'B', label: 'DECK B', win: 100, lossEvery: 10, lossAmount: 1250, color: '#f59e0b' },
-      { id: 'C', label: 'DECK C', win:  50, lossRange: [25,  75], lossEvery: 0, color: '#22c55e' },
+      { id: 'C', label: 'DECK C', win:  50, lossCycle: [0, 25, 0, 75, 0, 25, 0, 50, 0, 75], color: '#22c55e' },
       { id: 'D', label: 'DECK D', win:  50, lossEvery: 10, lossAmount:  250, color: '#3b82f6' }
     ];
     let trial = 0, net = 0, history = [];
@@ -287,8 +293,8 @@ export function renderIowaGambling(container, onClose) {
       if (deck.lossEvery > 0) {
         // Lose the lump sum every Nth draw
         if ((counts[deck.id] + 1) % deck.lossEvery === 0) loss = deck.lossAmount;
-      } else {
-        loss = Math.floor(deck.lossRange[0] + Math.random() * (deck.lossRange[1] - deck.lossRange[0]));
+      } else if (deck.lossCycle) {
+        loss = deck.lossCycle[counts[deck.id] % deck.lossCycle.length];
       }
       const delta = win - loss;
       net += delta;

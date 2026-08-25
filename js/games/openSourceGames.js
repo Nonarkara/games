@@ -50,6 +50,9 @@ function gameFrame({ title, subtitle, score, high, credit, canvasId }) {
 }
 
 export function renderArcadeBreakout(container, onClose) {
+  // PLAY AGAIN re-runs this renderer; drop the previous round's window key
+  // handlers so stale preventDefaults and paddle state cannot stack.
+  if (renderArcadeBreakout._releaseKeys) renderArcadeBreakout._releaseKeys();
   const credit = { name: 'ANIA KUBOW / BREAKOUT', url: 'https://github.com/kubowania/breakout' };
   let score = 0;
   let high = StorageService.getHighScore('arcade-breakout');
@@ -184,13 +187,19 @@ export function renderArcadeBreakout(container, onClose) {
     draw();
   }
 
-  window.addEventListener('keydown', event => {
+  const onKeydown = event => {
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
     if (['ArrowLeft', 'ArrowRight', 'a', 'd', ' '].includes(key)) event.preventDefault();
     keys.add(key);
     if (key === ' ' && !running) serve.click();
-  });
-  window.addEventListener('keyup', event => keys.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key));
+  };
+  const onKeyup = event => keys.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key);
+  window.addEventListener('keydown', onKeydown);
+  window.addEventListener('keyup', onKeyup);
+  renderArcadeBreakout._releaseKeys = () => {
+    window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('keyup', onKeyup);
+  };
   canvas.addEventListener('pointermove', event => movePaddle(event.clientX));
   canvas.addEventListener('pointerdown', event => {
     movePaddle(event.clientX);
@@ -209,6 +218,8 @@ export function renderArcadeBreakout(container, onClose) {
 }
 
 export function renderArcadePong(container, onClose) {
+  // Same restart-stacking fix as Breakout above.
+  if (renderArcadePong._releaseKeys) renderArcadePong._releaseKeys();
   const credit = { name: 'JAKE GORDON / JAVASCRIPT-PONG', url: 'https://github.com/jakesgordon/javascript-pong' };
   let playerScore = 0;
   let cpuScore = 0;
@@ -274,7 +285,8 @@ export function renderArcadePong(container, onClose) {
     running = false;
     cancelAnimationFrame(raf);
     const won = playerScore >= 7;
-    const score = Math.max(0, playerScore * 100 - cpuScore * 25);
+    // First to seven against ceiling 21: a 7-0 sweep is the perfect game.
+    const score = Math.max(0, playerScore * 3 - cpuScore);
     showResult({
       container,
       title: won ? 'MATCH WON' : 'CPU WINS',
@@ -342,13 +354,19 @@ export function renderArcadePong(container, onClose) {
     draw();
   }
 
-  window.addEventListener('keydown', event => {
+  const onKeydown = event => {
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
     if (['ArrowUp', 'ArrowDown', 'w', 's', ' '].includes(key)) event.preventDefault();
     keys.add(key);
     if (key === ' ' && !running) serve.click();
-  });
-  window.addEventListener('keyup', event => keys.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key));
+  };
+  const onKeyup = event => keys.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key);
+  window.addEventListener('keydown', onKeydown);
+  window.addEventListener('keyup', onKeyup);
+  renderArcadePong._releaseKeys = () => {
+    window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('keyup', onKeyup);
+  };
   canvas.addEventListener('pointermove', event => movePaddle(event.clientY));
   canvas.addEventListener('pointerdown', event => {
     movePaddle(event.clientY);

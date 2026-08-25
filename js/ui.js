@@ -178,16 +178,30 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
       soundFx.playCoin();
       form.remove();
       overlay.querySelector('#result-board').innerHTML = boardHtml();
-      // After the local board paints, try the server board. On success
-      // swap in the canonical top-5 across all players. On failure,
-      // the local board stays.
+      // After the local board paints, try the canonical server board. On
+      // success paint the SERVER rows (the old code fetched them and then
+      // re-rendered local data, so the fetch result was thrown away). On
+      // failure, the local board stays.
       if (typeof StorageService.fetchLeaderboardFromServer === 'function') {
-        StorageService.fetchLeaderboardFromServer(gameId).then(serverBoard => {
-          if (serverBoard && serverBoard.length) {
-            const boardEl = overlay.querySelector('#result-board');
-            if (boardEl) boardEl.innerHTML = boardHtml();
-          }
-        }).catch(() => { /* keep local */ });
+        const paintBoard = (board) => {
+          const boardEl = overlay.querySelector('#result-board');
+          if (!boardEl) return;
+          if (!board.length) return;
+          boardEl.innerHTML = `
+            <div class="axiom-board">
+              <div class="axiom-board-title">TOP 5 · GLOBAL</div>
+              ${board.map((e, n) => `
+                <div class="axiom-board-row">
+                  <span class="axiom-board-rank">${n + 1}</span>
+                  <span class="axiom-board-initials">${e.i}</span>
+                  <span class="axiom-board-date">${e.d}</span>
+                  <span class="axiom-board-score">${e.s}</span>
+                </div>`).join('')}
+            </div>`;
+        };
+        StorageService.fetchLeaderboardFromServer(gameId)
+          .then(serverBoard => { if (serverBoard) paintBoard(serverBoard); })
+          .catch(() => { /* keep local */ });
       }
     };
   }

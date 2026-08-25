@@ -186,6 +186,12 @@ class NgsApp {
     return gamesCatalog.filter(g => g.wing !== 'meta').length;
   }
 
+  // User-typed search text is interpolated into innerHTML twice; escape it
+  // so a query like `<img src=x onerror=…>` renders as text, not markup.
+  esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
   featuredGame() {
     const pool = this.filteredGames();
     if (this.focusId) {
@@ -420,7 +426,7 @@ class NgsApp {
     gridEl.className = 'game-library';
 
     if (filtered.length === 0) {
-      gridEl.innerHTML = `<p class="cabinet-empty">Nothing matches “${this.searchQuery}”.<br><span style="opacity:.7">Try what the game <em>is</em> — colour, cards, chess, typing, drinking, reaction — or clear the search.</span></p>`;
+      gridEl.innerHTML = `<p class="cabinet-empty">Nothing matches “${this.esc(this.searchQuery)}”.<br><span style="opacity:.7">Try what the game <em>is</em> — colour, cards, chess, typing, drinking, reaction — or clear the search.</span></p>`;
       return;
     }
 
@@ -441,7 +447,7 @@ class NgsApp {
     const searching = this.searchQuery.trim();
     const summary = searching
       ? `<div class="search-summary">
-           <span><b>${filtered.length}</b> ${filtered.length === 1 ? 'cartridge' : 'cartridges'} match “${searching}” · all rooms</span>
+           <span><b>${filtered.length}</b> ${filtered.length === 1 ? 'cartridge' : 'cartridges'} match “${this.esc(searching)}” · all rooms</span>
            <button id="search-clear" type="button">✕ CLEAR</button>
          </div>`
       : '';
@@ -536,6 +542,10 @@ class NgsApp {
 
     if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
 
+    // Focus in, focus back out. Keyboard and screen-reader users used to be
+    // left on the row behind the modal, tabbing a page they cannot see.
+    this._modalOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
     overlay.classList.remove('hidden');
     container.innerHTML = '';
 
@@ -556,6 +566,9 @@ class NgsApp {
       this.renderRailMeta();
       this.renderGameBay();
       if (didStart) this.renderAttract();
+      const opener = this._modalOpener;
+      this._modalOpener = null;
+      if (opener && opener.isConnected) opener.focus();
     };
 
     this._releaseModalUX = bindModalUX(overlay, closeGame);
@@ -600,6 +613,8 @@ class NgsApp {
         </article>`;
       container.querySelector('.briefing-close').onclick = closeGame;
       container.querySelector('.briefing-play').onclick = renderGame;
+      // Keyboard entry point lands on PLAY, inside the dialog.
+      container.querySelector('.briefing-play').focus();
       const skip = container.querySelector('.briefing-skip');
       if (skip) skip.onclick = renderGame;
     };
@@ -627,9 +642,11 @@ class NgsApp {
       game.renderer(stage, closeGame);
     };
 
-    const known = AnalyticsService.getLog().some(entry => entry.gameId === game.id);
-    if (known) renderGame();
-    else renderBriefing();
+    // Briefing first, every time. The attract screen's CONTINUE button is
+    // the one-tap path for returning players; opening a cartridge from the
+    // floor always re-shows what it trains. Closing without PLAY never
+    // counts as a session.
+    renderBriefing();
   }
 
   bindEvents() {

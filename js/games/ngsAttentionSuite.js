@@ -109,6 +109,17 @@ export function renderPosnerCueing(container, onClose) {
           t.innerHTML = '<span class="block w-7 h-7 bg-amber-400" style="border-radius:50%"></span>';
           shownAt = performance.now();
           status.innerText = 'RESPOND';
+          // Miss deadline: ignoring a target used to freeze the round forever.
+          later(() => {
+            if (phase !== 'target') return;
+            phase = 'idle';
+            errors++;
+            container.querySelector('#pc-err').innerText = errors;
+            soundFx.playHit();
+            status.innerText = 'MISSED';
+            clearBoxes();
+            later(nextTrial, 500);
+          }, 2000);
         }, 100 + Math.random() * 200);
       }, 120);
     }

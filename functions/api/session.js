@@ -74,6 +74,10 @@ export async function onRequestPost({ request, env }) {
     await env.DB.prepare(
       'INSERT INTO sessions (session_id, game_id, issued_at, expires_at, used) VALUES (?1, ?2, ?3, ?4, 0)'
     ).bind(session_id, game_id, issued_at, expires_at).run();
+    // Opportunistic housekeeping: expired tokens are useless, and without
+    // this the sessions table grows forever. Indexed by expires_at, so the
+    // delete is cheap; runs on the same insert path that creates rows.
+    await env.DB.prepare('DELETE FROM sessions WHERE expires_at < ?1').bind(now).run();
   } catch (e) {
     return json({ error: 'service_unavailable' }, 503);
   }

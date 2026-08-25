@@ -76,8 +76,12 @@ export function renderRetroSnake(container, onClose) {
     }
 
     function queueTurn(nx, ny) {
-      // Reject if reversing into current direction (the classic self-kill bug).
-      if (nx === -dx && ny === -dy) return;
+      // Reject if reversing into the PENDING direction — comparing against
+      // the current one ate a legal second turn queued inside one tick
+      // (Up then Left within 110ms discarded the Left).
+      const refX = pendingDx ?? dx;
+      const refY = pendingDy ?? dy;
+      if (nx === -refX && ny === -refY) return;
       pendingDx = nx;
       pendingDy = ny;
     }
@@ -243,7 +247,6 @@ export function renderSpaceDefender(container, onClose) {
       }
     }
     spawnWave();
-
     function gameLoop() {
       if (over || won) return;
 
@@ -258,7 +261,9 @@ export function renderSpaceDefender(container, onClose) {
       let changeDir = false;
       aliens.forEach(alien => {
         if (!alien.alive) return;
-        if (moveRight) alien.x += 1; else alien.x -= 1;
+        // Waves speed up: +0.5px per tick each wave, capped so it stays human.
+        const step = Math.min(3, 1 + (wave - 1) * 0.5);
+        if (moveRight) alien.x += step; else alien.x -= step;
         if (alien.x > canvas.width - 45 || alien.x < 10) changeDir = true;
         ctx.fillStyle = '#f59e0b';
         ctx.fillRect(alien.x, alien.y, alien.width, alien.height);
@@ -301,22 +306,14 @@ export function renderSpaceDefender(container, onClose) {
 
       const activeAliens = aliens.filter(a => a.alive);
 
-      // Win: wave cleared.
+      // Win: wave cleared — chain straight into a faster wave. The session
+      // (and the signed score) only ends when Earth is overrun.
       if (activeAliens.length === 0) {
-        won = true;
-        clearInterval(gameInterval);
-        kb.destroy();
-        const finalScore = score;
-        showResult({
-          container,
-          title: `WAVE ${wave} CLEARED`,
-          message: 'All invaders destroyed. Onward!',
-          score: finalScore,
-          gameId: 'space-defender',
-          tone: 'win',
-          onRestart: () => start(),
-          onClose
-        });
+        wave++;
+        container.querySelector('#space-wave').innerText = wave;
+        spawnWave();
+        moveRight = true;
+        bullets = [];
         return;
       }
 
@@ -325,6 +322,7 @@ export function renderSpaceDefender(container, onClose) {
         over = true;
         clearInterval(gameInterval);
         kb.destroy();
+        window.removeEventListener('keyup', onUp);
         showResult({
           container,
           title: 'EARTH OVERRUN',

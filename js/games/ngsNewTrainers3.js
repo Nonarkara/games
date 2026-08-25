@@ -86,7 +86,14 @@ const RULES = ['color', 'shape', 'count'];
 export function renderWCST(container, onClose) {
   start();
   function start() {
+    // Shuffle once and deal without replacement — the real WCST works
+    // through the deck; drawing with replacement could re-deal a card you
+    // just sorted.
     const deck = makeDeck();
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
     let currentRule = RULES[Math.floor(Math.random() * RULES.length)];
     let ruleStreak = 0;
     let correct = 0, wrong = 0, ruleChanges = 0;
@@ -95,9 +102,8 @@ export function renderWCST(container, onClose) {
     const TRIALS = 24;
     let done = 0;
     function next() {
-      if (done >= TRIALS) { endGame(); return; }
-      const card = deck[Math.floor(Math.random() * deck.length)];
-      render(card);
+      if (done >= TRIALS || deck.length === 0) { endGame(); return; }
+      render(deck.pop());
     }
     function render(card) {
       done++;
@@ -152,7 +158,7 @@ export function renderWCST(container, onClose) {
     function endGame() {
       clearTimeout(timer);
       const score = correct * 10;
-      showResult({ container, title: 'SORT COMPLETE', message: `${correct} / ${TRIALS} correct · rule changed ${ruleChanges} times.`, score, gameId: 'wcst', tone: 'over', onRestart: start, onClose });
+      showResult({ container, title: 'SORT COMPLETE', message: `${correct} / ${TRIALS} correct · rule changed ${ruleChanges} times.`, score, gameId: 'wcst', tone: correct >= TRIALS * 0.8 ? 'win' : 'over', onRestart: start, onClose });
     }
     next();
   }

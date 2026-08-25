@@ -35,7 +35,7 @@ export function renderFlappyBird(container, onClose) {
         </div>
 
         <div class="relative flex justify-center mb-4">
-          <canvas id="flappy-canvas" width="360" height="400" class="bg-black border border-amber-500/60 shadow-inner"></canvas>
+          <canvas id="flappy-canvas" width="360" height="400" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:360px"></canvas>
         </div>
 
         <button id="flap-btn" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-black text-lg tracking-wider border border-amber-400">
@@ -320,7 +320,7 @@ export function renderMinesweeper(container, onClose) {
               } else if (cell.flagged) {
                 content = '🚩'; cls = 'bg-zinc-900 border-amber-500/50';
               }
-              return `<button class="${cls} mine-cell aspect-square flex items-center justify-center font-bold text-sm border transition" data-r="${r}" data-c="${c}">${content}</button>`;
+              return `<button class="${cls} mine-cell aspect-square flex items-center justify-center font-bold text-sm border transition" style="touch-action:manipulation" data-r="${r}" data-c="${c}">${content}</button>`;
             }).join('')).join('')}
           </div>
 
@@ -336,7 +336,14 @@ export function renderMinesweeper(container, onClose) {
         const r = parseInt(btn.dataset.r, 10);
         const c = parseInt(btn.dataset.c, 10);
 
-        btn.onclick = (e) => {
+        // Pointer events for touch: the old touchstart+preventDefault pair
+        // suppressed the synthesized click, so a quick tap could never
+        // reveal a tile on a phone. suppressClick de-dupes the click that
+        // still follows our explicit pointer-driven reveal.
+        let suppressClick = false;
+
+        btn.onclick = () => {
+          if (suppressClick) { suppressClick = false; return; }
           if (longPressed) { longPressed = false; return; }
           reveal(r, c);
         };
@@ -346,17 +353,25 @@ export function renderMinesweeper(container, onClose) {
           toggleFlag(r, c);
         };
 
-        // Long-press flag for touch.
-        btn.ontouchstart = (e) => {
-          e.preventDefault();
+        btn.onpointerdown = (e) => {
+          if (e.pointerType !== 'touch') return;
           longPressed = false;
           pressTimer = setTimeout(() => {
             longPressed = true;
+            suppressClick = true;
             toggleFlag(r, c);
           }, 400);
         };
-        btn.ontouchend = () => { if (pressTimer) clearTimeout(pressTimer); };
-        btn.ontouchmove = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+        btn.onpointerup = (e) => {
+          if (e.pointerType !== 'touch') return;
+          if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+          if (!longPressed) {
+            suppressClick = true;
+            reveal(r, c);
+          }
+        };
+        btn.onpointerleave = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+        btn.onpointercancel = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
       });
     }
 

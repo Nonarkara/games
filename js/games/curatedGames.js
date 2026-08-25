@@ -369,7 +369,7 @@ export function renderTypeRush(container, onClose) {
           </div>
 
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">
-            <div>WPM: <span class="text-white text-base">${started ? Math.round((correct/5)/((DURATION-timeLeft||1)/60)) || 0 : 0}</span></div>
+            <div>WPM: <span id="wpm-value" class="text-white text-base">0</span></div>
             <div>TIME: <span id="tr-time" class="text-amber-400 text-base">${timeLeft}s</span></div>
             <div>HIGH: <span class="text-amber-400 text-base">${high}</span></div>
           </div>
@@ -386,17 +386,38 @@ export function renderTypeRush(container, onClose) {
           </div>
 
           <input id="type-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-            value="${inputValue}" class="w-full bg-black border border-amber-500/60 px-4 py-4 text-center text-2xl text-amber-200 focus:outline-none focus:border-amber-400 font-mono" />
-          <p class="text-[10px] text-zinc-500 text-center mt-3">CHARS: ${typed} · CORRECT: ${correct}</p>
+            value="" class="w-full bg-black border border-amber-500/60 px-4 py-4 text-center text-2xl text-amber-200 focus:outline-none focus:border-amber-400 font-mono" />
+          <p id="tr-chars" class="text-[10px] text-zinc-500 text-center mt-3">CHARS: 0 · CORRECT: 0</p>
         </div>
       `;
 
       container.querySelector('#close-game-btn').onclick = () => { clearInterval(timer); onClose(); };
+      // The input is built once and never replaced. Rebuilding the frame on
+      // every completed word used to drop and re-grab focus, so phones
+      // re-popped the soft keyboard mid-sprint.
       const input = container.querySelector('#type-input');
       input.focus();
+      paintWord();
+
+      function paintWord() {
+        container.querySelector('#tr-word').innerHTML = currentWord.split('').map((ch, i) => {
+          const got = inputValue[i];
+          const cls = got === undefined ? 'text-zinc-600' : got === ch ? 'text-emerald-400' : 'text-red-500';
+          return `<span class="${cls}">${ch}</span>`;
+        }).join('');
+        input.value = inputValue;
+        const charsEl = container.querySelector('#tr-chars');
+        if (charsEl) charsEl.textContent = `CHARS: ${typed} · CORRECT: ${correct}`;
+        const wpmEl = container.querySelector('#wpm-value');
+        if (wpmEl) {
+          const mins = started ? Math.max(1 / 60, (DURATION - timeLeft) / 60) : 0;
+          wpmEl.textContent = started && mins > 0 ? Math.round((correct / 5) / mins) || 0 : 0;
+        }
+      }
+
       input.oninput = (e) => {
         if (over) return;
-        const val = e.target.value;
+        let val = e.target.value;
         if (!started) {
           started = true;
           timer = setInterval(() => {
@@ -417,17 +438,10 @@ export function renderTypeRush(container, onClose) {
           soundFx.playCoin();
           inputValue = '';
           currentWord = pickWord();
-          render();
+          paintWord();
           return;
         }
-        const wordEl = container.querySelector('#tr-word');
-        if (wordEl) {
-          wordEl.innerHTML = currentWord.split('').map((ch, i) => {
-            const got = inputValue[i];
-            const cls = got === undefined ? 'text-zinc-600' : got === ch ? 'text-emerald-400' : 'text-red-500';
-            return `<span class="${cls}">${ch}</span>`;
-          }).join('');
-        }
+        paintWord();
       };
     }
 
@@ -602,6 +616,9 @@ export function renderSlide2048(container, onClose) {
       };
     }
 
+    // A restart used to stack another ScopedKeyboard per round — stale
+    // arrow handlers from every previous board stayed live until EXIT.
+    if (kb) kb.destroy();
     kb = new ScopedKeyboard();
     kb.on({
       ArrowLeft: () => move('left'),

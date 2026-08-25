@@ -226,7 +226,11 @@ export function renderAsteroids(container, onClose) {
       });
     }
 
-    function stop() { if (raf) { cancelAnimationFrame(raf); raf = null; } kb.destroy(); }
+    function stop() {
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      kb.destroy();
+      if (renderAsteroids._releaseKeys) renderAsteroids._releaseKeys();
+    }
 
     const kb = new ScopedKeyboard();
     kb.on({
@@ -239,6 +243,9 @@ export function renderAsteroids(container, onClose) {
       if (e.key === 'ArrowUp') keys.thrust = false;
     };
     window.addEventListener('keyup', onUp);
+    // Restart path re-runs start(); release the previous listener first.
+    if (renderAsteroids._releaseKeys) renderAsteroids._releaseKeys();
+    renderAsteroids._releaseKeys = () => window.removeEventListener('keyup', onUp);
 
     const hold = (el, on, off) => {
       el.onmousedown = on; el.onmouseup = off; el.onmouseleave = off;
@@ -251,7 +258,7 @@ export function renderAsteroids(container, onClose) {
     container.querySelector('#as-f').onclick = fire;
 
     container.querySelector('#close-game-btn').onclick = () => {
-      stop(); window.removeEventListener('keyup', onUp); onClose();
+      stop(); renderAsteroids._releaseKeys(); onClose();
     };
 
     reset(true);
@@ -738,6 +745,7 @@ export function renderSolitaire(container, onClose) {
             <div>MOVES <span class="text-white text-base">${moves}</span></div>
             <div>HOME <span class="text-amber-400 text-base">${foundations.reduce((n, f) => n + f.length, 0)}/52</span></div>
             <div>STOCK <span class="text-white text-base">${stock.length}</span></div>
+            <button id="sol-new-deal" style="border:1px solid rgba(245,158,11,0.5);color:#f59e0b;font-size:10px;font-weight:700;padding:4px 8px">NEW DEAL</button>
           </div>
 
           <div class="grid grid-cols-7 gap-1 mb-3">
@@ -769,6 +777,11 @@ export function renderSolitaire(container, onClose) {
         </div>`;
 
       container.querySelector('#close-game-btn').onclick = onClose;
+      container.querySelector('#sol-new-deal').onclick = () => {
+        // ~1 in 5 Klondike deals is unwinnable — a fresh deal beats a dead board.
+        deal();
+        render();
+      };
       container.querySelector('#sol-stock').onclick = drawStock;
       container.querySelectorAll('.sol-pick').forEach(b => {
         b.onclick = () => pick(b.dataset.from, +b.dataset.pile, +b.dataset.idx);

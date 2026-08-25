@@ -53,12 +53,12 @@ const CRT_QUESTIONS = [
     why: 'Each machine makes 1 widget in 5 minutes. 100 machines making 100 widgets in parallel still takes 5 minutes. The intuition confuses the per-machine rate with the system total.'
   },
   {
-    prompt: 'In a lake, there is a patch of lily pads. Every day, the patch doubles in size. If it takes 48 days for the patch to cover the whole lake, how long did it take for the patch to cover half the lake?',
-    options: ['24 days', '47 days', '12 days', '36 days'],
+    prompt: 'In a race you overtake the runner in second place. What place are you in now?',
+    options: ['First', 'Second', 'Third', 'Last'],
     correct: 1,
-    lure: '24 days',
-    right: '47 days',
-    why: 'Same logic as question 2 — exponential growth, not linear. The intuitive "half the time" answer feels right but is wrong.'
+    lure: 'First',
+    right: 'Second',
+    why: 'You took the second-place runner\'s spot, so you are second — the first-place runner is still ahead. The intuition leaps straight to first.'
   }
 ];
 
@@ -167,11 +167,13 @@ function makeRavenTrial(level) {
   // The missing cell is the bottom-right (r=2, c=2)
   const answer = grid[8];
   grid[8] = null; // mark missing
-  // Generate 5 distractor options
+  // Generate 5 distractor options. Offsets skip zero — a decoy identical to
+  // the answer used to sit at i=2 and got scored wrong by identity.
   const distractors = [];
+  const COUNT_OFFSETS = [-2, -1, 1, 2, 3];
   for (let i = 0; i < 5; i++) {
     const variant = { ...answer };
-    if (family === 'count') variant.count = Math.max(1, answer.count + (i - 2));
+    if (family === 'count') variant.count = Math.max(1, answer.count + COUNT_OFFSETS[i]);
     if (family === 'rotation') variant.angle = (answer.angle + (i + 1) * 45) % 360;
     if (family === 'color') variant.color = ['#22d3ee', '#facc15', '#f472b6', '#a78bfa', '#34d399'][i % 5];
     distractors.push(variant);
@@ -185,21 +187,21 @@ function drawCell(svg, cell, ox, oy, size = 56) {
   const cx = ox + size / 2;
   const cy = oy + size / 2;
   if (cell.count != null) {
-    // Draw N circles
-    const n = cell.count;
-    const radius = 5;
-    if (n === 1) {
-      svg.insertAdjacentHTML('beforeend', `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${cell.color}"/>`);
-    } else if (n <= 4) {
-      // 2x2 grid of dots
-      const step = 8;
-      for (let i = 0; i < n; i++) {
-        const r = Math.floor(i / 2);
-        const c = i % 2;
-        const x = cx - step + c * (2 * step);
-        const y = cy - step + r * (2 * step);
-        svg.insertAdjacentHTML('beforeend', `<circle cx="${x}" cy="${y}" r="${radius}" fill="${cell.color}"/>`);
-      }
+    // Draw N dots in centered rows of three. Counts past 4 used to draw
+    // nothing, so the correct option rendered as an empty box.
+    const n = Math.min(9, cell.count);
+    const radius = 4;
+    const perRow = 3;
+    const stepX = 13;
+    const stepY = 12;
+    const rows = Math.ceil(n / perRow);
+    for (let i = 0; i < n; i++) {
+      const row = Math.floor(i / perRow);
+      const colInRow = i % perRow;
+      const inRow = Math.min(perRow, n - row * perRow);
+      const x = cx - ((inRow - 1) * stepX) / 2 + colInRow * stepX;
+      const y = cy - ((rows - 1) * stepY) / 2 + row * stepY;
+      svg.insertAdjacentHTML('beforeend', `<circle cx="${x}" cy="${y}" r="${radius}" fill="${cell.color}"/>`);
     }
   } else if (cell.angle != null) {
     // Draw a triangle rotated by angle
@@ -522,11 +524,13 @@ export function renderNumberSense(container, onClose) {
       if (side === current.answer) {
         correct++;
         soundFx.playCoin();
-        // Tighten ratio on success, loosen on miss
-        ratio = Math.min(0.35, ratio + 0.015);
+        // Success shrinks the ratio gap (harder); a miss widens it. The
+        // staircase used to run backwards, rewarding good play with an
+        // easier task.
+        ratio = Math.max(0.10, ratio - 0.015);
       } else {
         soundFx.playHit();
-        ratio = Math.max(0.10, ratio - 0.02);
+        ratio = Math.min(0.35, ratio + 0.02);
       }
       current = makeANS(ratio);
       render();

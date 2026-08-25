@@ -206,7 +206,8 @@ export function renderSchulteTable(container, onClose) {
       clearInterval(tick);
       const secs = (performance.now() - startedAt) / 1000;
       // Sub-25s is a strong adult time on a 5x5; errors cost 2s each.
-      const score = Math.max(0, Math.round((60 - secs - errors * 2) * 10));
+      // Units match GAME_MAX (60): one point per second saved, errors cost two.
+      const score = Math.max(0, Math.round(60 - secs - errors * 2));
       showResult({
         container,
         title: secs < 25 ? 'FAST EYES' : 'TABLE CLEARED',
@@ -1179,7 +1180,15 @@ export function renderMemoryPalace(container, onClose) {
       choices.hidden = true;
       choices.innerHTML = '';
       const items = pickItems(span);
-      placed = items.map((item, i) => ({ locus: i, item }));
+      // Shuffle the locus binding. Item N used to always land at locus N, so
+      // recall order equalled encode order and the spatial map carried no
+      // information — the method of loci is the whole point of the drill.
+      const lociOrder = items.map((_, i) => i);
+      for (let i = lociOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [lociOrder[i], lociOrder[j]] = [lociOrder[j], lociOrder[i]];
+      }
+      placed = items.map((item, i) => ({ locus: lociOrder[i], item }));
       paintItems(false);
       status.textContent = 'ENCODE — WATCH EACH LOCUS';
       let step = 0;

@@ -9,6 +9,9 @@ import { ScopedKeyboard, showResult } from '../ui.js';
  * 1. CYBER TETRIS
  * ======================================================================== */
 export function renderCyberTetris(container, onClose) {
+  // start() runs again on every PLAY AGAIN; this releases the previous
+  // round's visibilitychange listener so restarts cannot stack them.
+  let releaseVisibility = null;
   start();
 
   function start() {
@@ -237,13 +240,15 @@ export function renderCyberTetris(container, onClose) {
       if (document.hidden) { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
       else if (!over && !rafId) { lastTime = performance.now(); rafId = requestAnimationFrame(tick); }
     };
+    if (releaseVisibility) releaseVisibility();
     document.addEventListener('visibilitychange', onVis);
+    releaseVisibility = () => document.removeEventListener('visibilitychange', onVis);
 
     const closeBtn = container.querySelector('#close-game-btn');
     closeBtn.onclick = () => {
       stopLoop();
       kb.destroy();
-      document.removeEventListener('visibilitychange', onVis);
+      releaseVisibility();
       onClose();
     };
   }
@@ -283,7 +288,7 @@ export function renderCyberPacman(container, onClose) {
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">Arrow keys or the pad below to turn · eat every dot · avoid ghosts, or eat them during ⚡ power mode</div>
 
         <div class="relative flex justify-center mb-4">
-          <canvas id="pac-canvas" width="360" height="360" class="bg-black border border-amber-500/60 shadow-inner"></canvas>
+          <canvas id="pac-canvas" width="360" height="360" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:360px"></canvas>
         </div>
 
         <div class="grid grid-cols-3 gap-2 max-w-xs mx-auto">
