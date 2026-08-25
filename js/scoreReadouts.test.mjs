@@ -40,6 +40,42 @@ const aim = explainScore('aim-trainer', 160);
 assert.ok(['warming', 'solid', 'sharp'].includes(aim.band));
 assert.match(aim.skill, /hand|aim|calibration|reaction/i);
 
+// Bands tuned to each game's actual score range — without these, the
+// eight games below would fall through to defaultCuts(100) and their
+// "rough/warming/solid/sharp" labels would mean nothing.
+assert.equal(explainScore('asteroids', 50).band, 'rough');
+assert.equal(explainScore('asteroids', 250).band, 'warming');
+assert.equal(explainScore('asteroids', 500).band, 'solid');
+assert.equal(explainScore('asteroids', 750).band, 'sharp');
+assert.equal(explainScore('frogger', 50).band, 'rough');
+assert.equal(explainScore('frogger', 200).band, 'warming');
+assert.equal(explainScore('frogger', 300).band, 'solid');
+assert.equal(explainScore('frogger', 450).band, 'sharp');
+assert.equal(explainScore('connect-four', 0).band, 'rough');
+assert.equal(explainScore('connect-four', 70).band, 'warming');
+assert.equal(explainScore('connect-four', 120).band, 'solid');
+assert.equal(explainScore('connect-four', 180).band, 'sharp');
+assert.equal(explainScore('solitaire', 100).band, 'rough');
+assert.equal(explainScore('solitaire', 400).band, 'warming');
+assert.equal(explainScore('solitaire', 600).band, 'solid');
+assert.equal(explainScore('solitaire', 750).band, 'sharp');
+assert.equal(explainScore('word-guess', 0).band, 'rough');
+assert.equal(explainScore('word-guess', 40).band, 'warming');
+assert.equal(explainScore('word-guess', 80).band, 'solid');
+assert.equal(explainScore('word-guess', 120).band, 'sharp');
+assert.equal(explainScore('mate-in-one', 0).band, 'rough');
+assert.equal(explainScore('mate-in-one', 60).band, 'warming');
+assert.equal(explainScore('mate-in-one', 120).band, 'solid');
+assert.equal(explainScore('mate-in-one', 200).band, 'sharp');
+assert.equal(explainScore('ear-trainer', 0).band, 'rough');
+assert.equal(explainScore('ear-trainer', 40).band, 'warming');
+assert.equal(explainScore('ear-trainer', 80).band, 'solid');
+assert.equal(explainScore('ear-trainer', 120).band, 'sharp');
+assert.equal(explainScore('morse-code', 0).band, 'rough');
+assert.equal(explainScore('morse-code', 40).band, 'warming');
+assert.equal(explainScore('morse-code', 80).band, 'solid');
+assert.equal(explainScore('morse-code', 120).band, 'sharp');
+
 assert.equal(explainScore('about-dr-non', 1), null);
 assert.equal(explainScore('aim-trainer', null), null);
 
