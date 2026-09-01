@@ -2386,6 +2386,69 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 }
 
 /* ============================================================================
+ * Tablet read — iPad portrait (768), iPad mini (744), iPad Pro 11" (834),
+ * iPad Pro 12.9" landscape (1024), Galaxy Z Fold inner (673–812), Surface
+ * Pro portrait. Targets the gap the 760px block leaves at 768–1100px:
+ * desktop's 2-col attract + 3-col cart is still in effect, but the right
+ * rail collapses to a strip too narrow for the 72px "DSP" code to read.
+ * We collapse the attract back to one column, hide the giant code, keep
+ * 3-col cart, and tighten the rationale stack.
+ * ========================================================================== */
+@media (max-width: 1100px) and (min-width: 421px) {
+  .cabinet-attract {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  /* The hero image's aspect-ratio rule is already in 760px; without
+     it the desktop 540px min-height stretches the image over the
+     whole screen. Same fix, applied one tier up. */
+  .attract-hero { min-height: 0; }
+  .attract-hero > img {
+    min-height: 0;
+    height: auto;
+    max-height: 320px;
+    object-fit: cover;
+  }
+  .attract-feature {
+    min-height: 0;
+    padding: 22px 24px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+  }
+  .attract-feature-kicker { display: none; }
+  .attract-feature-code { display: none; }
+  .attract-feature-ring { display: none; }
+  .attract-feature-sprite, .attract-feature .cart-sprite--hero {
+    width: 56px;
+    height: 56px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .attract-feature-title { font-size: 18px; max-width: none; margin: 0; }
+  .attract-feature-skill { font-size: 10px; margin: 4px 0 0; }
+  .attract-feature-cta { font-size: 10px; padding: 10px 14px; margin: 0; min-height: 36px; }
+  .attract-feature > * { margin: 0; }
+  .attract-feature > .attract-feature-sprite,
+  .attract-feature > .cart-sprite--hero { order: -1; }
+  .attract-feature > .attract-feature-cta { margin-left: auto; }
+
+  /* Rationale section ("THE STACK / Not a game system...") — on tablet the
+     two-column proof grid + press release side panel doesn't carry. Stack
+     the columns, drop the side panel. */
+  .attract-steps-grid { grid-template-columns: 1fr; }
+  .attract-steps-side,
+  .attract-steps-aside { display: none; }
+
+  /* Cart list: 3-col is right for tablet (foldable inner, iPad portrait).
+     Cards stay at the desktop detail level — the phone compressions
+     don't apply here. */
+  .select-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .select-row { min-height: 260px; }
+}
+
+/* ============================================================================
  * Phone read — last in the file so source order wins for same-specificity
  * rules that follow the base .select-row / .attract-* blocks above.
  *
