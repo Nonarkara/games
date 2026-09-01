@@ -226,16 +226,29 @@ export function attachReady(root, onGo) {
   const gate = document.createElement('button');
   gate.type = 'button';
   gate.className = 'ngs-ready-gate';
-  gate.textContent = 'TAP TO START';
-  gate.setAttribute('aria-label', 'Tap to start this round');
+  gate.textContent = 'TAP OR PRESS ANY KEY';
+  gate.setAttribute('aria-label', 'Tap or press any key to start this round');
+
+  // Most gated rounds are keyboard-driven (P/L, arrows, space). A click-only
+  // gate stranded those players: their first keypress went nowhere and the
+  // only way in was to Tab past five buttons or reach for the mouse.
+  const onKey = (event) => {
+    if (event.key === 'Tab' || event.key === 'Escape') return; // leave nav + close alone
+    event.preventDefault();
+    go();
+  };
   const go = () => {
     if (!gate.isConnected) return;
+    window.removeEventListener('keydown', onKey);
     gate.remove();
     onGo();
   };
+
   gate.onclick = go;
+  window.addEventListener('keydown', onKey);
   root.style.position = root.style.position || 'relative';
   root.appendChild(gate);
+  gate.focus({ preventScroll: true });
 }
 
 /* ===========================================================================

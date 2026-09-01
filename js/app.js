@@ -22,7 +22,7 @@ import { renderNonTrivial } from './games/labsGames.js';
 import { renderBlowIntoTheCartridge } from './games/nineties.js';
 import {
   renderDualNBack, renderSchulteTable, renderAimTrainer,
-  renderGoNoGo, renderDigitSpan, renderMentalMath, renderMentalMathPro, renderMentalMathThai, renderVisualSearch,
+  renderGoNoGo, renderDigitSpan, renderMentalMath, renderVisualSearch,
   renderCorsiBlocks, renderFlanker, renderMemoryPalace
 } from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
