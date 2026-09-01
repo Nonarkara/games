@@ -24,6 +24,8 @@ export const SEARCH_ALIASES = {
                    'orange', 'amber', 'ink', 'word colour', 'stroop', 'name the colour', 'coloured words'],
   'stroop-match-pro': ['pro', 'white', 'harder stroop', 'colour match pro', 'color match pro',
                       'white answers', 'orange'],
+  'color-march-pro': ['color march', 'colour march', 'mixed colors', 'mixed colours', 'read the word',
+                      'spells red', 'colored answers', 'coloured answers', 'stroop pro'],
 
   /* ── TRAIN ─────────────────────────────────────────────────────────── */
   'dual-n-back': ['nback', 'n back', 'working memory', 'jaeggi', 'brain training'],
@@ -37,6 +39,8 @@ export const SEARCH_ALIASES = {
   'flanker': ['arrows', 'distraction', 'attention', 'eriksen'],
   'aim-trainer': ['aim', 'mouse accuracy', 'targets', 'fps', 'crosshair', 'clicking'],
   'mental-math': ['maths', 'math', 'arithmetic', 'sums', 'calculation', 'times tables'],
+  'mental-math-pro': ['pro', 'mental math pro', 'word problems', 'spelled out', 'verbal math', 'read the words', 'word math'],
+  'mental-math-thai': ['thai', 'thai math', 'thai numbers', '๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', 'thai numerals', 'bilingual math'],
   'type-rush': ['typing', 'keyboard', 'wpm', 'words per minute', 'touch typing'],
   'reflex-matrix': ['reflex', 'reaction', 'whack a mole', 'tap fast', 'speed'],
   'trail-making': ['connect the dots', 'trails', 'task switching', 'reitan'],

@@ -193,6 +193,14 @@ export const BRAIN_GUIDES = {
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
+  'color-march-pro': {
+    label: 'Reading under interference', minutes: '2–3 min',
+    practice: 'Find a target word by spelling while its ink and every answer colour push a competing response.',
+    why: 'The round makes you keep the relevant rule—read the letters—active while several vivid but irrelevant cues compete for the tap.',
+    tip: 'Read the target once, then scan the answer letters. Treat every colour as noise.',
+    stack: ['kahneman', 'plasticity', 'clear']
+
+  },
   'go-nogo': {
     label: 'Impulse control', minutes: '2–3 min',
     practice: 'Build a fast response, then withhold it when a no-go signal appears.',
@@ -280,6 +288,20 @@ export const BRAIN_GUIDES = {
     tip: 'Break awkward numbers into tens and ones before calculating.',
     stack: ['kahneman', 'plasticity', 'clear']
 
+  },
+  'mental-math-pro': {
+    label: 'Verbal arithmetic', minutes: '2–4 min',
+    practice: 'Parse the spelled-out number first, then do the math. "twenty-one minus sixteen" has to round-trip through language before arithmetic can touch it.',
+    why: 'Forcing the read-then-calculate hop costs a beat each time, and that beat is what the drill trains against — once "forty-seven" stops needing a second pass, the math behind it speeds up too.',
+    tip: 'Read the whole question once for shape ("minus"), then back for the numbers. Don\'t try to translate as you read.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'mental-math-thai': {
+    label: 'Dual-script arithmetic', minutes: '2–4 min',
+    practice: 'Read ๐–๙ and 0–9 in the same problem. Same nine values, two scripts — your brain has to know that before the arithmetic can start.',
+    why: 'Bilingual numeracy is a separate fluency from arithmetic. Thai schoolchildren reading ๒๓ + 16 already have the script mapping internalised; English-first readers have to learn it on the page.',
+    tip: 'Anchor one script: read everything as Arabic first, then convert the Thai digits. Reverse it if that\'s faster for you.',
+    stack: ['kahneman', 'plasticity', 'clear']
   },
   'type-rush': {
     label: 'Motor fluency', minutes: '2–4 min',

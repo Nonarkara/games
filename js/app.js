@@ -13,14 +13,16 @@ import { renderRetroSnake, renderSpaceDefender } from './games/retroArcade.js';
 import { renderFlappyBird, renderMinesweeper } from './games/casualArcade.js';
 import { renderTriviaMaster, renderBlackjack } from './games/adultMind.js';
 import { renderAIGameStudio } from './games/aiGameStudio.js';
+import { renderMentalMathPro } from './games/mentalMathPro.js';
+import { renderMentalMathThai } from './games/mentalMathThai.js';
 import { renderPatternBreaker, renderReflexMatrix, renderTypeRush, renderSlide2048 } from './games/curatedGames.js';
 import { renderArcadeBreakout, renderArcadePong, renderSudokuSprint, renderFifteenPuzzle } from './games/openSourceGames.js';
-import { renderStroop, renderStroopPro, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
+import { renderStroop, renderStroopPro, renderColorMarchPro, renderSimon, renderAnagram, renderPeriodicQuest, renderCapitalQuiz, renderNumberChain, renderTowerHanoi, renderWordBuilder } from './games/eduGames.js';
 import { renderNonTrivial } from './games/labsGames.js';
 import { renderBlowIntoTheCartridge } from './games/nineties.js';
 import {
   renderDualNBack, renderSchulteTable, renderAimTrainer,
-  renderGoNoGo, renderDigitSpan, renderMentalMath, renderVisualSearch,
+  renderGoNoGo, renderDigitSpan, renderMentalMath, renderMentalMathPro, renderMentalMathThai, renderVisualSearch,
   renderCorsiBlocks, renderFlanker, renderMemoryPalace
 } from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
@@ -68,6 +70,7 @@ const gamesCatalog = [
   { id: 'digit-span', code: 'DSP', title: 'Digit Span', wing: 'train', category: 'memory-focus', domain: 'Capacity', age: 'Teen+', desc: 'Watch digits, type them back. Span grows until it breaks.', paper: 'Miller 1956', tags: ['Capacity', 'Recall'], renderer: renderDigitSpan },
   { id: 'stroop-match', code: 'STR', title: 'Colour Match', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: '8+', desc: 'The word says RED but the ink is BLUE — tap the colour of the ink, not the word it spells.', paper: 'Stroop 1935', tags: ['Colour', 'Inhibition', 'Focus'], renderer: renderStroop },
   { id: 'stroop-match-pro', code: 'CMP', title: 'Colour Match Pro', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: 'Teen+', desc: 'Tap the ink colour. All answers are white, so the buttons cannot hint.', paper: 'Stroop 1935', tags: ['Colour', 'Inhibition', 'Focus'], renderer: renderStroopPro },
+  { id: 'color-march-pro', code: 'CMR', title: 'Color March Pro', wing: 'train', category: 'memory-focus', domain: 'Interference control', age: 'Teen+', desc: 'Find the word that spells RED while every answer wears a misleading colour.', paper: 'Stroop 1935', tags: ['Color', 'Reading', 'Inhibition', 'Pro'], renderer: renderColorMarchPro },
   { id: 'go-nogo', code: 'GNG', title: 'Go / No-Go', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: 'Teen+', desc: 'Press on GO. Withhold on NO-GO. False starts cost more than slow hits.', paper: 'Verbruggen 2008', tags: ['Inhibition', 'Impulse'], renderer: renderGoNoGo },
   { id: 'simon-seq', code: 'SIM', title: 'Simon Sequence', wing: 'train', category: 'memory-focus', domain: 'Sequence memory', age: 'All', desc: 'Watch the pattern grow, then play it back.', tags: ['Memory', 'Sequence'], renderer: renderSimon },
   { id: 'schulte-table', code: 'SCH', title: 'Schulte Table', wing: 'train', category: 'memory-focus', domain: 'Attention field', age: 'Teen+', desc: 'Tap 1→25. Eyes on center; peripheral vision does the finding.', tags: ['Attention', 'Peripheral'], renderer: renderSchulteTable },
@@ -77,6 +80,8 @@ const gamesCatalog = [
   { id: 'flanker', code: 'FLK', title: 'Flanker', wing: 'train', category: 'memory-focus', domain: 'Selective attention', age: 'Teen+', desc: 'Report the center arrow. Ignore the flanks — especially when they disagree.', paper: 'Eriksen 1974', tags: ['Attention', 'Interference'], renderer: renderFlanker },
   { id: 'aim-trainer', code: 'AIM', title: 'Aim Trainer', wing: 'train', category: 'skills', domain: 'Hand-eye', age: 'All', desc: 'Tap as many targets as you can in 30 seconds without missing.', paper: 'Dye 2009', tags: ['Reaction', 'Precision'], renderer: renderAimTrainer },
   { id: 'mental-math', code: 'MMX', title: 'Mental Math', wing: 'train', category: 'math-logic', domain: 'Fluency', age: '10+', desc: 'Solve as many short arithmetic problems as you can in 45 seconds.', tags: ['Arithmetic', 'Speed'], renderer: renderMentalMath },
+  { id: 'mental-math-pro', code: 'MMP', title: 'Mental Math Pro', wing: 'train', category: 'math-logic', domain: 'Verbal fluency', age: '12+', desc: 'Read the words then type the answer. Twenty-one minus sixteen equals what, in numbers?', tags: ['Arithmetic', 'Verbal', 'Speed'], renderer: renderMentalMathPro },
+  { id: 'mental-math-thai', code: 'MMT', title: 'Mental Math Thai', wing: 'train', category: 'math-logic', domain: 'Dual-script fluency', age: '12+', desc: 'Read ๐–๙ and 0–9 in the same problem. ๒๓ + 16, ๔๒ × ๒ — same math, two scripts.', tags: ['Arithmetic', 'Bilingual', 'Speed'], renderer: renderMentalMathThai },
   { id: 'type-rush', code: 'TYP', title: 'Type Rush', wing: 'train', category: 'skills', domain: 'Keyboard fluency', age: '8+', desc: 'Type the shown words for 30 seconds; speed and accuracy both count.', tags: ['Typing', 'WPM'], renderer: renderTypeRush },
   { id: 'reflex-matrix', code: 'RFX', title: 'Reflex Matrix', wing: 'train', category: 'casual-friv', domain: 'Coordination', age: 'All', desc: 'Tap glowing cells before they fade. Speed escalates each wave.', tags: ['Reflex', 'Coordination'], renderer: renderReflexMatrix },
 
@@ -509,7 +514,7 @@ class NgsApp {
     const high = StorageService.getHighScore(game.id);
     const isFocus = game.id === this.focusId;
     const guide = getBrainGuide(game);
-    const isNew = ['nonogram', 'nim', 'make-24'].includes(game.id);
+    const isNew = ['color-march-pro'].includes(game.id);
     const hasPlayed = this._playedIds?.has(game.id);
     return `
       <li class="select-row ${isFocus ? 'is-focus' : ''}" data-game="${game.id}" tabindex="0" role="option" aria-selected="${isFocus}" aria-label="${game.title}">

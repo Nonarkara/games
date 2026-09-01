@@ -54,6 +54,7 @@ const MUST_FIND = [
   ['colour', 'stroop-match'], ['color', 'stroop-match'], ['red', 'stroop-match'],
   ['yellow', 'stroop-match'], ['ink', 'stroop-match'], ['orange', 'stroop-match'],
   ['colour match pro', 'stroop-match-pro'], ['white answers', 'stroop-match-pro'],
+  ['color march', 'color-march-pro'], ['spells red', 'color-march-pro'],
   ['pacman', 'cyber-pacman'], ['pac-man', 'cyber-pacman'], ['pac man', 'cyber-pacman'],
   ['pong', 'arcade-pong'], ['solitaire', 'solitaire'], ['patience', 'solitaire'],
   ['wordle', 'word-guess'], ['chess', 'mate-in-one'], ['tetris', 'cyber-tetris'],

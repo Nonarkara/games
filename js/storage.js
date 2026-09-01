@@ -52,6 +52,7 @@ const defaultData = {
     'cyber-blackjack': 1000,
     'stroop-match': 0,
     'stroop-match-pro': 0,
+    'color-march-pro': 0,
     'simon-seq': 0,
     'anagram-scramble': 0,
     'word-builder': 0,
@@ -99,7 +100,9 @@ const defaultData = {
     'backward-span': 0,
     'tic-tac-toe': 0,
     'rock-paper-scissors': 0,
-    'memory-matrix': 0
+    'memory-matrix': 0,
+    'mental-math-pro': 0,
+    'mental-math-thai': 0
   },
   favorites: [],
   favoriteStates: {},

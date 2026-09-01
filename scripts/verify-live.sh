@@ -25,12 +25,14 @@ say() { $QUIET || echo "$@"; }
 fail() { echo "✗ $@"; exit 1; }
 
 LOCAL=$(git rev-parse --short HEAD)
-REMOTE=$(git rev-parse --short origin/codex/arcade-revival 2>/dev/null || echo "no-remote")
+CURRENT_BRANCH=$(git branch --show-current)
+UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo "origin/$CURRENT_BRANCH")
+REMOTE=$(git rev-parse --short "$UPSTREAM" 2>/dev/null || echo "no-remote")
 
 # Fetch the latest production deployment
 say "▶ NGS live verification"
 say "  local HEAD:  $LOCAL"
-say "  remote HEAD: $REMOTE"
+say "  remote HEAD: $REMOTE ($UPSTREAM)"
 
 if [ "$LOCAL" != "$REMOTE" ]; then
   say ""

@@ -114,6 +114,22 @@ export const SPRITES = {
     '............'
   ],
 
+  // Five answer words; the misleading colours live inside gameplay only.
+  'color-march-pro': [
+    '............',
+    '.###.---.+++',
+    '.#.#.-.-.+..',
+    '.###.---.+++',
+    '............',
+    '.---.###.+++',
+    '.-.-.#.#.+..',
+    '.---.###.+++',
+    '............',
+    '.++..++..##.',
+    '.++..++..##.',
+    '............'
+  ],
+
   // A traffic light having a crisis: both lamps lit at once.
   'go-nogo': [
     '..--------..',
@@ -256,6 +272,41 @@ export const SPRITES = {
     '.--.####.--.',
     '....####....',
     '.--..--..--.'
+  ],
+
+  // A page being read: lines of text up top, a number waiting at the
+  // bottom. The whole point of the game is the read-then-type hop.
+  'mental-math-pro': [
+    '..######....',
+    '..######....',
+    '..######....',
+    '............',
+    '..######....',
+    '..#....#....',
+    '..######....',
+    '..#....#....',
+    '..#....#....',
+    '............',
+    '.....##.....',
+    '.....##.....'
+  ],
+
+  // Two numerals in two scripts: ๒ (top, rounded) and 3 (bottom, square),
+  // with a + in the middle. The drill's difficulty is the round-to-square
+  // hop, not the arithmetic.
+  'mental-math-thai': [
+    '..######....',
+    '..#....#....',
+    '..######....',
+    '..#....#....',
+    '..#....#....',
+    '.....##.....',
+    '.....##.....',
+    '.....##.....',
+    '............',
+    '..######....',
+    '..#....#....',
+    '..######....'
   ],
 
   // Keys mid-flight. One has left the keyboard entirely.

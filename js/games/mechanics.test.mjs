@@ -30,7 +30,9 @@ import {
 import { checkWinner, findWinningMove, minimaxMove, easyMove, LINES } from './ticTacToe.js';
 import { resolveRPS, predictCPU, CHOICES } from './rockPaperScissors.js';
 import { generatePattern, checkPattern } from './memoryMatrix.js';
-import { STROOP_COLORS } from './eduGames.js';
+import { numberWord, rollPro } from './mentalMathPro.js';
+import { toThai, fromThai, rollThai } from './mentalMathThai.js';
+import { STROOP_COLORS, makeColorMarchRound } from './eduGames.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
 const probe = { color: 'green', shape: 'star', count: 1 };
@@ -219,4 +221,123 @@ assert.ok(STROOP_COLORS.some(c => c.name === 'ORANGE'));
 assert.equal(new Set(STROOP_COLORS.map(c => c.name)).size, STROOP_COLORS.length);
 assert.equal(new Set(STROOP_COLORS.map(c => c.hex)).size, STROOP_COLORS.length);
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, and Colour Match passed');
+// Color March: spelling alone determines the answer; every ink cue conflicts.
+for (let seed = 0; seed < 100; seed++) {
+  let state = seed + 1;
+  const random = () => ((state = (state * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  const march = makeColorMarchRound(random);
+  assert.notEqual(march.target.name, march.promptInk.name, 'target word must wear misleading ink');
+  assert.equal(march.options.filter(option => option.word.name === march.target.name).length, 1, 'one option must spell the target');
+  assert.equal(new Set(march.options.map(option => option.word.name)).size, STROOP_COLORS.length, 'answer words must be unique');
+  assert.equal(new Set(march.options.map(option => option.ink.name)).size, STROOP_COLORS.length, 'answer inks must be fully mixed');
+  assert.ok(march.options.every(option => option.word.name !== option.ink.name), 'every answer word must wear the wrong ink');
+  const answer = march.options.find(option => option.word.name === march.target.name);
+  assert.notEqual(answer.ink.name, march.promptInk.name, 'correct spelling must not match the target ink');
+  assert.notEqual(march.options.find(option => option.ink.name === march.promptInk.name).word.name, march.target.name, 'matching the target ink must be a decoy');
+}
+
+// ── Mental Math Pro: numberWord is the drill's read hop. The word for n
+// must round-trip back to n so the live renderer's question is unambiguous
+// to anyone who can read English. Hyphenation follows the house style
+// ("twenty-one", not "twenty one").
+for (let n = 0; n <= 99; n++) {
+  const w = numberWord(n);
+  assert.ok(typeof w === 'string' && w.length > 0, `numberWord(${n}) must be a non-empty string`);
+  if (n <= 20) {
+    const expected = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+      'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'][n];
+    assert.equal(w, expected, `numberWord(${n}) should be "${expected}", got "${w}"`);
+  } else if (n % 10 === 0) {
+    assert.ok(!w.includes('-'), `${n} should not hyphenate: "${w}"`);
+  } else {
+    assert.ok(w.includes('-'), `${n} should hyphenate: "${w}"`);
+  }
+}
+
+// rollPro: every roll must produce a valid question with the right answer.
+// Seeded random — fixed seed reproduces the same question twice (no
+// Date.now leakage).
+for (let seed = 0; seed < 200; seed++) {
+  let s = seed + 1;
+  const random = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  const p = rollPro(random);
+  assert.ok(p.question.endsWith(' ='), `question must end with " =", got "${p.question}"`);
+  assert.ok(p.answer === Math.trunc(p.answer), 'answer must be a whole number');
+  if (p.kind === 'read') {
+    // Pure-read round: the question is just "<word> =", and the answer
+    // is the integer the word names.
+    assert.ok(p.answer >= 1 && p.answer <= 99, `read answer should be 1–99, got ${p.answer}`);
+    assert.equal(p.question, `${numberWord(p.answer)} =`);
+  } else {
+    // Arithmetic round: parse the word operands and the operator, then
+    // confirm rollPro's answer matches the math.
+    const m = p.question.match(/^([a-z\-]+) (plus|minus|times) ([a-z\-]+) =$/);
+    assert.ok(m, `arithmetic question malformed: "${p.question}"`);
+    const a = parseSpelledNumber(m[1]);
+    const b = parseSpelledNumber(m[3]);
+    assert.ok(a !== null && b !== null, `could not parse "${m[1]}" or "${m[3]}"`);
+    const op = { plus: a + b, minus: a - b, times: a * b }[m[2]];
+    assert.equal(p.answer, op, `${a} ${m[2]} ${b} should be ${op}, rollPro said ${p.answer}`);
+    assert.ok(a >= 0 && b >= 0, 'operands must be non-negative');
+  }
+}
+
+// ── Mental Math Thai: Thai ↔ Arabic round-trip. U+0E50..U+0E59 is the
+// standard Thai decimal block; toThai / fromThai must be a clean bijection.
+assert.equal(toThai(0), '๐');
+assert.equal(toThai(9), '๙');
+assert.equal(toThai(10), '๑๐');
+assert.equal(toThai(23), '๒๓');
+assert.equal(toThai(144), '๑๔๔');
+assert.equal(toThai(49), '๔๙');
+for (let n = 0; n < 1000; n++) {
+  assert.equal(fromThai(toThai(n)), n, `toThai/fromThai round-trip failed for ${n}`);
+}
+// Every Thai digit must be the right codepoint.
+for (let d = 0; d <= 9; d++) {
+  assert.equal(toThai(d).codePointAt(0), 0x0E50 + d, `digit ${d} should be U+0E5${d.toString(16).toUpperCase()}`);
+}
+
+// rollThai: ~half the lines should be mixed-script (different systems
+// for the two operands), and the math must match the Arabic parsing.
+let mixedCount = 0;
+for (let seed = 0; seed < 200; seed++) {
+  let s = seed + 1;
+  const random = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  const p = rollThai(random);
+  const m = p.question.match(/^([๐-๙0-9]+) ([+\-×]) ([๐-๙0-9]+) =$/);
+  assert.ok(m, `Thai question malformed: "${p.question}"`);
+  const a = fromMixedNumber(m[1]);
+  const b = fromMixedNumber(m[3]);
+  const op = { '+': a + b, '-': a - b, '×': a * b }[m[2]];
+  assert.equal(p.answer, op, `Thai question ${p.question} should be ${op}, got ${p.answer}`);
+  if (p.mixed) mixedCount++;
+}
+assert.ok(mixedCount > 60 && mixedCount < 140, `mixed-script ratio should be ~50%, got ${mixedCount}/200`);
+
+function parseSpelledNumber(word) {
+  // Reverse lookup for the test assertion above.
+  const table = {
+    zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+    eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19,
+    twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90
+  };
+  if (word in table) return table[word];
+  const m = word.match(/^(\w+)-(\w+)$/);
+  if (m && m[1] in table && m[2] in table && table[m[1]] >= 20) return table[m[1]] + table[m[2]];
+  return null;
+}
+
+function fromMixedNumber(s) {
+  // Mixed Thai/Arabic string → integer. fromThai only handles Thai;
+  // ASCII digits pass through.
+  let out = '';
+  for (const ch of s) {
+    if (ch >= '๐' && ch <= '๙') out += String('๐๑๒๓๔๕๖๗๘๙'.indexOf(ch));
+    else if (ch >= '0' && ch <= '9') out += ch;
+    else throw new Error(`bad digit: ${ch}`);
+  }
+  return Number(out);
+}
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, and Mental Math Thai passed');

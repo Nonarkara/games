@@ -15,6 +15,36 @@ export const STROOP_COLORS = [
   { name: 'PURPLE', hex: '#a855f7' }
 ];
 
+function shuffleWithRng(values, random = Math.random) {
+  const copy = [...values];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/**
+ * Build one Color March Pro round. Exactly one option spells the target.
+ * Every word—including the target—wears a different ink colour, so ink can
+ * interfere but can never determine the correct answer.
+ */
+export function makeColorMarchRound(random = Math.random) {
+  const target = STROOP_COLORS[Math.floor(random() * STROOP_COLORS.length)];
+  const promptInks = STROOP_COLORS.filter(color => color.name !== target.name);
+  const promptInk = promptInks[Math.floor(random() * promptInks.length)];
+  const words = shuffleWithRng(STROOP_COLORS, random);
+  const targetIndex = words.findIndex(word => word.name === target.name);
+  const validShifts = Array.from({ length: words.length - 1 }, (_, index) => index + 1)
+    .filter(shift => words[(targetIndex + shift) % words.length].name !== promptInk.name);
+  const shift = validShifts[Math.floor(random() * validShifts.length)];
+  const options = words.map((word, index) => ({
+    word,
+    ink: words[(index + shift) % words.length]
+  }));
+  return { target, promptInk, options };
+}
+
 function renderStroopMode(container, onClose, { gameId, title, subtitle, hint, whiteAnswers }) {
   start();
   function start() {
@@ -98,6 +128,112 @@ export function renderStroopPro(container, onClose) {
     hint: 'TAP THE INK COLOUR · BUTTONS ARE WHITE ↓',
     whiteAnswers: true
   });
+}
+
+export function renderColorMarchPro(container, onClose) {
+  const TOTAL = 20;
+  let round = 0, correct = 0, misses = 0, current = makeColorMarchRound();
+  let timer = null, locked = false, first = true;
+
+  const clearRoundTimer = () => { clearTimeout(timer); timer = null; };
+  const close = () => { clearRoundTimer(); window.removeEventListener('keydown', onKey); onClose(); };
+
+  function finish() {
+    clearRoundTimer();
+    window.removeEventListener('keydown', onKey);
+    showResult({
+      container,
+      title: 'MARCH COMPLETE',
+      message: `${correct}/${TOTAL} words read correctly. The score follows spelling only; every ink colour was bait.`,
+      score: correct * 10,
+      gameId: 'color-march-pro',
+      tone: correct >= 15 ? 'win' : 'over',
+      onRestart: () => renderColorMarchPro(container, onClose),
+      onClose
+    });
+  }
+
+  function nextRound() {
+    round++;
+    if (round >= TOTAL) return finish();
+    current = makeColorMarchRound();
+    locked = false;
+    render();
+  }
+
+  function settle(chosenName) {
+    if (locked) return;
+    locked = true;
+    clearRoundTimer();
+    const hit = chosenName === current.target.name;
+    if (hit) { correct++; soundFx.playCoin(); }
+    else { misses++; soundFx.playHit(); }
+    const note = container.querySelector('#march-feedback');
+    if (note) {
+      note.textContent = hit ? `CORRECT · ${current.target.name}` : `MISS · READ ${current.target.name}`;
+      note.style.color = hit ? '#e6edf3' : '#f59e0b';
+    }
+    container.querySelectorAll('.march-choice').forEach(button => { button.disabled = true; });
+    setTimeout(nextRound, 440);
+  }
+
+  function timeOut() {
+    if (locked) return;
+    locked = true;
+    misses++;
+    soundFx.playHit();
+    const note = container.querySelector('#march-feedback');
+    if (note) { note.textContent = `TIME · READ ${current.target.name}`; note.style.color = '#f59e0b'; }
+    container.querySelectorAll('.march-choice').forEach(button => { button.disabled = true; });
+    setTimeout(nextRound, 440);
+  }
+
+  function arm() {
+    locked = false;
+    timer = setTimeout(timeOut, Math.max(2200, 4400 - round * 90));
+  }
+
+  function onKey(event) {
+    if (!/^[1-5]$/.test(event.key)) return;
+    const option = current.options[Number(event.key) - 1];
+    if (option) settle(option.word.name);
+  }
+
+  function render() {
+    clearRoundTimer();
+    container.innerHTML = `
+      <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
+        <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
+          <div class="min-w-0"><h2 class="text-base sm:text-xl font-black text-amber-400 tracking-wider">COLOR MARCH PRO</h2><p class="text-[9px] text-amber-500/80 uppercase">READ THE WORD · EVERY COLOUR LIES</p></div>
+          <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
+        </div>
+        <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+          <div>SCORE: <span class="text-white text-base">${correct * 10}</span></div>
+          <div>WORD: <span class="text-amber-400 text-base">${round + 1}/${TOTAL}</span></div>
+          <div>MISSES: <span class="text-white text-base">${misses}</span></div>
+        </div>
+        <div class="bg-zinc-900 border border-amber-500/60 px-4 py-7 sm:p-10 text-center mb-4">
+          <div class="text-amber-500 text-[10px] mb-3">FIND THE BUTTON THAT SPELLS</div>
+          <div class="text-4xl sm:text-6xl font-black break-all" style="color:${current.promptInk.hex}">${current.target.name}</div>
+          <div id="march-feedback" class="min-h-5 mt-3 text-[10px] font-bold tracking-wider">IGNORE THIS INK. READ THE LETTERS.</div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
+          ${current.options.map((option, index) => `<button class="march-choice min-h-14 border border-zinc-600 bg-zinc-950 font-black text-xs" style="color:${option.ink.hex}" data-name="${option.word.name}" aria-label="Choice ${index + 1}: ${option.word.name}"><span class="mr-2 text-zinc-500">${index + 1}</span>${option.word.name}</button>`).join('')}
+        </div>
+        <p class="mt-4 text-[10px] leading-relaxed text-zinc-400">Choose by spelling only. The target ink and every answer ink are deliberate distractions. Keyboard: 1–5.</p>
+      </div>`;
+    container.querySelector('#close-game-btn').onclick = close;
+    container.querySelectorAll('.march-choice').forEach(button => {
+      button.onclick = () => settle(button.dataset.name);
+    });
+    if (first) {
+      first = false;
+      attachReady(container.firstElementChild, arm);
+    } else arm();
+  }
+
+  window.addEventListener('keydown', onKey);
+  render();
 }
 
 /* 2. SIMON SEQUENCE (Auditory working memory) */

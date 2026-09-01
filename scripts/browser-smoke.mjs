@@ -12,7 +12,8 @@ const profile = mkdtempSync(join(tmpdir(), 'omni-smoke-'));
 const screenshots = {
   home: process.env.HOME_SCREENSHOT || join(tmpdir(), 'omni-home-mobile.png'),
   briefing: process.env.BRIEFING_SCREENSHOT || join(tmpdir(), 'omni-briefing-mobile.png'),
-  game: process.env.GAME_SCREENSHOT || join(tmpdir(), 'omni-breakout-mobile.png')
+  game: process.env.GAME_SCREENSHOT || join(tmpdir(), 'omni-breakout-mobile.png'),
+  colorMarch: process.env.COLOR_MARCH_SCREENSHOT || join(tmpdir(), 'omni-color-march.png')
 };
 
 const chrome = spawn(chromePath, [
@@ -174,6 +175,77 @@ try {
   await main.screenshot(screenshots.game);
   await main.close();
 
+  // Color March Pro is a reading game, not a colour-picking game. Guard the
+  // exact contract: one spelling match, five unique misleading inks, and
+  // equally usable controls at both phone and desktop widths.
+  const colorMarch = await withFreshPage(async page => {
+    await page.evaluate(`document.fonts.ready.then(() => true)`);
+    await page.evaluate(`document.querySelector('[data-wing="all"]').click()`);
+    const opened = await page.evaluate(`(() => {
+      const row = document.querySelector('.select-row[data-game="color-march-pro"]');
+      if (!row) return false;
+      row.click();
+      return document.querySelector('#briefing-title')?.textContent === 'Color March Pro';
+    })()`);
+    if (!opened) throw new Error('Color March Pro briefing did not open');
+    await page.evaluate(`document.querySelector('.briefing-play').click()`);
+    await delay(150);
+    const readyGate = await page.evaluate(`(() => {
+      const gate = document.querySelector('.ngs-ready-gate');
+      if (!gate) return false;
+      gate.click();
+      return true;
+    })()`);
+    if (!readyGate) throw new Error('Color March Pro skipped its fair-start gate');
+    await delay(60);
+    const state = await page.evaluate(`(() => {
+      const palette = {
+        RED: 'rgb(239, 68, 68)', GREEN: 'rgb(34, 197, 94)',
+        BLUE: 'rgb(59, 130, 246)', ORANGE: 'rgb(245, 158, 11)',
+        PURPLE: 'rgb(168, 85, 247)'
+      };
+      const targetNode = document.querySelector('#march-feedback')?.previousElementSibling;
+      const target = targetNode?.textContent.trim();
+      const choices = [...document.querySelectorAll('.march-choice')].map(button => ({
+        word: button.dataset.name,
+        ink: getComputedStyle(button).color,
+        height: button.getBoundingClientRect().height
+      }));
+      const stage = document.querySelector('.game-session-stage');
+      return {
+        target,
+        targetInk: targetNode ? getComputedStyle(targetNode).color : '',
+        choices,
+        spellingMatches: choices.filter(choice => choice.word === target).length,
+        uniqueWords: new Set(choices.map(choice => choice.word)).size,
+        uniqueInks: new Set(choices.map(choice => choice.ink)).size,
+        allInksMislead: choices.every(choice => choice.ink !== palette[choice.word]),
+        promptInkMisleads: Boolean(target && getComputedStyle(targetNode).color !== palette[target]),
+        matchingInkIsDecoy: choices.some(choice => choice.ink === getComputedStyle(targetNode).color && choice.word !== target),
+        correctInkDoesNotMatchPrompt: choices.find(choice => choice.word === target)?.ink !== getComputedStyle(targetNode).color,
+        minChoiceHeight: Math.min(...choices.map(choice => choice.height)),
+        overflow: stage ? stage.scrollWidth - stage.clientWidth : 999
+      };
+    })()`);
+    if (state.spellingMatches !== 1 || state.uniqueWords !== 5 || state.uniqueInks !== 5) {
+      throw new Error(`Color March answer set is ambiguous: ${JSON.stringify(state)}`);
+    }
+    if (!state.allInksMislead || !state.promptInkMisleads || !state.matchingInkIsDecoy || !state.correctInkDoesNotMatchPrompt) {
+      throw new Error(`Color March ink gave away an answer: ${JSON.stringify(state)}`);
+    }
+    if (state.minChoiceHeight < 44 || state.overflow > 2) {
+      throw new Error(`Color March controls fail touch/overflow audit: ${JSON.stringify(state)}`);
+    }
+    await page.screenshot(screenshots.colorMarch);
+    const feedback = await page.evaluate(`(() => {
+      const target = document.querySelector('#march-feedback')?.previousElementSibling?.textContent.trim();
+      document.querySelector('.march-choice[data-name="' + target + '"]')?.click();
+      return document.querySelector('#march-feedback')?.textContent;
+    })()`);
+    if (!feedback?.startsWith('CORRECT')) throw new Error(`Color March correct spelling failed: ${feedback}`);
+    return { ...state, feedback };
+  });
+
   // Full floor: every scoring cartridge must pass its briefing gate, mount a
   // non-empty play surface, stay inside the requested viewport, and mount in
   // a tab whose emulated size actually held.
@@ -244,7 +316,7 @@ try {
   }
 
   if (browserErrors.length) throw new Error(`browser errors: ${browserErrors.join(' | ')}`);
-  console.log(JSON.stringify({ home, account, briefing, game, sampledGames, catalogSweep: { count: catalogSweep.length, ids: catalogSweep }, screenshots }, null, 2));
+  console.log(JSON.stringify({ home, account, briefing, game, colorMarch, sampledGames, catalogSweep: { count: catalogSweep.length, ids: catalogSweep }, screenshots }, null, 2));
 } finally {
   try { await fetch(`http://127.0.0.1:${port}/json/close`); } catch { /* fall through */ }
   try { chrome.kill(); } catch { /* already gone */ }
