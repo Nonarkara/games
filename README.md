@@ -1,35 +1,96 @@
 # Dr Non — Non-Gaming System
 
-Small playable experiments by Dr Non. Arcade-scale civic toys, not a product company.
+<p align="center">
+  <img src="docs/hero-banner.png" alt="People of mixed ages around a city-building table, collaborating over hexagonal tiles. Overlay icons and dashboards are illustration only." width="100%" />
+</p>
 
-This repository is the source for **[games.nonarkara.org](https://games.nonarkara.org)**: a 16-bit floor of short browser games, research-style drills, and a few personal packs. Every cartridge opens with a briefing — how to play, what it practises, and the limit of the claim. No ads. No login required.
+<p align="center"><em>HUD overlays in the banner — speech-bubble icons, hex tokens, dashboard sheets — are illustration only. They are not the live floor interface.</em></p>
 
-These are **experiments**, not a studio product and not a clinical tool. Near transfer (you get better at the task) is the honest claim. Far transfer is not sold.
+Small playable experiments by **Dr Non** (Non Arkaraprasertkul). Arcade-scale civic toys, not a product company.
 
-Vanilla JavaScript, no build step. Scores stay on the device unless a guest later links an account on the live site.
+Live floor: **[games.nonarkara.org](https://games.nonarkara.org)** · local: `node server.js` → [http://localhost:3000](http://localhost:3000)
 
-## Run the floor
+## What this is
 
-Requires [Node.js](https://nodejs.org/). There are no package dependencies.
+This repository is the source for a 16-bit browser floor of short games, research-style drills, and a few personal packs. One site, four wings:
+
+| Wing | What you find |
+|---|---|
+| **TRAIN** | Lab tasks with a paper trail. Gains stay closest to what you practice. |
+| **ARCADE** | Classics, shooters, and a sandbox. Scoreboards count. |
+| **LEARN** | Math, language, science, and kids drills — fluency under a clock. |
+| **LABS** | Hand-curated rooms: friends, parties, private packs. Drinking prompts are 18+. |
+
+Every cartridge opens with a **briefing**: how to play, what it practises, and the limit of the claim. No ads. No login required.
+
+These are **experiments**, not a studio product and not a clinical tool.
+
+## Philosophy
+
+Games taught Dr Non how to think before any book did. The floor exists so the next person can get that back — a system, a reflex, a memory — instead of another infinite feed.
+
+Three moves hold it up:
+
+1. **Not a game system.** A brain-expansion system. The time always dies; the question is whether the minutes gave anything back.
+2. **Love is not enough. You need a science.** Cartridges sit on five named frameworks: Kahneman & Tversky (System 1 / System 2), Werbach (gamification), Thaler (nudge), neuroplasticity, and James Clear’s habit loop. The loop on the floor is briefing → play → result.
+3. **Sign the board with four letters. Come back. Beat yourself.** That is the practice.
+
+The honest claim is narrower than the marketing of “brain training.” Practice is specific. Near transfer (you get better at the task) is defended. Far transfer is not sold. Simons 2016 stays on every briefing on purpose.
+
+The longer why lives on the floor as **About Dr Non** (the SIGNAL cart).
+
+## Ethical use
+
+Read this before you teach with it, cite it, or hang a high score on a wall.
+
+- **Not clinical.** NGS is not a diagnostic, a therapy, or a substitute for care. TRAIN carts are schematic practice of named tasks, not validated assessments. “Mind in the Eyes · Lite,” for example, is a gaze-vocabulary drill — not the Baron-Cohen instrument.
+- **Do not overclaim.** Each cart practises the skill it names. Broad transfer to IQ, school grades, or unrelated abilities is **not promised**. If you write about this floor, keep that sentence.
+- **Age and setting.** Kids drills are for kids. Casino and drinking-prompt carts are **18+**. The drinking set is a prompt deck, not a bar: play it only with consenting adults, and never as an instruction to drink.
+- **ROM / SWF Inspector** accepts a **legal** local backup (`.nes` / `.gb` / `.sfc` / `.swf`) and reads **header metadata only**. Do not drop files you do not have the right to possess.
+- **Privacy on a clone.** Guest play stores scores on the device. This README does not document production account wiring, API keys, or deploy internals — those are not public learner material.
+- **Credit the studies.** Mechanic studies from other open-source projects are named in [CREDITS.md](CREDITS.md). No third-party game is iframed.
+
+If a briefing and a classroom pitch disagree, the briefing wins.
+
+## How it works
+
+Plain ESM. No build step, no package dependencies.
+
+```
+index.html  →  js/app.js (catalog: one entry per cartridge)
+                 └─ js/games/*.js  (each cart is a renderer)
+Shared:     js/ui.js  ·  js/storage.js  ·  js/brainGuides.js  ·  js/theory.js
+Local only: server.js  (static files on port 3000)
+```
+
+A round is always the same shape:
+
+1. **Briefing** — skill, round length, coach tip, paper when there is one, and the transfer caveat.
+2. **Play** — keyboard and touch where the cart needs them.
+3. **Result** — score, optional four-letter sign on the local board.
+
+Wings are folders of attention, not separate binaries. You run **one** floor.
+
+## How to play or run
+
+Requires [Node.js](https://nodejs.org/). There is nothing to install from npm.
 
 ```bash
+git clone https://github.com/Nonarkara/games.git
+cd games
 node server.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Same entry: `npm start`.
+Same entry: `npm start`. Open [http://localhost:3000](http://localhost:3000).
 
-That is the only local binary. Every game below is a cartridge on this floor — pick a wing (TRAIN / ARCADE / LEARN / LABS), open the title, read the briefing, then play. Keyboard and touch both work where the cart needs them.
-
-Optional checks:
+Then play like a visitor: pick a wing (TRAIN / ARCADE / LEARN / LABS), open a title, read the briefing, start the round. Optional checks for people changing code:
 
 ```bash
 npm test
 npm run check
 ```
 
-## How to play each game
-
-Titles and play lines are taken from the catalog in `js/app.js`. Nothing here is an invented name.
+Titles and play lines below are taken from the catalog in `js/app.js`. Nothing here is an invented name.
 
 ### TRAIN — lab tasks with a paper trail
 
@@ -39,6 +100,7 @@ Titles and play lines are taken from the catalog in `js/app.js`. Nothing here is
 | Digit Span | Watch digits, type them back. Span grows until it breaks. |
 | Colour Match | The word says RED but the ink is BLUE — tap the colour of the ink, not the word it spells. |
 | Colour Match Pro | Tap the ink colour. All answers are white, so the buttons cannot hint. |
+| Color March Pro | Find the word that spells RED while every answer wears a misleading colour. |
 | Go / No-Go | Press on GO. Withhold on NO-GO. False starts cost more than slow hits. |
 | Simon Sequence | Watch the pattern grow, then play it back. |
 | Schulte Table | Tap 1→25. Eyes on center; peripheral vision does the finding. |
@@ -48,6 +110,8 @@ Titles and play lines are taken from the catalog in `js/app.js`. Nothing here is
 | Flanker | Report the center arrow. Ignore the flanks — especially when they disagree. |
 | Aim Trainer | Tap as many targets as you can in 30 seconds without missing. |
 | Mental Math | Solve as many short arithmetic problems as you can in 45 seconds. |
+| Mental Math Pro | Read the words then type the answer. Twenty-one minus sixteen equals what, in numbers? |
+| Mental Math Thai | Read ๐–๙ and 0–9 in the same problem. ๒๓ + 16, ๔๒ × ๒ — same math, two scripts. |
 | Type Rush | Type the shown words for 30 seconds; speed and accuracy both count. |
 | Reflex Matrix | Tap glowing cells before they fade. Speed escalates each wave. |
 | Trail Making | Connect 1→2→3, then switch between numbers and letters: 1→A→2→B. |
@@ -142,12 +206,6 @@ Drinking-prompt carts are **18+**. They are prompt decks, not a bar.
 | 2 Truths & a Lie | Tell two true statements and one lie, then let the group vote. |
 
 **About Dr Non** is the SIGNAL cart on the same floor (not a game): why the floor exists.
-
-## Stack
-
-Plain ESM. `index.html` loads `js/app.js`, which registers one catalog entry per cartridge and a renderer in `js/games/`. Shared session, scores, and briefing live in `js/ui.js`, `js/storage.js`, and `js/brainGuides.js`. `server.js` is local static serving only.
-
-Mechanic studies from other open-source projects are named in [CREDITS.md](CREDITS.md). No third-party game is iframed.
 
 ## License
 
