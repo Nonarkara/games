@@ -18,3 +18,7 @@ if [[ -x scripts/visual-audit.sh ]]; then
     exit 1
   fi
 fi
+
+if [[ -x scripts/hooks/pre-commit-secrets.sh ]]; then
+  bash scripts/hooks/pre-commit-secrets.sh
+fi

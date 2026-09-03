@@ -220,6 +220,8 @@ npx wrangler pages deploy . --project-name=games --commit-dirty=true
 
 Plain ESM, no build. `index.html` shell → `js/app.js` (`gamesCatalog[]`, one entry per game, `renderer: renderXxx(container, onClose)`) → `js/games/*.js` suites. Shared: `ui.js` (GameSession timer/listener trap, ScopedKeyboard, showResult), `storage.js` (high scores + top-5 leaderboards with 4-letter initials, D1-backed via functions/api), `analytics.js`, `audio.js`. `server.js` is the local dev server only (port 3000).
 
+**Score gate (2026-09-03):** `js/scoreGate.js` is the shared contract for initials, session ids, score ceilings, and board-row shape. The client sanitizes every board it caches or paints. POST `/api/leaderboard` consumes a session with `UPDATE … AND used = 0` (two concurrent posts cannot both win). `api_rate_limits` lives in git (`0001_init.sql` + `0003_rate_limits.sql`); a 2026-08-13 dirty deploy had applied it only on the live D1. Empty leftover account tables from that deploy are dropped by 0003.
+
 **Tetris conservation law:** canvas pixel size = `COLS × ROWS × BLOCK_SIZE` (10×20×24 = 240×480). A shorter canvas draws rows off-screen.
 
 ## Open-source adaptations (MIT)

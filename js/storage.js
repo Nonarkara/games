@@ -17,6 +17,8 @@
  * cross-user record. Failures are silent.
  */
 
+import { sanitizeBoard } from './scoreGate.js';
+
 const STORAGE_KEY   = 'ngs_data_v1';
 const LEGACY_KEY    = 'omni_arcade_data_v1';
 const MIGRATION_KEY = 'ngs_migrated_v2';
@@ -279,7 +281,7 @@ export class StorageService {
    * ---------------------------------------------------------------------- */
   static getLeaderboard(gameId) {
     const data = this.getData();
-    return (data.leaderboards && data.leaderboards[gameId]) || [];
+    return sanitizeBoard((data.leaderboards && data.leaderboards[gameId]) || []);
   }
 
   static qualifiesForBoard(gameId, score) {
@@ -312,10 +314,11 @@ export class StorageService {
     if (typeof window !== 'undefined' && typeof fetch !== 'undefined') {
       this.submitScoreToServer(gameId, clean, score)
         .then(serverBoard => {
-          if (serverBoard && Array.isArray(serverBoard) && serverBoard.length) {
+          const rows = sanitizeBoard(serverBoard);
+          if (rows.length) {
             const d = this.getData();
             d.leaderboards = d.leaderboards || {};
-            d.leaderboards[gameId] = serverBoard;
+            d.leaderboards[gameId] = rows;
             this.saveData(d);
           }
         })
@@ -352,7 +355,7 @@ export class StorageService {
       clearTimeout(timer);
       if (!scoreRes.ok) return null;
       const result = await scoreRes.json();
-      return Array.isArray(result.board) ? result.board : null;
+      return Array.isArray(result.board) ? sanitizeBoard(result.board) : null;
     } catch (e) {
       return null;
     }
@@ -373,7 +376,7 @@ export class StorageService {
       clearTimeout(timer);
       if (!res.ok) return null;
       const data = await res.json();
-      return Array.isArray(data.board) ? data.board : null;
+      return Array.isArray(data.board) ? sanitizeBoard(data.board) : null;
     } catch (e) {
       return null;
     }

@@ -8,6 +8,7 @@
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
 import { explainScore } from './scoreReadouts.js';
+import { escapeHtml, sanitizeBoard } from './scoreGate.js';
 
 export class ScopedKeyboard {
   constructor() {
@@ -119,7 +120,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   const readout = explainScore(gameId, score);
 
   const boardHtml = () => {
-    const board = gameId !== null ? StorageService.getLeaderboard(gameId) : [];
+    const board = gameId !== null ? sanitizeBoard(StorageService.getLeaderboard(gameId)) : [];
     if (!board.length) return '';
     return `
       <div class="axiom-board">
@@ -127,9 +128,9 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
         ${board.map((e, n) => `
           <div class="axiom-board-row">
             <span class="axiom-board-rank">${n + 1}</span>
-            <span class="axiom-board-initials">${e.i}</span>
-            <span class="axiom-board-date">${e.d}</span>
-            <span class="axiom-board-score">${e.s}</span>
+            <span class="axiom-board-initials">${escapeHtml(e.i)}</span>
+            <span class="axiom-board-date">${escapeHtml(e.d)}</span>
+            <span class="axiom-board-score">${escapeHtml(e.s)}</span>
           </div>`).join('')}
       </div>`;
   };
@@ -156,7 +157,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
           <label class="axiom-initials-label" for="initials-input">YOU MADE THE BOARD — SIGN IT</label>
           <div class="axiom-initials-row">
             <input id="initials-input" class="axiom-initials-input" maxlength="4" autocomplete="off"
-                   spellcheck="false" placeholder="AAAA" value="${StorageService.getLastInitials()}" />
+                   spellcheck="false" placeholder="AAAA" value="${escapeHtml(String(StorageService.getLastInitials() || '').replace(/[^A-Z0-9]/gi, '').slice(0, 4))}" />
             <button type="submit" class="axiom-btn axiom-btn-primary axiom-initials-submit">SIGN</button>
           </div>
         </form>` : ''}
@@ -186,16 +187,17 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
         const paintBoard = (board) => {
           const boardEl = overlay.querySelector('#result-board');
           if (!boardEl) return;
-          if (!board.length) return;
+          const rows = sanitizeBoard(board);
+          if (!rows.length) return;
           boardEl.innerHTML = `
             <div class="axiom-board">
               <div class="axiom-board-title">TOP 5 · GLOBAL</div>
-              ${board.map((e, n) => `
+              ${rows.map((e, n) => `
                 <div class="axiom-board-row">
                   <span class="axiom-board-rank">${n + 1}</span>
-                  <span class="axiom-board-initials">${e.i}</span>
-                  <span class="axiom-board-date">${e.d}</span>
-                  <span class="axiom-board-score">${e.s}</span>
+                  <span class="axiom-board-initials">${escapeHtml(e.i)}</span>
+                  <span class="axiom-board-date">${escapeHtml(e.d)}</span>
+                  <span class="axiom-board-score">${escapeHtml(e.s)}</span>
                 </div>`).join('')}
             </div>`;
         };

@@ -14,8 +14,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { GAME_MAX } from '../_shared/games.js';
+import { INITIALS_RE } from '../../js/scoreGate.js';
 
-const fnSource = readFileSync(new URL('./leaderboard.js', import.meta.url), 'utf8');
 const appSource = readFileSync(new URL('../../js/app.js', import.meta.url), 'utf8');
 
 const allowed = new Set(Object.keys(GAME_MAX));
@@ -51,10 +51,7 @@ const storageSource = readFileSync(new URL('../../js/storage.js', import.meta.ur
 const clientLen = Number(storageSource.match(/INITIALS_LEN\s*=\s*(\d+)/)?.[1]);
 assert.ok(Number.isInteger(clientLen) && clientLen > 0, 'client INITIALS_LEN must be a positive integer');
 
-const serverRe = fnSource.match(/const INITIALS_RE\s*=\s*\/([^/]+)\//)?.[1];
-assert.ok(serverRe, 'server INITIALS_RE not found');
-
-const re = new RegExp(serverRe);
+const re = INITIALS_RE;
 for (let n = 1; n <= clientLen; n++) {
   const sample = 'A'.repeat(n);
   assert.ok(re.test(sample), `server rejects ${n}-char initials ("${sample}") that the client can produce`);

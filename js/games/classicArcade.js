@@ -4,6 +4,7 @@
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';
 import { ScopedKeyboard, showResult } from '../ui.js';
+import { escapeHtml } from '../scoreGate.js';
 
 /* ===========================================================================
  * 1. CYBER TETRIS
@@ -615,7 +616,7 @@ export function renderRomLoader(container, onClose) {
 
       metaEl.innerHTML = `
         <div><span class="text-zinc-500">FORMAT:</span> <span class="text-amber-400 font-bold">${format}</span></div>
-        <div><span class="text-zinc-500">FILE NAME:</span> <span class="text-white">${file.name}</span></div>
+        <div><span class="text-zinc-500">FILE NAME:</span> <span class="text-white">${escapeHtml(file.name)}</span></div>
         <div><span class="text-zinc-500">SIZE:</span> <span class="text-white">${(file.size / 1024).toFixed(1)} KB</span></div>
         <div><span class="text-zinc-500">TYPE:</span> <span class="text-white">${file.type || 'application/octet-stream'}</span></div>
         ${notes ? `<div><span class="text-zinc-500">HEADER:</span> <span class="text-white">${notes}</span></div>` : ''}

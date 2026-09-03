@@ -30,3 +30,10 @@ CREATE TABLE IF NOT EXISTS scores (
 );
 
 CREATE INDEX IF NOT EXISTS idx_scores_game_score ON scores(game_id, score DESC);
+
+-- Hashed client key + last-seen timestamp. session.js and leaderboard.js
+-- share this table. Raw IPs are never stored.
+CREATE TABLE IF NOT EXISTS api_rate_limits (
+  key_hash     TEXT PRIMARY KEY,
+  last_seen_at INTEGER NOT NULL
+);
