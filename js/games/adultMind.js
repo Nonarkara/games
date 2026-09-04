@@ -33,7 +33,7 @@ export function renderTriviaMaster(container, onClose) {
               <span class="text-3xl text-amber-400">🧠</span>
               <div>
                 <h2 class="text-2xl font-black text-amber-400 tracking-wider">ULTIMATE TRIVIA MASTER</h2>
-                <p class="text-[10px] text-amber-500/80 uppercase">MIND LOUNGE — KNOWLEDGE ASSESSMENT</p>
+                <p class="text-[10px] text-amber-500/80 uppercase">TAP THE ANSWER · ONE QUESTION AT A TIME</p>
               </div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>

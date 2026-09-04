@@ -8,32 +8,32 @@
 
 export const BRAIN_GUIDES = {
   'reaction-gate': {
-    label: 'Simple reaction time', minutes: '2–3 min',
-    practice: 'Hold still until the colour change, then tap. Anticipation is scored as a miss.',
+    label: 'Wait, then tap', minutes: '2–3 min',
+    practice: 'Do nothing until the box turns orange, then tap it. Tapping too soon is a miss.',
     why: 'Waiting without guessing is a different skill from tapping fast. Daily use makes the wait visible.',
-    tip: 'Look at the box, not the clock. Move only after amber, never before.',
+    tip: 'Look at the box, not the clock. Move only after orange, never before.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'one-back': {
-    label: 'Working-memory updating', minutes: '2–3 min',
-    practice: 'Keep only the last square. When a new one lights, compare it to the one you are holding.',
+    label: 'Remember the last square', minutes: '2–3 min',
+    practice: 'Watch where the square is. When a new one lights, tap MATCH if it is in the same place as last time.',
     why: 'This is Dual N-Back with one item and one turn of lag — the same update, less load.',
     tip: 'Say “same” or “moved” out loud for the first five trials. Then drop the voice.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'oddball': {
-    label: 'Rare-target attention', minutes: '2–3 min',
-    practice: 'Let the common square pass. Fire only when the diamond appears.',
+    label: 'Tap the rare shape', minutes: '2–3 min',
+    practice: 'Let the common square pass. Tap only when the diamond appears.',
     why: 'Most of attention is withholding. Catching a rare event is the part people notice; ignoring the rest is the work.',
     tip: 'Keep a finger ready, but do not bounce. The miss that costs is tapping the square.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'backward-span': {
-    label: 'Working-memory reversal', minutes: '2–4 min',
-    practice: 'Hold the digits, then reverse them before typing. Echo memory is not enough.',
+    label: 'Type digits backwards', minutes: '2–4 min',
+    practice: 'Watch the numbers. Type them last to first. Each win adds one more digit.',
     why: 'Repeating forward can be a loop in the ear. Reversing forces you to use the workspace.',
     tip: 'Chunk in twos from the end: last pair first, then the pair before that.',
     stack: ['kahneman', 'plasticity', 'clear']
@@ -92,8 +92,8 @@ export const BRAIN_GUIDES = {
     stack: ['kahneman', 'clear']
   },
   'word-guess': {
-    label: 'Constraint-driven vocabulary', minutes: '3–6 min',
-    practice: 'Narrow a word space using positional evidence from each guess rather than guessing words you merely like.',
+    label: 'Guess the word', minutes: '3–6 min',
+    practice: 'Guess a five-letter word. Green is the right place. Orange is in the word, wrong place.',
     why: 'Each guess is an experiment; the skill is choosing the one that eliminates the most possibilities, not the one most likely to be right.',
     tip: 'Spend guess one on coverage — three vowels and two common consonants — before trying to win.',
     stack: ['kahneman']
@@ -106,8 +106,8 @@ export const BRAIN_GUIDES = {
     stack: ['neuroplasticity', 'kahneman']
   },
   'ear-trainer': {
-    label: 'Relative pitch', minutes: '4–6 min',
-    practice: 'Identify the distance between two tones without any visual cue to fall back on.',
+    label: 'Name the gap between two notes', minutes: '4–6 min',
+    practice: 'Hear two notes, then tap the interval name. The second note is always higher.',
     why: 'Relative pitch is one of the clearest cases of adult trainability, unlike absolute pitch which mostly is not.',
     tip: 'Anchor each interval to a song you already know; naming beats guessing.',
     stack: ['neuroplasticity', 'clear']
@@ -127,8 +127,8 @@ export const BRAIN_GUIDES = {
     stack: ['neuroplasticity', 'werbach']
   },
   'calibration': {
-    label: 'Confidence calibration', minutes: '4–6 min',
-    practice: 'State 90% confidence intervals for quantities you half-know, then face the hit rate you actually earn.',
+    label: 'Trap the number', minutes: '4–6 min',
+    practice: 'Type a low guess and a high guess. You want the true number to sit between them.',
     why: 'The gap between stated confidence and actual accuracy is the most reproducible bias in judgment research — and the most expensive one in real decisions.',
     tip: 'If a range feels comfortable, it is too narrow. The skill being trained is deliberate vagueness.',
     stack: ['kahneman', 'thaler']
@@ -141,8 +141,8 @@ export const BRAIN_GUIDES = {
     stack: ['kahneman']
   },
   'posner-cueing': {
-    label: 'Covert attention orienting', minutes: '3–4 min',
-    practice: 'Hold your gaze still while attention alone shifts to a cued location, then pays a cost when the cue misleads.',
+    label: 'Watch the flash, tap the dot', minutes: '3–4 min',
+    practice: 'Keep your eyes on the centre. Watch the flash, then tap when the dot appears. Some flashes lie.',
     why: 'Attention and eye position are separable: you can attend to a place you are not looking at, and re-orienting from a wrong guess takes measurable time.',
     tip: 'Keep your eyes locked on the centre cross. If you catch yourself looking at the box, the effect disappears.',
     stack: ['kahneman']
@@ -155,39 +155,39 @@ export const BRAIN_GUIDES = {
     stack: ['kahneman', 'neuroplasticity']
   },
   'operation-span': {
-    label: 'Complex working-memory span', minutes: '4–6 min',
-    practice: 'Hold a growing list of letters while a maths check keeps interrupting the rehearsal you would normally rely on.',
+    label: 'Sums, then letters', minutes: '4–6 min',
+    practice: 'Check each sum, remember the letter that follows, then type the letters in order at the end.',
     why: 'Storage plus processing is closer to real cognitive load than storage alone, which is why complex span predicts comprehension better than simple span.',
     tip: 'Answer the equations honestly. Neglecting them to protect the letters is the exact failure this task is built to detect.',
     stack: ['kahneman', 'neuroplasticity']
   },
   'dual-n-back': {
-    label: 'Working-memory updating', minutes: '4–6 min',
-    practice: 'Track a position and a sound, then replace old information as each new pair arrives.',
+    label: 'Match two turns ago', minutes: '4–6 min',
+    practice: 'Watch the lit square and the letter. Tap SQUARE MATCHED or LETTER MATCHED if either is the same as two turns ago.',
     why: 'Working memory is the small mental workspace used to hold and update information during a task.',
     tip: 'Accuracy first. Add speed only when two-back feels stable.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'digit-span': {
-    label: 'Short-term recall', minutes: '3–5 min',
-    practice: 'Hold an ordered string of digits long enough to reproduce it without external cues.',
+    label: 'Repeat the numbers', minutes: '3–5 min',
+    practice: 'Watch the numbers, then type them back in the same order. Each win adds one digit.',
     why: 'The task makes memory load visible: one more digit can be the difference between holding and losing the sequence.',
     tip: 'Group digits into chunks, then notice when chunking stops helping.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'stroop-match': {
-    label: 'Response inhibition', minutes: '2–4 min',
-    practice: 'Answer with the ink colour while suppressing the faster, automatic urge to read the word.',
+    label: 'Tap the ink, not the word', minutes: '2–4 min',
+    practice: 'Tap the colour of the ink. Ignore the word it spells.',
     why: 'Inhibition helps keep an irrelevant but tempting response from taking over the action you intended.',
     tip: 'Pause for one beat when the word and ink disagree.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'stroop-match-pro': {
-    label: 'Response inhibition', minutes: '2–4 min',
-    practice: 'Name the ink colour when the answer keys are all white — no colour on the button to lean on.',
+    label: 'White buttons, same rule', minutes: '2–4 min',
+    practice: 'Tap the ink colour. Every answer is white, so the buttons cannot hint.',
     why: 'Without a colour-matched key, you have to hold the ink name in mind and pick it from words alone.',
     tip: 'Say the ink colour out loud before you tap. Do not look for a matching hue.',
     stack: ['kahneman', 'plasticity', 'clear']
@@ -195,33 +195,33 @@ export const BRAIN_GUIDES = {
   },
   'color-march-pro': {
     label: 'Reading under interference', minutes: '2–3 min',
-    practice: 'Find a target word by spelling while its ink and every answer colour push a competing response.',
+    practice: 'Tap the word that spells the same letters as the target. Ignore every colour.',
     why: 'The round makes you keep the relevant rule—read the letters—active while several vivid but irrelevant cues compete for the tap.',
     tip: 'Read the target once, then scan the answer letters. Treat every colour as noise.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'go-nogo': {
-    label: 'Impulse control', minutes: '2–3 min',
-    practice: 'Build a fast response, then withhold it when a no-go signal appears.',
+    label: 'Tap GO, skip NOGO', minutes: '2–3 min',
+    practice: 'Tap when the box says GO. Stay still when it says NOGO.',
     why: 'Good control is not only reacting quickly. It is also stopping a prepared action at the right moment.',
     tip: 'Treat false starts as the main error, not slow correct presses.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'simon-seq': {
-    label: 'Sequence memory', minutes: '3–5 min',
-    practice: 'Encode an ordered pattern, retain it, and replay it as the sequence grows.',
+    label: 'Repeat the pads', minutes: '3–5 min',
+    practice: 'Watch the pads light up, then tap them back in the same order.',
     why: 'Order matters in instructions, music, language, and multi-step routines.',
     tip: 'Name or rhythmically group each color instead of memorizing isolated flashes.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'schulte-table': {
-    label: 'Visual scanning', minutes: '2–4 min',
-    practice: 'Search a crowded field in order while resisting the urge to scan randomly.',
+    label: 'Find 1 to 25', minutes: '2–4 min',
+    practice: 'Tap 1 to 25 in order. Keep your eyes near the middle of the grid.',
     why: 'A systematic search strategy reduces missed targets and repeated checking.',
-    tip: 'Keep your gaze near the center and let peripheral vision find the next number.',
+    tip: 'Keep your eyes near the middle. Let the edges of the grid come to you.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
@@ -234,8 +234,8 @@ export const BRAIN_GUIDES = {
 
   },
   'corsi-blocks': {
-    label: 'Visuospatial span', minutes: '3–5 min',
-    practice: 'Hold an ordered path through space long enough to reproduce it without notes.',
+    label: 'Repeat the path', minutes: '3–5 min',
+    practice: 'Watch the boxes light up, then tap them in the same order.',
     why: 'Spatial working memory is a different channel from digit span — useful for maps, diagrams, and layouts.',
     tip: 'Trace the path with your eyes once before the lights finish.',
     stack: ['kahneman', 'plasticity', 'clear']
@@ -250,16 +250,16 @@ export const BRAIN_GUIDES = {
 
   },
   'flanker': {
-    label: 'Selective attention', minutes: '2–4 min',
-    practice: 'Report the center stimulus while suppressing conflicting neighbors.',
-    why: 'The incongruent trial is the point: interference makes attention costs measurable.',
-    tip: 'Fixate the center. Do not scan the flanks.',
+    label: 'Middle arrow only', minutes: '2–4 min',
+    practice: 'Tap LEFT or RIGHT for the middle arrow. Ignore the arrows beside it.',
+    why: 'The hard rounds are when the side arrows point the other way. That pull is the skill.',
+    tip: 'Look at the middle. Do not scan the sides.',
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
   'aim-trainer': {
-    label: 'Hand–eye calibration', minutes: '1–3 min',
-    practice: 'Map visual target position to a precise hand movement under time pressure.',
+    label: 'Aim — tap the orange targets', minutes: '1–3 min',
+    practice: 'Tap as many orange targets as you can in 30 seconds. Empty clicks cost points.',
     why: 'Repeated aiming gives immediate feedback about speed–accuracy trade-offs.',
     tip: 'Move smoothly to the target center. Overshooting wastes more time than a measured approach.',
     stack: ['kahneman', 'plasticity', 'clear']
@@ -569,8 +569,8 @@ export const BRAIN_GUIDES = {
     stack: ['thaler', 'clear']
   },
   'cog-reflection': {
-    label: 'Cognitive reflection', minutes: '3–5 min',
-    practice: 'Three problems with a System-1 lure and a System-2 answer. The famous Frederick CRT — bat and ball, lily pads, widgets. The "aha" of catching the lure is the point.',
+    label: 'The first guess is usually wrong', minutes: '3–5 min',
+    practice: 'Solve three short questions. The first answer that pops up is usually wrong. Pause, then tap.',
     why: 'CRT measures whether you override an intuitive wrong answer with reflection. Three out of three is rare; one out of three is normal.',
     tip: 'Read the question twice. If the first answer felt too easy, the second read usually surfaces the catch.',
     stack: ['kahneman', 'thaler', 'clear']
@@ -583,22 +583,22 @@ export const BRAIN_GUIDES = {
     stack: ['plasticity', 'kahneman', 'clear']
   },
   'sternberg': {
-    label: 'Working-memory scanning', minutes: '3–5 min',
-    practice: 'Memorize 3-5 letters for 2 seconds. Then a probe letter appears. Was it in the set? Yes or no. Set size escalates 3 -> 5 across the 24 trials.',
+    label: 'Was this letter in the list?', minutes: '3–5 min',
+    practice: 'Remember a few letters. Then tap YES or NO if a new letter was in that list.',
     why: 'Sternberg\'s 1966 paradigm is the foundation of the serial memory-scan model — reaction time scales with set size in a predictable way.',
     tip: 'Hold the set as a small chunk, not five separate items. The probe is a single yes/no, not a serial scan.',
     stack: ['kahneman', 'plasticity', 'clear']
   },
   'number-sense': {
-    label: 'Approximate number system', minutes: '1 min',
-    practice: 'Two clouds of dots side by side. Click the side with more. The ratio starts easy (10:9) and narrows toward 10:7 as you succeed. 60 seconds total.',
+    label: 'More dots, no counting', minutes: '1 min',
+    practice: 'Tap the side with more dots. Glance — do not count.',
     why: 'Halberda\'s work shows that "number sense" — the ability to estimate quantities without counting — is a stable cognitive trait that predicts math achievement.',
     tip: 'Trust your first glance. Counting destroys the intuition that the ANS is testing.',
     stack: ['plasticity', 'kahneman', 'clear']
   },
   'wcst': {
-    label: 'Set shifting', minutes: '4–6 min',
-    practice: 'Sort cards into buckets by a hidden rule (color, shape, or count). After 5 correct sorts, the rule changes silently. The challenge is to detect the change and adapt.',
+    label: 'Notice when the rule changes', minutes: '4–6 min',
+    practice: 'Sort each card by a hidden rule. After five correct, the rule changes. Notice and switch.',
     why: 'Berg\'s WCST is the canonical test of cognitive flexibility. Perseveration on an old rule is the failure mode.',
     tip: 'After a wrong sort, treat it as a strong signal the rule has changed. Try a different dimension.',
     stack: ['kahneman', 'plasticity', 'clear']
@@ -611,8 +611,8 @@ export const BRAIN_GUIDES = {
     stack: ['kahneman', 'plasticity', 'clear']
   },
   'stop-signal': {
-    label: 'Response cancellation', minutes: '2–3 min',
-    practice: 'Prepare a quick left or right response, then cancel it when a delayed stop cue appears on a minority of trials.',
+    label: 'Start, then freeze', minutes: '2–3 min',
+    practice: 'Start tapping LEFT or RIGHT, then freeze if STOP appears.',
     why: 'Unlike Go / No-Go, the stop cue arrives after the action process has begun. The adaptive delay makes the race between acting and stopping visible.',
     tip: 'Do not wait for STOP on every trial. Respond normally to the arrows; the staircase only works when the go response is genuine.',
     paper: 'Logan 1984',

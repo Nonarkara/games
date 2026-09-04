@@ -274,7 +274,7 @@ export function renderCyberPacman(container, onClose) {
             <span class="text-3xl text-yellow-400">🟡</span>
             <div>
               <h2 class="text-2xl font-black text-amber-400 tracking-wider">CYBER PAC-MAN</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">MAZE PROTOCOL [PAC_GHOST_AI] — EAT ALL DOTS</p>
+              <p class="text-[10px] text-amber-500/80 uppercase">EAT EVERY DOT · DODGE THE GHOSTS</p>
             </div>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
