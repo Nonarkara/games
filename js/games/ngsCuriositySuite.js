@@ -69,10 +69,9 @@ export function renderChimpTest(container, onClose) {
       const byCell = new Map(cells.map(c => [c.cell, c]));
       container.innerHTML = `
         <div class="${FRAME}">
-          ${head('🐵', 'CHIMP TEST', 'Masked numerical recall · Inoue & Matsuzawa 2007')}
+          ${head('🐵', 'CHIMP TEST', 'Tap the numbers in order after they hide')}
           <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-            Memorise where the numbers sit. The moment you tap 1, the rest turn into blanks —
-            finish the sequence from memory. Ayumu the chimpanzee manages 9.
+            Numbers appear, then hide. Tap 1, then 2, then 3… from memory.
           </div>
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>DIGITS <span class="text-amber-400 text-base">${level}</span></div>
@@ -173,10 +172,10 @@ export function renderCalibration(container, onClose) {
       const item = qs[i];
       container.innerHTML = `
         <div class="${FRAME}">
-          ${head('📏', 'CALIBRATION', '90% confidence intervals · Lichtenstein & Fischhoff 1977')}
+          ${head('📏', 'CALIBRATION', 'Type a low number and a high number · trap the answer between them')}
           <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-            Give a LOW and HIGH bound you are 90% sure contains the true value.
-            Don't know it? Widen the range — that IS the skill. Narrow ranges you miss are overconfidence.
+            Type a LOW guess and a HIGH guess. You want the true number to sit between them.
+            If you are not sure, make the range wider.
           </div>
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>QUESTION <span class="text-white">${i + 1}</span> / ${ROUNDS}</div>

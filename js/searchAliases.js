@@ -59,7 +59,7 @@ export const SEARCH_ALIASES = {
   'chimp-test': ['chimp', 'monkey', 'ayumu', 'number memory', 'famous test'],
   'calibration': ['confidence', 'overconfidence', 'estimation', 'how sure', 'guessing'],
   'stop-signal': ['stop', 'brakes', 'cancel', 'inhibition'],
-  'reaction-gate': ['reaction time', 'reflex', 'how fast', 'ms'],
+  'reaction-gate': ['reaction time', 'reflex', 'how fast', 'ms', 'orange', 'wait then tap'],
   'one-back': ['1 back', 'nback', 'quick memory'],
   'oddball': ['odd one', 'rare target', 'p300'],
   'backward-span': ['reverse', 'backwards', 'digits backwards'],

@@ -342,6 +342,12 @@ const FAMILY = {
 };
 
 function familyFor(gameId) {
+  // Game id first — briefing labels are written for players, not this matcher.
+  if (/dual-n-back|digit-span|corsi|memory-palace|simon-seq|backward-span|one-back|operation-span|sternberg|chimp-test|memory-matrix/.test(gameId)) return 'memory';
+  if (/stroop|go-nogo|flanker|schulte|visual-search|posner|change-blindness|oddball|color-march|stop-signal/.test(gameId)) return 'attention';
+  if (/aim-trainer|reaction-gate/.test(gameId)) return 'hand-eye';
+  if (/calibration|iowa-gambling/.test(gameId)) return 'judgment';
+  if (/cog-reflection|raven-matrices|number-sense|wcst/.test(gameId)) return 'reasoning';
   const label = (BRAIN_GUIDES[gameId]?.label || '').toLowerCase();
   if (/memory|span|recall|loci|scanning|operation|chimp|sternberg/.test(label)) return 'memory';
   if (/attention|inhibition|impulse|interference|flanker|stroop|posner|change|search|schulte/.test(label)) return 'attention';
