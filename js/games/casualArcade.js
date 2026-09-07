@@ -23,7 +23,7 @@ export function renderFlappyBird(container, onClose) {
             <span class="text-3xl text-amber-400">🐦</span>
             <div>
               <h2 class="text-2xl font-black text-amber-400 tracking-wider">FLAPPY CYBER BIRD</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">FRIV CASUAL MODULE — TAP TO FLY</p>
+              <p class="text-[10px] text-amber-500/80 uppercase">TAP TO FLY · MISS THE PIPES</p>
             </div>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
@@ -298,7 +298,7 @@ export function renderMinesweeper(container, onClose) {
               <span class="text-3xl text-amber-400">💣</span>
               <div>
                 <h2 class="text-2xl font-black text-amber-400 tracking-wider">MINESWEEPER PRO</h2>
-                <p class="text-[10px] text-amber-500/80 uppercase">GRID PROTOCOL [8×8 MATRIX]</p>
+                <p class="text-[10px] text-amber-500/80 uppercase">TAP A CELL TO OPEN IT · LONG-PRESS TO FLAG A MINE</p>
               </div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>

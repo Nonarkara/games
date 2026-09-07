@@ -79,7 +79,7 @@ export function renderCognitiveReflection(container, onClose) {
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">⚖</span>
               <div><h2 class="text-xl font-black text-amber-400 tracking-wider">COGNITIVE REFLECTION</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">SYSTEM 1 LURE · SYSTEM 2 ANSWER · FREDERICK 2005</p></div>
+              <p class="text-[10px] text-amber-500/80 uppercase">The first guess is usually wrong · pause, then tap</p></div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
@@ -345,7 +345,7 @@ export function renderSternberg(container, onClose) {
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">👁</span>
               <div><h2 class="text-xl font-black text-amber-400 tracking-wider">STERNBERG SCAN</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">MEMORIZE ${setSize} LETTERS · THEN PROBE</p></div>
+              <p class="text-[10px] text-amber-500/80 uppercase">Remember ${setSize} letters · then one letter will ask YES or NO</p></div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
@@ -372,7 +372,7 @@ export function renderSternberg(container, onClose) {
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">👁</span>
               <div><h2 class="text-xl font-black text-amber-400 tracking-wider">STERNBERG SCAN</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">HOLD THE SET IN MIND · PROBE COMING</p></div>
+              <p class="text-[10px] text-amber-500/80 uppercase">Hold the letters · a YES / NO question is next</p></div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
@@ -393,7 +393,7 @@ export function renderSternberg(container, onClose) {
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">👁</span>
               <div><h2 class="text-xl font-black text-amber-400 tracking-wider">STERNBERG SCAN</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">WAS <b>${probe}</b> IN THE SET?</p></div>
+              <p class="text-[10px] text-amber-500/80 uppercase">WAS <b>${probe}</b> IN THE LIST?</p></div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>
@@ -403,7 +403,7 @@ export function renderSternberg(container, onClose) {
             <div>CORRECT: <span class="text-green-400 text-base">${correct}</span></div>
           </div>
           <div class="bg-zinc-900 border border-amber-500/60 p-10 mb-4 text-center" style="min-height:200px">
-            <div class="text-zinc-500 text-xs mb-3">PROBE</div>
+            <div class="text-zinc-500 text-xs mb-3">THIS LETTER</div>
             <div class="text-7xl font-black text-amber-400">${probe}</div>
           </div>
           <div class="grid grid-cols-2 gap-3">
@@ -489,7 +489,7 @@ export function renderNumberSense(container, onClose) {
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">●</span>
               <div><h2 class="text-xl font-black text-amber-400 tracking-wider">NUMBER SENSE</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">CLICK THE SIDE WITH MORE DOTS · RATIO ${ratio.toFixed(2)}</p></div>
+              <p class="text-[10px] text-amber-500/80 uppercase">TAP THE SIDE WITH MORE DOTS · DO NOT COUNT</p></div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
           </div>

@@ -49,7 +49,7 @@ export function renderDualNBack(container, onClose) {
             <span class="text-3xl text-amber-400">🧠</span>
             <div>
               <h2 class="text-2xl font-black text-amber-400 tracking-wider">DUAL N-BACK</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">The Jaeggi working-memory task · N = ${N}</p>
+              <p class="text-[10px] text-amber-500/80 uppercase">The square and the letter · tap if either matches two turns ago</p>
             </div>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
@@ -156,14 +156,14 @@ export function renderSchulteTable(container, onClose) {
             <span class="text-3xl text-amber-400">🔢</span>
             <div>
               <h2 class="text-2xl font-black text-amber-400 tracking-wider">SCHULTE TABLE</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">Attention-field drill · eyes on the center, find with the periphery</p>
+              <p class="text-[10px] text-amber-500/80 uppercase">Tap 1 to 25 in order · keep your eyes near the middle</p>
             </div>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
         </div>
 
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          Tap 1 → 25 in order, fast. Classic drill: keep your eyes fixed on the center cell and let peripheral vision find the numbers.
+          Tap 1 → 25 in order. Keep your eyes near the middle. Let the sides of the grid come to you.
         </div>
 
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -249,7 +249,7 @@ export function renderAimTrainer(container, onClose) {
         </div>
 
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          Hit the amber target as fast as it appears. Empty clicks cost points. 30 seconds on the clock.
+          Hit the orange target as fast as it appears. Empty clicks cost points. 30 seconds on the clock.
         </div>
 
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -352,17 +352,17 @@ export function renderGoNoGo(container, onClose) {
         <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
           <div>
             <h2 class="text-2xl font-black text-amber-400 tracking-wider">GO / NO-GO</h2>
-            <p class="text-[10px] text-amber-500/80 uppercase">Response inhibition · Verbruggen &amp; Logan 2008</p>
+            <p class="text-[10px] text-amber-500/80 uppercase">Tap GO · stay still on NOGO</p>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
         </div>
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          Tap or press SPACE on GO. Do nothing on NO-GO. False starts cost more than slow hits.
+          Tap GO. Stay still on NOGO. A tap on NOGO costs more than a slow GO.
         </div>
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
           <div>TRIAL <span id="gng-trial" class="text-white">0</span> / ${TRIALS}</div>
           <div>HITS <span id="gng-hits" class="text-amber-400">0</span></div>
-          <div>FA <span id="gng-fa" class="text-white">0</span></div>
+          <div>EARLY <span id="gng-fa" class="text-white">0</span></div>
         </div>
         <button id="gng-stage" class="w-full h-[220px] bg-zinc-950 border border-amber-500/40 flex items-center justify-center text-4xl font-black tracking-widest text-amber-400" aria-label="respond">
           READY
@@ -425,7 +425,7 @@ export function renderGoNoGo(container, onClose) {
       showResult({
         container,
         title: clean ? 'INHIBITION LOCKED' : 'SESSION COMPLETE',
-        message: `${hits} hits · ${falseAlarms} false starts · ${misses} misses · avg GO ${avg || '—'}ms. The hard skill is withholding, not pressing.`,
+        message: `${hits} hits · ${falseAlarms} early taps · ${misses} misses · avg GO ${avg || '—'}ms. The hard skill is staying still, not tapping fast.`,
         score,
         gameId: 'go-nogo',
         tone: clean ? 'win' : 'over',
@@ -463,12 +463,12 @@ export function renderDigitSpan(container, onClose) {
         <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
           <div>
             <h2 class="text-2xl font-black text-amber-400 tracking-wider">DIGIT SPAN</h2>
-            <p class="text-[10px] text-amber-500/80 uppercase">Working-memory capacity · Miller 1956</p>
+            <p class="text-[10px] text-amber-500/80 uppercase">Watch the numbers · type them back in order</p>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
         </div>
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          Watch the digits. When they clear, type them back in order. Span grows on success.
+          Watch the numbers. When they clear, type them back in the same order. Each win adds one digit.
         </div>
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
           <div>SPAN <span id="ds-span" class="text-amber-400 text-base">3</span></div>
@@ -933,12 +933,12 @@ export function renderFlanker(container, onClose) {
         <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
           <div>
             <h2 class="text-2xl font-black text-amber-400 tracking-wider">FLANKER</h2>
-            <p class="text-[10px] text-amber-500/80 uppercase">Selective attention · Eriksen paradigm</p>
+            <p class="text-[10px] text-amber-500/80 uppercase">Tap LEFT or RIGHT for the middle arrow only</p>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
         </div>
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          Report the CENTER arrow only. Congruent flanks feel easy. Incongruent flanks are the point.
+          Tap LEFT or RIGHT for the CENTER arrow. Ignore the arrows on both sides.
         </div>
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
           <div>TRIAL <span id="fk-trial" class="text-white">0</span> / ${TRIALS}</div>

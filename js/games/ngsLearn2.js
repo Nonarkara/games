@@ -108,7 +108,7 @@ export function renderWordGuess(container, onClose) {
         title: won ? `SOLVED IN ${guesses.length}` : 'OUT OF TRIES',
         message: won
           ? `${answer} in ${guesses.length} guess${guesses.length === 1 ? '' : 'es'}. Opening with a word carrying three vowels and two common consonants collapses the field fastest.`
-          : `The word was ${answer}. Amber means the letter lives somewhere else in the word — a repeated letter only turns amber if a copy is still unaccounted for.`,
+          : `The word was ${answer}. Orange means the letter is in the word, but in a different place.`,
         score: won ? (TRIES - guesses.length + 1) * 20 : 0,
         gameId: 'word-guess',
         tone: won ? 'win' : 'over',
@@ -140,7 +140,7 @@ export function renderWordGuess(container, onClose) {
       const keyRows = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
       container.innerHTML = `
         <div class="${FRAME}">
-          ${head('🟩', 'WORD GUESS', 'Five letters · six tries · green is placed, amber is present')}
+          ${head('🟩', 'WORD GUESS', 'Five letters · six tries · green is the right place, orange is in the word')}
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-3 text-xs font-bold">
             <div>TRY <span class="text-white text-base">${Math.min(guesses.length + 1, TRIES)}</span> / ${TRIES}</div>
             <div id="wg-note" class="text-amber-400">${note || (done ? '' : 'TYPE A WORD')}</div>

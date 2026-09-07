@@ -43,7 +43,7 @@ function shuffled(values) {
 }
 
 /* --------------------------------------------------------------------------
- * REACTION GATE — wait for amber, then tap. Early taps are misses.
+ * REACTION GATE — wait for orange, then tap. Early taps are misses.
  * --------------------------------------------------------------------- */
 export function renderReactionGate(container, onClose) {
   start();
@@ -58,7 +58,7 @@ export function renderReactionGate(container, onClose) {
         <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
           <div>
             <h2 class="text-xl font-black text-amber-400 tracking-wider">REACTION GATE</h2>
-            <p class="text-[10px] text-amber-500/80 uppercase">Wait for amber. Tap. Early taps miss · Dinges 1997</p>
+            <p class="text-[10px] text-amber-500/80 uppercase">Wait for orange. Tap. Early taps miss</p>
           </div>${closeButton()}
         </div>
         <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
@@ -66,8 +66,8 @@ export function renderReactionGate(container, onClose) {
           <span>HITS <b id="rg-hits" class="text-amber-400">0</b></span>
           <span>EARLY <b id="rg-fa" class="text-white">0</b></span>
         </div>
-        <button id="rg-stage" type="button" class="w-full h-[220px] bg-zinc-950 border border-amber-500/40 flex items-center justify-center text-2xl font-black tracking-widest text-zinc-500" aria-label="Tap when amber">WAIT</button>
-        <p class="mt-3 text-[11px] leading-relaxed text-zinc-400">Do nothing until the box turns amber. Then tap it as soon as you see the colour change.</p>
+        <button id="rg-stage" type="button" class="w-full h-[220px] bg-zinc-950 border border-amber-500/40 flex items-center justify-center text-2xl font-black tracking-widest text-zinc-500" aria-label="Tap when orange">WAIT</button>
+        <p class="mt-3 text-[11px] leading-relaxed text-zinc-400">Do nothing until the box turns orange. Then tap it as soon as you see the colour change.</p>
       </div>`;
 
     const stage = container.querySelector('#rg-stage');

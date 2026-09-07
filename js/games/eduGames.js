@@ -264,7 +264,7 @@ export function renderSimon(container, onClose) {
     container.innerHTML = `
       <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-md mx-auto font-mono-hud">
         <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
-          <div><h2 class="text-xl font-black text-amber-400 tracking-wider">SIMON SEQUENCE</h2><p class="text-[10px] text-amber-500/80 uppercase">WORKING MEMORY — REPEAT THE PATTERN</p></div>
+          <div><h2 class="text-xl font-black text-amber-400 tracking-wider">SIMON SEQUENCE</h2><p class="text-[10px] text-amber-500/80 uppercase">WATCH THE PADS · TAP THEM BACK IN ORDER</p></div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ CLOSE</button>
         </div>
         <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-3 mb-6 text-xs font-bold">

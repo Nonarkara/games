@@ -58,7 +58,7 @@ export function renderPosnerCueing(container, onClose) {
 
     container.innerHTML = `
       <div class="${FRAME}">
-        ${head('👁', 'POSNER CUEING', 'Covert attention · Posner 1980')}
+        ${head('👁', 'POSNER CUEING', 'Watch the flash · tap when the dot appears')}
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
           Keep your eyes on the centre cross. A box flashes, then a dot appears.
           Press ← or → for the side the DOT is on — not the box. Most flashes predict correctly; some lie.
@@ -198,7 +198,7 @@ export function renderChangeBlindness(container, onClose) {
 
     container.innerHTML = `
       <div class="${FRAME}">
-        ${head('🫥', 'CHANGE BLINDNESS', 'Flicker paradigm · Rensink 1997')}
+        ${head('🫥', 'CHANGE BLINDNESS', 'Find the square that changes')}
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
           One square keeps changing colour. The blank flash between frames hides the movement your eye would normally catch.
           Click the square that changes. 20 seconds per round.
@@ -324,7 +324,7 @@ export function renderOperationSpan(container, onClose) {
     function shell(inner) {
       container.innerHTML = `
         <div class="${FRAME}">
-          ${head('🧮', 'OPERATION SPAN', 'Complex span · Turner & Engle 1989')}
+          ${head('🧮', 'OPERATION SPAN', 'Check the sum · remember the letter · type the letters at the end')}
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>SET <span class="text-white">${Math.min(setIdx + 1, SETS.length)}</span> / ${SETS.length}</div>
             <div>MATH <span class="text-amber-400">${mathHits}/${mathTotal}</span></div>
