@@ -569,7 +569,7 @@ export function renderPaperSoccer(container, onClose) {
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const padX = 54;
+    const padX = 78;
     const padY = 28;
     const scale = Math.min((w - padX * 2) / PITCH.length, (h - padY * 2) / PITCH.width);
     map = {
@@ -803,6 +803,18 @@ export function renderPaperSoccer(container, onClose) {
       ctx.arc(0, 0, r + 4, 0, Math.PI * 2);
       ctx.stroke();
     }
+    const mover = state.phase === 'move-self'
+      ? state.kickingTeam
+      : state.phase === 'move-opp'
+        ? otherTeam(state.kickingTeam)
+        : null;
+    if (mover && player.team === mover && player.id !== selectedId) {
+      ctx.strokeStyle = 'rgba(245,158,11,0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(0, 0, r + 3, 0, Math.PI * 2);
+      ctx.stroke();
+    }
     if (player.id === selectedId) {
       ctx.strokeStyle = INK;
       ctx.setLineDash([3, 3]);
@@ -855,17 +867,19 @@ export function renderPaperSoccer(container, onClose) {
   }
 
   function drawSeats() {
-    const prompt = !started
-      ? 'PICK A SHAPE'
-      : flying
-        ? 'BALL MOVING'
-        : state.phase === 'kick'
-          ? `${state.possession.toUpperCase()} · HOLD THE DISC`
-          : state.phase === 'move-self'
-            ? `${state.kickingTeam.toUpperCase()} · MOVE ONE`
-            : state.phase === 'move-opp'
-              ? `${otherTeam(state.kickingTeam).toUpperCase()} · MOVE ONE`
-              : 'MATCH OVER';
+    const prompt = !container.querySelector('#ps-setup')
+      ? (!started
+        ? 'TAP TO START'
+        : flying
+          ? 'BALL MOVING'
+          : state.phase === 'kick'
+            ? `${state.possession.toUpperCase()} · HOLD THE DISC`
+            : state.phase === 'move-self'
+              ? `${state.kickingTeam.toUpperCase()} · MOVE ONE`
+              : state.phase === 'move-opp'
+                ? `${otherTeam(state.kickingTeam).toUpperCase()} · MOVE ONE`
+                : 'MATCH OVER')
+      : 'PICK A SHAPE';
 
     ctx.fillStyle = AMBER;
     ctx.font = '11px "Press Start 2P", monospace';

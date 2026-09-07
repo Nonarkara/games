@@ -2568,6 +2568,7 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 .paper-soccer .ps-board {
   position: relative;
   min-height: 280px;
+  padding: 0 56px;
 }
 .paper-soccer .ps-pitch {
   display: block;
@@ -2591,12 +2592,12 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
   cursor: pointer;
 }
 .paper-soccer .ps-skip-red {
-  left: 8px;
+  left: 4px;
   top: 50%;
   transform: translateY(-50%) rotate(-90deg);
 }
 .paper-soccer .ps-skip-blue {
-  right: 8px;
+  right: 4px;
   top: 50%;
   transform: translateY(-50%) rotate(90deg);
 }
