@@ -33,6 +33,24 @@ import { generatePattern, checkPattern } from './memoryMatrix.js';
 import { numberWord, rollPro } from './mentalMathPro.js';
 import { toThai, fromThai, rollThai } from './mentalMathThai.js';
 import { STROOP_COLORS, makeColorMarchRound } from './eduGames.js';
+import {
+  GOALS_TO_WIN,
+  MAX_KICK,
+  MOVE_FIELD,
+  MOVE_GK,
+  PITCH,
+  applyKick,
+  clampMove,
+  closestTo,
+  createMatch,
+  isOffside,
+  kickTravel,
+  matchScore,
+  otherTeam,
+  placeTeam,
+  resolveKick,
+  skipMove
+} from './paperSoccer.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
 const probe = { color: 'green', shape: 'star', count: 1 };
@@ -340,4 +358,90 @@ function fromMixedNumber(s) {
   return Number(out);
 }
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, and Mental Math Thai passed');
+const kickoff = createMatch('4-4-2', '4-4-2');
+assert.equal(kickoff.red.length, 11);
+assert.equal(kickoff.blue.length, 11);
+assert.equal(kickoff.red[0].role, 'gk');
+assert.equal(kickoff.blue[0].role, 'gk');
+assert.equal(kickoff.phase, 'kick');
+assert.equal(kickoff.possession, 'red');
+assert.ok(kickoff.red.every(p => p.x < PITCH.length / 2), 'red starts in its own half');
+assert.ok(kickoff.blue.every(p => p.x > PITCH.length / 2), 'blue starts in its own half');
+
+assert.equal(placeTeam('red', '4-3-3').length, 11);
+assert.equal(placeTeam('blue', '3-5-2').length, 11);
+
+assert.ok(kickTravel(0.2) < kickTravel(0.9));
+assert.ok(kickTravel(1) > 50);
+assert.ok(kickTravel(1.12) > kickTravel(1));
+
+const mid = { x: PITCH.length / 2, y: PITCH.width / 2 };
+const longShot = resolveKick({ x: 54, y: 34 }, { x: 54 + MAX_KICK, y: 34 }, 1);
+assert.equal(longShot.kind, 'goal');
+assert.equal(longShot.scorer, 'red');
+const fromOwnHalf = resolveKick({ x: 48, y: 34 }, { x: 48 + MAX_KICK, y: 34 }, 1);
+assert.equal(fromOwnHalf.kind, 'play');
+const overBar = resolveKick({ x: 54, y: 34 }, { x: 54 + kickTravel(1.12), y: 34 }, 1.12);
+assert.equal(overBar.kind, 'over');
+assert.equal(overBar.keeperTeam, 'blue');
+
+const throwIn = resolveKick(mid, { x: mid.x, y: mid.y + 80 }, 1);
+assert.equal(throwIn.kind, 'throw-in');
+assert.equal(throwIn.dest.y, PITCH.width);
+
+const scoring = createMatch();
+const striker = scoring.red.reduce((a, b) => (a.x > b.x ? a : b));
+striker.x = 54;
+striker.y = 34;
+scoring.ball = { x: 54, y: 34 };
+scoring.possessorId = striker.id;
+scoring.possession = 'red';
+applyKick(scoring, 0, 1);
+assert.equal(scoring.score.red, 1);
+assert.equal(scoring.phase, 'kick');
+assert.equal(scoring.possession, 'blue', 'the side that conceded takes kickoff');
+
+const sweep = createMatch();
+sweep.score.red = 2;
+const finisher = sweep.red.reduce((a, b) => (a.x > b.x ? a : b));
+finisher.x = 54;
+finisher.y = 34;
+sweep.ball = { x: 54, y: 34 };
+sweep.possessorId = finisher.id;
+sweep.possession = 'red';
+applyKick(sweep, 0, 1);
+assert.equal(sweep.winner, 'red');
+assert.equal(sweep.phase, 'over');
+assert.equal(matchScore(sweep), GOALS_TO_WIN);
+
+const loose = createMatch();
+const passer = loose.red.concat(loose.blue).find(p => p.id === loose.possessorId);
+const interceptor = closestTo({ x: 70, y: 20 }, loose.blue).player;
+loose.ball = { x: passer.x, y: passer.y };
+applyKick(loose, Math.atan2(interceptor.y - loose.ball.y, interceptor.x - loose.ball.x), 0.35);
+if (loose.phase === 'move-self') {
+  skipMove(loose);
+  skipMove(loose);
+  assert.equal(loose.phase, 'kick');
+}
+
+const parked = { id: 'red-x', team: 'red', role: 'field', x: 92, y: 34 };
+const blueWall = placeTeam('blue', '4-4-2');
+assert.equal(isOffside(parked, blueWall, { x: 60, y: 34 }), true);
+assert.equal(isOffside({ ...parked, x: 50 }, blueWall, { x: 60, y: 34 }), false);
+
+const mover = createMatch();
+const runner = mover.red.find(p => p.role === 'field');
+const far = clampMove(runner, { x: runner.x + 80, y: runner.y }, mover);
+assert.ok(Math.hypot(far.x - runner.x, far.y - runner.y) <= MOVE_FIELD + 1e-6);
+const gkSlide = clampMove(mover.red[0], { x: mover.red[0].x, y: mover.red[0].y + 40 }, mover);
+assert.ok(Math.hypot(gkSlide.x - mover.red[0].x, gkSlide.y - mover.red[0].y) <= MOVE_GK + 1e-6);
+
+const offsideRun = createMatch();
+const forward = offsideRun.red.reduce((a, b) => (a.x > b.x ? a : b));
+const illegal = clampMove(forward, { x: 100, y: 34 }, offsideRun);
+assert.equal(isOffside({ ...forward, ...illegal }, offsideRun.blue, offsideRun.ball), false);
+
+assert.equal(otherTeam('red'), 'blue');
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, and Paper Soccer passed');

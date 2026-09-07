@@ -64,6 +64,7 @@ const MUST_FIND = [
   ['2048', 'slide-2048'], ['sudoku', 'sudoku-sprint'], ['minesweeper', 'minesweeper'],
   ['connect 4', 'connect-four'], ['four in a row', 'connect-four'],
   ['drinking', 'kings-cup'], ['noughts and crosses', 'tic-tac-toe'],
+  ['paper soccer', 'paper-soccer'], ['subbuteo', 'paper-soccer'], ['table soccer', 'paper-soccer'],
   ['music', 'ear-trainer'], ['morse', 'morse-code'], ['reaction time', 'reaction-gate'],
   ['tower london', 'tower-london'], ['london tower', 'tower-london'],  // order-free
   ['spot the difference', 'change-blindness'], ['iq test', 'raven-matrices'],

@@ -76,6 +76,11 @@ assert.equal(explainScore('morse-code', 40).band, 'warming');
 assert.equal(explainScore('morse-code', 80).band, 'solid');
 assert.equal(explainScore('morse-code', 120).band, 'sharp');
 
+assert.equal(explainScore('paper-soccer', 0).band, 'rough');
+assert.equal(explainScore('paper-soccer', 1).band, 'warming');
+assert.equal(explainScore('paper-soccer', 2).band, 'solid');
+assert.equal(explainScore('paper-soccer', 3).band, 'sharp');
+
 assert.equal(explainScore('about-dr-non', 1), null);
 assert.equal(explainScore('aim-trainer', null), null);
 

@@ -20,6 +20,7 @@ export const GAME_MAX = Object.freeze({
   'make-24': 240,
   'tic-tac-toe': 500,
   'rock-paper-scissors': 100,
+  'paper-soccer': 3,
   'memory-matrix': 1200,
 
   // TRAIN

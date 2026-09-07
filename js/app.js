@@ -39,6 +39,7 @@ import { renderStopSignal, renderWarehousePush, renderLightsOut } from './games/
 import { renderNonogram, renderNim, renderMake24 } from './games/ngsLogicSuite.js';
 import { renderTicTacToe } from './games/ticTacToe.js';
 import { renderRockPaperScissors } from './games/rockPaperScissors.js';
+import { renderPaperSoccer } from './games/paperSoccer.js';
 import { renderMemoryMatrix } from './games/memoryMatrix.js';
 import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } from './games/ngsDailySuite.js';
 import { bindModalUX, GameSession } from './ui.js';
@@ -125,6 +126,7 @@ const gamesCatalog = [
   { id: 'ai-sandbox', code: 'AIG', title: 'AI Game Builder', wing: 'arcade', category: 'ai-studio', domain: 'Sandbox', age: 'All', desc: 'Type a prompt or pick a preset. A tiny game appears you can play.', tags: ['AI', 'Sandbox'], renderer: renderAIGameStudio },
   { id: 'warehouse-push', code: 'WHK', title: 'Warehouse Push', wing: 'arcade', category: 'classics', domain: 'Spatial planning', age: '8+', desc: 'Push every crate onto a target. You can undo a step, but you can never pull.', tags: ['Classic', 'Planning', 'Open source'], credit: 'Steven Lambert · CC0', source: 'https://gist.github.com/straker/2fddb507d4bb6bec54ea2fdb022d020c', renderer: renderWarehousePush },
   { id: 'rock-paper-scissors', code: 'RPS', title: 'Rock Paper Scissors', wing: 'arcade', category: 'casual-friv', domain: 'Prediction', age: 'All', desc: 'Pick rock, paper, or scissors. The CPU reads your habits — mix it up.', tags: ['Casual', 'Prediction'], renderer: renderRockPaperScissors },
+  { id: 'paper-soccer', code: 'PSF', title: 'Paper Soccer', wing: 'arcade', category: 'casual-friv', domain: 'Table soccer', age: 'All', desc: 'Tap to pass, then move one player. First to three goals.', tags: ['Two player', 'Soccer', 'Table'], renderer: renderPaperSoccer },
 
   // ── LEARN ──────────────────────────────────────────────────────────────
   { id: 'monty-hall', code: 'MTY', title: 'Monty Hall', wing: 'learn', category: 'math-logic', domain: 'Probability', age: 'All', desc: 'Pick a door, see one empty door opened, then choose whether to stay or switch.', paper: 'Selvin 1975', tags: ['Probability', 'Bayes', 'Argument-settler'], renderer: renderMontyHall },

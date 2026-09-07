@@ -102,6 +102,7 @@ const defaultData = {
     'backward-span': 0,
     'tic-tac-toe': 0,
     'rock-paper-scissors': 0,
+    'paper-soccer': 0,
     'memory-matrix': 0,
     'mental-math-pro': 0,
     'mental-math-thai': 0

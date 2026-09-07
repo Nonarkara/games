@@ -695,6 +695,13 @@ export const BRAIN_GUIDES = {
     tip: 'After losing, switch to the throw that just beat you. Losers escalate; winners repeat.',
     stack: ['kahneman', 'thaler', 'clear']
   },
+  'paper-soccer': {
+    label: 'Pass-and-move planning', minutes: '5–12 min',
+    practice: 'Hold the disc to charge a pass, release to flick it, then move one teammate. After that the other side moves one. Closest player to the ball plays next.',
+    why: 'You only get one run after each pass, so you are guessing where they will send the next ball — not racing them in real time.',
+    tip: 'A short pass into open grass beats a long shot when a defender is already in the lane.',
+    stack: ['kahneman', 'werbach']
+  },
   'memory-matrix': {
     label: 'Parallel spatial encoding', minutes: '2–4 min',
     practice: 'Snapshot multiple lit positions at once, then reproduce them after the grid clears.',

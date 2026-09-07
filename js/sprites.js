@@ -999,6 +999,22 @@ export const SPRITES = {
     '..--------..'
   ],
 
+  // A pitch seen from above, disc sitting on the centre spot.
+  'paper-soccer': [
+    '..########..',
+    '.#--------#.',
+    '.#+------+#.',
+    '.#--#--#--#.',
+    '.#--------#.',
+    '.#---++---#.',
+    '.#---++---#.',
+    '.#--------#.',
+    '.#--#--#--#.',
+    '.#+------+#.',
+    '.#--------#.',
+    '..########..'
+  ],
+
   // A diagonal four, which is the one everybody misses.
   'connect-four': [
     '.--.--.--.##',
