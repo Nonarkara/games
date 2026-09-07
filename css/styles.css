@@ -2626,6 +2626,7 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 }
 .paper-soccer .ps-setup-row-blue span { color: #6f93c2; }
 .paper-soccer .ps-shape,
+.paper-soccer .ps-seat,
 .paper-soccer .ps-play {
   min-height: 44px;
   padding: 8px 12px;
@@ -2637,6 +2638,7 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
   cursor: pointer;
 }
 .paper-soccer .ps-shape.is-on,
+.paper-soccer .ps-seat.is-on,
 .paper-soccer .ps-play {
   background: #f59e0b;
   color: #0a0e14;

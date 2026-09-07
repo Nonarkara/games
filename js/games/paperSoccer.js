@@ -1,16 +1,10 @@
 /**
- * Paper Soccer — two people, one pad, the childhood table game.
+ * Paper Soccer — table soccer as a placement game.
  *
- * A3-ish pitch, eleven men a side, a flat disc. You flick the disc, then
- * you may relocate one man; then your opponent does the same. Whoever is
- * closest to the ball plays next. First to three goals.
- *
- * This is turn-based table soccer, not a physics FIFA clone:
- *   hold to charge a pass → release to flick
- *   one run each after the ball stops
- *   closest player owns the next flick
- *   offside is a placement rule (you cannot park a man beyond the
- *   second-last opponent)
+ * Drag the disc to the grass you want. After it stops, you run one man
+ * toward it; then the other side runs one. Whoever can get closer owns
+ * the next flick. First to three. One seat vs the machine, or two seats
+ * on a landscape pad.
  */
 
 import { soundFx } from '../audio.js';
@@ -458,10 +452,118 @@ export function matchScore(state) {
   return GOALS_TO_WIN;
 }
 
+/** Power so a drag lands on `at` when the pointer is within a full kick. */
+export function powerForAim(ball, at) {
+  const d = dist(ball, at);
+  return Math.max(0.08, Math.min(POWER_CEILING, d / MAX_KICK));
+}
+
+export function aimFromPointer(ball, at) {
+  const dx = at.x - ball.x;
+  const dy = at.y - ball.y;
+  if (Math.hypot(dx, dy) < 0.8) return null;
+  return { angle: Math.atan2(dy, dx), power: powerForAim(ball, at) };
+}
+
+/**
+ * How close a man can get to `dest` with one run. That leftover gap is
+ * the possession race: smaller wins the next flick.
+ */
+export function collectDistance(player, dest, state) {
+  const trial = { ...state, ball: dest };
+  const after = clampMove(player, dest, trial);
+  return dist(after, dest);
+}
+
+export function bestCollector(players, dest, state) {
+  let best = null;
+  let bestD = Infinity;
+  for (const player of players) {
+    const d = collectDistance(player, dest, state);
+    if (d < bestD) {
+      best = player;
+      bestD = d;
+    }
+  }
+  return { player: best, dist: bestD };
+}
+
+/**
+ * Live read of a pass: after both sides spend their one run toward the
+ * landing, who is closer? 'yours' / 'theirs' / 'contested'.
+ */
+export function possessionPreview(state, dest, kickingTeam) {
+  const us = bestCollector(teamOf(state, kickingTeam), dest, state);
+  const them = bestCollector(teamOf(state, otherTeam(kickingTeam)), dest, state);
+  let claim = 'contested';
+  if (us.dist + 0.55 < them.dist) claim = 'yours';
+  else if (them.dist + 0.55 < us.dist) claim = 'theirs';
+  return { us, them, claim, dest };
+}
+
+function goalTarget(team) {
+  return {
+    x: team === 'red' ? PITCH.length : 0,
+    y: PITCH.width / 2
+  };
+}
+
+/** Pure CPU kick: shoot if the mouth is on, else pass to grass we can own. */
+export function pickCpuKick(state) {
+  const team = state.possession;
+  const ball = state.ball;
+  const mouth = goalMouthY();
+  const samples = [0.5, 0.35, 0.65, 0.22, 0.78].map(t => mouth.y0 + (mouth.y1 - mouth.y0) * t);
+  for (const y of samples) {
+    const goal = { x: team === 'red' ? PITCH.length : 0, y };
+    const aim = aimFromPointer(ball, goal);
+    if (!aim || aim.power > 1) continue;
+    const dest = kickDestination(ball, aim.angle, aim.power);
+    const result = resolveKick(ball, dest, aim.power);
+    if (result.kind === 'goal' && result.scorer === team) return aim;
+  }
+
+  let best = null;
+  let bestScore = -Infinity;
+  for (let i = 0; i < 20; i++) {
+    const ang = (i / 20) * Math.PI * 2;
+    for (const power of [0.2, 0.34, 0.48, 0.64, 0.8]) {
+      const dest = kickDestination(ball, ang, power);
+      const result = resolveKick(ball, dest, power);
+      if (result.kind === 'goal' && result.scorer === team) return { angle: ang, power };
+      if (result.kind !== 'play') continue;
+      const preview = possessionPreview(state, result.dest, team);
+      if (preview.claim === 'theirs') continue;
+      const toward = team === 'red' ? result.dest.x : PITCH.length - result.dest.x;
+      const own = preview.claim === 'yours' ? 14 : 0;
+      const score = toward + own - preview.us.dist;
+      if (score > bestScore) {
+        bestScore = score;
+        best = { angle: ang, power };
+      }
+    }
+  }
+  if (best) return best;
+  const fallback = goalTarget(team);
+  return aimFromPointer(ball, fallback) || { angle: team === 'red' ? 0 : Math.PI, power: 0.35 };
+}
+
+/** Pure CPU run: the man who can get closest to the disc, then go there. */
+export function pickCpuMove(state) {
+  const team = state.phase === 'move-self'
+    ? state.kickingTeam
+    : state.phase === 'move-opp'
+      ? otherTeam(state.kickingTeam)
+      : null;
+  if (!team) return null;
+  const { player } = bestCollector(teamOf(state, team), state.ball, state);
+  if (!player) return null;
+  return { playerId: player.id, dest: { x: state.ball.x, y: state.ball.y } };
+}
+
 /* ===========================================================================
- * Renderer — landscape two-seat board.
- * Red sits on the left short edge, blue on the right. Hold to charge a
- * flick; after the disc stops, each side gets one run.
+ * Renderer — drag the disc to place a pass. A live mark says who would
+ * own it after one run each. Default seat is you (red) vs the machine.
  * ======================================================================== */
 
 const FRAME = 'paper-soccer relative bg-black border border-amber-500/40 text-white font-mono-hud';
@@ -474,15 +576,27 @@ const DIM = '#6b7785';
 export function renderPaperSoccer(container, onClose) {
   let redShape = '4-4-2';
   let blueShape = '4-4-2';
+  let vsCpu = true;
   let state = createMatch(redShape, blueShape);
   let started = false;
   let selectedId = null;
   let charge = null;
   let flying = null;
+  let cpuBusy = false;
   let raf = 0;
   let canvas;
   let ctx;
   let map = { left: 0, top: 0, scale: 1 };
+
+  function humanTeam() { return vsCpu ? 'red' : null; }
+  function cpuTeam() { return vsCpu ? 'blue' : null; }
+  function isHumanTurn() {
+    if (!vsCpu) return true;
+    if (state.phase === 'kick') return state.possession === 'red';
+    if (state.phase === 'move-self') return state.kickingTeam === 'red';
+    if (state.phase === 'move-opp') return state.kickingTeam === 'blue';
+    return false;
+  }
 
   function mount() {
     container.innerHTML = `
@@ -490,7 +604,7 @@ export function renderPaperSoccer(container, onClose) {
         <div class="flex justify-between items-center px-3 pt-3 pb-2 border-b border-amber-500/40">
           <div>
             <h2 class="text-sm font-black text-amber-400 tracking-wider">PAPER SOCCER</h2>
-            <p class="text-[10px] text-amber-500/80 uppercase">Two seats · first to three</p>
+            <p class="text-[10px] text-amber-500/80 uppercase">Place a pass · run to the disc</p>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
         </div>
@@ -500,7 +614,12 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden>SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Sit on the two short sides of a landscape pad. Red is left, blue is right.</p>
+          <p class="ps-setup-lead">Drag the disc to the grass you want. After it lands, move one man onto it. Closest player flicks next.</p>
+          <div class="ps-setup-row">
+            <span>SEATS</span>
+            <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
+            <button type="button" class="ps-seat" data-seat="two">TWO SEATS</button>
+          </div>
           <div class="ps-setup-row">
             <span>RED SHAPE</span>
             ${FORMATION_NAMES.map(name => `<button type="button" class="ps-shape" data-team="red" data-shape="${name}">${name}</button>`).join('')}
@@ -520,6 +639,12 @@ export function renderPaperSoccer(container, onClose) {
       cancelAnimationFrame(raf);
       onClose();
     };
+    container.querySelectorAll('.ps-seat').forEach(btn => {
+      btn.onclick = () => {
+        vsCpu = btn.dataset.seat === 'cpu';
+        container.querySelectorAll('.ps-seat').forEach(b => b.classList.toggle('is-on', b === btn));
+      };
+    });
     container.querySelectorAll('.ps-shape').forEach(btn => {
       btn.onclick = () => {
         const team = btn.dataset.team;
@@ -547,6 +672,7 @@ export function renderPaperSoccer(container, onClose) {
       attachReady(container.querySelector('.ps-board'), () => {
         started = true;
         loop();
+        maybeCpu();
       });
     };
   }
@@ -605,18 +731,29 @@ export function renderPaperSoccer(container, onClose) {
 
   function bindPointer(el) {
     const down = event => {
-      if (!started || flying || state.winner || state.phase === 'over') return;
+      if (!started || flying || cpuBusy || state.winner || state.phase === 'over') return;
+      if (!isHumanTurn()) return;
       event.preventDefault();
       const pt = pointerInfo(event);
       if (state.phase === 'kick') {
         if (dist(pt, state.ball) > 10) return;
         if (event.pointerId != null && el.setPointerCapture) el.setPointerCapture(event.pointerId);
-        charge = { from: { ...state.ball }, at: pt, start: performance.now(), power: 0 };
+        charge = { from: { ...state.ball }, at: pt, start: performance.now() };
         return;
       }
       const team = state.phase === 'move-self' ? state.kickingTeam : otherTeam(state.kickingTeam);
+      if (selectedId && dist(pt, state.ball) <= 5) {
+        applyMove(state, selectedId, { ...state.ball });
+        selectedId = null;
+        soundFx.playClick();
+        afterHumanAct();
+        return;
+      }
       const near = closestTo(pt, teamOf(state, team));
-      if (near.player && near.dist <= 5) selectedId = near.player.id;
+      if (near.player && near.dist <= 5) {
+        selectedId = near.player.id;
+        if (event.pointerId != null && el.setPointerCapture) el.setPointerCapture(event.pointerId);
+      }
     };
     const move = event => {
       if (!charge && !selectedId) return;
@@ -628,31 +765,20 @@ export function renderPaperSoccer(container, onClose) {
       event.preventDefault();
       const pt = pointerInfo(event);
       if (charge && state.phase === 'kick') {
-        const power = Math.max(0.14, Math.min(POWER_CEILING, (performance.now() - charge.start) / CHARGE_MS * POWER_CEILING));
-        let angle = Math.atan2(charge.at.y - state.ball.y, charge.at.x - state.ball.x);
-        if (dist(charge.at, state.ball) < 1.2) {
-          angle = state.possession === 'red' ? 0 : Math.PI;
-        }
-        const dest = kickDestination(state.ball, angle, power);
-        const preview = resolveKick(state.ball, dest, power);
-        flying = {
-          from: { ...state.ball },
-          to: preview.dest,
-          start: performance.now(),
-          ms: 280 + kickTravel(power) * 8,
-          angle,
-          power
-        };
+        const holdPower = (performance.now() - charge.start) / CHARGE_MS * POWER_CEILING;
+        const aim = aimFromPointer(state.ball, charge.at);
         charge = null;
-        soundFx.playHit();
+        const power = Math.min(POWER_CEILING, Math.max(aim ? aim.power : 0, holdPower));
+        if (!aim && power < 0.18) return;
+        const angle = aim ? aim.angle : (state.possession === 'red' ? 0 : Math.PI);
+        startFlight(angle, Math.max(0.14, power));
         return;
       }
       if (selectedId && (state.phase === 'move-self' || state.phase === 'move-opp')) {
         applyMove(state, selectedId, pt);
         selectedId = null;
         soundFx.playClick();
-        syncSkip();
-        if (state.phase === 'over' || state.winner) endMatch();
+        afterHumanAct();
       }
     };
     el.addEventListener('pointerdown', down);
@@ -661,12 +787,75 @@ export function renderPaperSoccer(container, onClose) {
     el.addEventListener('pointercancel', up);
   }
 
+  function startFlight(angle, power) {
+    const dest = kickDestination(state.ball, angle, power);
+    const preview = resolveKick(state.ball, dest, power);
+    flying = {
+      from: { ...state.ball },
+      to: preview.dest,
+      start: performance.now(),
+      ms: 280 + kickTravel(power) * 8,
+      angle,
+      power
+    };
+    soundFx.playHit();
+  }
+
+  function selectCollector(team) {
+    const { player } = bestCollector(teamOf(state, team), state.ball, state);
+    selectedId = player?.id || null;
+  }
+
+  function afterHumanAct() {
+    syncSkip();
+    if (state.phase === 'over' || state.winner) {
+      endMatch();
+      return;
+    }
+    if (state.phase === 'move-self' && isHumanTurn()) selectCollector(state.kickingTeam);
+    if (state.phase === 'move-opp' && isHumanTurn()) selectCollector(otherTeam(state.kickingTeam));
+    maybeCpu();
+  }
+
+  function maybeCpu() {
+    if (!vsCpu || cpuBusy || flying || charge || !started || state.winner) return;
+    const cpuActs = (state.phase === 'kick' && state.possession === cpuTeam())
+      || (state.phase === 'move-self' && state.kickingTeam === cpuTeam())
+      || (state.phase === 'move-opp' && state.kickingTeam === humanTeam());
+    if (!cpuActs) return;
+    cpuBusy = true;
+    const wait = state.phase === 'kick' ? 480 : 360;
+    setTimeout(() => {
+      cpuBusy = false;
+      if (!started || state.winner || flying) return;
+      if (state.phase === 'kick' && state.possession === cpuTeam()) {
+        const kick = pickCpuKick(state);
+        if (kick) startFlight(kick.angle, kick.power);
+        return;
+      }
+      const mv = pickCpuMove(state);
+      if (mv) applyMove(state, mv.playerId, mv.dest);
+      else skipMove(state);
+      syncSkip();
+      if (state.phase === 'over' || state.winner) {
+        endMatch();
+        return;
+      }
+      if (isHumanTurn() && (state.phase === 'move-self' || state.phase === 'move-opp')) {
+        const team = state.phase === 'move-self' ? state.kickingTeam : otherTeam(state.kickingTeam);
+        selectCollector(team);
+      }
+      maybeCpu();
+    }, wait);
+  }
+
   function onSkip(team) {
-    if (!started || flying) return;
+    if (!started || flying || cpuBusy) return;
+    if (!isHumanTurn()) return;
     if (state.phase === 'move-self' && team === state.kickingTeam) skipMove(state);
     else if (state.phase === 'move-opp' && team === otherTeam(state.kickingTeam)) skipMove(state);
     selectedId = null;
-    syncSkip();
+    afterHumanAct();
     draw();
   }
 
@@ -679,8 +868,8 @@ export function renderPaperSoccer(container, onClose) {
       : state.phase === 'move-opp'
         ? otherTeam(state.kickingTeam)
         : null;
-    redBtn.hidden = mover !== 'red';
-    blueBtn.hidden = mover !== 'blue';
+    redBtn.hidden = !(mover === 'red' && isHumanTurn());
+    blueBtn.hidden = vsCpu || !(mover === 'blue' && isHumanTurn());
   }
 
   function endMatch() {
@@ -689,7 +878,9 @@ export function renderPaperSoccer(container, onClose) {
     showResult({
       container,
       title: `${winner} WINS`,
-      message: `Red ${state.score.red} – Blue ${state.score.blue}. First to three. Closest player to the disc plays it.`,
+      message: vsCpu
+        ? `Red ${state.score.red} – Blue ${state.score.blue}. Drag a pass onto grass your man can reach.`
+        : `Red ${state.score.red} – Blue ${state.score.blue}. Closest player to the disc plays it.`,
       score: matchScore(state),
       gameId: 'paper-soccer',
       tone: 'win',
@@ -700,9 +891,6 @@ export function renderPaperSoccer(container, onClose) {
 
   function loop() {
     raf = requestAnimationFrame(loop);
-    if (charge) {
-      charge.power = Math.min(POWER_CEILING, (performance.now() - charge.start) / CHARGE_MS * POWER_CEILING);
-    }
     if (flying) {
       const t = Math.min(1, (performance.now() - flying.start) / flying.ms);
       const ease = 1 - (1 - t) * (1 - t);
@@ -722,6 +910,11 @@ export function renderPaperSoccer(container, onClose) {
           return;
         }
         if (state.log === 'RED GOAL' || state.log === 'BLUE GOAL') soundFx.playCoin();
+        if (isHumanTurn() && (state.phase === 'move-self' || state.phase === 'move-opp')) {
+          const team = state.phase === 'move-self' ? state.kickingTeam : otherTeam(state.kickingTeam);
+          selectCollector(team);
+        }
+        maybeCpu();
       }
     }
     draw();
@@ -837,16 +1030,66 @@ export function renderPaperSoccer(container, onClose) {
     ctx.stroke();
   }
 
+  function liveAim() {
+    if (!charge) return null;
+    const holdPower = (performance.now() - charge.start) / CHARGE_MS * POWER_CEILING;
+    const aim = aimFromPointer(state.ball, charge.at);
+    const power = Math.min(POWER_CEILING, Math.max(aim ? aim.power : 0, holdPower));
+    if (power < 0.1 && !aim) return null;
+    const angle = aim ? aim.angle : (state.possession === 'red' ? 0 : Math.PI);
+    const dest = kickDestination(state.ball, angle, Math.max(0.14, power));
+    const resolved = resolveKick(state.ball, dest, Math.max(0.14, power));
+    const preview = resolved.kind === 'play'
+      ? possessionPreview(state, resolved.dest, state.possession)
+      : null;
+    return { power: Math.max(0.14, power), dest: resolved.dest, kind: resolved.kind, preview, scorer: resolved.scorer };
+  }
+
   function drawCharge() {
-    if (!charge) return;
+    const live = liveAim();
+    if (!live) return;
     const from = toScreen(state.ball);
-    const to = toScreen(charge.at);
+    const to = toScreen(live.dest);
     ctx.strokeStyle = AMBER;
     ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(to.x, to.y);
     ctx.stroke();
+    ctx.setLineDash([]);
+
+    let ring = AMBER;
+    let label = 'PLACE THE PASS';
+    if (live.kind === 'goal') { ring = INK; label = 'ON TARGET'; }
+    else if (live.kind === 'over') { ring = DIM; label = 'OVER THE BAR'; }
+    else if (live.preview) {
+      if (live.preview.claim === 'yours') { ring = AMBER; label = 'YOU GET IT'; }
+      else if (live.preview.claim === 'theirs') { ring = DIM; label = 'THEY GET IT'; }
+      else { ring = INK; label = '50 / 50'; }
+      if (live.preview.us.player) {
+        const a = toScreen(live.preview.us.player);
+        ctx.strokeStyle = 'rgba(245,158,11,0.55)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    ctx.fillStyle = ring;
+    ctx.beginPath();
+    ctx.arc(to.x, to.y, Math.max(6, 1.8 * map.scale), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0a0e14';
+    ctx.stroke();
+
+    ctx.fillStyle = INK;
+    ctx.font = '10px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, to.x, to.y - 14);
 
     const barW = 120;
     const barH = 10;
@@ -856,8 +1099,8 @@ export function renderPaperSoccer(container, onClose) {
     ctx.fillRect(x, y, barW, barH);
     ctx.strokeStyle = DIM;
     ctx.strokeRect(x, y, barW, barH);
-    ctx.fillStyle = charge.power > 1 ? '#e6edf3' : AMBER;
-    ctx.fillRect(x, y, Math.min(barW, (charge.power / POWER_CEILING) * barW), barH);
+    ctx.fillStyle = live.power > 1 ? '#e6edf3' : AMBER;
+    ctx.fillRect(x, y, Math.min(barW, (live.power / POWER_CEILING) * barW), barH);
     const mark = barW / POWER_CEILING;
     ctx.strokeStyle = INK;
     ctx.beginPath();
@@ -872,13 +1115,15 @@ export function renderPaperSoccer(container, onClose) {
         ? 'TAP TO START'
         : flying
           ? 'BALL MOVING'
-          : state.phase === 'kick'
-            ? `${state.possession.toUpperCase()} · HOLD THE DISC`
-            : state.phase === 'move-self'
-              ? `${state.kickingTeam.toUpperCase()} · MOVE ONE`
-              : state.phase === 'move-opp'
-                ? `${otherTeam(state.kickingTeam).toUpperCase()} · MOVE ONE`
-                : 'MATCH OVER')
+          : cpuBusy
+            ? 'MACHINE THINKING'
+            : state.phase === 'kick'
+              ? `${state.possession.toUpperCase()} · DRAG THE DISC`
+              : state.phase === 'move-self'
+                ? `${state.kickingTeam.toUpperCase()} · RUN TO THE DISC`
+                : state.phase === 'move-opp'
+                  ? `${otherTeam(state.kickingTeam).toUpperCase()} · RUN TO THE DISC`
+                  : 'MATCH OVER')
       : 'PICK A SHAPE';
 
     ctx.fillStyle = AMBER;

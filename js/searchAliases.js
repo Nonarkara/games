@@ -84,7 +84,7 @@ export const SEARCH_ALIASES = {
   'ai-sandbox': ['ai', 'make a game', 'generate', 'custom game', 'builder'],
   'warehouse-push': ['sokoban', 'push boxes', 'crates', 'warehouse'],
   'rock-paper-scissors': ['rock paper scissors', 'rps', 'roshambo', 'scissors'],
-  'paper-soccer': ['soccer', 'football', 'paper football', 'table soccer', 'subbuteo', 'flick', 'two player soccer', 'ipad soccer'],
+  'paper-soccer': ['soccer', 'football', 'paper football', 'table soccer', 'subbuteo', 'flick', 'two player soccer', 'ipad soccer', 'vs computer', 'cpu', 'one player'],
   'asteroids': ['asteroids', 'space rocks', 'spaceship', 'atari', 'thrust'],
   'frogger': ['frog', 'cross the road', 'traffic', 'konami'],
   'connect-four': ['connect 4', 'four in a row', '4 in a row', 'versus', 'opponent', 'computer'],

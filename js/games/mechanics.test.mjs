@@ -47,6 +47,11 @@ import {
   kickTravel,
   matchScore,
   otherTeam,
+  pickCpuKick,
+  pickCpuMove,
+  possessionPreview,
+  powerForAim,
+  aimFromPointer,
   placeTeam,
   resolveKick,
   skipMove
@@ -443,5 +448,32 @@ const illegal = clampMove(forward, { x: 100, y: 34 }, offsideRun);
 assert.equal(isOffside({ ...forward, ...illegal }, offsideRun.blue, offsideRun.ball), false);
 
 assert.equal(otherTeam('red'), 'blue');
+
+const aim = aimFromPointer({ x: 10, y: 10 }, { x: 10 + MAX_KICK, y: 10 });
+assert.ok(aim);
+assert.ok(Math.abs(aim.power - 1) < 1e-6);
+assert.ok(powerForAim({ x: 0, y: 0 }, { x: 10, y: 0 }) < powerForAim({ x: 0, y: 0 }, { x: 40, y: 0 }));
+
+const race = createMatch();
+const redNear = race.red.find(p => p.role === 'field');
+redNear.x = 22;
+redNear.y = 34;
+const dest = { x: 24, y: 34 };
+const yours = possessionPreview(race, dest, 'red');
+assert.equal(yours.claim, 'yours');
+const stealAt = { x: race.blue[0].x, y: race.blue[0].y };
+const theirs = possessionPreview(race, stealAt, 'red');
+assert.equal(theirs.claim, 'theirs');
+
+const cpuState = createMatch();
+cpuState.possession = 'blue';
+cpuState.possessorId = cpuState.blue.reduce((a, b) => (a.x < b.x ? a : b)).id;
+const cpuKick = pickCpuKick(cpuState);
+assert.ok(cpuKick && Number.isFinite(cpuKick.angle) && cpuKick.power > 0);
+cpuState.phase = 'move-opp';
+cpuState.kickingTeam = 'red';
+cpuState.ball = { x: 70, y: 34 };
+const cpuRun = pickCpuMove(cpuState);
+assert.ok(cpuRun && cpuRun.playerId.startsWith('blue'));
 
 console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, and Paper Soccer passed');
