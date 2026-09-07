@@ -146,6 +146,29 @@ class SoundFxManager {
       });
     } catch (e) {}
   }
+
+  playWhistle() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      [0, 0.14].forEach(start => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(2400, now + start);
+        osc.frequency.linearRampToValueAtTime(2800, now + start + 0.04);
+        osc.frequency.linearRampToValueAtTime(2400, now + start + 0.1);
+        gain.gain.setValueAtTime(0.22 * this.volume, now + start);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + start + 0.1);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + start);
+        osc.stop(now + start + 0.1);
+      });
+    } catch (e) {}
+  }
 }
 
 export const soundFx = new SoundFxManager();

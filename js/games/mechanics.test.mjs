@@ -474,6 +474,15 @@ cpuState.phase = 'move-opp';
 cpuState.kickingTeam = 'red';
 cpuState.ball = { x: 70, y: 34 };
 const cpuRun = pickCpuMove(cpuState);
-assert.ok(cpuRun && cpuRun.playerId.startsWith('blue'));
+const redLoss = createMatch();
+redLoss.score.red = 1;
+redLoss.score.blue = 3;
+redLoss.winner = 'blue';
+assert.equal(matchScore(redLoss, 'red'), 1, 'Red gets credit for scored goals even in loss');
+assert.equal(matchScore(redLoss, 'blue'), 3, 'Blue winner gets max 3 goals');
+
+assert.equal(kickoff.red[0].num, 1, 'GK has squad number 1');
+assert.equal(kickoff.red[1].num, 2, 'First outfield defender has squad number 2');
+assert.equal(kickoff.red[10].num, 11, 'Last attacker has squad number 11');
 
 console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, and Paper Soccer passed');

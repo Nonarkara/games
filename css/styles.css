@@ -2644,3 +2644,16 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
   color: #0a0e14;
 }
 .paper-soccer .ps-play { width: 100%; margin-top: 8px; }
+
+@media (max-width: 640px) {
+  .paper-soccer .ps-board {
+    padding: 0 10px;
+    min-height: 220px;
+  }
+  .paper-soccer .ps-skip {
+    min-width: 48px;
+    min-height: 34px;
+    padding: 4px 6px;
+    font-size: 7px;
+  }
+}
