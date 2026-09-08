@@ -29,8 +29,8 @@ export const MAX_KICK = 56;
 // line blocked, and the ball was drawn lofting up to 16 units into the air on
 // every kick, which is why shots read as sailing over a defender's head into
 // the net. Nothing leaves the ground any more.
-export const BODY_R = 3.1;    // an outfield disc, as drawn
-export const BALL_R = 1.35;   // the ball, as drawn
+export const BODY_R = 2.2;    // an outfield disc, as drawn
+export const BALL_R = 1.1;    // the ball, as drawn
 export const BLOCK_RADIUS = BODY_R + BALL_R;      // two discs touching
 export const GK_REACH = BLOCK_RADIUS + 2.0;       // keepers dive, so they cover more
 export const POWER_CEILING = 1.12;
@@ -182,7 +182,14 @@ export function resetKickoff(state, kickingTeam) {
   state.phase = 'kick';
   state.kickingTeam = kickingTeam;
   state.winner = null;
-  refreshPossession(state);
+  // The man taking the kickoff stands over the ball, exactly as he does after
+  // every other restart. Leaving him a stride behind it made the first move of
+  // the match a pass back to yourself from a player who was not on the ball.
+  const taker = closestTo(state.ball, teamOf(state, kickingTeam)).player;
+  state.possession = kickingTeam;
+  state.possessorId = taker.id;
+  taker.x = state.ball.x;
+  taker.y = state.ball.y;
   return state;
 }
 
@@ -734,7 +741,7 @@ export function renderPaperSoccer(container, onClose) {
             <span class="text-xl text-amber-400" aria-hidden="true">⚽</span>
             <div>
               <h2 class="text-sm font-black text-amber-400 tracking-wider">PAPER SOCCER</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">Aim · hold · release · first to three</p>
+              <p class="text-[10px] text-amber-500/80 uppercase">Point · hold for weight · release · first to three</p>
             </div>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
@@ -745,7 +752,7 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Table soccer, computed. Aim, hold to load the flick, release. The ball slides flat in a straight line and any disc in that line stops it — so find the gap. The nearest man to where it stops picks it up, then both sides run one player before the next flick.</p>
+          <p class="ps-setup-lead">Table soccer, computed. Point anywhere on the pitch for direction, hold to build weight, release to strike — the longer you hold, the further it goes. The ball slides flat in a straight line and any disc in that line stops it, so find the gap. The nearest man to where it stops picks it up, then both sides run one player before the next flick.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -922,7 +929,9 @@ export function renderPaperSoccer(container, onClose) {
       const pt = pointerInfo(event);
 
       if (state.phase === 'kick') {
-        if (dist(pt, state.ball) > 12) return;
+        // Press anywhere: the line from the ball to your finger is the
+        // direction, the hold is the weight. Requiring you to grab the ball
+        // first meant most presses on the pitch did nothing at all.
         if (event.pointerId != null && el.setPointerCapture) {
           try { el.setPointerCapture(event.pointerId); } catch (e) {}
         }
@@ -1337,7 +1346,7 @@ export function renderPaperSoccer(container, onClose) {
 
   function drawMan(player) {
     const p = toScreen(player);
-    const r = Math.max(7, BODY_R * map.scale);
+    const r = Math.max(5, BODY_R * map.scale);
     const facing = player.team === 'red' ? 0 : Math.PI;
 
     ctx.save();
@@ -1451,7 +1460,7 @@ export function renderPaperSoccer(container, onClose) {
     ctx.fill();
 
     const ballY = p.y;
-    const br = Math.max(5, BALL_R * map.scale);
+    const br = Math.max(4, BALL_R * map.scale);
     ctx.fillStyle = AMBER;
     ctx.beginPath();
     ctx.arc(p.x, ballY, br, 0, Math.PI * 2);
@@ -1571,6 +1580,17 @@ export function renderPaperSoccer(container, onClose) {
     ctx.moveTo(x + mark, y);
     ctx.lineTo(x + mark, y + barH);
     ctx.stroke();
+
+    // Name the dial. "Release when it feels right" is only playable if you can
+    // see what you are releasing at.
+    ctx.fillStyle = DIM;
+    ctx.font = '9px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('WEIGHT', x, y - 4);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = live.power > 1 ? '#f87171' : AMBER;
+    ctx.fillText(`${Math.round((live.power / POWER_CEILING) * 100)}%`, x + barW, y - 4);
+    ctx.textAlign = 'center';
   }
 
   function drawSeats() {
@@ -1584,7 +1604,7 @@ export function renderPaperSoccer(container, onClose) {
             : cpuBusy
               ? 'MACHINE THINKING...'
               : state.phase === 'kick'
-                ? `${state.possession.toUpperCase()}'S FLICK · AIM, HOLD, RELEASE`
+                ? `${state.possession.toUpperCase()}'S FLICK · POINT ANYWHERE · HOLD FOR WEIGHT · RELEASE`
                 : moverTeam(state)
                   ? `${moverTeam(state).toUpperCase()}'S RUN · DRAG A TEAMMATE INTO SPACE`
                   : 'MATCH OVER')
