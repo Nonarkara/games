@@ -699,7 +699,7 @@ export const BRAIN_GUIDES = {
     label: 'Pass-and-move planning', minutes: '5–12 min',
     practice: 'Point at the gap in their shape, hold to build weight, release. The ball slides flat and any man in the line stops it. Nearest player picks it up.',
     why: 'You only get one run after each pass, so the skill is placing the ball where you can own it — not flicking as hard as you can.',
-    tip: 'Look down the line before you pull. A long shot crosses more bodies than a short pass, so it is the easier one to block.',
+    tip: 'Watch the keeper ring shrink as you come forward. From distance he covers the whole mouth; from the box he cannot.',
     stack: ['kahneman', 'werbach']
   },
   'memory-matrix': {

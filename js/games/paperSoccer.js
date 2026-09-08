@@ -32,7 +32,18 @@ export const MAX_KICK = 56;
 export const BODY_R = 2.2;    // an outfield disc, as drawn
 export const BALL_R = 1.1;    // the ball, as drawn
 export const BLOCK_RADIUS = BODY_R + BALL_R;      // two discs touching
-export const GK_REACH = BLOCK_RADIUS + 2.0;       // keepers dive, so they cover more
+export const GK_REACH = BLOCK_RADIUS + 2.0;       // a keeper's standing reach
+// ...and he sets himself as the ball comes from further out. A shot from the
+// halfway line gives him all the time in the world; one from the six-yard box
+// gives him none. This is what makes working the ball upfield the point of the
+// game instead of a formality — without it a full-weight flick from the centre
+// spot simply goes in, which is exactly what it did.
+export const GK_SET_PER_UNIT = 0.09;
+
+/** How much of the mouth this keeper covers against a shot struck from `from`. */
+export function keeperReach(from, keeper) {
+  return GK_REACH + dist(from, keeper) * GK_SET_PER_UNIT;
+}
 export const POWER_CEILING = 1.12;
 export const OVER_EXTRA = 10;
 export const MOVE_FIELD = 18;
@@ -279,7 +290,7 @@ function nearestOnSegment(a, b, p) {
 export function firstBlocker(ball, dest, defenders = []) {
   let best = null;
   for (const defender of defenders) {
-    const reach = defender.role === 'gk' ? GK_REACH : BLOCK_RADIUS;
+    const reach = defender.role === 'gk' ? keeperReach(ball, defender) : BLOCK_RADIUS;
     const near = nearestOnSegment(ball, dest, defender);
     // t<=0.04 is a defender standing on the kicker, not one in the lane.
     if (near.t <= 0.04 || near.gap > reach) continue;
@@ -752,7 +763,7 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Table soccer, computed. Point anywhere on the pitch for direction, hold to build weight, release to strike — the longer you hold, the further it goes. The ball slides flat in a straight line and any disc in that line stops it, so find the gap. The nearest man to where it stops picks it up, then both sides run one player before the next flick.</p>
+          <p class="ps-setup-lead">Table soccer, computed. Point anywhere for direction, hold to build weight, release to strike — the longer you hold, the further it goes. The ball slides flat in a straight line and any disc in that line stops it, so find the gap. Then tap where a man should be and the nearest one runs there. Keepers set themselves against long shots, so the goal only really opens once you work the ball close.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -957,15 +968,21 @@ export function renderPaperSoccer(container, onClose) {
         return;
       }
 
-      if (selectedId) {
-        const target = dist(pt, state.ball) <= 6 ? { ...state.ball } : pt;
-        const before = state.phase;
-        applyMove(state, selectedId, target);
-        if (state.phase === before) { draw(); return; }  // refused — still your run
-        selectedId = null;
-        soundFx.playClick();
-        afterHumanAct();
-      }
+      const target = dist(pt, state.ball) <= 6 ? { ...state.ball } : pt;
+
+      // Nothing picked up, and you tapped open grass: send whoever can get
+      // there. The decision worth making is WHERE a man should be, not which
+      // shirt runs — asking for both made two thirds of every match's taps
+      // bookkeeping. Drag a specific man when you want that one.
+      const runner = selectedId || bestCollector(movableMen(team), target, state).player?.id;
+      if (!runner) return;
+
+      const before = state.phase;
+      applyMove(state, runner, target);
+      if (state.phase === before) { draw(); return; }  // refused — still your run
+      selectedId = null;
+      soundFx.playClick();
+      afterHumanAct();
     };
 
     const move = event => {
@@ -1080,6 +1097,28 @@ export function renderPaperSoccer(container, onClose) {
   function cpuLater() {
     clearTimeout(cpuRetry);
     cpuRetry = setTimeout(maybeCpu, 140);
+  }
+
+  // Test hook. `?psdebug=1` exposes the live match so the play harness can
+  // drive real matches in a real browser — the only way to find out whether
+  // this is actually playable, rather than only whether the rules are sound.
+  if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('psdebug')) {
+    window.__psf = () => ({
+      phase: state.phase, possession: state.possession, possessorId: state.possessorId,
+      score: { ...state.score }, winner: state.winner, log: state.log,
+      mover: moverTeam(state), started, flying: !!flying, cpuBusy, celebration: !!celebration,
+      red: state.red.map(p => ({ id: p.id, x: p.x, y: p.y, role: p.role })),
+      blue: state.blue.map(p => ({ id: p.id, x: p.x, y: p.y, role: p.role })),
+      ball: { ...state.ball }, map: { ...map }
+    });
+    // What a good player would do from here — the harness plays red to the
+    // same standard the machine plays blue, so a losing scoreline means the
+    // game is unfair rather than that the harness is bad at it. Separate from
+    // the state poll because the search is far too costly to run per frame.
+    window.__psfHint = () => ({
+      flick: state.phase === 'kick' ? pickCpuKick(state) : null,
+      run: moverTeam(state) ? pickCpuMove(state) : null
+    });
   }
 
   function maybeCpu() {
@@ -1396,7 +1435,7 @@ export function renderPaperSoccer(container, onClose) {
       ctx.lineWidth = 1;
       ctx.setLineDash([2, 3]);
       ctx.beginPath();
-      ctx.arc(0, 0, GK_REACH * map.scale, 0, Math.PI * 2);
+      ctx.arc(0, 0, keeperReach(state.ball, player) * map.scale, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
 
@@ -1527,7 +1566,7 @@ export function renderPaperSoccer(container, onClose) {
       label = live.kind === 'save' ? 'KEEPER GETS IT' : 'BLOCKED';
       if (live.stopper) {
         const b = toScreen(live.stopper);
-        const reach = (live.stopper.role === 'gk' ? GK_REACH : BLOCK_RADIUS) * map.scale;
+        const reach = (live.stopper.role === 'gk' ? keeperReach(state.ball, live.stopper) : BLOCK_RADIUS) * map.scale;
         ctx.strokeStyle = '#f87171';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -1606,7 +1645,7 @@ export function renderPaperSoccer(container, onClose) {
               : state.phase === 'kick'
                 ? `${state.possession.toUpperCase()}'S FLICK · POINT ANYWHERE · HOLD FOR WEIGHT · RELEASE`
                 : moverTeam(state)
-                  ? `${moverTeam(state).toUpperCase()}'S RUN · DRAG A TEAMMATE INTO SPACE`
+                  ? `${moverTeam(state).toUpperCase()}'S RUN · TAP WHERE A MAN SHOULD BE`
                   : 'MATCH OVER')
       : 'CHOOSE FORMATION & KICK OFF';
 
