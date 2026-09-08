@@ -382,7 +382,7 @@ assert.ok(kickTravel(1.12) > kickTravel(1));
 
 const mid = { x: PITCH.length / 2, y: PITCH.width / 2 };
 const longShot = resolveKick({ x: 54, y: 34 }, { x: 54 + MAX_KICK, y: 34 }, 1);
-assert.equal(longShot.kind, 'goal');
+assert.equal(longShot.kind, 'goal', 'geometry alone still scores with nobody in the lane');
 assert.equal(longShot.scorer, 'red');
 const fromOwnHalf = resolveKick({ x: 48, y: 34 }, { x: 48 + MAX_KICK, y: 34 }, 1);
 assert.equal(fromOwnHalf.kind, 'play');
@@ -394,27 +394,41 @@ const throwIn = resolveKick(mid, { x: mid.x, y: mid.y + 80 }, 1);
 assert.equal(throwIn.kind, 'throw-in');
 assert.equal(throwIn.dest.y, PITCH.width);
 
+// Bodies in the lane are what stopped "blue wins by three shots from the
+// centre spot": a dead-centre blast now walks into the keeper's hands.
+const halfway = createMatch();
+const blaster = halfway.red.reduce((a, b) => (a.x > b.x ? a : b));
+blaster.x = 54;
+blaster.y = 34;
+halfway.ball = { x: 54, y: 34 };
+halfway.possessorId = blaster.id;
+halfway.possession = 'red';
+applyKick(halfway, 0, 1);
+assert.equal(halfway.score.red, 0, 'the keeper saves a shot straight down the middle');
+assert.equal(halfway.log, 'KEEPER SAVES');
+assert.equal(halfway.possession, 'blue');
+
 const scoring = createMatch();
 const striker = scoring.red.reduce((a, b) => (a.x > b.x ? a : b));
-striker.x = 54;
-striker.y = 34;
-scoring.ball = { x: 54, y: 34 };
+striker.x = 96;
+striker.y = 26;
+scoring.ball = { x: 96, y: 26 };
 scoring.possessorId = striker.id;
 scoring.possession = 'red';
-applyKick(scoring, 0, 1);
-assert.equal(scoring.score.red, 1);
+applyKick(scoring, 0, 0.6);
+assert.equal(scoring.score.red, 1, 'a shot across the keeper from the corner of the box goes in');
 assert.equal(scoring.phase, 'kick');
 assert.equal(scoring.possession, 'blue', 'the side that conceded takes kickoff');
 
 const sweep = createMatch();
 sweep.score.red = 2;
 const finisher = sweep.red.reduce((a, b) => (a.x > b.x ? a : b));
-finisher.x = 54;
-finisher.y = 34;
-sweep.ball = { x: 54, y: 34 };
+finisher.x = 96;
+finisher.y = 26;
+sweep.ball = { x: 96, y: 26 };
 sweep.possessorId = finisher.id;
 sweep.possession = 'red';
-applyKick(sweep, 0, 1);
+applyKick(sweep, 0, 0.6);
 assert.equal(sweep.winner, 'red');
 assert.equal(sweep.phase, 'over');
 assert.equal(matchScore(sweep), GOALS_TO_WIN);

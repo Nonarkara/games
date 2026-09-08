@@ -172,10 +172,12 @@ const gamesCatalog = [
 class NgsApp {
   constructor() {
     this.activeWing = 'train';
+    this.wingChosen = false;
+    this.focusChosen = false;
     this.searchQuery = '';
-    // First visit: a short cart (≤ ~5 min), not Dual N-Back as the default focus.
-    const shortIds = ['reaction-gate', 'one-back', 'digit-span', 'flanker', 'oddball'];
-    this.focusId = shortIds[Math.floor(Date.now() / 86400000) % shortIds.length];
+    // No seeded focus: the hero opens on the house game (see featuredGame).
+    // renderGameBay pulls focus back into the visible grid on its own.
+    this.focusId = null;
     this._releaseModalUX = null;
     this.initUI();
   }
@@ -201,6 +203,17 @@ class NgsApp {
 
   featuredGame() {
     const pool = this.filteredGames();
+    // The marquee cabinet. Paper Soccer is the house game — designed and built
+    // here, not adapted — so it holds the hero on the landing view. It lives in
+    // ARCADE while the floor opens on TRAIN, so this looks past the room
+    // filter, and it sits above the focus check because renderGameBay pulls an
+    // unchosen focus onto the first visible cart before the hero ever renders.
+    // Any deliberate pick — a room, a search, a cartridge — takes the hero back.
+    // Personalised picks still drive the recommended strip.
+    if (!this.wingChosen && !this.focusChosen && !this.searchQuery.trim()) {
+      const house = gamesCatalog.find(g => g.id === 'paper-soccer');
+      if (house) return house;
+    }
     if (this.focusId) {
       const focused = pool.find(g => g.id === this.focusId);
       if (focused) return focused;
@@ -493,11 +506,13 @@ class NgsApp {
     gridEl.querySelectorAll('[data-game]').forEach(row => {
       row.addEventListener('mouseenter', () => {
         this.focusId = row.dataset.game;
+        this.focusChosen = true;
         this.paintFocus();
         this.renderAttract();
       });
       row.addEventListener('focus', () => {
         this.focusId = row.dataset.game;
+        this.focusChosen = true;
         this.paintFocus();
         this.renderAttract();
       });
@@ -669,6 +684,7 @@ class NgsApp {
       if (wingBtn) {
         soundFx.playClick();
         this.activeWing = wingBtn.dataset.wing;
+        this.wingChosen = true;
         this.focusId = null;
         this.renderWingBar();
         this.renderGameBay();

@@ -1,10 +1,11 @@
 /**
  * Paper Soccer — table soccer as a tactical placement game.
  *
- * Drag the disc to the grass you want. After it stops, you run one man
- * toward it; then the other side runs one. Whoever can get closer owns
- * the next flick. First to three. One seat vs the machine, or two seats
- * on a landscape pad.
+ * Drag the disc to the grass you want. Whoever can get closer to where it
+ * lands owns the next flick, and a dead heat goes to the defence — so the
+ * pass, not the run, is the decision. You then run one man toward it and the
+ * other side runs one, positioning for what comes next. First to three. One
+ * seat vs the machine, or two seats on a landscape pad.
  */
 
 import { soundFx } from '../audio.js';
@@ -17,6 +18,8 @@ export const PITCH = Object.freeze({
 });
 
 export const MAX_KICK = 56;
+export const BLOCK_RADIUS = 3.4;  // an outfield body covers this much of a lane
+export const GK_REACH = 6.5;      // keepers dive, so they cover more of the mouth
 export const POWER_CEILING = 1.12;
 export const OVER_EXTRA = 10;
 export const MOVE_FIELD = 18;
@@ -233,8 +236,52 @@ function clipSideline(a, b) {
   };
 }
 
-export function resolveKick(ball, dest, power) {
+/** Nearest point on segment a→b to p, with how far along the segment it sits. */
+function nearestOnSegment(a, b, p) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len2 = dx * dx + dy * dy;
+  if (len2 < 1e-9) return { t: 0, gap: dist(a, p), point: { x: a.x, y: a.y } };
+  let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const point = { x: a.x + t * dx, y: a.y + t * dy };
+  return { t, gap: dist(point, p), point };
+}
+
+/**
+ * The first opponent whose reach covers the kick line.
+ *
+ * Without this the ball passed through every body on the pitch, so any aim
+ * inside the posts from within MAX_KICK was an unstoppable goal — the centre
+ * spot is 52.5 from goal and MAX_KICK is 56, which is why the machine could
+ * kick off and score, three times, without ever being challenged.
+ */
+export function firstBlocker(ball, dest, defenders = []) {
+  let best = null;
+  for (const defender of defenders) {
+    const reach = defender.role === 'gk' ? GK_REACH : BLOCK_RADIUS;
+    const near = nearestOnSegment(ball, dest, defender);
+    // t<=0.04 is a defender standing on the kicker, not one in the lane.
+    if (near.t <= 0.04 || near.gap > reach) continue;
+    if (!best || near.t < best.t) best = { ...near, player: defender };
+  }
+  return best;
+}
+
+export function resolveKick(ball, dest, power, defenders = []) {
   const over = power > 1;
+  const block = firstBlocker(ball, dest, defenders);
+  const atRedLine = ball.x > 0 ? xAt(ball, dest, 0) : null;
+  const atBlueLine = ball.x < PITCH.length ? xAt(ball, dest, PITCH.length) : null;
+  const exitT = atRedLine?.t ?? atBlueLine?.t ?? 1;
+  if (block && block.t < exitT) {
+    return {
+      kind: block.player.role === 'gk' ? 'save' : 'block',
+      dest: block.point,
+      to: block.player.team,
+      by: block.player.id
+    };
+  }
   const atRed = ball.x > 0 ? xAt(ball, dest, 0) : null;
   if (atRed) {
     if (inMouth(atRed.y)) {
@@ -281,7 +328,18 @@ export function applyKick(state, angle, power) {
   );
 
   const dest = kickDestination(state.ball, angle, power);
-  const result = resolveKick(state.ball, dest, power);
+  const result = resolveKick(state.ball, dest, power, opponents);
+
+  if (result.kind === 'block' || result.kind === 'save') {
+    state.ball = { ...result.dest };
+    const stopper = findPlayer(state, result.by);
+    state.possession = result.to;
+    state.possessorId = result.by;
+    if (stopper) { stopper.x = result.dest.x; stopper.y = result.dest.y; }
+    state.phase = 'kick';
+    state.log = result.kind === 'save' ? 'KEEPER SAVES' : 'BLOCKED';
+    return state;
+  }
 
   if (result.kind === 'goal') {
     state.score[result.scorer] += 1;
@@ -324,8 +382,15 @@ export function applyKick(state, angle, power) {
   }
 
   state.ball = result.dest;
-  const nearest = closestTo(state.ball, allPlayers(state)).player;
-  if (nearest.team === kickingTeam && offsideIds.has(nearest.id)) {
+  // The pass settles the loose ball, not who moves first. The kicking team
+  // always ran first and `separate` shoved the defender off the disc, so the
+  // attacker won every 50/50 and kept the ball until it scored — 40 CPU
+  // matches, 40 wins for whoever kicked off. A dead heat now goes to the
+  // defence, which is also what the on-screen mark promises the player.
+  const race = possessionPreview(state, state.ball, kickingTeam);
+  const winner = race.claim === 'yours' ? kickingTeam : otherTeam(kickingTeam);
+  const collector = winner === kickingTeam ? race.us.player : race.them.player;
+  if (winner === kickingTeam && collector && offsideIds.has(collector.id)) {
     const def = closestTo(state.ball, opponents).player;
     state.possession = def.team;
     state.possessorId = def.id;
@@ -334,9 +399,10 @@ export function applyKick(state, angle, power) {
     return state;
   }
 
+  state.looseTo = winner;
   state.kickingTeam = kickingTeam;
   state.phase = 'move-self';
-  state.log = nearest.team === kickingTeam ? 'KEEP GOING' : 'LOOSE BALL';
+  state.log = winner === kickingTeam ? 'KEEP GOING' : 'LOOSE BALL';
   return state;
 }
 
@@ -406,7 +472,14 @@ export function clampMove(player, dest, state) {
 }
 
 function finishMoves(state) {
-  refreshPossession(state);
+  // Possession was decided when the ball landed (see applyKick); the runs are
+  // positioning for the next kick, so they must not re-open the race.
+  const claimed = state.looseTo ? closestTo(state.ball, teamOf(state, state.looseTo)).player : null;
+  if (claimed) {
+    state.possession = claimed.team;
+    state.possessorId = claimed.id;
+  } else refreshPossession(state);
+  state.looseTo = null;
   state.phase = 'kick';
   const owner = findPlayer(state, state.possessorId);
   if (owner && owner.team !== state.kickingTeam) state.log = 'INTERCEPTION';
@@ -522,13 +595,17 @@ export function pickCpuKick(state) {
   const ball = state.ball;
   const { y0, y1 } = goalMouthY();
 
+  // The machine must respect bodies in the lane too — without `foes` it saw a
+  // clean shot from anywhere inside MAX_KICK and took it every single kickoff.
+  const foes = teamOf(state, otherTeam(team));
+
   const samples = Array.from({ length: 7 }, (_, i) => y0 + 1 + (i / 6) * (y1 - y0 - 2));
   for (const y of samples) {
     const goal = { x: team === 'red' ? PITCH.length : 0, y };
     const aim = aimFromPointer(ball, goal);
     if (!aim || aim.power > 1) continue;
     const dest = kickDestination(ball, aim.angle, aim.power);
-    const result = resolveKick(ball, dest, aim.power);
+    const result = resolveKick(ball, dest, aim.power, foes);
     if (result.kind === 'goal' && result.scorer === team) return aim;
   }
 
@@ -538,13 +615,14 @@ export function pickCpuKick(state) {
     const ang = (i / 24) * Math.PI * 2;
     for (const power of [0.22, 0.36, 0.5, 0.66, 0.84]) {
       const dest = kickDestination(ball, ang, power);
-      const result = resolveKick(ball, dest, power);
+      const result = resolveKick(ball, dest, power, foes);
       if (result.kind === 'goal' && result.scorer === team) return { angle: ang, power };
       if (result.kind !== 'play') continue;
       const preview = possessionPreview(state, result.dest, team);
-      if (preview.claim === 'theirs') continue;
+      // A contested landing now goes to the defence, so keeping the ball is
+      // worth more than any amount of territory.
       const toward = team === 'red' ? result.dest.x : PITCH.length - result.dest.x;
-      const own = preview.claim === 'yours' ? 16 : 0;
+      const own = preview.claim === 'yours' ? 60 : 0;
       const score = toward * 1.2 + own - preview.us.dist;
       if (score > bestScore) {
         bestScore = score;
@@ -628,7 +706,7 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Drag the disc to the grass you want. The live badge predicts ownership after one run each. Closest player flicks next.</p>
+          <p class="ps-setup-lead">Drag the disc to the grass you want. The live badge says who wins it — pass into space only your man can reach, because a 50/50 goes to the defence.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -910,9 +988,15 @@ export function renderPaperSoccer(container, onClose) {
     el.addEventListener('pointercancel', up);
   }
 
+  /** Opponents of whoever is on the ball — the bodies a kick must beat. */
+  function defendersNow() {
+    const kicker = findPlayer(state, state.possessorId);
+    return kicker ? teamOf(state, otherTeam(kicker.team)) : [];
+  }
+
   function startFlight(angle, power) {
     const dest = kickDestination(state.ball, angle, power);
-    const preview = resolveKick(state.ball, dest, power);
+    const preview = resolveKick(state.ball, dest, power, defendersNow());
     flying = {
       from: { ...state.ball },
       to: preview.dest,
@@ -1049,7 +1133,7 @@ export function renderPaperSoccer(container, onClose) {
         flying = null;
         state.ball = { ...from };
         const dest = kickDestination(state.ball, angle, power);
-        const resolved = resolveKick(state.ball, dest, power);
+        const resolved = resolveKick(state.ball, dest, power, defendersNow());
 
         if (resolved.kind === 'goal') {
           state.score[resolved.scorer] += 1;
@@ -1350,7 +1434,7 @@ export function renderPaperSoccer(container, onClose) {
     if (power < 0.1 && !aim) return null;
     const angle = aim ? aim.angle : (state.possession === 'red' ? 0 : Math.PI);
     const dest = kickDestination(state.ball, angle, Math.max(0.14, power));
-    const resolved = resolveKick(state.ball, dest, Math.max(0.14, power));
+    const resolved = resolveKick(state.ball, dest, Math.max(0.14, power), defendersNow());
     const preview = resolved.kind === 'play'
       ? possessionPreview(state, resolved.dest, state.possession)
       : null;
@@ -1386,7 +1470,7 @@ export function renderPaperSoccer(container, onClose) {
     else if (live.preview) {
       if (live.preview.claim === 'yours') { ring = AMBER; label = 'YOU GET IT'; }
       else if (live.preview.claim === 'theirs') { ring = DIM; label = 'THEY GET IT'; }
-      else { ring = INK; label = '50 / 50'; }
+      else { ring = INK; label = '50 / 50 · THEY GET IT'; }
 
       if (live.preview.us.player) {
         const a = toScreen(live.preview.us.player);

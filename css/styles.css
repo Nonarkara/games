@@ -1769,7 +1769,9 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   .arcade-account-link { min-width: 62px; padding-inline: 7px; }
   .arcade-sound { min-width: 61px; }
 
-  .cabinet-attract { min-height: 0; grid-template-columns: 1fr; }
+  /* minmax(0,…) not 1fr: a bare 1fr floors at min-content, so the panel
+     stayed 448px wide inside a 375px phone and the hero ran off-screen. */
+  .cabinet-attract { min-height: 0; grid-template-columns: minmax(0, 1fr); }
   .attract-hero { min-height: 0; }
   .attract-hero > img {
     min-height: 0;
@@ -2309,6 +2311,12 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
    the hero for returning players: last cartridge, best score, one tap.
    Register: panel, hairline, the amber rule, zero radius, 56px target. */
 .attract-continue {
+  /* The attract panel is a two-column grid with min-height:540px. Without
+     this span, CONTINUE took the first cell — the hero got pushed into
+     column 2 and the featured cart dropped to a second row, with the 56px
+     button stretched down a 540px cell. It is a full-width row of its own. */
+  grid-column: 1 / -1;
+  align-self: start;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2396,7 +2404,7 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
  * ========================================================================== */
 @media (max-width: 1100px) and (min-width: 421px) {
   .cabinet-attract {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     min-height: 0;
   }
   /* The hero image's aspect-ratio rule is already in 760px; without

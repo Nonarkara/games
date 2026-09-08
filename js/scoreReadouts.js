@@ -202,6 +202,29 @@ const FAMILY = {
       tip: 'Own it. Then pick a tougher logic cart so the win does not become a comfort habit.'
     }
   },
+  pitch: {
+    skill: 'pass-and-move planning',
+    rough: {
+      title: 'NO WAY THROUGH',
+      feel: 'Every lane you picked had a body in it. The disc goes where you place it, not where you wish it would end up.',
+      tip: 'Stop shooting from range — a defender in the lane eats it. Pass short into open grass, walk a man onto the disc, then shoot from close.'
+    },
+    warming: {
+      title: 'ONE ON THE BOARD',
+      feel: 'You got one. That usually means one clean pass into space before the shot, rather than a hopeful flick from halfway.',
+      tip: 'Repeat the move that scored. Look at the mark before you release — it tells you who owns the disc after both runs.'
+    },
+    solid: {
+      title: 'HOLDING THE PITCH',
+      feel: 'Two goals and you kept the disc more often than not. You are placing passes where your man arrives first.',
+      tip: 'Now defend on purpose: park a man in the shooting lane before they reach it, not after.'
+    },
+    sharp: {
+      title: 'MATCH WON',
+      feel: 'Three goals. You beat the bodies instead of hoping through them — that is the whole game.',
+      tip: 'Sign the board, then try the other formation. 4-3-3 gives you more forward runs and a thinner back line.'
+    }
+  },
   planning: {
     skill: 'spatial planning and foresight',
     rough: {
@@ -349,6 +372,10 @@ function familyFor(gameId) {
   if (/aim-trainer|reaction-gate/.test(gameId)) return 'hand-eye';
   if (/calibration|iowa-gambling/.test(gameId)) return 'judgment';
   if (/cog-reflection|raven-matrices|number-sense|wcst/.test(gameId)) return 'reasoning';
+  // Paper Soccer's label is "Pass-and-move planning", which fell into the
+  // tile-puzzle planning copy — a match report telling you to protect
+  // "finished rows or corners". It gets its own pitch language.
+  if (/paper-soccer/.test(gameId)) return 'pitch';
   const label = (BRAIN_GUIDES[gameId]?.label || '').toLowerCase();
   if (/memory|span|recall|loci|scanning|operation|chimp|sternberg/.test(label)) return 'memory';
   if (/attention|inhibition|impulse|interference|flanker|stroop|posner|change|search|schulte/.test(label)) return 'attention';
