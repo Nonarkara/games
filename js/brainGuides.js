@@ -697,9 +697,9 @@ export const BRAIN_GUIDES = {
   },
   'paper-soccer': {
     label: 'Pass-and-move planning', minutes: '5–12 min',
-    practice: 'Drag the disc to the grass you want. The mark says if your man can get there before theirs. Then move that man onto the ball.',
+    practice: 'Aim through a gap in their shape, hold to load the flick, release. The ball slides flat and any man in the line stops it. Nearest player picks it up.',
     why: 'You only get one run after each pass, so the skill is placing the ball where you can own it — not flicking as hard as you can.',
-    tip: 'A short pass into open grass beats a long shot when a defender is already in the lane.',
+    tip: 'Look down the line before you pull. A long shot crosses more bodies than a short pass, so it is the easier one to block.',
     stack: ['kahneman', 'werbach']
   },
   'memory-matrix': {

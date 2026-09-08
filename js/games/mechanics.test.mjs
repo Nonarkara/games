@@ -36,6 +36,9 @@ import { STROOP_COLORS, makeColorMarchRound } from './eduGames.js';
 import {
   GOALS_TO_WIN,
   MAX_KICK,
+  BLOCK_RADIUS,
+  BODY_R,
+  BALL_R,
   MOVE_FIELD,
   MOVE_GK,
   PITCH,
@@ -54,7 +57,9 @@ import {
   aimFromPointer,
   placeTeam,
   resolveKick,
-  skipMove
+  skipMove,
+  moverTeam,
+  applyMove,
 } from './paperSoccer.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
@@ -381,6 +386,24 @@ assert.ok(kickTravel(1) > 50);
 assert.ok(kickTravel(1.12) > kickTravel(1));
 
 const mid = { x: PITCH.length / 2, y: PITCH.width / 2 };
+// The conservation law of this game: what you see is what stops the ball.
+// The ball rolls flat in a straight line, so a kick is blocked exactly when
+// the ball's disc touches a body's disc — no more, no less. Drift between the
+// drawn radius and the blocking radius is how shots came to read as sailing
+// over a defender's head.
+assert.equal(BLOCK_RADIUS, BODY_R + BALL_R, 'the drawn discs are the blocking discs');
+{
+  const lane = { x: 20, y: 34 };
+  const far = { x: 90, y: 34 };
+  const grazed = [{ id: 'b-1', team: 'blue', role: 'field', x: 55, y: 34 + BLOCK_RADIUS - 0.1 }];
+  const cleared = [{ id: 'b-1', team: 'blue', role: 'field', x: 55, y: 34 + BLOCK_RADIUS + 0.1 }];
+  assert.equal(resolveKick(lane, far, 1, grazed).kind, 'block', 'discs touching stops the ball');
+  assert.equal(resolveKick(lane, far, 1, cleared).kind, 'play', 'a hair of daylight lets it through');
+  // A body behind the kicker is not in the lane.
+  const behind = [{ id: 'b-2', team: 'blue', role: 'field', x: 5, y: 34 }];
+  assert.equal(resolveKick(lane, far, 1, behind).kind, 'play', 'only bodies in front block');
+}
+
 const longShot = resolveKick({ x: 54, y: 34 }, { x: 54 + MAX_KICK, y: 34 }, 1);
 assert.equal(longShot.kind, 'goal', 'geometry alone still scores with nobody in the lane');
 assert.equal(longShot.scorer, 'red');
@@ -438,11 +461,21 @@ const passer = loose.red.concat(loose.blue).find(p => p.id === loose.possessorId
 const interceptor = closestTo({ x: 70, y: 20 }, loose.blue).player;
 loose.ball = { x: passer.x, y: passer.y };
 applyKick(loose, Math.atan2(interceptor.y - loose.ball.y, interceptor.x - loose.ball.x), 0.35);
-if (loose.phase === 'move-self') {
-  skipMove(loose);
-  skipMove(loose);
-  assert.equal(loose.phase, 'kick');
-}
+// A kick that ends in open play hands the ball to the nearest man on the
+// pitch, then both sides run one player before the next flick: the side on
+// the ball first, the side answering it second.
+assert.equal(loose.phase, 'move');
+assert.equal(moverTeam(loose), loose.possession, 'the side on the ball runs first');
+const holder = loose[loose.possession].find(p => p.id === loose.possessorId);
+assert.ok(Math.hypot(holder.x - loose.ball.x, holder.y - loose.ball.y) < 1e-6,
+  'the nearest man snaps onto the ball');
+assert.equal(applyMove(loose, holder.id, { x: holder.x + 5, y: holder.y }).phase, 'move',
+  'the man holding the ball cannot run off it');
+skipMove(loose);
+assert.equal(loose.phase, 'move-opp');
+assert.equal(moverTeam(loose), otherTeam(loose.possession), 'then the other side answers');
+skipMove(loose);
+assert.equal(loose.phase, 'kick');
 
 const parked = { id: 'red-x', team: 'red', role: 'field', x: 92, y: 34 };
 const blueWall = placeTeam('blue', '4-4-2');
@@ -485,7 +518,6 @@ cpuState.possessorId = cpuState.blue.reduce((a, b) => (a.x < b.x ? a : b)).id;
 const cpuKick = pickCpuKick(cpuState);
 assert.ok(cpuKick && Number.isFinite(cpuKick.angle) && cpuKick.power > 0);
 cpuState.phase = 'move-opp';
-cpuState.kickingTeam = 'red';
 cpuState.ball = { x: 70, y: 34 };
 const cpuRun = pickCpuMove(cpuState);
 const redLoss = createMatch();

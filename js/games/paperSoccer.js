@@ -1,9 +1,12 @@
 /**
  * Paper Soccer — table soccer as a tactical placement game.
  *
- * Drag the disc to the grass you want. Whoever can get closer to where it
- * lands owns the next flick, and a dead heat goes to the defence — so the
- * pass, not the run, is the decision. You then run one man toward it and the
+ * The weighted-disc table game, run on rules instead of physics. Aim where you
+ * point, hold to load the flick, release. The ball slides flat in a straight
+ * line and the first disc that line touches stops it, so the gap between
+ * defenders is the whole game. The nearest man to where it stops snaps onto
+ * it and his side is on the ball; then that side runs one player and the other
+ * side answers with one, before the next flick. You then run one man toward it and the
  * other side runs one, positioning for what comes next. First to three. One
  * seat vs the machine, or two seats on a landscape pad.
  */
@@ -18,8 +21,18 @@ export const PITCH = Object.freeze({
 });
 
 export const MAX_KICK = 56;
-export const BLOCK_RADIUS = 3.4;  // an outfield body covers this much of a lane
-export const GK_REACH = 6.5;      // keepers dive, so they cover more of the mouth
+
+// The picture is the rule. The ball rolls flat along the grass in a straight
+// line, and it is stopped when its disc touches a body's disc — so these two
+// radii are what the renderer draws AND what the physics tests. They used to
+// disagree twice over: the drawn body was 3.1 while only 3.4 from the centre
+// line blocked, and the ball was drawn lofting up to 16 units into the air on
+// every kick, which is why shots read as sailing over a defender's head into
+// the net. Nothing leaves the ground any more.
+export const BODY_R = 3.1;    // an outfield disc, as drawn
+export const BALL_R = 1.35;   // the ball, as drawn
+export const BLOCK_RADIUS = BODY_R + BALL_R;      // two discs touching
+export const GK_REACH = BLOCK_RADIUS + 2.0;       // keepers dive, so they cover more
 export const POWER_CEILING = 1.12;
 export const OVER_EXTRA = 10;
 export const MOVE_FIELD = 18;
@@ -332,13 +345,8 @@ export function applyKick(state, angle, power) {
 
   if (result.kind === 'block' || result.kind === 'save') {
     state.ball = { ...result.dest };
-    const stopper = findPlayer(state, result.by);
-    state.possession = result.to;
-    state.possessorId = result.by;
-    if (stopper) { stopper.x = result.dest.x; stopper.y = result.dest.y; }
-    state.phase = 'kick';
-    state.log = result.kind === 'save' ? 'KEEPER SAVES' : 'BLOCKED';
-    return state;
+    return takeOver(state, findPlayer(state, result.by),
+      result.kind === 'save' ? 'KEEPER SAVES' : 'INTERCEPTED');
   }
 
   if (result.kind === 'goal') {
@@ -353,56 +361,45 @@ export function applyKick(state, angle, power) {
     return resetKickoff(state, otherTeam(result.scorer));
   }
 
-  if (result.kind === 'over') {
+  if (result.kind === 'over' || result.kind === 'goal-kick') {
+    const to = result.kind === 'over' ? result.keeperTeam : result.to;
     state.ball = { ...result.dest };
-    snapKeeperToBall(state, result.keeperTeam);
-    refreshPossession(state);
-    state.phase = 'kick';
-    state.log = 'OVER THE BAR';
-    return state;
-  }
-
-  if (result.kind === 'goal-kick') {
-    state.ball = { ...result.dest };
-    snapKeeperToBall(state, result.to);
-    refreshPossession(state);
-    state.phase = 'kick';
-    state.log = 'GOAL KICK';
-    return state;
+    snapKeeperToBall(state, to);
+    return takeOver(state, teamOf(state, to).find(p => p.role === 'gk'),
+      result.kind === 'over' ? 'OVERHIT · KEEPER COLLECTS' : 'GOAL KICK');
   }
 
   if (result.kind === 'throw-in') {
     state.ball = result.dest;
-    const { player } = closestTo(state.ball, teamOf(state, otherTeam(kickingTeam)));
-    state.possession = player.team;
-    state.possessorId = player.id;
-    state.phase = 'kick';
-    state.log = 'THROW-IN';
-    return state;
+    return takeOver(state, closestTo(state.ball, opponents).player, 'THROW-IN');
   }
 
+  // The ball stops; the nearest man on the pitch snaps onto it and his side
+  // is on the ball. No two-sided run race any more — where you place the pass
+  // IS the decision, so a short one to your own man keeps the turn and a long
+  // one that lands nearer a defender hands it over. Kick the ball a little way
+  // into your own space and you snap to it again: that is the dribble.
   state.ball = result.dest;
-  // The pass settles the loose ball, not who moves first. The kicking team
-  // always ran first and `separate` shoved the defender off the disc, so the
-  // attacker won every 50/50 and kept the ball until it scored — 40 CPU
-  // matches, 40 wins for whoever kicked off. A dead heat now goes to the
-  // defence, which is also what the on-screen mark promises the player.
-  const race = possessionPreview(state, state.ball, kickingTeam);
-  const winner = race.claim === 'yours' ? kickingTeam : otherTeam(kickingTeam);
-  const collector = winner === kickingTeam ? race.us.player : race.them.player;
-  if (winner === kickingTeam && collector && offsideIds.has(collector.id)) {
-    const def = closestTo(state.ball, opponents).player;
-    state.possession = def.team;
-    state.possessorId = def.id;
-    state.phase = 'kick';
-    state.log = 'OFFSIDE';
-    return state;
+  const claim = closestTo(state.ball, allPlayers(state)).player;
+  if (claim.team === kickingTeam && offsideIds.has(claim.id)) {
+    return takeOver(state, closestTo(state.ball, opponents).player, 'OFFSIDE');
   }
+  return takeOver(state, claim, claim.team === kickingTeam ? 'ON THE BALL' : 'TURNOVER');
+}
 
-  state.looseTo = winner;
-  state.kickingTeam = kickingTeam;
-  state.phase = 'move-self';
-  state.log = winner === kickingTeam ? 'KEEP GOING' : 'LOOSE BALL';
+/**
+ * Hand the ball to `player`: he snaps onto it, his side is in possession, and
+ * his side gets the one move before the next kick. The single place a turn
+ * changes hands, so the rule cannot drift between outcomes.
+ */
+function takeOver(state, player, log) {
+  if (!player) return state;
+  player.x = state.ball.x;
+  player.y = state.ball.y;
+  state.possession = player.team;
+  state.possessorId = player.id;
+  state.phase = 'move';
+  state.log = log;
   return state;
 }
 
@@ -471,53 +468,46 @@ export function clampMove(player, dest, state) {
   return separated;
 }
 
-function finishMoves(state) {
-  // Possession was decided when the ball landed (see applyKick); the runs are
-  // positioning for the next kick, so they must not re-open the race.
-  const claimed = state.looseTo ? closestTo(state.ball, teamOf(state, state.looseTo)).player : null;
-  if (claimed) {
-    state.possession = claimed.team;
-    state.possessorId = claimed.id;
-  } else refreshPossession(state);
-  state.looseTo = null;
-  state.phase = 'kick';
-  const owner = findPlayer(state, state.possessorId);
-  if (owner && owner.team !== state.kickingTeam) state.log = 'INTERCEPTION';
-  else if (!state.log || state.log === 'KEEP GOING' || state.log === 'LOOSE BALL') {
-    state.log = 'YOUR FLICK';
-  }
-  return state;
+/** Who is on the clock during a move phase: the side on the ball, then the other. */
+export function moverTeam(state) {
+  if (state.phase === 'move') return state.possession;
+  if (state.phase === 'move-opp') return otherTeam(state.possession);
+  return null;
 }
 
 export function applyMove(state, playerId, dest) {
   if (state.winner) return state;
-  const expected = state.phase === 'move-self'
-    ? state.kickingTeam
-    : state.phase === 'move-opp'
-      ? otherTeam(state.kickingTeam)
-      : null;
+  const expected = moverTeam(state);
   if (!expected) return state;
   const player = findPlayer(state, playerId);
   if (!player || player.team !== expected) return state;
+  // Never the man standing on the ball — he is holding it. Move a teammate
+  // into space, then pass to him.
+  if (player.id === state.possessorId) return state;
   const next = clampMove(player, dest, state);
   player.x = next.x;
   player.y = next.y;
-  if (state.phase === 'move-self') {
-    state.phase = 'move-opp';
-    state.log = `${otherTeam(expected).toUpperCase()} MOVE`;
-  } else {
-    finishMoves(state);
-  }
-  return state;
+  return advanceMove(state);
 }
 
 export function skipMove(state) {
-  if (state.phase === 'move-self') {
+  if (!moverTeam(state)) return state;
+  return advanceMove(state);
+}
+
+/**
+ * The side on the ball runs one man, then the other side runs one — so a
+ * defence can always answer the ball moving, which is the whole reason to
+ * keep a body between it and your goal.
+ */
+function advanceMove(state) {
+  if (state.phase === 'move') {
     state.phase = 'move-opp';
-    state.log = `${otherTeam(state.kickingTeam).toUpperCase()} MOVE`;
-    return state;
+    state.log = `${otherTeam(state.possession).toUpperCase()} RUN`;
+  } else {
+    state.phase = 'kick';
+    state.log = 'YOUR FLICK';
   }
-  if (state.phase === 'move-opp') return finishMoves(state);
   return state;
 }
 
@@ -564,16 +554,15 @@ export function bestCollector(players, dest, state) {
 }
 
 /**
- * Live read of a pass: after both sides spend their one run toward the
- * landing, who is closer? 'yours' / 'theirs' / 'contested'.
+ * Live read of a pass, under exactly the rule applyKick uses: the nearest man
+ * on the pitch to where the ball stops snaps onto it. Straight-line distance,
+ * no runs, no margin — so the badge on screen and the machine's plan and the
+ * outcome are all the same computation.
  */
 export function possessionPreview(state, dest, kickingTeam) {
-  const us = bestCollector(teamOf(state, kickingTeam), dest, state);
-  const them = bestCollector(teamOf(state, otherTeam(kickingTeam)), dest, state);
-  let claim = 'contested';
-  if (us.dist + 0.55 < them.dist) claim = 'yours';
-  else if (them.dist + 0.55 < us.dist) claim = 'theirs';
-  return { claim, us, them };
+  const us = closestTo(dest, teamOf(state, kickingTeam));
+  const them = closestTo(dest, teamOf(state, otherTeam(kickingTeam)));
+  return { claim: us.dist <= them.dist ? 'yours' : 'theirs', us, them };
 }
 
 export function goalTarget(team) {
@@ -619,11 +608,13 @@ export function pickCpuKick(state) {
       if (result.kind === 'goal' && result.scorer === team) return { angle: ang, power };
       if (result.kind !== 'play') continue;
       const preview = possessionPreview(state, result.dest, team);
-      // A contested landing now goes to the defence, so keeping the ball is
-      // worth more than any amount of territory.
+      // Losing the ball costs more than any amount of territory. Among passes
+      // it keeps, prefer the one that gains ground — and charge a small toll
+      // for shuffling the ball back and forth over the same grass.
       const toward = team === 'red' ? result.dest.x : PITCH.length - result.dest.x;
-      const own = preview.claim === 'yours' ? 60 : 0;
-      const score = toward * 1.2 + own - preview.us.dist;
+      const here = team === 'red' ? ball.x : PITCH.length - ball.x;
+      const own = preview.claim === 'yours' ? 200 : 0;
+      const score = own + (toward - here) * 1.4 - preview.us.dist * 0.4;
       if (score > bestScore) {
         bestScore = score;
         best = { angle: ang, power };
@@ -637,15 +628,55 @@ export function pickCpuKick(state) {
 
 /** Pure CPU run: the man who can get closest to the disc, then go there. */
 export function pickCpuMove(state) {
-  const team = state.phase === 'move-self'
-    ? state.kickingTeam
-    : state.phase === 'move-opp'
-      ? otherTeam(state.kickingTeam)
-      : null;
+  const team = moverTeam(state);
   if (!team) return null;
-  const { player } = bestCollector(teamOf(state, team), state.ball, state);
-  if (!player) return null;
-  return { playerId: player.id, dest: { x: state.ball.x, y: state.ball.y } };
+  const mates = teamOf(state, team).filter(p => p.id !== state.possessorId && p.role !== 'gk');
+  if (!mates.length) return null;
+  const attacking = team === state.possession;
+  const foes = teamOf(state, otherTeam(team));
+
+  if (attacking) {
+    // Offer a receiver. Prefer a man who ends up ahead of the ball with a
+    // clear lane to it, but take the best available push either way — a
+    // defence outnumbers you behind the ball, so refusing to move at all
+    // until the lane is perfect is how an attack seizes up entirely.
+    const goal = goalTarget(team);
+    let best = null;
+    let bestScore = -Infinity;
+    for (const mate of mates) {
+      for (const frac of [0.2, 0.4, 0.7, 1]) {
+        for (const spread of [0, -14, 14]) {
+          const landing = clampMove(mate, {
+            x: mate.x + (goal.x - mate.x) * frac,
+            y: mate.y + (goal.y - mate.y) * frac + spread
+          }, state);
+          const open = !firstBlocker(state.ball, landing, foes);
+          const gain = team === 'red' ? landing.x : PITCH.length - landing.x;
+          const score = gain + (open ? 45 : 0) - dist(state.ball, landing) * 0.25;
+          if (score > bestScore) { bestScore = score; best = { playerId: mate.id, dest: landing }; }
+        }
+      }
+    }
+    return best;
+  }
+
+  // Defending: stand on the line between the ball and your own goal — the
+  // shot is only on when that line is clear, so occupying it is the job.
+  const own = goalTarget(otherTeam(team));
+  let best = null;
+  let bestGap = Infinity;
+  for (const mate of mates) {
+    for (const frac of [0.25, 0.4, 0.55, 0.7]) {
+      const spot = {
+        x: state.ball.x + (own.x - state.ball.x) * frac,
+        y: state.ball.y + (own.y - state.ball.y) * frac
+      };
+      const landing = clampMove(mate, spot, state);
+      const gap = dist(landing, spot);
+      if (gap < bestGap) { bestGap = gap; best = { playerId: mate.id, dest: landing }; }
+    }
+  }
+  return best;
 }
 
 /* ===========================================================================
@@ -682,8 +713,7 @@ export function renderPaperSoccer(container, onClose) {
   function isHumanTurn() {
     if (!vsCpu) return true;
     if (state.phase === 'kick') return state.possession === 'red';
-    if (state.phase === 'move-self') return state.kickingTeam === 'red';
-    if (state.phase === 'move-opp') return state.kickingTeam === 'blue';
+    if (state.phase === 'move' || state.phase === 'move-opp') return moverTeam(state) === 'red';
     return false;
   }
 
@@ -695,7 +725,7 @@ export function renderPaperSoccer(container, onClose) {
             <span class="text-xl text-amber-400" aria-hidden="true">⚽</span>
             <div>
               <h2 class="text-sm font-black text-amber-400 tracking-wider">PAPER SOCCER</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">Place a pass · run to the disc · first to three</p>
+              <p class="text-[10px] text-amber-500/80 uppercase">Aim · hold · release · first to three</p>
             </div>
           </div>
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>
@@ -706,7 +736,7 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Drag the disc to the grass you want. The live badge says who wins it — pass into space only your man can reach, because a 50/50 goes to the defence.</p>
+          <p class="ps-setup-lead">Table soccer, computed. Aim, hold to load the flick, release. The ball slides flat in a straight line and any disc in that line stops it — so find the gap. The nearest man to where it stops picks it up, then both sides run one player before the next flick.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -787,13 +817,13 @@ export function renderPaperSoccer(container, onClose) {
       const key = event.key;
       if (key === 's' || key === 'S') {
         event.preventDefault();
-        const team = state.phase === 'move-self' ? state.kickingTeam : otherTeam(state.kickingTeam);
+        const team = moverTeam(state);
         onSkip(team);
         return;
       }
       if (key === 'Tab') {
         event.preventDefault();
-        const mover = state.phase === 'move-self' ? state.kickingTeam : otherTeam(state.kickingTeam);
+        const mover = moverTeam(state);
         const mates = teamOf(state, mover).filter(p => p.role === 'field');
         const curIdx = mates.findIndex(p => p.id === selectedId);
         const nextIdx = (curIdx + 1) % mates.length;
@@ -808,7 +838,7 @@ export function renderPaperSoccer(container, onClose) {
           if (aim) startFlight(aim.angle, aim.power);
           return;
         }
-        if (selectedId && (state.phase === 'move-self' || state.phase === 'move-opp')) {
+        if (selectedId && moverTeam(state)) {
           applyMove(state, selectedId, { ...state.ball });
           selectedId = null;
           soundFx.playClick();
@@ -891,7 +921,7 @@ export function renderPaperSoccer(container, onClose) {
         return;
       }
 
-      const team = state.phase === 'move-self' ? state.kickingTeam : otherTeam(state.kickingTeam);
+      const team = moverTeam(state);
       const touchedPlayer = teamOf(state, team).find(p => dist(pt, p) <= 5);
       if (touchedPlayer) {
         if (event.pointerId != null && el.setPointerCapture) {
@@ -948,21 +978,19 @@ export function renderPaperSoccer(container, onClose) {
 
       if (charge) {
         const pt = pointerInfo(event);
-        const holdPower = (performance.now() - charge.start) / CHARGE_MS * POWER_CEILING;
+        const held = (performance.now() - charge.start) / CHARGE_MS;
         const aim = aimFromPointer(state.ball, pt);
         charge = null;
 
-        const isDragAim = aim && dist(state.ball, pt) >= 1.2;
-        const power = isDragAim
-          ? Math.min(POWER_CEILING, Math.max(0.14, aim.power))
-          : Math.min(POWER_CEILING, Math.max(aim ? aim.power : 0, holdPower));
-
-        if (!aim && power < 0.16) {
+        // Point for direction, hold for power, release to strike. A tap that
+        // never charged is a mis-touch, not a nudge.
+        const power = Math.min(POWER_CEILING, held * POWER_CEILING);
+        if (power < 0.14) {
           draw();
           return;
         }
         const angle = aim ? aim.angle : (state.possession === 'red' ? 0 : Math.PI);
-        startFlight(angle, Math.max(0.14, power));
+        startFlight(angle, power);
         return;
       }
 
@@ -1019,16 +1047,14 @@ export function renderPaperSoccer(container, onClose) {
       endMatch();
       return;
     }
-    if (state.phase === 'move-self' && isHumanTurn()) selectCollector(state.kickingTeam);
-    if (state.phase === 'move-opp' && isHumanTurn()) selectCollector(otherTeam(state.kickingTeam));
+    if (moverTeam(state) && isHumanTurn()) selectCollector(moverTeam(state));
     maybeCpu();
   }
 
   function maybeCpu() {
     if (!vsCpu || cpuBusy || flying || celebration || charge || !started || state.winner) return;
     const cpuActs = (state.phase === 'kick' && state.possession === cpuTeam())
-      || (state.phase === 'move-self' && state.kickingTeam === cpuTeam())
-      || (state.phase === 'move-opp' && state.kickingTeam === humanTeam());
+      || (moverTeam(state) === cpuTeam());
     if (!cpuActs) return;
     cpuBusy = true;
     const wait = state.phase === 'kick' ? 520 : 380;
@@ -1048,8 +1074,8 @@ export function renderPaperSoccer(container, onClose) {
         endMatch();
         return;
       }
-      if (isHumanTurn() && (state.phase === 'move-self' || state.phase === 'move-opp')) {
-        const team = state.phase === 'move-self' ? state.kickingTeam : otherTeam(state.kickingTeam);
+      if (isHumanTurn() && moverTeam(state)) {
+        const team = moverTeam(state);
         selectCollector(team);
       }
       maybeCpu();
@@ -1059,8 +1085,7 @@ export function renderPaperSoccer(container, onClose) {
   function onSkip(team) {
     if (!started || flying || celebration || cpuBusy) return;
     if (!isHumanTurn()) return;
-    if (state.phase === 'move-self' && team === state.kickingTeam) skipMove(state);
-    else if (state.phase === 'move-opp' && team === otherTeam(state.kickingTeam)) skipMove(state);
+    if (team === moverTeam(state)) skipMove(state);
     selectedId = null;
     afterHumanAct();
     draw();
@@ -1070,11 +1095,7 @@ export function renderPaperSoccer(container, onClose) {
     const redBtn = container.querySelector('.ps-skip-red');
     const blueBtn = container.querySelector('.ps-skip-blue');
     if (!redBtn) return;
-    const mover = state.phase === 'move-self'
-      ? state.kickingTeam
-      : state.phase === 'move-opp'
-        ? otherTeam(state.kickingTeam)
-        : null;
+    const mover = moverTeam(state);
     redBtn.hidden = !(mover === 'red' && isHumanTurn());
     blueBtn.hidden = vsCpu || !(mover === 'blue' && isHumanTurn());
   }
@@ -1164,8 +1185,8 @@ export function renderPaperSoccer(container, onClose) {
           return;
         }
 
-        if (isHumanTurn() && (state.phase === 'move-self' || state.phase === 'move-opp')) {
-          const team = state.phase === 'move-self' ? state.kickingTeam : otherTeam(state.kickingTeam);
+        if (isHumanTurn() && moverTeam(state)) {
+          const team = moverTeam(state);
           selectCollector(team);
         }
         maybeCpu();
@@ -1291,7 +1312,7 @@ export function renderPaperSoccer(container, onClose) {
 
   function drawMan(player) {
     const p = toScreen(player);
-    const r = Math.max(7, 3.1 * map.scale);
+    const r = Math.max(7, BODY_R * map.scale);
     const facing = player.team === 'red' ? 0 : Math.PI;
 
     ctx.save();
@@ -1334,8 +1355,17 @@ export function renderPaperSoccer(container, onClose) {
     ctx.textBaseline = 'middle';
     ctx.fillText(player.role === 'gk' ? '1' : String(player.num || ''), 0, 0);
 
-    // Goalkeeper amber border
+    // Goalkeeper amber border, plus the dive he can actually reach. Drawing
+    // the reach is the point: a save must be something you could see coming.
     if (player.role === 'gk') {
+      ctx.strokeStyle = 'rgba(245,158,11,0.28)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.arc(0, 0, GK_REACH * map.scale, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
       ctx.strokeStyle = AMBER;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -1388,22 +1418,15 @@ export function renderPaperSoccer(container, onClose) {
 
   function drawBall() {
     const p = toScreen(state.ball);
-    let lift = 0;
-    if (flying) {
-      const t = Math.min(1, (performance.now() - flying.start) / flying.ms);
-      const arc = Math.sin(t * Math.PI);
-      lift = arc * (flying.power > 1 ? 16 : Math.min(12, flying.power * 14)) * map.scale;
-    }
 
-    // Turf shadow
+    // Turf shadow, tight under the ball — it is rolling, not flying.
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.beginPath();
-    ctx.ellipse(p.x, p.y + (lift * 0.15), Math.max(3.5, 1.2 * map.scale), Math.max(2, 0.7 * map.scale), 0, 0, Math.PI * 2);
+    ctx.ellipse(p.x, p.y + 1, Math.max(3.5, 1.2 * map.scale), Math.max(2, 0.7 * map.scale), 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 3D Ball
-    const ballY = p.y - lift;
-    const br = Math.max(5, 1.35 * map.scale);
+    const ballY = p.y;
+    const br = Math.max(5, BALL_R * map.scale);
     ctx.fillStyle = AMBER;
     ctx.beginPath();
     ctx.arc(p.x, ballY, br, 0, Math.PI * 2);
@@ -1422,16 +1445,12 @@ export function renderPaperSoccer(container, onClose) {
 
   function liveAim() {
     if (!charge) return null;
-    const holdPower = (performance.now() - charge.start) / CHARGE_MS * POWER_CEILING;
+    // Two separate jobs, so neither is guessing at the other: where you point
+    // is the direction, how long you hold is the power. Nothing about the
+    // distance you happen to drag feeds into how hard the ball is struck.
     const aim = aimFromPointer(state.ball, charge.at);
-
-    // Direct drag-to-place aim if dragged away from ball; hold-to-charge only if static touch
-    const isDragAim = aim && dist(state.ball, charge.at) >= 1.2;
-    const power = isDragAim
-      ? Math.min(POWER_CEILING, Math.max(0.14, aim.power))
-      : Math.min(POWER_CEILING, Math.max(aim ? aim.power : 0, holdPower));
-
-    if (power < 0.1 && !aim) return null;
+    const held = (performance.now() - charge.start) / CHARGE_MS;
+    const power = Math.min(POWER_CEILING, Math.max(0.14, held * POWER_CEILING));
     const angle = aim ? aim.angle : (state.possession === 'red' ? 0 : Math.PI);
     const dest = kickDestination(state.ball, angle, Math.max(0.14, power));
     const resolved = resolveKick(state.ball, dest, Math.max(0.14, power), defendersNow());
@@ -1444,7 +1463,9 @@ export function renderPaperSoccer(container, onClose) {
       kind: resolved.kind,
       preview,
       scorer: resolved.scorer,
-      isDragAim
+      // Who stops it, so the aim line can point at the body in the way
+      // instead of leaving the player to guess why the pass died.
+      stopper: resolved.by ? findPlayer(state, resolved.by) : null
     };
   }
 
@@ -1466,7 +1487,20 @@ export function renderPaperSoccer(container, onClose) {
     let ring = AMBER;
     let label = 'PLACE PASS';
     if (live.kind === 'goal') { ring = '#4ade80'; label = 'ON TARGET'; }
-    else if (live.kind === 'over') { ring = '#f87171'; label = 'OVER BAR'; }
+    else if (live.kind === 'over') { ring = '#f87171'; label = 'TOO HARD'; }
+    else if (live.kind === 'block' || live.kind === 'save') {
+      ring = '#f87171';
+      label = live.kind === 'save' ? 'KEEPER GETS IT' : 'BLOCKED';
+      if (live.stopper) {
+        const b = toScreen(live.stopper);
+        const reach = (live.stopper.role === 'gk' ? GK_REACH : BLOCK_RADIUS) * map.scale;
+        ctx.strokeStyle = '#f87171';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, reach, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
     else if (live.preview) {
       if (live.preview.claim === 'yours') { ring = AMBER; label = 'YOU GET IT'; }
       else if (live.preview.claim === 'theirs') { ring = DIM; label = 'THEY GET IT'; }
@@ -1525,12 +1559,10 @@ export function renderPaperSoccer(container, onClose) {
             : cpuBusy
               ? 'MACHINE THINKING...'
               : state.phase === 'kick'
-                ? `${state.possession.toUpperCase()}'S FLICK · DRAG TO PLACE PASS`
-                : state.phase === 'move-self'
-                  ? `${state.kickingTeam.toUpperCase()}'S RUN · TAP BALL OR DRAG PLAYER`
-                  : state.phase === 'move-opp'
-                    ? `${otherTeam(state.kickingTeam).toUpperCase()}'S RUN · TAP BALL OR DRAG PLAYER`
-                    : 'MATCH OVER')
+                ? `${state.possession.toUpperCase()}'S FLICK · AIM, HOLD, RELEASE`
+                : moverTeam(state)
+                  ? `${moverTeam(state).toUpperCase()}'S RUN · DRAG A TEAMMATE INTO SPACE`
+                  : 'MATCH OVER')
       : 'CHOOSE FORMATION & KICK OFF';
 
     // Broadcast Top Scoreboard
