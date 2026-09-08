@@ -59,6 +59,7 @@ import {
   resolveKick,
   skipMove,
   moverTeam,
+  movablePlayers,
   applyMove,
 } from './paperSoccer.js';
 
@@ -471,6 +472,16 @@ assert.ok(Math.hypot(holder.x - loose.ball.x, holder.y - loose.ball.y) < 1e-6,
   'the nearest man snaps onto the ball');
 assert.equal(applyMove(loose, holder.id, { x: holder.x + 5, y: holder.y }).phase, 'move',
   'the man holding the ball cannot run off it');
+// The list the board offers and the list the rule accepts must be one list —
+// offering a man the rule then refuses is how every drag came to do nothing.
+const offered = movablePlayers(loose, loose.possession);
+assert.ok(!offered.some(p => p.id === loose.possessorId), 'the carrier is never offered');
+assert.equal(offered.length, loose[loose.possession].length - 1);
+for (const p of offered) {
+  const probe = JSON.parse(JSON.stringify(loose));
+  assert.equal(applyMove(probe, p.id, { x: p.x + 3, y: p.y }).phase, 'move-opp',
+    `every offered man is actually movable (${p.id})`);
+}
 skipMove(loose);
 assert.equal(loose.phase, 'move-opp');
 assert.equal(moverTeam(loose), otherTeam(loose.possession), 'then the other side answers');

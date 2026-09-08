@@ -475,15 +475,23 @@ export function moverTeam(state) {
   return null;
 }
 
+/**
+ * The men a side may actually run this turn. The one standing on the ball is
+ * holding it and cannot be run off it — the way to move the ball is to flick
+ * it. The UI picks from this same list, because offering a man the rule then
+ * refuses is how every drag came to do nothing at all.
+ */
+export function movablePlayers(state, team) {
+  return teamOf(state, team).filter(p => p.id !== state.possessorId);
+}
+
 export function applyMove(state, playerId, dest) {
   if (state.winner) return state;
   const expected = moverTeam(state);
   if (!expected) return state;
   const player = findPlayer(state, playerId);
   if (!player || player.team !== expected) return state;
-  // Never the man standing on the ball — he is holding it. Move a teammate
-  // into space, then pass to him.
-  if (player.id === state.possessorId) return state;
+  if (!movablePlayers(state, expected).some(p => p.id === player.id)) return state;
   const next = clampMove(player, dest, state);
   player.x = next.x;
   player.y = next.y;
@@ -630,7 +638,7 @@ export function pickCpuKick(state) {
 export function pickCpuMove(state) {
   const team = moverTeam(state);
   if (!team) return null;
-  const mates = teamOf(state, team).filter(p => p.id !== state.possessorId && p.role !== 'gk');
+  const mates = movablePlayers(state, team).filter(p => p.role !== 'gk');
   if (!mates.length) return null;
   const attacking = team === state.possession;
   const foes = teamOf(state, otherTeam(team));
@@ -704,6 +712,7 @@ export function renderPaperSoccer(container, onClose) {
   let celebration = null;
   let cpuBusy = false;
   let raf = 0;
+  let cpuRetry = 0;
   let canvas;
   let ctx;
   let map = { left: 0, top: 0, scale: 1, cssW: 640, cssH: 380 };
@@ -802,6 +811,7 @@ export function renderPaperSoccer(container, onClose) {
 
   function cleanupAndClose() {
     cancelAnimationFrame(raf);
+    clearTimeout(cpuRetry);
     window.removeEventListener('resize', resize);
     if (window._psKeyHandler) {
       window.removeEventListener('keydown', window._psKeyHandler);
@@ -922,7 +932,7 @@ export function renderPaperSoccer(container, onClose) {
       }
 
       const team = moverTeam(state);
-      const touchedPlayer = teamOf(state, team).find(p => dist(pt, p) <= 5);
+      const touchedPlayer = movableMen(team).find(p => dist(pt, p) <= 5);
       if (touchedPlayer) {
         if (event.pointerId != null && el.setPointerCapture) {
           try { el.setPointerCapture(event.pointerId); } catch (e) {}
@@ -938,16 +948,11 @@ export function renderPaperSoccer(container, onClose) {
         return;
       }
 
-      if (selectedId && dist(pt, state.ball) <= 6) {
-        applyMove(state, selectedId, { ...state.ball });
-        selectedId = null;
-        soundFx.playClick();
-        afterHumanAct();
-        return;
-      }
-
       if (selectedId) {
-        applyMove(state, selectedId, pt);
+        const target = dist(pt, state.ball) <= 6 ? { ...state.ball } : pt;
+        const before = state.phase;
+        applyMove(state, selectedId, target);
+        if (state.phase === before) { draw(); return; }  // refused — still your run
         selectedId = null;
         soundFx.playClick();
         afterHumanAct();
@@ -982,13 +987,11 @@ export function renderPaperSoccer(container, onClose) {
         const aim = aimFromPointer(state.ball, pt);
         charge = null;
 
-        // Point for direction, hold for power, release to strike. A tap that
-        // never charged is a mis-touch, not a nudge.
-        const power = Math.min(POWER_CEILING, held * POWER_CEILING);
-        if (power < 0.14) {
-          draw();
-          return;
-        }
+        // Point for direction, hold for power, release to strike. A quick tap
+        // is the softest touch on the dial, never a dead press — pressing the
+        // ball and seeing nothing happen is indistinguishable from a broken
+        // game.
+        const power = Math.max(0.14, Math.min(POWER_CEILING, held * POWER_CEILING));
         const angle = aim ? aim.angle : (state.possession === 'red' ? 0 : Math.PI);
         startFlight(angle, power);
         return;
@@ -999,7 +1002,9 @@ export function renderPaperSoccer(container, onClose) {
         const drag = activeDrag;
         activeDrag = null;
         if (drag.hasMoved) {
+          const before = state.phase;
           applyMove(state, drag.player.id, pt);
+          if (state.phase === before) { draw(); return; }  // refused — still your run
           selectedId = null;
           soundFx.playClick();
           afterHumanAct();
@@ -1036,9 +1041,13 @@ export function renderPaperSoccer(container, onClose) {
     soundFx.playHit();
   }
 
+  const movableMen = team => movablePlayers(state, team);
+
   function selectCollector(team) {
-    const { player } = bestCollector(teamOf(state, team), state.ball, state);
-    selectedId = player?.id || null;
+    const men = movableMen(team);
+    if (!men.length) { selectedId = null; return; }
+    const { player } = bestCollector(men, state.ball, state);
+    selectedId = player?.id || men[0].id;
   }
 
   function afterHumanAct() {
@@ -1051,16 +1060,31 @@ export function renderPaperSoccer(container, onClose) {
     maybeCpu();
   }
 
+  /**
+   * Come back once the ball has settled. Bailing outright here is what killed
+   * matches: the flight only advances inside requestAnimationFrame, which the
+   * browser stops for a backgrounded tab, while this timer keeps running. The
+   * timer would fire mid-flight, see `flying`, return — and nothing ever
+   * called it again. The machine had quietly resigned and the match was dead
+   * with the player still waiting for it to move.
+   */
+  function cpuLater() {
+    clearTimeout(cpuRetry);
+    cpuRetry = setTimeout(maybeCpu, 140);
+  }
+
   function maybeCpu() {
-    if (!vsCpu || cpuBusy || flying || celebration || charge || !started || state.winner) return;
+    if (!vsCpu || cpuBusy || !started || state.winner) return;
     const cpuActs = (state.phase === 'kick' && state.possession === cpuTeam())
       || (moverTeam(state) === cpuTeam());
     if (!cpuActs) return;
+    if (flying || celebration || charge) { cpuLater(); return; }
     cpuBusy = true;
     const wait = state.phase === 'kick' ? 520 : 380;
     setTimeout(() => {
       cpuBusy = false;
-      if (!started || state.winner || flying || celebration) return;
+      if (!started || state.winner) return;
+      if (flying || celebration || charge) { cpuLater(); return; }
       if (state.phase === 'kick' && state.possession === cpuTeam()) {
         const kick = pickCpuKick(state);
         if (kick) startFlight(kick.angle, kick.power);
@@ -1112,6 +1136,7 @@ export function renderPaperSoccer(container, onClose) {
 
   function endMatch() {
     cancelAnimationFrame(raf);
+    clearTimeout(cpuRetry);
     const winner = state.winner === 'red' ? 'RED' : 'BLUE';
     soundFx.playWin?.();
     showResult({
