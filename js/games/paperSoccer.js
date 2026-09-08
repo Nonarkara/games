@@ -29,9 +29,16 @@ export const MAX_KICK = 56;
 // line blocked, and the ball was drawn lofting up to 16 units into the air on
 // every kick, which is why shots read as sailing over a defender's head into
 // the net. Nothing leaves the ground any more.
-export const BODY_R = 2.2;    // an outfield disc, as drawn
-export const BALL_R = 1.1;    // the ball, as drawn
-export const BLOCK_RADIUS = BODY_R + BALL_R;      // two discs touching
+export const BODY_R = 1.6;    // an outfield disc, as drawn
+export const BALL_R = 0.95;   // the ball, as drawn
+// A man covers more grass than his base: legs, reach, a stuck-out boot. Tying
+// the block to the drawn disc forced a choice between discs too fat to see
+// past with 22 of them on the pitch, and discs so small that nothing was ever
+// intercepted — at BODY_R 1.6 the interception rate was flatly 0%. So the
+// cover is its own number, and it is DRAWN on the pitch the moment you start
+// aiming: shown, not hidden in a constant.
+export const COVER_R = 2.35;
+export const BLOCK_RADIUS = COVER_R + BALL_R;     // ball meets the cover
 export const GK_REACH = BLOCK_RADIUS + 2.0;       // a keeper's standing reach
 // ...and he sets himself as the ball comes from further out. A shot from the
 // halfway line gives him all the time in the world; one from the six-yard box
@@ -186,10 +193,10 @@ export function refreshPossession(state) {
 export function resetKickoff(state, kickingTeam) {
   state.red = placeTeam('red', state.redShape);
   state.blue = placeTeam('blue', state.blueShape);
-  state.ball = {
-    x: PITCH.length / 2 + (kickingTeam === 'red' ? -1.2 : 1.2),
-    y: PITCH.width / 2
-  };
+  // Dead centre. The offset existed so the nearest-man calculation favoured
+  // the kicking team; the taker is named outright below, so it is just a ball
+  // sitting off the spot.
+  state.ball = { x: PITCH.length / 2, y: PITCH.width / 2 };
   state.phase = 'kick';
   state.kickingTeam = kickingTeam;
   state.winner = null;
@@ -412,6 +419,12 @@ export function applyKick(state, angle, power) {
  */
 function takeOver(state, player, log) {
   if (!player) return state;
+  // Where he came from, so the board can walk him onto the ball instead of
+  // snapping him there. The ball comes to rest, then someone goes and takes
+  // it — that arrival is the tackle, and it should be something you watch.
+  state.collect = (player.x !== state.ball.x || player.y !== state.ball.y)
+    ? { id: player.id, from: { x: player.x, y: player.y } }
+    : null;
   player.x = state.ball.x;
   player.y = state.ball.y;
   state.possession = player.team;
@@ -731,6 +744,7 @@ export function renderPaperSoccer(container, onClose) {
   let cpuBusy = false;
   let raf = 0;
   let cpuRetry = 0;
+  let collecting = null;
   let canvas;
   let ctx;
   let map = { left: 0, top: 0, scale: 1, cssW: 640, cssH: 380 };
@@ -763,7 +777,7 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Table soccer, computed. Point anywhere for direction, hold to build weight, release to strike — the longer you hold, the further it goes. The ball slides flat in a straight line and any disc in that line stops it, so find the gap. Then tap where a man should be and the nearest one runs there. Keepers set themselves against long shots, so the goal only really opens once you work the ball close.</p>
+          <p class="ps-setup-lead">Table soccer, computed. Point where you want it to go — that sets the direction and it stays set. Then hold to build weight and release to strike; the notched meter is how far it travels, and the marker on the line is where it stops. The ball slides flat in a straight line and any disc in that line stops it, so find the gap. Then tap where a man should be and the nearest one runs there. Keepers set themselves against long shots, so the goal only really opens once you work the ball close.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -840,7 +854,7 @@ export function renderPaperSoccer(container, onClose) {
 
   function bindKeyboard() {
     const handler = event => {
-      if (!started || flying || celebration || cpuBusy || state.winner || state.phase === 'over') return;
+      if (!started || flying || celebration || collecting || cpuBusy || state.winner || state.phase === 'over') return;
       if (!isHumanTurn()) return;
       const key = event.key;
       if (key === 's' || key === 'S') {
@@ -934,7 +948,7 @@ export function renderPaperSoccer(container, onClose) {
 
   function bindPointer(el) {
     const down = event => {
-      if (!started || flying || celebration || cpuBusy || state.winner || state.phase === 'over') return;
+      if (!started || flying || celebration || collecting || cpuBusy || state.winner || state.phase === 'over') return;
       if (!isHumanTurn()) return;
       event.preventDefault();
       const pt = pointerInfo(event);
@@ -946,7 +960,17 @@ export function renderPaperSoccer(container, onClose) {
         if (event.pointerId != null && el.setPointerCapture) {
           try { el.setPointerCapture(event.pointerId); } catch (e) {}
         }
-        charge = { from: { ...state.ball }, at: pt, start: performance.now() };
+        // Direction is fixed by where you press and does not drift after
+        // that: with the angle tracking a held finger, the target swung
+        // around while you were trying to judge the weight, so neither could
+        // be aimed. Point, then hold, then release.
+        const lock = aimFromPointer(state.ball, pt);
+        charge = {
+          from: { ...state.ball },
+          at: pt,
+          angle: lock ? lock.angle : (state.possession === 'red' ? 0 : Math.PI),
+          start: performance.now()
+        };
         draw();
         return;
       }
@@ -986,10 +1010,16 @@ export function renderPaperSoccer(container, onClose) {
     };
 
     const move = event => {
-      if (!started || flying || celebration || cpuBusy) return;
+      if (!started || flying || celebration || collecting || cpuBusy) return;
       const pt = pointerInfo(event);
       if (charge) {
-        charge.at = pt;
+        // A deliberate swing re-aims; a wobbling finger does not. Locking the
+        // angle outright fixed the drift but left you committed to a bad
+        // direction with no way out but to kick it there.
+        if (dist(pt, charge.at) > 6) {
+          const re = aimFromPointer(state.ball, pt);
+          if (re) { charge.angle = re.angle; charge.at = pt; }
+        }
         draw();
         return;
       }
@@ -1008,9 +1038,8 @@ export function renderPaperSoccer(container, onClose) {
       }
 
       if (charge) {
-        const pt = pointerInfo(event);
         const held = (performance.now() - charge.start) / CHARGE_MS;
-        const aim = aimFromPointer(state.ball, pt);
+        const angle = charge.angle;
         charge = null;
 
         // Point for direction, hold for power, release to strike. A quick tap
@@ -1018,7 +1047,6 @@ export function renderPaperSoccer(container, onClose) {
         // ball and seeing nothing happen is indistinguishable from a broken
         // game.
         const power = Math.max(0.14, Math.min(POWER_CEILING, held * POWER_CEILING));
-        const angle = aim ? aim.angle : (state.possession === 'red' ? 0 : Math.PI);
         startFlight(angle, power);
         return;
       }
@@ -1123,6 +1151,7 @@ export function renderPaperSoccer(container, onClose) {
 
   function maybeCpu() {
     if (!vsCpu || cpuBusy || !started || state.winner) return;
+    if (collecting) { cpuLater(); return; }
     const cpuActs = (state.phase === 'kick' && state.possession === cpuTeam())
       || (moverTeam(state) === cpuTeam());
     if (!cpuActs) return;
@@ -1205,6 +1234,11 @@ export function renderPaperSoccer(container, onClose) {
     raf = requestAnimationFrame(loop);
     const now = performance.now();
 
+    if (collecting && now - collecting.start >= collecting.ms) {
+      collecting = null;
+      maybeCpu();
+    }
+
     if (celebration) {
       if (now >= celebration.until) {
         const finish = celebration.onFinish;
@@ -1251,6 +1285,11 @@ export function renderPaperSoccer(container, onClose) {
         }
 
         applyKick(state, angle, power);
+        if (state.collect) {
+          collecting = { ...state.collect, start: performance.now(), ms: 260 };
+          state.collect = null;
+          soundFx.playClick?.();
+        }
         syncSkip();
         if (state.phase === 'over' || state.winner) {
           draw();
@@ -1384,7 +1423,18 @@ export function renderPaperSoccer(container, onClose) {
   }
 
   function drawMan(player) {
-    const p = toScreen(player);
+    // Mid-collection he is still on his way: the engine has already given him
+    // the ball, the board shows him going to get it.
+    let at = player;
+    if (collecting && collecting.id === player.id) {
+      const t = Math.min(1, (performance.now() - collecting.start) / collecting.ms);
+      const ease = 1 - (1 - t) * (1 - t);
+      at = {
+        x: collecting.from.x + (player.x - collecting.from.x) * ease,
+        y: collecting.from.y + (player.y - collecting.from.y) * ease
+      };
+    }
+    const p = toScreen(at);
     const r = Math.max(5, BODY_R * map.scale);
     const facing = player.team === 'red' ? 0 : Math.PI;
 
@@ -1521,10 +1571,9 @@ export function renderPaperSoccer(container, onClose) {
     // Two separate jobs, so neither is guessing at the other: where you point
     // is the direction, how long you hold is the power. Nothing about the
     // distance you happen to drag feeds into how hard the ball is struck.
-    const aim = aimFromPointer(state.ball, charge.at);
     const held = (performance.now() - charge.start) / CHARGE_MS;
     const power = Math.min(POWER_CEILING, Math.max(0.14, held * POWER_CEILING));
-    const angle = aim ? aim.angle : (state.possession === 'red' ? 0 : Math.PI);
+    const angle = charge.angle;
     const dest = kickDestination(state.ball, angle, Math.max(0.14, power));
     const resolved = resolveKick(state.ball, dest, Math.max(0.14, power), defendersNow());
     const preview = resolved.kind === 'play'
@@ -1547,6 +1596,23 @@ export function renderPaperSoccer(container, onClose) {
     if (!live) return;
     const from = toScreen(state.ball);
     const to = toScreen(live.dest);
+
+    // The corridors, shown only while you are aiming: every man who could stop
+    // this kick wears the grass he actually covers. Off-screen the rest of the
+    // time, so 22 rings never clutter the board.
+    ctx.save();
+    ctx.strokeStyle = 'rgba(232,237,243,0.16)';
+    ctx.fillStyle = 'rgba(232,237,243,0.05)';
+    ctx.lineWidth = 1;
+    for (const foe of defendersNow()) {
+      const c = toScreen(foe);
+      const rr = (foe.role === 'gk' ? keeperReach(state.ball, foe) : COVER_R) * map.scale;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, rr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
 
     ctx.strokeStyle = AMBER;
     ctx.lineWidth = 2;
@@ -1619,6 +1685,16 @@ export function renderPaperSoccer(container, onClose) {
     ctx.moveTo(x + mark, y);
     ctx.lineTo(x + mark, y + barH);
     ctx.stroke();
+
+    // Quarter notches: something to aim the release at.
+    ctx.strokeStyle = 'rgba(232,237,243,0.35)';
+    for (let i = 1; i < 4; i++) {
+      const nx = x + (mark * i) / 4;
+      ctx.beginPath();
+      ctx.moveTo(nx, y + barH * 0.4);
+      ctx.lineTo(nx, y + barH);
+      ctx.stroke();
+    }
 
     // Name the dial. "Release when it feels right" is only playable if you can
     // see what you are releasing at.

@@ -38,6 +38,7 @@ import {
   MAX_KICK,
   BLOCK_RADIUS,
   BODY_R,
+  COVER_R,
   BALL_R,
   MOVE_FIELD,
   MOVE_GK,
@@ -376,7 +377,9 @@ assert.equal(kickoff.red[0].role, 'gk');
 assert.equal(kickoff.blue[0].role, 'gk');
 assert.equal(kickoff.phase, 'kick');
 assert.equal(kickoff.possession, 'red');
-assert.ok(kickoff.red.every(p => p.x < PITCH.length / 2), 'red starts in its own half');
+assert.ok(kickoff.red.every(p => p.x <= PITCH.length / 2), 'red starts in its own half');
+assert.equal(kickoff.ball.x, PITCH.length / 2, 'the ball is on the centre spot');
+assert.ok(kickoff.red.some(p => p.x === kickoff.ball.x && p.y === kickoff.ball.y), 'and a red man is standing on it');
 assert.ok(kickoff.blue.every(p => p.x > PITCH.length / 2), 'blue starts in its own half');
 
 assert.equal(placeTeam('red', '4-3-3').length, 11);
@@ -392,7 +395,8 @@ const mid = { x: PITCH.length / 2, y: PITCH.width / 2 };
 // the ball's disc touches a body's disc — no more, no less. Drift between the
 // drawn radius and the blocking radius is how shots came to read as sailing
 // over a defender's head.
-assert.equal(BLOCK_RADIUS, BODY_R + BALL_R, 'the drawn discs are the blocking discs');
+assert.equal(BLOCK_RADIUS, COVER_R + BALL_R, 'the ball is stopped where it meets a man\'s cover');
+assert.ok(COVER_R > BODY_R, 'a man covers more grass than his base — and the board draws it while you aim');
 {
   const lane = { x: 20, y: 34 };
   const far = { x: 90, y: 34 };
