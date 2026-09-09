@@ -56,6 +56,8 @@ export const OVER_EXTRA = 10;
 export const MOVE_FIELD = 18;
 export const MOVE_GK = 14;
 export const MIN_SEP = 2.6;
+export const TWO_PLAYER_CLEARANCE = BODY_R * 4; // 2 player diameters buffer (6.4 units)
+export const MIN_OPPONENT_DIST = BODY_R * 2 + TWO_PLAYER_CLEARANCE; // Center-to-center (9.6 units)
 export const GOALS_TO_WIN = 3;
 export const CHARGE_MS = 1050;
 
@@ -103,7 +105,7 @@ export function findPlayer(state, id) {
 }
 
 export function moveRadius(player) {
-  return player.role === 'gk' ? MOVE_GK : MOVE_FIELD;
+  return PITCH.length;
 }
 
 export function goalMouthY() {
@@ -473,30 +475,127 @@ function separate(point, selfId, state) {
 }
 
 export function clampMove(player, dest, state) {
-  const radius = moveRadius(player);
   const from = { x: player.x, y: player.y };
-  let x = dest.x;
-  let y = dest.y;
-  const d = dist(from, dest);
-  if (d > radius && d > 1e-9) {
-    const s = radius / d;
-    x = from.x + (dest.x - from.x) * s;
-    y = from.y + (dest.y - from.y) * s;
+  const dx = dest.x - from.x;
+  const dy = dest.y - from.y;
+  const targetDist = Math.hypot(dx, dy);
+  if (targetDist < 1e-6) return { x: from.x, y: from.y };
+
+  const ux = dx / targetDist;
+  const uy = dy / targetDist;
+
+  // 1. Boundary clamp along the straight line ray
+  let tMax = targetDist;
+  if (ux > 1e-9) tMax = Math.min(tMax, (PITCH.length - from.x) / ux);
+  else if (ux < -1e-9) tMax = Math.min(tMax, -from.x / ux);
+
+  if (uy > 1e-9) tMax = Math.min(tMax, (PITCH.width - from.y) / uy);
+  else if (uy < -1e-9) tMax = Math.min(tMax, -from.y / uy);
+
+  // 2. Obstacle collision (cannot cross through other players along the ray)
+  const COLLISION_RADIUS = BODY_R * 2; // 3.2 units
+  for (const other of allPlayers(state)) {
+    if (other.id === player.id) continue;
+    const vx = other.x - from.x;
+    const vy = other.y - from.y;
+    const proj = vx * ux + vy * uy;
+    if (proj <= 0.05) continue;
+    const perpSq = (vx * vx + vy * vy) - (proj * proj);
+    if (perpSq < COLLISION_RADIUS * COLLISION_RADIUS) {
+      const halfChord = Math.sqrt(COLLISION_RADIUS * COLLISION_RADIUS - perpSq);
+      const hitDist = proj - halfChord;
+      if (hitDist > 0) {
+        tMax = Math.min(tMax, Math.max(0, hitDist - 0.15));
+      }
+    }
   }
-  x = Math.min(PITCH.length, Math.max(0, x));
-  y = Math.min(PITCH.width, Math.max(0, y));
+
+  // 3. Two-player clearance rule from opponents (cannot block too closely)
   const opponents = teamOf(state, otherTeam(player.team));
-  const onside = pullOnside(player, { x, y }, opponents, state.ball);
-  const separated = separate(onside, player.id, state);
-  const stretched = dist(from, separated);
-  if (stretched > radius && stretched > 1e-9) {
-    const s = radius / stretched;
-    return {
-      x: from.x + (separated.x - from.x) * s,
-      y: from.y + (separated.y - from.y) * s
-    };
+  for (const opp of opponents) {
+    const vx = opp.x - from.x;
+    const vy = opp.y - from.y;
+    const initDist = Math.hypot(vx, vy);
+    const proj = vx * ux + vy * uy;
+    if (proj <= 0.05) continue;
+    const perpSq = (vx * vx + vy * vy) - (proj * proj);
+    if (perpSq < MIN_OPPONENT_DIST * MIN_OPPONENT_DIST) {
+      const halfChord = Math.sqrt(MIN_OPPONENT_DIST * MIN_OPPONENT_DIST - perpSq);
+      const hitDist = proj - halfChord;
+      if (hitDist > 0) {
+        tMax = Math.min(tMax, hitDist);
+      } else if (initDist < MIN_OPPONENT_DIST) {
+        tMax = 0;
+      }
+    }
   }
-  return separated;
+
+  // 4. Offside pulling along the ray
+  const tentative = {
+    ...player,
+    x: from.x + ux * tMax,
+    y: from.y + uy * tMax
+  };
+  if (isOffside(tentative, opponents, state.ball)) {
+    let lo = 0;
+    let hi = tMax;
+    for (let step = 0; step < 16; step++) {
+      const mid = (lo + hi) / 2;
+      const testPt = { ...player, x: from.x + ux * mid, y: from.y + uy * mid };
+      if (isOffside(testPt, opponents, state.ball)) hi = mid;
+      else lo = mid;
+    }
+    tMax = lo;
+  }
+
+  tMax = Math.max(0, tMax);
+  const finalX = Math.min(PITCH.length, Math.max(0, from.x + ux * tMax));
+  const finalY = Math.min(PITCH.width, Math.max(0, from.y + uy * tMax));
+  return { x: finalX, y: finalY };
+}
+
+export function rayInfo(player, dest, state) {
+  const from = { x: player.x, y: player.y };
+  const target = clampMove(player, dest, state);
+  const dx = dest.x - from.x;
+  const dy = dest.y - from.y;
+  const targetDist = Math.hypot(dx, dy);
+  const actualDist = Math.hypot(target.x - from.x, target.y - from.y);
+  let blockedBy = null;
+  let reason = 'clear';
+
+  if (actualDist + 0.15 < targetDist) {
+    const ux = dx / (targetDist || 1);
+    const uy = dy / (targetDist || 1);
+    for (const other of allPlayers(state)) {
+      if (other.id === player.id) continue;
+      const vx = other.x - from.x;
+      const vy = other.y - from.y;
+      const proj = vx * ux + vy * uy;
+      if (proj > 0.05) {
+        const dTarget = Math.hypot(target.x - other.x, target.y - other.y);
+        if (other.team !== player.team && dTarget <= MIN_OPPONENT_DIST + 0.25) {
+          blockedBy = other;
+          reason = '2-player buffer';
+          break;
+        } else if (dTarget <= BODY_R * 2 + 0.35) {
+          blockedBy = other;
+          reason = 'obstacle';
+          break;
+        }
+      }
+    }
+    if (!blockedBy) {
+      const opponents = teamOf(state, otherTeam(player.team));
+      if (isOffside({ ...player, x: dest.x, y: dest.y }, opponents, state.ball)) {
+        reason = 'offside';
+      } else {
+        reason = 'boundary';
+      }
+    }
+  }
+
+  return { from, dest, target, blockedBy, reason, actualDist, targetDist };
 }
 
 /** Who is on the clock during a move phase: the side on the ball, then the other. */
@@ -777,7 +876,7 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Table soccer, computed. Point where you want it to go — that sets the direction and it stays set. Then hold to build weight and release to strike; the notched meter is how far it travels, and the marker on the line is where it stops. The ball slides flat in a straight line and any disc in that line stops it, so find the gap. Then tap where a man should be and the nearest one runs there. Keepers set themselves against long shots, so the goal only really opens once you work the ball close.</p>
+          <p class="ps-setup-lead">Chess-speed tactical soccer. Each turn, move one runner along a straight ray as far as you want — like a rook or queen. You cannot cross through other players, and you must maintain a 2-player buffer distance from opponents (no direct body-checking). Offside is strictly active. Then flick the ball into open space or towards goal; whoever is nearest claims possession.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -1506,36 +1605,70 @@ export function renderPaperSoccer(container, onClose) {
       ctx.stroke();
     }
 
-    // Selected runner movement circle
+    // Selected runner pulsing ring
     if (player.id === selectedId) {
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([3, 3]);
+      const pulse = 1 + Math.sin(performance.now() * 0.01) * 0.12;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(0, 0, moveRadius(player) * map.scale, 0, Math.PI * 2);
+      ctx.arc(0, 0, (r + 4) * pulse, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.setLineDash([]);
     }
 
     ctx.restore();
 
-    // If currently dragging this player, draw line to clamped target
+    // If currently dragging this player, draw straight-line raycast beam
     if (activeDrag && activeDrag.player.id === player.id) {
-      const clamped = clampMove(player, activeDrag.currentPt, state);
-      const to = toScreen(clamped);
-      ctx.strokeStyle = player.team === 'red' ? 'rgba(196,92,74,0.85)' : 'rgba(111,147,194,0.85)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 3]);
+      const ray = rayInfo(player, activeDrag.currentPt, state);
+      const to = toScreen(ray.target);
+      const cursor = toScreen(activeDrag.currentPt);
+
+      // 2-player clearance buffer rings around opponents
+      for (const opp of teamOf(state, otherTeam(player.team))) {
+        const op = toScreen(opp);
+        ctx.strokeStyle = 'rgba(248,113,113,0.35)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 4]);
+        ctx.beginPath();
+        ctx.arc(op.x, op.y, MIN_OPPONENT_DIST * map.scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Valid straight-line trajectory
+      ctx.strokeStyle = player.team === 'red' ? 'rgba(239,68,68,0.9)' : 'rgba(56,189,248,0.9)';
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(p.x, p.y);
       ctx.lineTo(to.x, to.y);
       ctx.stroke();
-      ctx.setLineDash([]);
 
+      // Target landing disc
       ctx.fillStyle = AMBER;
       ctx.beginPath();
-      ctx.arc(to.x, to.y, 4, 0, Math.PI * 2);
+      ctx.arc(to.x, to.y, 4.5, 0, Math.PI * 2);
       ctx.fill();
+
+      // If blocked along the ray, show the blocked segment and reason
+      if (ray.reason !== 'clear') {
+        ctx.strokeStyle = 'rgba(248,113,113,0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(to.x, to.y);
+        ctx.lineTo(cursor.x, cursor.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#f87171';
+        ctx.font = '9px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        let label = 'BLOCKED';
+        if (ray.reason === '2-player buffer') label = 'BUFFER: 2 PLAYERS';
+        else if (ray.reason === 'obstacle') label = 'OBSTACLE IN LINE';
+        else if (ray.reason === 'offside') label = 'OFFSIDE LINE';
+        ctx.fillText(label, to.x, to.y - 10);
+      }
     }
   }
 
@@ -1719,9 +1852,9 @@ export function renderPaperSoccer(container, onClose) {
             : cpuBusy
               ? 'MACHINE THINKING...'
               : state.phase === 'kick'
-                ? `${state.possession.toUpperCase()}'S FLICK · POINT ANYWHERE · HOLD FOR WEIGHT · RELEASE`
+                ? `${state.possession.toUpperCase()}'S FLICK · POINT DIRECTION · HOLD WEIGHT · RELEASE`
                 : moverTeam(state)
-                  ? `${moverTeam(state).toUpperCase()}'S RUN · TAP WHERE A MAN SHOULD BE`
+                  ? `${moverTeam(state).toUpperCase()} TO MOVE · STRAIGHT LINE (2-PLAYER BUFFER)`
                   : 'MATCH OVER')
       : 'CHOOSE FORMATION & KICK OFF';
 

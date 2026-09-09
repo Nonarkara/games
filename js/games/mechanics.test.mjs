@@ -42,6 +42,8 @@ import {
   BALL_R,
   MOVE_FIELD,
   MOVE_GK,
+  TWO_PLAYER_CLEARANCE,
+  MIN_OPPONENT_DIST,
   PITCH,
   applyKick,
   clampMove,
@@ -62,6 +64,7 @@ import {
   moverTeam,
   movablePlayers,
   applyMove,
+  rayInfo,
 } from './paperSoccer.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
@@ -499,10 +502,29 @@ assert.equal(isOffside({ ...parked, x: 50 }, blueWall, { x: 60, y: 34 }), false)
 
 const mover = createMatch();
 const runner = mover.red.find(p => p.role === 'field');
-const far = clampMove(runner, { x: runner.x + 80, y: runner.y }, mover);
-assert.ok(Math.hypot(far.x - runner.x, far.y - runner.y) <= MOVE_FIELD + 1e-6);
-const gkSlide = clampMove(mover.red[0], { x: mover.red[0].x, y: mover.red[0].y + 40 }, mover);
-assert.ok(Math.hypot(gkSlide.x - mover.red[0].x, gkSlide.y - mover.red[0].y) <= MOVE_GK + 1e-6);
+// 1. Unobstructed straight-line raycast: runner can move freely along a straight line (chess-like unlimited distance)
+const straightRun = clampMove(runner, { x: runner.x + 25, y: runner.y + 10 }, mover);
+assert.ok(Math.hypot(straightRun.x - runner.x, straightRun.y - runner.y) > 20, 'unobstructed straight line allows long run');
+
+// 2. Obstacle collision: runner stops before colliding with an in-between teammate
+const teammateAhead = mover.red.find(p => p.id !== runner.id && p.role === 'field');
+teammateAhead.x = runner.x;
+teammateAhead.y = runner.y + 12;
+const blocked = clampMove(runner, { x: runner.x, y: runner.y + 30 }, mover);
+assert.ok(blocked.y < teammateAhead.y, 'cannot pass through teammate obstacle');
+assert.ok(teammateAhead.y - blocked.y >= BODY_R * 2 - 0.2, 'stops before collision with obstacle');
+
+// 3. 2-player buffer: runner cannot move closer than MIN_OPPONENT_DIST to an opponent
+const opponentAhead = mover.blue[0];
+opponentAhead.x = runner.x + 20;
+opponentAhead.y = runner.y;
+const bufferBlocked = clampMove(runner, { x: opponentAhead.x, y: runner.y }, mover);
+const finalGap = Math.hypot(bufferBlocked.x - opponentAhead.x, bufferBlocked.y - opponentAhead.y);
+assert.ok(finalGap >= MIN_OPPONENT_DIST - 1e-4, `must keep at least 2-player clearance buffer (${finalGap} >= ${MIN_OPPONENT_DIST})`);
+
+// 4. Diagnostics: rayInfo reports blocking reason
+const rayObstacle = rayInfo(runner, { x: opponentAhead.x, y: runner.y }, mover);
+assert.equal(rayObstacle.reason, '2-player buffer');
 
 const offsideRun = createMatch();
 const forward = offsideRun.red.reduce((a, b) => (a.x > b.x ? a : b));

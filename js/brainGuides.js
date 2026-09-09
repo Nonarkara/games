@@ -696,10 +696,10 @@ export const BRAIN_GUIDES = {
     stack: ['kahneman', 'thaler', 'clear']
   },
   'paper-soccer': {
-    label: 'Pass-and-move planning', minutes: '5–12 min',
-    practice: 'Point at the gap in their shape, hold to build weight, release. The ball slides flat and any man in the line stops it. Nearest player picks it up.',
-    why: 'You only get one run after each pass, so the skill is placing the ball where you can own it — not flicking as hard as you can.',
-    tip: 'Watch the keeper ring shrink as you come forward. From distance he covers the whole mouth; from the box he cannot.',
+    label: 'Chess-speed tactical soccer', minutes: '5–12 min',
+    practice: 'Flick pass to open space; runners move unlimited straight lines like rooks/queens, but cannot cross obstacles and must keep a 2-player buffer from opponents.',
+    why: 'Alternating straight-line movement creates genuine spatial strategy: every open channel is an avenue for an attack or an interception trap.',
+    tip: 'Offside is active: you cannot run past the second-last defender before the ball. Block passing lanes while honoring the 2-player buffer zone.',
     stack: ['kahneman', 'werbach']
   },
   'memory-matrix': {
