@@ -66,6 +66,7 @@ import {
   movablePlayers,
   applyMove,
   rayInfo,
+  SHIELD_R,
 } from './paperSoccer.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
@@ -545,25 +546,64 @@ const rayFar = rayInfo(runner, { x: runner.x + 60, y: runner.y }, mover);
 assert.equal(rayFar.reason, 'range');
 assert.equal(rayFar.radius, MOVE_FIELD);
 
-// 6. Self-play must actually reach a result. This is the guard that catches a
-// CPU heuristic which looks reasonable but stalls the game: when "get free"
-// was weighted above "get forward", every attacker ran to an empty corner,
-// the ball never left the centre circle and no match ever ended.
+// 6. Self-play must actually produce football — goals get scored and matches
+// reach results. This catches a total stall (a movement or CPU change that
+// leaves the ball in the centre circle forever), which is the failure mode
+// worth guarding. It deliberately does NOT try to pin the exact CPU tuning:
+// judged over varied kickoffs the space weight barely moves these numbers, and
+// a guard that only fires on one hand-picked match is a guard that lies.
+{
+  const seeded = seed => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+  let goals = 0, finished = 0;
+  const MATCHES = 8;
+  for (let run = 0; run < MATCHES; run++) {
+    const rng = seeded(run * 7919 + 13);
+    const s = createMatch();
+    [...s.red, ...s.blue].forEach(p => { p.x += (rng() - 0.5) * 10; p.y += (rng() - 0.5) * 10; });
+    let steps = 0;
+    while (steps < 3000 && !s.winner && s.phase !== 'over') {
+      if (s.phase === 'move' || s.phase === 'move-opp') {
+        const mv = pickCpuMove(s);
+        if (mv) applyMove(s, mv.playerId, mv.dest); else skipMove(s);
+      } else if (s.phase === 'kick') {
+        const k = pickCpuKick(s);
+        if (!k) break;
+        applyKick(s, k.angle, k.power);
+      } else break;
+      steps++;
+    }
+    goals += matchScore(s, 'red') + matchScore(s, 'blue');
+    if (s.winner) finished++;
+  }
+  assert.ok(goals >= MATCHES, `self-play must score: ${goals} goals over ${MATCHES} matches`);
+  assert.ok(finished >= MATCHES / 3, `matches must reach a result: ${finished}/${MATCHES}`);
+}
+
+// 7. A marker may not smother the man on the ball. SHIELD_R must clear
+// BLOCK_RADIUS or a defender stands closer than his own cover, his block
+// circle swallows the ball, and EVERY outgoing angle is dead however you aim
+// — the soft lock that made "there is no angle to the goal" the normal case.
+assert.ok(SHIELD_R > BLOCK_RADIUS + 1,
+  `a marker must not cover the ball he is marking (shield ${SHIELD_R} vs block ${BLOCK_RADIUS})`);
 {
   const s = createMatch();
-  let steps = 0;
-  while (steps < 4000 && !s.winner && s.phase !== 'over') {
-    if (s.phase === 'move' || s.phase === 'move-opp') {
-      const mv = pickCpuMove(s);
-      if (mv) applyMove(s, mv.playerId, mv.dest); else skipMove(s);
-    } else if (s.phase === 'kick') {
-      const k = pickCpuKick(s);
-      if (!k) break;
-      applyKick(s, k.angle, k.power);
-    } else break;
-    steps++;
-  }
-  assert.ok(s.winner, `self-play must produce a winner, stalled after ${steps} steps`);
+  [...s.red, ...s.blue].forEach(p => { p.x = 10; p.y = 64; });
+  const carrier = s.red[1]; carrier.x = 60; carrier.y = 34;
+  s.possession = 'red'; s.possessorId = carrier.id; s.ball = { x: 60, y: 34 };
+
+  // An opponent closing him down is held at the shield...
+  const marker = s.blue[1]; marker.x = 74; marker.y = 34;
+  const closed = clampMove(marker, { x: carrier.x, y: carrier.y }, s);
+  const gap = Math.hypot(closed.x - carrier.x, closed.y - carrier.y);
+  assert.ok(gap >= SHIELD_R - 0.05, `marker held off the ball carrier (${gap})`);
+  assert.ok(gap > BLOCK_RADIUS, 'and therefore never covering the ball itself');
+
+  // ...but a team-mate is not, and a defender away from the ball still runs free.
+  const mate = s.red[2]; mate.x = 66; mate.y = 34;
+  s.blue.forEach(p => { p.x = 98; p.y = 34; });
+  const mateGot = clampMove(mate, { x: 62.7, y: 34 }, s);
+  assert.ok(Math.hypot(mateGot.x - carrier.x, mateGot.y - carrier.y) < SHIELD_R,
+    'the shield holds off opponents only, never your own side');
 }
 
 

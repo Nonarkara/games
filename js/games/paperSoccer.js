@@ -56,6 +56,15 @@ export const OVER_EXTRA = 10;
 export const MOVE_FIELD = 18;
 export const MOVE_GK = 14;
 export const MIN_SEP = 2.6;
+// A defender may not smother the man on the ball. BLOCK_RADIUS is 3.30 while
+// MIN_SEP is 2.6, so without this a marker can stand closer than his own cover
+// radius: his block circle swallows the ball and EVERY outgoing angle is dead,
+// no matter where you aim. That is not defending, it is a soft lock.
+// This is the old 2-player buffer put back where it belonged. Applied to every
+// player it walled off the pitch and no attack could develop; applied only to
+// opponents of the ball carrier it does the one job it was ever for — keeping
+// a shooting angle alive. Everyone else still runs wherever they like.
+export const SHIELD_R = 7;
 export const CANCEL_RADIUS = 3.5; // Drag within this radius of the ball to cancel kick
 export const GOALS_TO_WIN = 3;
 export const CHARGE_MS = 1050;
@@ -709,18 +718,34 @@ export function clampMove(player, dest, state) {
   // moves can no longer wall off the pitch; it can only cover space.
   let tMax = Math.min(want, moveRadius(player));
 
-  // Offside is the one line you still cannot run past. Binary-search the
-  // furthest legal point on the way to where you asked for, testing the
-  // fully-resolved position so a body nudge can't sneak you past the line.
   const opponents = teamOf(state, otherTeam(player.team));
   const at = t => separate({ x: from.x + ux * t, y: from.y + uy * t }, player.id, state);
-  if (isOffside({ ...player, ...at(tMax) }, opponents, state.ball)) {
+
+  // Closing down the ball carrier stops at his shield. If you are somehow
+  // already inside it, you may still move — you just may not crowd in further.
+  // You may not MOVE into the shield, ever — not "no closer than you already
+  // are". Allowing the second let a marker who was already inside it sit there
+  // covering the ball, which is the smother this rule exists to stop. Staying
+  // put is always legal, so nobody is trapped when possession changes under
+  // their feet; the moment they move, they have to give him room.
+  const carrier = state.possessorId ? findPlayer(state, state.possessorId) : null;
+  const marking = carrier && carrier.team !== player.team ? carrier : null;
+
+  const illegal = t => {
+    const spot = at(t);
+    if (marking && dist(spot, marking) < SHIELD_R - 1e-6) return true;
+    return isOffside({ ...player, ...spot }, opponents, state.ball);
+  };
+
+  // Offside is the other line you cannot run past. Binary-search the furthest
+  // legal point toward where you asked for, testing the fully-resolved
+  // position so a body nudge can't sneak you past either rule.
+  if (illegal(tMax)) {
     let lo = 0;
     let hi = tMax;
     for (let step = 0; step < 20; step++) {
       const mid = (lo + hi) / 2;
-      if (isOffside({ ...player, ...at(mid) }, opponents, state.ball)) hi = mid;
-      else lo = mid;
+      if (illegal(mid)) hi = mid; else lo = mid;
     }
     tMax = lo;
   }
@@ -967,10 +992,11 @@ export function pickCpuMove(state) {
           // a few metres of ground.
           const marker = foes.reduce((m, f) => Math.min(m, dist(f, landing)), Infinity);
           const space = Math.min(marker, 25);
-          // ponytail: 0.6 is tuned, not guessed — 12-match self-play stays at
-          // 36 goals / 0 deadlocks anywhere in 0.3-0.8, and collapses to 0
-          // goals and a stalled ball at 1.6, where getting free outranks
-          // getting forward and every attacker just runs to an empty corner.
+          // ponytail: 0.6 keeps "get free" below "get forward". Measured over 8
+          // varied kickoffs it is mildly ahead of 1.6 (14 goals to 11) — a
+          // preference, not a cliff. An earlier note here claimed 1.6 collapsed
+          // the game to zero goals; that was one deterministic match, not a
+          // sample, and it does not hold once the kickoff varies.
           const score = gain + (open ? 45 : 0) + space * SPACE_WEIGHT - dist(state.ball, landing) * 0.25;
           if (score > bestScore) { bestScore = score; best = { playerId: mate.id, dest: landing }; }
         }
