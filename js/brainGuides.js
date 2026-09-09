@@ -697,9 +697,9 @@ export const BRAIN_GUIDES = {
   },
   'paper-soccer': {
     label: 'Chess-speed tactical soccer', minutes: '5–12 min',
-    practice: 'Flick pass to open space; runners move unlimited straight lines like rooks/queens, but cannot cross obstacles and must keep a 2-player buffer from opponents.',
+    practice: 'Drag to set pass direction and weight; drag back to the ball or tap Cancel to abort. Runners move unlimited straight lines with a 2-player buffer.',
     why: 'Alternating straight-line movement creates genuine spatial strategy: every open channel is an avenue for an attack or an interception trap.',
-    tip: 'Offside is active: you cannot run past the second-last defender before the ball. Block passing lanes while honoring the 2-player buffer zone.',
+    tip: 'Offside is active: you cannot run past the second-last defender before the ball. Drag back to the ball if you change your mind about a pass.',
     stack: ['kahneman', 'werbach']
   },
   'memory-matrix': {

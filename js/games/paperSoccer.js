@@ -58,6 +58,7 @@ export const MOVE_GK = 14;
 export const MIN_SEP = 2.6;
 export const TWO_PLAYER_CLEARANCE = BODY_R * 4; // 2 player diameters buffer (6.4 units)
 export const MIN_OPPONENT_DIST = BODY_R * 2 + TWO_PLAYER_CLEARANCE; // Center-to-center (9.6 units)
+export const CANCEL_RADIUS = 3.5; // Drag within this radius of the ball to cancel kick
 export const GOALS_TO_WIN = 3;
 export const CHARGE_MS = 1050;
 
@@ -872,11 +873,12 @@ export function renderPaperSoccer(container, onClose) {
         </div>
         <div class="ps-board">
           <button type="button" class="ps-skip ps-skip-red" hidden title="Skip Red's run (or press S)">SKIP</button>
+          <button type="button" class="ps-cancel-kick" id="ps-cancel-kick" hidden title="Cancel kick (or press Esc)">✕ CANCEL</button>
           <canvas class="ps-pitch" width="1100" height="640" aria-label="Paper Soccer Pitch"></canvas>
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Chess-speed tactical soccer. Each turn, move one runner along a straight ray as far as you want — like a rook or queen. You cannot cross through other players, and you must maintain a 2-player buffer distance from opponents (no direct body-checking). Offside is strictly active. Then flick the ball into open space or towards goal; whoever is nearest claims possession.</p>
+          <p class="ps-setup-lead">Chess-speed tactical soccer. Each turn, move one runner along a straight ray as far as you want — like a rook or queen. You cannot cross through other players, and you must maintain a 2-player buffer distance from opponents (no direct body-checking). Offside is strictly active. Then drag to set kick direction and distance (weight); drag back onto the ball or tap Cancel to abort safely without kicking.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -917,6 +919,14 @@ export function renderPaperSoccer(container, onClose) {
     });
     container.querySelector('.ps-skip-red').onclick = () => onSkip('red');
     container.querySelector('.ps-skip-blue').onclick = () => onSkip('blue');
+    const cancelKickBtn = container.querySelector('#ps-cancel-kick');
+    if (cancelKickBtn) cancelKickBtn.onclick = () => { charge = null; draw(); };
+
+    canvas.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      if (charge) { charge = null; draw(); }
+      if (activeDrag) { activeDrag = null; draw(); }
+    });
 
     bindPointer(canvas);
     bindKeyboard();
@@ -970,6 +980,13 @@ export function renderPaperSoccer(container, onClose) {
         const nextIdx = (curIdx + 1) % mates.length;
         selectedId = mates[nextIdx].id;
         draw();
+        return;
+      }
+      if (key === 'Escape') {
+        event.preventDefault();
+        if (charge) { charge = null; draw(); return; }
+        if (activeDrag) { activeDrag = null; draw(); return; }
+        if (selectedId) { selectedId = null; draw(); return; }
         return;
       }
       if (key === ' ' || key === 'Enter') {
@@ -1053,22 +1070,21 @@ export function renderPaperSoccer(container, onClose) {
       const pt = pointerInfo(event);
 
       if (state.phase === 'kick') {
-        // Press anywhere: the line from the ball to your finger is the
-        // direction, the hold is the weight. Requiring you to grab the ball
-        // first meant most presses on the pitch did nothing at all.
         if (event.pointerId != null && el.setPointerCapture) {
           try { el.setPointerCapture(event.pointerId); } catch (e) {}
         }
-        // Direction is fixed by where you press and does not drift after
-        // that: with the angle tracking a held finger, the target swung
-        // around while you were trying to judge the weight, so neither could
-        // be aimed. Point, then hold, then release.
+        const d = dist(state.ball, pt);
+        const isCancel = d < CANCEL_RADIUS;
         const lock = aimFromPointer(state.ball, pt);
         charge = {
           from: { ...state.ball },
           at: pt,
+          startPt: { x: pt.x, y: pt.y },
           angle: lock ? lock.angle : (state.possession === 'red' ? 0 : Math.PI),
-          start: performance.now()
+          power: lock ? lock.power : 0.25,
+          start: performance.now(),
+          isCancel,
+          hasDragged: false
         };
         draw();
         return;
@@ -1112,12 +1128,20 @@ export function renderPaperSoccer(container, onClose) {
       if (!started || flying || celebration || collecting || cpuBusy) return;
       const pt = pointerInfo(event);
       if (charge) {
-        // A deliberate swing re-aims; a wobbling finger does not. Locking the
-        // angle outright fixed the drift but left you committed to a bad
-        // direction with no way out but to kick it there.
-        if (dist(pt, charge.at) > 6) {
-          const re = aimFromPointer(state.ball, pt);
-          if (re) { charge.angle = re.angle; charge.at = pt; }
+        charge.at = pt;
+        if (dist(pt, charge.startPt) > 1.2) {
+          charge.hasDragged = true;
+        }
+        const d = dist(state.ball, pt);
+        if (d < CANCEL_RADIUS) {
+          charge.isCancel = true;
+        } else {
+          charge.isCancel = false;
+          const lock = aimFromPointer(state.ball, pt);
+          if (lock) {
+            charge.angle = lock.angle;
+            charge.power = lock.power;
+          }
         }
         draw();
         return;
@@ -1137,16 +1161,23 @@ export function renderPaperSoccer(container, onClose) {
       }
 
       if (charge) {
-        const held = (performance.now() - charge.start) / CHARGE_MS;
-        const angle = charge.angle;
+        const c = charge;
         charge = null;
 
-        // Point for direction, hold for power, release to strike. A quick tap
-        // is the softest touch on the dial, never a dead press — pressing the
-        // ball and seeing nothing happen is indistinguishable from a broken
-        // game.
-        const power = Math.max(0.14, Math.min(POWER_CEILING, held * POWER_CEILING));
-        startFlight(angle, power);
+        // Cancelled if inside cancel radius, or if explicitly marked cancel
+        if (c.isCancel) {
+          draw();
+          return;
+        }
+
+        const d = dist(state.ball, c.at);
+        if (d < CANCEL_RADIUS) {
+          draw();
+          return;
+        }
+
+        const power = Math.max(0.12, Math.min(POWER_CEILING, c.power));
+        startFlight(c.angle, power);
         return;
       }
 
@@ -1294,6 +1325,10 @@ export function renderPaperSoccer(container, onClose) {
   function syncSkip() {
     const redBtn = container.querySelector('.ps-skip-red');
     const blueBtn = container.querySelector('.ps-skip-blue');
+    const cancelBtn = container.querySelector('#ps-cancel-kick');
+    if (cancelBtn) {
+      cancelBtn.hidden = !charge;
+    }
     if (!redBtn) return;
     const mover = moverTeam(state);
     redBtn.hidden = !(mover === 'red' && isHumanTurn());
@@ -1701,26 +1736,21 @@ export function renderPaperSoccer(container, onClose) {
 
   function liveAim() {
     if (!charge) return null;
-    // Two separate jobs, so neither is guessing at the other: where you point
-    // is the direction, how long you hold is the power. Nothing about the
-    // distance you happen to drag feeds into how hard the ball is struck.
-    const held = (performance.now() - charge.start) / CHARGE_MS;
-    const power = Math.min(POWER_CEILING, Math.max(0.14, held * POWER_CEILING));
+    const power = charge.power != null ? charge.power : 0.25;
     const angle = charge.angle;
-    const dest = kickDestination(state.ball, angle, Math.max(0.14, power));
-    const resolved = resolveKick(state.ball, dest, Math.max(0.14, power), defendersNow());
+    const dest = kickDestination(state.ball, angle, power);
+    const resolved = resolveKick(state.ball, dest, power, defendersNow());
     const preview = resolved.kind === 'play'
       ? possessionPreview(state, resolved.dest, state.possession)
       : null;
     return {
-      power: Math.max(0.14, power),
+      power,
       dest: resolved.dest,
       kind: resolved.kind,
       preview,
       scorer: resolved.scorer,
-      // Who stops it, so the aim line can point at the body in the way
-      // instead of leaving the player to guess why the pass died.
-      stopper: resolved.by ? findPlayer(state, resolved.by) : null
+      stopper: resolved.by ? findPlayer(state, resolved.by) : null,
+      isCancel: Boolean(charge.isCancel)
     };
   }
 
@@ -1729,6 +1759,42 @@ export function renderPaperSoccer(container, onClose) {
     if (!live) return;
     const from = toScreen(state.ball);
     const to = toScreen(live.dest);
+
+    // Cancel state rendering:
+    if (live.isCancel) {
+      ctx.save();
+      const pulse = 1 + Math.sin(performance.now() * 0.015) * 0.08;
+      ctx.strokeStyle = '#f87171';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(from.x, from.y, CANCEL_RADIUS * map.scale * pulse, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = 'rgba(248, 113, 113, 0.18)';
+      ctx.beginPath();
+      ctx.arc(from.x, from.y, CANCEL_RADIUS * map.scale * pulse, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#f87171';
+      ctx.font = '10px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('✕ RELEASE TO CANCEL', from.x, from.y - CANCEL_RADIUS * map.scale - 14);
+      ctx.restore();
+      return;
+    }
+
+    // Cancel guide circle around the ball (shows player where to drag back to abort)
+    ctx.save();
+    ctx.strokeStyle = 'rgba(248, 113, 113, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.arc(from.x, from.y, CANCEL_RADIUS * map.scale, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
 
     // The corridors, shown only while you are aiming: every man who could stop
     // this kick wears the grass he actually covers. Off-screen the rest of the
@@ -1829,8 +1895,7 @@ export function renderPaperSoccer(container, onClose) {
       ctx.stroke();
     }
 
-    // Name the dial. "Release when it feels right" is only playable if you can
-    // see what you are releasing at.
+    // Name the dial.
     ctx.fillStyle = DIM;
     ctx.font = '9px "JetBrains Mono", monospace';
     ctx.textAlign = 'left';
@@ -1852,7 +1917,9 @@ export function renderPaperSoccer(container, onClose) {
             : cpuBusy
               ? 'MACHINE THINKING...'
               : state.phase === 'kick'
-                ? `${state.possession.toUpperCase()}'S FLICK · POINT DIRECTION · HOLD WEIGHT · RELEASE`
+                ? (charge && charge.isCancel
+                    ? '✕ RELEASE ON BALL TO CANCEL KICK'
+                    : `${state.possession.toUpperCase()}'S KICK · DRAG TO SET DISTANCE · SLIDE TO BALL TO CANCEL`)
                 : moverTeam(state)
                   ? `${moverTeam(state).toUpperCase()} TO MOVE · STRAIGHT LINE (2-PLAYER BUFFER)`
                   : 'MATCH OVER')

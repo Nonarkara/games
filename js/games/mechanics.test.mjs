@@ -44,6 +44,7 @@ import {
   MOVE_GK,
   TWO_PLAYER_CLEARANCE,
   MIN_OPPONENT_DIST,
+  CANCEL_RADIUS,
   PITCH,
   applyKick,
   clampMove,
@@ -533,6 +534,7 @@ assert.equal(isOffside({ ...forward, ...illegal }, offsideRun.blue, offsideRun.b
 
 assert.equal(otherTeam('red'), 'blue');
 
+assert.equal(CANCEL_RADIUS, 3.5);
 const aim = aimFromPointer({ x: 10, y: 10 }, { x: 10 + MAX_KICK, y: 10 });
 assert.ok(aim);
 assert.ok(Math.abs(aim.power - 1) < 1e-6);

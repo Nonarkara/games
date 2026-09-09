@@ -2609,6 +2609,26 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
   top: 50%;
   transform: translateY(-50%) rotate(90deg);
 }
+.paper-soccer .ps-cancel-kick {
+  position: absolute;
+  z-index: 4;
+  top: 8px;
+  right: 8px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid rgba(248, 113, 113, 0.85);
+  background: #180808;
+  color: #f87171;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.paper-soccer .ps-cancel-kick:hover {
+  background: #2a0c0c;
+  border-color: #fca5a5;
+  color: #fca5a5;
+}
 .paper-soccer .ps-setup {
   padding: 16px 14px 18px;
   border-top: 1px solid rgba(245, 158, 11, 0.35);
