@@ -351,7 +351,7 @@ class NgsApp {
         </figcaption>
       </figure>
       ${feature ? `
-        <button type="button" class="attract-feature" data-game="${feature.id}" aria-label="Load ${feature.title}">
+        <button type="button" class="attract-feature${feature.id === 'paper-soccer' ? ' has-art' : ''}" data-game="${feature.id}" aria-label="Load ${feature.title}">
           <span class="attract-feature-kicker">TODAY'S CARTRIDGE · ${wingLabel}</span>
           ${spriteImg(feature.id, 'cart-sprite cart-sprite--hero', 'ink')}
           <span class="attract-feature-code">${feature.code}</span>

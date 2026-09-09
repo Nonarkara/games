@@ -1378,6 +1378,7 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   object-position: center 35%;
   image-rendering: auto;
 }
+
 .attract-copy {
   position: absolute;
   left: 0;
@@ -2685,3 +2686,29 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
     font-size: 7px;
   }
 }
+
+/* The featured cart wears its own artwork when Paper Soccer holds the marquee.
+   The amber stays underneath so a slow connection still gets a solid panel,
+   and the dark wash keeps PSF / LOAD GAME above 4.5:1 over a busy picture —
+   the one legitimate gradient is exactly this: legibility over a photograph. */
+.attract-feature.has-art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to right, rgba(8,11,16,.94) 0%, rgba(8,11,16,.80) 42%, rgba(8,11,16,.44) 100%),
+    linear-gradient(to bottom, rgba(8,11,16,.30), rgba(8,11,16,.62)),
+    url('../public/paper-soccer-hero.webp') center 42% / cover no-repeat;
+  image-rendering: pixelated;
+}
+/* The panel's type is near-black because it was drawn for amber. Over a
+   photograph it has to invert, or it is simply not there — a caption that
+   exists in the DOM and not on the screen is the failure 11.10 is about. */
+.attract-feature.has-art,
+.attract-feature.has-art .attract-feature-code,
+.attract-feature.has-art .attract-feature-title { color: #fff; }
+.attract-feature.has-art .attract-feature-kicker,
+.attract-feature.has-art .attract-feature-skill { color: rgba(255,255,255,.88); }
+.attract-feature.has-art:hover { background: var(--ax-red); }
+.attract-feature.has-art:hover::before { filter: brightness(1.08); }
