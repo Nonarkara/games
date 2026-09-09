@@ -42,8 +42,8 @@ import {
   BALL_R,
   MOVE_FIELD,
   MOVE_GK,
-  TWO_PLAYER_CLEARANCE,
-  MIN_OPPONENT_DIST,
+  MIN_SEP,
+  moveRadius,
   CANCEL_RADIUS,
   PITCH,
   applyKick,
@@ -503,29 +503,69 @@ assert.equal(isOffside({ ...parked, x: 50 }, blueWall, { x: 60, y: 34 }), false)
 
 const mover = createMatch();
 const runner = mover.red.find(p => p.role === 'field');
-// 1. Unobstructed straight-line raycast: runner can move freely along a straight line (chess-like unlimited distance)
-const straightRun = clampMove(runner, { x: runner.x + 25, y: runner.y + 10 }, mover);
-assert.ok(Math.hypot(straightRun.x - runner.x, straightRun.y - runner.y) > 20, 'unobstructed straight line allows long run');
+// Give this runner an empty quarter of the pitch so only the rule under test bites.
+for (const p of [...mover.red, ...mover.blue]) {
+  if (p.id !== runner.id) { p.x = 100; p.y = 64; }
+}
+mover.ball = { x: 100, y: 64 };
 
-// 2. Obstacle collision: runner stops before colliding with an in-between teammate
-const teammateAhead = mover.red.find(p => p.id !== runner.id && p.role === 'field');
-teammateAhead.x = runner.x;
-teammateAhead.y = runner.y + 12;
-const blocked = clampMove(runner, { x: runner.x, y: runner.y + 30 }, mover);
-assert.ok(blocked.y < teammateAhead.y, 'cannot pass through teammate obstacle');
-assert.ok(teammateAhead.y - blocked.y >= BODY_R * 2 - 0.2, 'stops before collision with obstacle');
+// 1. Movement is a CIRCLE bounded by speed, not an unlimited ray.
+const farReach = clampMove(runner, { x: runner.x + 60, y: runner.y }, mover);
+const reached = Math.hypot(farReach.x - runner.x, farReach.y - runner.y);
+assert.ok(Math.abs(reached - MOVE_FIELD) < 0.2, `field runner caps at MOVE_FIELD (${reached} ~ ${MOVE_FIELD})`);
+assert.ok(moveRadius(runner) === MOVE_FIELD, 'field players use MOVE_FIELD');
+assert.ok(moveRadius(mover.red.find(p => p.role === 'gk')) === MOVE_GK, 'keeper uses MOVE_GK');
 
-// 3. 2-player buffer: runner cannot move closer than MIN_OPPONENT_DIST to an opponent
-const opponentAhead = mover.blue[0];
-opponentAhead.x = runner.x + 20;
-opponentAhead.y = runner.y;
-const bufferBlocked = clampMove(runner, { x: opponentAhead.x, y: runner.y }, mover);
-const finalGap = Math.hypot(bufferBlocked.x - opponentAhead.x, bufferBlocked.y - opponentAhead.y);
-assert.ok(finalGap >= MIN_OPPONENT_DIST - 1e-4, `must keep at least 2-player clearance buffer (${finalGap} >= ${MIN_OPPONENT_DIST})`);
+// 2. Anywhere inside that circle is reachable — sideways and backwards too,
+// which is how a runner peels off a marker into space.
+for (const [dx, dy] of [[0, 10], [0, -10], [-10, 0], [7, 7], [-7, -7]]) {
+  const spot = { x: runner.x + dx, y: runner.y + dy };
+  const got = clampMove(runner, spot, mover);
+  assert.ok(Math.hypot(got.x - spot.x, got.y - spot.y) < 0.2,
+    `free space inside the radius is reachable (${dx},${dy})`);
+}
 
-// 4. Diagnostics: rayInfo reports blocking reason
-const rayObstacle = rayInfo(runner, { x: opponentAhead.x, y: runner.y }, mover);
-assert.equal(rayObstacle.reason, '2-player buffer');
+// 3. THE REASON THIS MODEL EXISTS: a defender who never moves cannot wall the
+// pitch off. The runner goes AROUND a standing body rather than stopping short.
+const camper = mover.blue[0];
+camper.x = runner.x + 8;
+camper.y = runner.y;
+const past = clampMove(runner, { x: runner.x + 16, y: runner.y }, mover);
+assert.ok(past.x > camper.x + BODY_R, `runner gets past a static defender (${past.x} > ${camper.x})`);
+assert.ok(Math.hypot(past.x - camper.x, past.y - camper.y) >= MIN_SEP - 0.05,
+  'but never lands on top of him');
+
+// 4. You still cannot END on another body — the spot is occupied, so you settle beside it.
+const onTop = clampMove(runner, { x: camper.x, y: camper.y }, mover);
+assert.ok(Math.hypot(onTop.x - camper.x, onTop.y - camper.y) >= MIN_SEP - 0.05,
+  'cannot stack two players on one point');
+
+// 5. Diagnostics: out-of-range asks report range, not a phantom obstacle.
+const rayFar = rayInfo(runner, { x: runner.x + 60, y: runner.y }, mover);
+assert.equal(rayFar.reason, 'range');
+assert.equal(rayFar.radius, MOVE_FIELD);
+
+// 6. Self-play must actually reach a result. This is the guard that catches a
+// CPU heuristic which looks reasonable but stalls the game: when "get free"
+// was weighted above "get forward", every attacker ran to an empty corner,
+// the ball never left the centre circle and no match ever ended.
+{
+  const s = createMatch();
+  let steps = 0;
+  while (steps < 4000 && !s.winner && s.phase !== 'over') {
+    if (s.phase === 'move' || s.phase === 'move-opp') {
+      const mv = pickCpuMove(s);
+      if (mv) applyMove(s, mv.playerId, mv.dest); else skipMove(s);
+    } else if (s.phase === 'kick') {
+      const k = pickCpuKick(s);
+      if (!k) break;
+      applyKick(s, k.angle, k.power);
+    } else break;
+    steps++;
+  }
+  assert.ok(s.winner, `self-play must produce a winner, stalled after ${steps} steps`);
+}
+
 
 const offsideRun = createMatch();
 const forward = offsideRun.red.reduce((a, b) => (a.x > b.x ? a : b));

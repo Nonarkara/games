@@ -56,11 +56,89 @@ export const OVER_EXTRA = 10;
 export const MOVE_FIELD = 18;
 export const MOVE_GK = 14;
 export const MIN_SEP = 2.6;
-export const TWO_PLAYER_CLEARANCE = BODY_R * 4; // 2 player diameters buffer (6.4 units)
-export const MIN_OPPONENT_DIST = BODY_R * 2 + TWO_PLAYER_CLEARANCE; // Center-to-center (9.6 units)
 export const CANCEL_RADIUS = 3.5; // Drag within this radius of the ball to cancel kick
 export const GOALS_TO_WIN = 3;
 export const CHARGE_MS = 1050;
+
+/**
+ * Table Soccer audio synthesizer: tactile wooden flicks, plastic disc clacks,
+ * ringing metallic woodwork chimes, and cushion bank thuds.
+ */
+export function playTableSound(type) {
+  if (soundFx?.muted) return;
+  soundFx?.init?.();
+  const audio = soundFx?.ctx;
+  if (!audio) return;
+  const now = audio.currentTime;
+  const vol = soundFx.volume || 0.3;
+
+  try {
+    if (type === 'flick') {
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.exponentialRampToValueAtTime(75, now + 0.04);
+      gain.gain.setValueAtTime(0.28 * vol, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.connect(gain);
+      gain.connect(audio.destination);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    } else if (type === 'clack') {
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.035);
+      gain.gain.setValueAtTime(0.32 * vol, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      osc.connect(gain);
+      gain.connect(audio.destination);
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } else if (type === 'woodwork') {
+      [520, 1040, 1560].forEach((freq, i) => {
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.type = i === 0 ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime((0.35 / (i + 1)) * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      });
+    } else if (type === 'bank') {
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(60, now + 0.06);
+      gain.gain.setValueAtTime(0.35 * vol, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      osc.connect(gain);
+      gain.connect(audio.destination);
+      osc.start(now);
+      osc.stop(now + 0.07);
+    } else if (type === 'screamer') {
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(540, now + 0.12);
+      gain.gain.setValueAtTime(0.25 * vol, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.connect(gain);
+      gain.connect(audio.destination);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    } else if (type === 'whistle') {
+      soundFx.playWhistle?.();
+    }
+  } catch {}
+}
 
 export const FORMATIONS = Object.freeze({
   '4-4-2': Object.freeze([
@@ -105,8 +183,15 @@ export function findPlayer(state, id) {
   return allPlayers(state).find(player => player.id === id) || null;
 }
 
+/**
+ * How far this player can travel in one turn. A circle, not a ray: the point
+ * of the move is to FIND SPACE. A runner who can only slide along straight
+ * lines can never get free of a defender who simply stands still — and if
+ * nobody can get free, nobody can be picked out, and the killer pass never
+ * exists. Speed is the only limit on where inside that circle you land.
+ */
 export function moveRadius(player) {
-  return PITCH.length;
+  return player.role === 'gk' ? MOVE_GK : MOVE_FIELD;
 }
 
 export function goalMouthY() {
@@ -309,13 +394,93 @@ export function firstBlocker(ball, dest, defenders = []) {
   return best;
 }
 
-export function resolveKick(ball, dest, power, defenders = []) {
+/**
+ * Can this shot beat the man in front of it? A deterministic block means a
+ * defender standing in the lane is an unbeatable wall, which is why shots
+ * never went in. A struck ball past a half-committed defender does go
+ * through in the real game. Power does most of the work; catching him at the
+ * edge of his reach does the rest. The keeper is exempt — he is meant to be
+ * the last line, and a leaky keeper reads as a bug, not as drama.
+ */
+export function resolveKick(ball, dest, power, defenders = [], options = {}) {
+  const tableSoccer = Boolean(options.tableSoccer);
+  const allowBank = options.bank !== false;
   const over = power > 1;
+
+  // 1. Table soccer sideline cushion reflection (bank shots)
+  const yLine = dest.y < 0 ? 0 : (dest.y > PITCH.width ? PITCH.width : null);
+  const hitCushion = allowBank && yLine !== null && Math.abs(dest.x - ball.x) >= 2
+    ? yAt(ball, dest, yLine)
+    : null;
+
+  if (hitCushion && hitCushion.t > 0.04 && hitCushion.t < 0.98 && hitCushion.x >= 0 && hitCushion.x <= PITCH.length) {
+    // Check if the initial path from ball to cushion is blocked
+    const leg1Block = firstBlocker(ball, hitCushion, defenders);
+    if (leg1Block && leg1Block.t < 1) {
+      if (tableSoccer && power >= 0.65 && leg1Block.player.role !== 'gk') {
+        const ang = Math.atan2(leg1Block.point.y - ball.y, leg1Block.point.x - ball.x);
+        return {
+          kind: 'deflect',
+          dest: {
+            x: Math.max(2, Math.min(PITCH.length - 2, leg1Block.point.x + Math.cos(ang + 0.6) * 4)),
+            y: Math.max(2, Math.min(PITCH.width - 2, leg1Block.point.y + Math.sin(ang + 0.6) * 4))
+          },
+          by: leg1Block.player.id,
+          point: leg1Block.point
+        };
+      }
+      return {
+        kind: leg1Block.player.role === 'gk' ? 'save' : 'block',
+        dest: leg1Block.point,
+        to: leg1Block.player.team,
+        by: leg1Block.player.id
+      };
+    }
+    // Reflected leg off the wooden rail
+    const dx = dest.x - hitCushion.x;
+    const dy = -(dest.y - hitCushion.y);
+    const distRem = Math.hypot(dx, dy) * 0.9;
+    const refDest = {
+      x: hitCushion.x + (dx / (Math.hypot(dx, dy) || 1)) * distRem,
+      y: hitCushion.y + (dy / (Math.hypot(dx, dy) || 1)) * distRem
+    };
+    const leg2 = resolveKick(hitCushion, refDest, power * (1 - hitCushion.t), defenders, { ...options, bank: false });
+    return {
+      ...leg2,
+      bounce: { x: hitCushion.x, y: hitCushion.y },
+      bank: true
+    };
+  }
+
+  // 2. Direct path raycast
   const block = firstBlocker(ball, dest, defenders);
   const atRedLine = ball.x > 0 ? xAt(ball, dest, 0) : null;
   const atBlueLine = ball.x < PITCH.length ? xAt(ball, dest, PITCH.length) : null;
   const exitT = atRedLine?.t ?? atBlueLine?.t ?? 1;
+
   if (block && block.t < exitT) {
+    if (tableSoccer && power >= 0.65) {
+      if (block.player.role === 'gk') {
+        const reboundX = block.player.team === 'red' ? 9 : PITCH.length - 9;
+        const reboundY = block.point.y + (block.point.y < 34 ? 6 : -6);
+        return {
+          kind: 'parry',
+          dest: { x: reboundX, y: Math.max(4, Math.min(PITCH.width - 4, reboundY)) },
+          by: block.player.id,
+          point: block.point
+        };
+      }
+      const ang = Math.atan2(block.point.y - ball.y, block.point.x - ball.x);
+      return {
+        kind: 'deflect',
+        dest: {
+          x: Math.max(2, Math.min(PITCH.length - 2, block.point.x + Math.cos(ang + 0.6) * 4.5)),
+          y: Math.max(2, Math.min(PITCH.width - 2, block.point.y + Math.sin(ang + 0.6) * 4.5))
+        },
+        by: block.player.id,
+        point: block.point
+      };
+    }
     return {
       kind: block.player.role === 'gk' ? 'save' : 'block',
       dest: block.point,
@@ -323,22 +488,46 @@ export function resolveKick(ball, dest, power, defenders = []) {
       by: block.player.id
     };
   }
+
+  const { y0, y1 } = goalMouthY();
   const atRed = ball.x > 0 ? xAt(ball, dest, 0) : null;
   if (atRed) {
+    // Upright post or crossbar hit
+    if (tableSoccer && ((atRed.y >= y0 - 1.2 && atRed.y < y0) || (atRed.y > y1 && atRed.y <= y1 + 1.2) || (power > 1.0 && power <= 1.08 && inMouth(atRed.y)))) {
+      const postY = atRed.y < 34 ? y0 : y1;
+      return {
+        kind: 'woodwork',
+        post: { x: 0, y: postY },
+        dest: { x: 10 + (atRed.y % 3), y: postY + (postY < 34 ? 7 : -7) },
+        against: 'red'
+      };
+    }
     if (inMouth(atRed.y)) {
       if (over) return { kind: 'over', dest: keeperSpot('red'), keeperTeam: 'red' };
       return { kind: 'goal', scorer: 'blue', dest: atRed };
     }
     return { kind: 'goal-kick', dest: keeperSpot('red'), to: 'red' };
   }
+
   const atBlue = ball.x < PITCH.length ? xAt(ball, dest, PITCH.length) : null;
   if (atBlue) {
+    // Upright post or crossbar hit
+    if (tableSoccer && ((atBlue.y >= y0 - 1.2 && atBlue.y < y0) || (atBlue.y > y1 && atBlue.y <= y1 + 1.2) || (power > 1.0 && power <= 1.08 && inMouth(atBlue.y)))) {
+      const postY = atBlue.y < 34 ? y0 : y1;
+      return {
+        kind: 'woodwork',
+        post: { x: PITCH.length, y: postY },
+        dest: { x: PITCH.length - (10 + (atBlue.y % 3)), y: postY + (postY < 34 ? 7 : -7) },
+        against: 'blue'
+      };
+    }
     if (inMouth(atBlue.y)) {
       if (over) return { kind: 'over', dest: keeperSpot('blue'), keeperTeam: 'blue' };
       return { kind: 'goal', scorer: 'red', dest: atBlue };
     }
     return { kind: 'goal-kick', dest: keeperSpot('blue'), to: 'blue' };
   }
+
   if (dest.y < 0 || dest.y > PITCH.width) {
     return { kind: 'throw-in', dest: clipSideline(ball, dest) };
   }
@@ -356,7 +545,7 @@ function snapKeeperToBall(state, team) {
   gk.y = state.ball.y;
 }
 
-export function applyKick(state, angle, power) {
+export function applyKick(state, angle, power, options = {}) {
   if (state.phase !== 'kick' || state.winner) return state;
   const kicker = findPlayer(state, state.possessorId);
   if (!kicker) return state;
@@ -369,7 +558,22 @@ export function applyKick(state, angle, power) {
   );
 
   const dest = kickDestination(state.ball, angle, power);
-  const result = resolveKick(state.ball, dest, power, opponents);
+  const result = resolveKick(state.ball, dest, power, opponents, options);
+
+  if (result.kind === 'woodwork') {
+    state.ball = { ...result.dest };
+    return takeOver(state, closestTo(state.ball, allPlayers(state)).player, 'DONK! OFF THE WOODWORK!');
+  }
+
+  if (result.kind === 'deflect') {
+    state.ball = { ...result.dest };
+    return takeOver(state, closestTo(state.ball, allPlayers(state)).player, 'PINBALL DEFLECTION!');
+  }
+
+  if (result.kind === 'parry') {
+    state.ball = { ...result.dest };
+    return takeOver(state, closestTo(state.ball, allPlayers(state)).player, 'HOWLER! SPILLED REBOUND!');
+  }
 
   if (result.kind === 'block' || result.kind === 'save') {
     state.ball = { ...result.dest };
@@ -379,7 +583,13 @@ export function applyKick(state, angle, power) {
 
   if (result.kind === 'goal') {
     state.score[result.scorer] += 1;
-    state.log = `${result.scorer.toUpperCase()} GOAL`;
+    if (result.bank) {
+      state.log = `${result.scorer.toUpperCase()} BANK GOAL! WHAT A TRICK SHOT!`;
+    } else if (power >= 0.9) {
+      state.log = `${result.scorer.toUpperCase()} ROCKET! WHAT A SCREAMER!`;
+    } else {
+      state.log = `${result.scorer.toUpperCase()} GOAL`;
+    }
     if (state.score[result.scorer] >= GOALS_TO_WIN) {
       state.winner = result.scorer;
       state.phase = 'over';
@@ -403,16 +613,16 @@ export function applyKick(state, angle, power) {
   }
 
   // The ball stops; the nearest man on the pitch snaps onto it and his side
-  // is on the ball. No two-sided run race any more — where you place the pass
-  // IS the decision, so a short one to your own man keeps the turn and a long
-  // one that lands nearer a defender hands it over. Kick the ball a little way
-  // into your own space and you snap to it again: that is the dribble.
+  // is on the ball.
   state.ball = result.dest;
   const claim = closestTo(state.ball, allPlayers(state)).player;
   if (claim.team === kickingTeam && offsideIds.has(claim.id)) {
     return takeOver(state, closestTo(state.ball, opponents).player, 'OFFSIDE');
   }
-  return takeOver(state, claim, claim.team === kickingTeam ? 'ON THE BALL' : 'TURNOVER');
+  const defaultLog = result.bank
+    ? (claim.team === kickingTeam ? 'BANK PASS COMPLETED' : 'TURNOVER OFF THE CUSHION')
+    : (claim.team === kickingTeam ? 'ON THE BALL' : 'TURNOVER');
+  return takeOver(state, claim, defaultLog);
 }
 
 /**
@@ -463,10 +673,17 @@ function separate(point, selfId, state) {
   for (const other of allPlayers(state)) {
     if (other.id === selfId) continue;
     const d = Math.hypot(x - other.x, y - other.y);
-    if (d < MIN_SEP && d > 1e-9) {
+    if (d >= MIN_SEP) continue;
+    if (d > 1e-9) {
       const s = MIN_SEP / d;
       x = other.x + (x - other.x) * s;
       y = other.y + (y - other.y) * s;
+    } else {
+      // Dead centre on top of him. With free movement you can now aim at a
+      // body exactly, and the old divide-by-zero guard just left the two
+      // stacked. Nudge along the pitch's long axis so the result is stable.
+      x = other.x + MIN_SEP;
+      y = other.y;
     }
   }
   return {
@@ -479,80 +696,36 @@ export function clampMove(player, dest, state) {
   const from = { x: player.x, y: player.y };
   const dx = dest.x - from.x;
   const dy = dest.y - from.y;
-  const targetDist = Math.hypot(dx, dy);
-  if (targetDist < 1e-6) return { x: from.x, y: from.y };
+  const want = Math.hypot(dx, dy);
+  if (want < 1e-6) return { x: from.x, y: from.y };
 
-  const ux = dx / targetDist;
-  const uy = dy / targetDist;
+  const ux = dx / want;
+  const uy = dy / want;
 
-  // 1. Boundary clamp along the straight line ray
-  let tMax = targetDist;
-  if (ux > 1e-9) tMax = Math.min(tMax, (PITCH.length - from.x) / ux);
-  else if (ux < -1e-9) tMax = Math.min(tMax, -from.x / ux);
+  // Anywhere inside the speed circle is fair game. Nobody's body blocks the
+  // PATH any more — a runner goes round a standing defender, which is what a
+  // real one does. Bodies only stop you from LANDING on top of someone
+  // (separate() below). Take the two rules together and a defence that never
+  // moves can no longer wall off the pitch; it can only cover space.
+  let tMax = Math.min(want, moveRadius(player));
 
-  if (uy > 1e-9) tMax = Math.min(tMax, (PITCH.width - from.y) / uy);
-  else if (uy < -1e-9) tMax = Math.min(tMax, -from.y / uy);
-
-  // 2. Obstacle collision (cannot cross through other players along the ray)
-  const COLLISION_RADIUS = BODY_R * 2; // 3.2 units
-  for (const other of allPlayers(state)) {
-    if (other.id === player.id) continue;
-    const vx = other.x - from.x;
-    const vy = other.y - from.y;
-    const proj = vx * ux + vy * uy;
-    if (proj <= 0.05) continue;
-    const perpSq = (vx * vx + vy * vy) - (proj * proj);
-    if (perpSq < COLLISION_RADIUS * COLLISION_RADIUS) {
-      const halfChord = Math.sqrt(COLLISION_RADIUS * COLLISION_RADIUS - perpSq);
-      const hitDist = proj - halfChord;
-      if (hitDist > 0) {
-        tMax = Math.min(tMax, Math.max(0, hitDist - 0.15));
-      }
-    }
-  }
-
-  // 3. Two-player clearance rule from opponents (cannot block too closely)
+  // Offside is the one line you still cannot run past. Binary-search the
+  // furthest legal point on the way to where you asked for, testing the
+  // fully-resolved position so a body nudge can't sneak you past the line.
   const opponents = teamOf(state, otherTeam(player.team));
-  for (const opp of opponents) {
-    const vx = opp.x - from.x;
-    const vy = opp.y - from.y;
-    const initDist = Math.hypot(vx, vy);
-    const proj = vx * ux + vy * uy;
-    if (proj <= 0.05) continue;
-    const perpSq = (vx * vx + vy * vy) - (proj * proj);
-    if (perpSq < MIN_OPPONENT_DIST * MIN_OPPONENT_DIST) {
-      const halfChord = Math.sqrt(MIN_OPPONENT_DIST * MIN_OPPONENT_DIST - perpSq);
-      const hitDist = proj - halfChord;
-      if (hitDist > 0) {
-        tMax = Math.min(tMax, hitDist);
-      } else if (initDist < MIN_OPPONENT_DIST) {
-        tMax = 0;
-      }
-    }
-  }
-
-  // 4. Offside pulling along the ray
-  const tentative = {
-    ...player,
-    x: from.x + ux * tMax,
-    y: from.y + uy * tMax
-  };
-  if (isOffside(tentative, opponents, state.ball)) {
+  const at = t => separate({ x: from.x + ux * t, y: from.y + uy * t }, player.id, state);
+  if (isOffside({ ...player, ...at(tMax) }, opponents, state.ball)) {
     let lo = 0;
     let hi = tMax;
-    for (let step = 0; step < 16; step++) {
+    for (let step = 0; step < 20; step++) {
       const mid = (lo + hi) / 2;
-      const testPt = { ...player, x: from.x + ux * mid, y: from.y + uy * mid };
-      if (isOffside(testPt, opponents, state.ball)) hi = mid;
+      if (isOffside({ ...player, ...at(mid) }, opponents, state.ball)) hi = mid;
       else lo = mid;
     }
     tMax = lo;
   }
 
-  tMax = Math.max(0, tMax);
-  const finalX = Math.min(PITCH.length, Math.max(0, from.x + ux * tMax));
-  const finalY = Math.min(PITCH.width, Math.max(0, from.y + uy * tMax));
-  return { x: finalX, y: finalY };
+  return at(Math.max(0, tMax));
 }
 
 export function rayInfo(player, dest, state) {
@@ -562,42 +735,34 @@ export function rayInfo(player, dest, state) {
   const dy = dest.y - from.y;
   const targetDist = Math.hypot(dx, dy);
   const actualDist = Math.hypot(target.x - from.x, target.y - from.y);
+  const radius = moveRadius(player);
   let blockedBy = null;
   let reason = 'clear';
 
   if (actualDist + 0.15 < targetDist) {
-    const ux = dx / (targetDist || 1);
-    const uy = dy / (targetDist || 1);
-    for (const other of allPlayers(state)) {
-      if (other.id === player.id) continue;
-      const vx = other.x - from.x;
-      const vy = other.y - from.y;
-      const proj = vx * ux + vy * uy;
-      if (proj > 0.05) {
-        const dTarget = Math.hypot(target.x - other.x, target.y - other.y);
-        if (other.team !== player.team && dTarget <= MIN_OPPONENT_DIST + 0.25) {
+    const opponents = teamOf(state, otherTeam(player.team));
+    if (isOffside({ ...player, x: dest.x, y: dest.y }, opponents, state.ball)) {
+      reason = 'offside';
+    } else if (targetDist > radius + 0.15) {
+      reason = 'range';
+    } else {
+      // Only thing left that can shorten a legal in-range move is another body
+      // occupying the spot you asked for.
+      for (const other of allPlayers(state)) {
+        if (other.id === player.id) continue;
+        if (Math.hypot(dest.x - other.x, dest.y - other.y) < MIN_SEP) {
           blockedBy = other;
-          reason = '2-player buffer';
-          break;
-        } else if (dTarget <= BODY_R * 2 + 0.35) {
-          blockedBy = other;
-          reason = 'obstacle';
+          reason = 'occupied';
           break;
         }
       }
-    }
-    if (!blockedBy) {
-      const opponents = teamOf(state, otherTeam(player.team));
-      if (isOffside({ ...player, x: dest.x, y: dest.y }, opponents, state.ball)) {
-        reason = 'offside';
-      } else {
-        reason = 'boundary';
-      }
+      if (!blockedBy) reason = 'boundary';
     }
   }
 
-  return { from, dest, target, blockedBy, reason, actualDist, targetDist };
+  return { from, dest, target, blockedBy, reason, actualDist, targetDist, radius };
 }
+
 
 /** Who is on the clock during a move phase: the side on the ball, then the other. */
 export function moverTeam(state) {
@@ -771,6 +936,7 @@ export function pickCpuMove(state) {
   if (!team) return null;
   const mates = movablePlayers(state, team).filter(p => p.role !== 'gk');
   if (!mates.length) return null;
+  const SPACE_WEIGHT = 0.6;
   const attacking = team === state.possession;
   const foes = teamOf(state, otherTeam(team));
 
@@ -783,15 +949,29 @@ export function pickCpuMove(state) {
     let best = null;
     let bestScore = -Infinity;
     for (const mate of mates) {
-      for (const frac of [0.2, 0.4, 0.7, 1]) {
-        for (const spread of [0, -14, 14]) {
+      // Sweep the whole reach circle, not just the line to goal. Getting FREE
+      // is often sideways or even backwards, and a receiver nobody is marking
+      // is what turns an ordinary ball into a killer pass. Sampling only the
+      // goalward line is how an attack ends up permanently crowded.
+      const reach = moveRadius(mate);
+      for (let a = 0; a < 360; a += 30) {
+        for (const frac of [0.45, 0.8, 1]) {
+          const rad = a * Math.PI / 180;
           const landing = clampMove(mate, {
-            x: mate.x + (goal.x - mate.x) * frac,
-            y: mate.y + (goal.y - mate.y) * frac + spread
+            x: mate.x + Math.cos(rad) * reach * frac,
+            y: mate.y + Math.sin(rad) * reach * frac
           }, state);
           const open = !firstBlocker(state.ball, landing, foes);
           const gain = team === 'red' ? landing.x : PITCH.length - landing.x;
-          const score = gain + (open ? 45 : 0) - dist(state.ball, landing) * 0.25;
+          // How much daylight has he got? An unmarked man is worth more than
+          // a few metres of ground.
+          const marker = foes.reduce((m, f) => Math.min(m, dist(f, landing)), Infinity);
+          const space = Math.min(marker, 25);
+          // ponytail: 0.6 is tuned, not guessed — 12-match self-play stays at
+          // 36 goals / 0 deadlocks anywhere in 0.3-0.8, and collapses to 0
+          // goals and a stalled ball at 1.6, where getting free outranks
+          // getting forward and every attacker just runs to an empty corner.
+          const score = gain + (open ? 45 : 0) + space * SPACE_WEIGHT - dist(state.ball, landing) * 0.25;
           if (score > bestScore) { bestScore = score; best = { playerId: mate.id, dest: landing }; }
         }
       }
@@ -848,6 +1028,22 @@ export function renderPaperSoccer(container, onClose) {
   let canvas;
   let ctx;
   let map = { left: 0, top: 0, scale: 1, cssW: 640, cssH: 380 };
+  let shake = 0;
+  let particles = [];
+
+  function spawnParticles(x, y, color = '#f59e0b', count = 6) {
+    for (let i = 0; i < count; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const spd = 1.2 + Math.random() * 2.5;
+      particles.push({
+        x, y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        life: 1.0,
+        color
+      });
+    }
+  }
 
   function humanTeam() { return vsCpu ? 'red' : null; }
   function cpuTeam() { return vsCpu ? 'blue' : null; }
@@ -878,7 +1074,7 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Chess-speed tactical soccer. Each turn, move one runner along a straight ray as far as you want — like a rook or queen. You cannot cross through other players, and you must maintain a 2-player buffer distance from opponents (no direct body-checking). Offside is strictly active. Then drag to set kick direction and distance (weight); drag back onto the ball or tap Cancel to abort safely without kicking.</p>
+          <p class="ps-setup-lead">Tactical soccer at chess speed. Each turn, move one runner anywhere inside his reach circle — how far his legs carry him in one turn. Go round a marker, drop into space, whatever gets him free; you just cannot finish standing on someone. Offside is strictly active. Then drag to set kick direction and distance (weight); drag back onto the ball or tap Cancel to abort safely without kicking. Find a man in space and the killer pass is on.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -1203,6 +1399,21 @@ export function renderPaperSoccer(container, onClose) {
     el.addEventListener('pointermove', move);
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
+
+    // Double-click to shoot: full weight at the spot you hit. Holding a drag
+    // to build weight is right for a measured pass and wrong for a shot you
+    // have already decided on, so this is the fast path — same aim, no wind-up.
+    el.addEventListener('dblclick', event => {
+      if (!started || flying || celebration || collecting || cpuBusy || state.winner) return;
+      if (state.phase !== 'kick' || !isHumanTurn()) return;
+      event.preventDefault();
+      const pt = pointerInfo(event);
+      if (dist(state.ball, pt) < CANCEL_RADIUS) return;   // that is the cancel zone
+      const lock = aimFromPointer(state.ball, pt);
+      if (!lock) return;
+      charge = null;
+      startFlight(lock.angle, 1);
+    });
   }
 
   /** Opponents of whoever is on the ball — the bodies a kick must beat. */
@@ -1658,19 +1869,18 @@ export function renderPaperSoccer(container, onClose) {
       const to = toScreen(ray.target);
       const cursor = toScreen(activeDrag.currentPt);
 
-      // 2-player clearance buffer rings around opponents
-      for (const opp of teamOf(state, otherTeam(player.team))) {
-        const op = toScreen(opp);
-        ctx.strokeStyle = 'rgba(248,113,113,0.35)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([2, 4]);
-        ctx.beginPath();
-        ctx.arc(op.x, op.y, MIN_OPPONENT_DIST * map.scale, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
+      // The reach circle IS the rule now, so draw it. Without it a player is
+      // guessing how far the legs go, and "find space" is not a decision you
+      // can make blind.
+      ctx.strokeStyle = 'rgba(245,158,11,0.4)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, ray.radius * map.scale, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
 
-      // Valid straight-line trajectory
+      // Run line to the spot you actually get.
       ctx.strokeStyle = player.team === 'red' ? 'rgba(239,68,68,0.9)' : 'rgba(56,189,248,0.9)';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
@@ -1684,7 +1894,6 @@ export function renderPaperSoccer(container, onClose) {
       ctx.arc(to.x, to.y, 4.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // If blocked along the ray, show the blocked segment and reason
       if (ray.reason !== 'clear') {
         ctx.strokeStyle = 'rgba(248,113,113,0.45)';
         ctx.lineWidth = 1.5;
@@ -1699,8 +1908,8 @@ export function renderPaperSoccer(container, onClose) {
         ctx.font = '9px "JetBrains Mono", monospace';
         ctx.textAlign = 'center';
         let label = 'BLOCKED';
-        if (ray.reason === '2-player buffer') label = 'BUFFER: 2 PLAYERS';
-        else if (ray.reason === 'obstacle') label = 'OBSTACLE IN LINE';
+        if (ray.reason === 'range') label = 'OUT OF RANGE';
+        else if (ray.reason === 'occupied') label = 'SPOT TAKEN';
         else if (ray.reason === 'offside') label = 'OFFSIDE LINE';
         ctx.fillText(label, to.x, to.y - 10);
       }
@@ -1919,9 +2128,9 @@ export function renderPaperSoccer(container, onClose) {
               : state.phase === 'kick'
                 ? (charge && charge.isCancel
                     ? '✕ RELEASE ON BALL TO CANCEL KICK'
-                    : `${state.possession.toUpperCase()}'S KICK · DRAG TO SET DISTANCE · SLIDE TO BALL TO CANCEL`)
+                    : `${state.possession.toUpperCase()}'S KICK · DRAG FOR WEIGHT · DOUBLE-CLICK TO SHOOT`)
                 : moverTeam(state)
-                  ? `${moverTeam(state).toUpperCase()} TO MOVE · STRAIGHT LINE (2-PLAYER BUFFER)`
+                  ? `${moverTeam(state).toUpperCase()} TO MOVE · RUN ANYWHERE IN REACH · OFFSIDE LIVE`
                   : 'MATCH OVER')
       : 'CHOOSE FORMATION & KICK OFF';
 
