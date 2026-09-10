@@ -34,6 +34,22 @@ import { numberWord, rollPro } from './mentalMathPro.js';
 import { toThai, fromThai, rollThai } from './mentalMathThai.js';
 import { STROOP_COLORS, makeColorMarchRound } from './eduGames.js';
 import {
+  initialBoard as chessInitial, generateMoves as chessMoves, makeMove as chessMake,
+  inCheck, gameStatus, evaluate as chessEval, bestMove as chessBest
+} from './chess.js';
+import {
+  initialBoard as checkersInitial, generateMoves as checkersMoves, applyMove as checkersApply,
+  gameStatus as checkersStatus, evaluate as checkersEval, bestMove as checkersBest
+} from './checkers.js';
+import {
+  newDeck as spiderDeck, dealInitial as spiderDeal, movableRun, canStack as spiderCanStack,
+  applyMove as spiderApply, checkAutoFoundations as spiderAuto, isWon as spiderWon
+} from './spiderSolitaire.js';
+import {
+  newBoard as goNew, neighbors as goNeighbors, groupAt, placeStone, isLegalMove,
+  generateMoves as goMoves, scorePosition, bestMove as goBest, boardsEqual
+} from './go.js';
+import {
   GOALS_TO_WIN,
   MAX_KICK,
   BLOCK_RADIUS,
@@ -722,4 +738,157 @@ assert.equal(kickoff.red[0].num, 1, 'GK has squad number 1');
 assert.equal(kickoff.red[1].num, 2, 'First outfield defender has squad number 2');
 assert.equal(kickoff.red[10].num, 11, 'Last attacker has squad number 11');
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, and Paper Soccer passed');
+/* ── CHESS ─────────────────────────────────────────────────────────────── */
+const cb0 = chessInitial();
+const cb0w = chessMoves(cb0, 'w');
+const cb0b = chessMoves(cb0, 'b');
+assert.equal(cb0w.length, 20, 'chess: 20 opening moves for white');
+assert.equal(cb0b.length, 20, 'chess: 20 opening moves for black');
+assert.equal(chessEval(cb0), 0, 'chess: balanced at start');
+
+// Scholar's mate is reachable
+let cb = cb0;
+cb = chessMake(cb, cb0w.find(m => m.from[0] === 6 && m.from[1] === 4 && m.to[0] === 4 && m.to[1] === 4));
+cb = chessMake(cb, chessMoves(cb, 'b').find(m => m.from[0] === 1 && m.from[1] === 4 && m.to[0] === 3 && m.to[1] === 4));
+cb = chessMake(cb, chessMoves(cb, 'w').find(m => m.from[0] === 7 && m.from[1] === 5 && m.to[0] === 4 && m.to[1] === 2));
+cb = chessMake(cb, chessMoves(cb, 'b').find(m => m.from[0] === 0 && m.from[1] === 1 && m.to[0] === 2 && m.to[1] === 2));
+cb = chessMake(cb, chessMoves(cb, 'w').find(m => m.from[0] === 7 && m.from[1] === 3 && m.to[0] === 3 && m.to[1] === 7));
+cb = chessMake(cb, chessMoves(cb, 'b').find(m => m.from[0] === 0 && m.from[1] === 6 && m.to[0] === 2 && m.to[1] === 5));
+const mate = chessMoves(cb, 'w').find(m => m.from[0] === 3 && m.from[1] === 7 && m.to[0] === 1 && m.to[1] === 5);
+assert.ok(mate, "chess: scholar's mate Qxf7 is in white's moves");
+const cbMate = chessMake(cb, mate);
+assert.equal(gameStatus(cbMate, 'b'), 'checkmate', 'chess: Qxf7# is checkmate');
+
+// Castling
+const castle = [
+  ['r', null, null, null, 'k', null, null, 'r'],
+  Array(8).fill(null), Array(8).fill(null), Array(8).fill(null), Array(8).fill(null), Array(8).fill(null), Array(8).fill(null),
+  ['R', null, null, null, 'K', null, null, 'R']
+];
+const castleOpts = { castling: { w: { kingside: true, queenside: true }, b: { kingside: true, queenside: true } } };
+const castleMoves = chessMoves(castle, 'w', castleOpts);
+assert.ok(castleMoves.find(m => m.castle === 'k'), 'chess: kingside castling legal');
+assert.ok(castleMoves.find(m => m.castle === 'q'), 'chess: queenside castling legal');
+
+// En passant (enPassantTarget = destination of capturing pawn)
+let ep = chessInitial();
+ep = chessMake(ep, chessMoves(ep, 'w').find(m => m.from[0] === 6 && m.from[1] === 4 && m.to[0] === 4 && m.to[1] === 4));
+ep = chessMake(ep, chessMoves(ep, 'b').find(m => m.from[0] === 1 && m.from[1] === 3 && m.to[0] === 3 && m.to[1] === 3));
+const epMoves = chessMoves(ep, 'w', { enPassantTarget: [3, 3] });
+assert.ok(epMoves.find(m => m.from[0] === 4 && m.from[1] === 4 && m.to[0] === 3 && m.to[1] === 3 && m.enPassant), 'chess: en passant available');
+
+// AI returns a move
+const aiMove = chessBest(cb0, 'b', 2);
+assert.ok(aiMove && aiMove.from && aiMove.to, 'chess: AI returns a legal move');
+
+/* ── CHECKERS ─────────────────────────────────────────────────────────── */
+const ck0 = checkersInitial();
+let redCount = 0, blackCount = 0;
+for (const row of ck0) for (const c of row) { if (c === 'r') redCount++; if (c === 'b') blackCount++; }
+assert.equal(redCount, 12, 'checkers: 12 red men at start');
+assert.equal(blackCount, 12, 'checkers: 12 black men at start');
+assert.equal(checkersMoves(ck0, 'r').length, 7, 'checkers: red has 7 opening slides');
+
+// Kinging: red man on row 1 reaches row 0
+const ck1 = Array.from({ length: 8 }, () => Array(8).fill(null));
+ck1[1][4] = 'r';
+const ck1Moves = checkersMoves(ck1, 'r');
+const kingMove = ck1Moves.find(m => m.to[0] === 0);
+assert.ok(kingMove, 'checkers: pawn on 2nd row can king');
+const ck1Kinged = checkersApply(ck1, kingMove);
+assert.equal(ck1Kinged[0][3] === 'R' || ck1Kinged[0][5] === 'R', true, 'checkers: a king appears on row 0');
+
+// Mandatory capture
+const ck2 = Array.from({ length: 8 }, () => Array(8).fill(null));
+ck2[4][3] = 'b';
+ck2[5][4] = 'r';
+const ck2Moves = checkersMoves(ck2, 'r');
+assert.ok(ck2Moves.length > 0, 'checkers: a capture exists');
+assert.ok(ck2Moves.every(m => m.captures && m.captures.length > 0), 'checkers: only captures are legal when one exists');
+
+// Multi-jump
+const ck3 = Array.from({ length: 8 }, () => Array(8).fill(null));
+ck3[5][4] = 'r';
+ck3[4][3] = 'b';
+ck3[2][1] = 'b';
+const ck3Moves = checkersMoves(ck3, 'r');
+const longest = Math.max(...ck3Moves.map(m => m.path.length));
+assert.equal(longest, 3, 'checkers: longest mandatory capture is 3 squares (2 jumps)');
+
+// AI
+const ckAI = checkersBest(ck0, 'b', 4);
+assert.ok(ckAI && ckAI.from, 'checkers: AI returns a legal move');
+
+/* ── SPIDER SOLITAIRE ─────────────────────────────────────────────────── */
+assert.equal(spiderDeck('1-suit').length, 104, 'spider: 1-suit deck is 104 cards');
+assert.equal(spiderDeck('4-suit').length, 104, 'spider: 4-suit deck is 104 cards');
+const ss0 = spiderDeal('1-suit');
+assert.equal(ss0.tableau.length, 10, 'spider: 10 columns');
+assert.equal(ss0.tableau.reduce((s, c) => s + c.length, 0), 54, 'spider: 54 cards in tableau');
+assert.equal(ss0.stock.length, 50, 'spider: 50 cards in stock');
+assert.ok(ss0.tableau.every(c => c[c.length - 1].up && c.slice(0, -1).every(x => !x.up)), 'spider: only top card of each column is face-up');
+
+// movableRun + canStack
+const ssCol = [
+  { r: '7', v: 7, s: '♠', red: false, up: false },
+  { r: '6', v: 6, s: '♠', red: false, up: true },
+  { r: '5', v: 5, s: '♠', red: false, up: true },
+  { r: '4', v: 4, s: '♠', red: false, up: true }
+];
+assert.equal(movableRun(ssCol).length, 3, 'spider: movableRun returns 3-card descending run');
+assert.ok(spiderCanStack({ v: 5, s: '♠', up: true }, { v: 6, s: '♥', up: true }, '1-suit'), 'spider: 1-suit ignores suit');
+assert.ok(!spiderCanStack({ v: 5, s: '♠', up: true }, { v: 6, s: '♥', up: true }, '4-suit'), 'spider: 4-suit enforces suit');
+
+// Auto-foundation
+const ssWin = {
+  tableau: [
+    Array.from({ length: 13 }, (_, i) => ({ v: 13 - i, s: '♠', red: false, up: true, r: 'K' })),
+    ...Array.from({ length: 9 }, () => [])
+  ],
+  stock: [], foundations: Array.from({ length: 8 }, () => [])
+};
+const ssWinResult = spiderAuto(ssWin, '1-suit');
+assert.equal(ssWinResult.state.foundations[0].length, 13, 'spider: full K-A run auto-moves to foundation');
+assert.equal(ssWinResult.state.tableau[0].length, 0, 'spider: column cleared after auto-foundation');
+
+/* ── GO ───────────────────────────────────────────────────────────────── */
+const g9 = goNew(9);
+assert.equal(g9.length, 9, 'go: newBoard(9) is 9x9');
+assert.equal(goNeighbors(9, 4, 4).length, 4, 'go: middle has 4 neighbors');
+assert.equal(goNeighbors(9, 0, 0).length, 2, 'go: corner has 2 neighbors');
+
+const gp = placeStone(g9, 0, 0, 'B');
+assert.ok(gp, 'go: first move legal');
+assert.equal(gp.board[0][0], 'B', 'go: stone placed');
+
+// Capture: surround a corner stone
+const gc = goNew(9);
+gc[0][0] = 'B';
+const gc1 = placeStone(gc, 0, 1, 'W');
+const gc2 = placeStone(gc1.board, 1, 0, 'W');
+assert.equal(gc2.board[0][0], null, 'go: surrounded stone is captured');
+
+// Suicide illegal
+const gs = goNew(9);
+gs[0][1] = 'W'; gs[1][0] = 'W';
+const suicide = placeStone(gs, 0, 0, 'B');
+assert.equal(suicide, null, 'go: suicide move is rejected');
+
+// Score with komi
+const ge = goNew(9);
+const score = scorePosition(ge);
+assert.equal(score.black, 0, 'go: empty board gives 0 black');
+assert.equal(score.white, 6.5, 'go: empty board gives 6.5 white (komi)');
+
+// AI levels — beginner can pass with low probability on a near-empty board;
+// assert the move is one of the legal options, not strictly a placement.
+const gLegal = goMoves(ge, 'B');
+const gReal = gLegal.filter(m => !m.pass);
+const gAI1 = goBest(ge, 'B', 'beginner');
+assert.ok(gLegal.some(m => m.pass === gAI1.pass && m.r === gAI1.r && m.c === gAI1.c), 'go: beginner returns a legal move');
+const gAI2 = goBest(ge, 'B', 'intermediate');
+assert.ok(!gAI2.pass, 'go: intermediate returns a placement');
+const gAI3 = goBest(ge, 'B', 'pro');
+assert.ok(!gAI3.pass, 'go: pro returns a placement');
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, and Go passed');

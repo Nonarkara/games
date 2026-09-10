@@ -105,7 +105,11 @@ const defaultData = {
     'paper-soccer': 0,
     'memory-matrix': 0,
     'mental-math-pro': 0,
-    'mental-math-thai': 0
+    'mental-math-thai': 0,
+    'chess': 0,
+    'checkers': 0,
+    'spider-solitaire': 0,
+    'go': 0
   },
   favorites: [],
   favoriteStates: {},

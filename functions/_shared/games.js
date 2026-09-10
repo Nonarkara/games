@@ -106,7 +106,13 @@ export const GAME_MAX = Object.freeze({
   'buzz-21': 100,
   'truth-or-dare': 100,
   'higher-lower': 200,
-  'two-truths': 100
+  'two-truths': 100,
+
+  // 2026-09 expansion — classic board games
+  'chess': 1000,
+  'checkers': 1000,
+  'spider-solitaire': 1000,
+  'go': 1000
 });
 
 export const ALLOWED_GAME_IDS = new Set(Object.keys(GAME_MAX));

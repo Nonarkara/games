@@ -105,6 +105,34 @@ export const BRAIN_GUIDES = {
     tip: 'Look at the king\u2019s escape squares first. The mate is usually the move that removes the last one.',
     stack: ['neuroplasticity', 'kahneman']
   },
+  'chess': {
+    label: 'Search under branching complexity', minutes: '15–45 min',
+    practice: 'Play a full game against the engine, then review the moves that surprised you.',
+    why: 'Chess is the canonical bounded-rationality task: every decision is one move in a tree so deep no human can fully evaluate it. The skill is pruning.',
+    tip: 'Ask after every move: what does my opponent want, and what stops them? A plan in plain words beats a calculation in your head.',
+    stack: ['kahneman', 'neuroplasticity']
+  },
+  'checkers': {
+    label: 'Mandatory tactical sequencing', minutes: '10–25 min',
+    practice: 'Force captures to expose the king, and remember you can move multi-jumps as a single turn.',
+    why: 'Draughts has been fully solved by computer (Chinook, 2007) — the game tree is finite enough that perfect play is known. The lesson is that "solvable" is not the same as "obvious".',
+    tip: 'Before any non-capture move, scan the board for any capture. If one exists, you must take it, and you must take the longest one.',
+    stack: ['clear', 'kahneman']
+  },
+  'spider-solitaire': {
+    label: 'Plan several moves ahead in a sortable queue', minutes: '20–60 min',
+    practice: 'Build K→A runs before exposing cards you will need later.',
+    why: 'Spider is a constraint-satisfaction problem dressed as a card game. The moves you make now restrict the moves available later — exactly what working memory handles badly and pattern recognition handles well.',
+    tip: 'Never break an in-progress run to chase a one-card gain. The completed run moves itself to the foundation and frees a whole column.',
+    stack: ['clear', 'neuroplasticity']
+  },
+  'go': {
+    label: 'Read shape, weight, and timing', minutes: '20–90 min',
+    practice: 'After every move, count your liberties, then your opponent\u2019s. A group with one liberty is dying.',
+    why: 'Go is the deepest bounded-rationality task we ship. The branching factor is wider than chess, and the evaluation function is positional, not just material. The skill is reading shape at a glance.',
+    tip: 'Corners first, then sides, then centre. An empty corner is worth more than a centre stone; an enemy corner is worth attacking before they settle.',
+    stack: ['kahneman', 'neuroplasticity', 'clear']
+  },
   'ear-trainer': {
     label: 'Name the gap between two notes', minutes: '4–6 min',
     practice: 'Hear two notes, then tap the interval name. The second note is always higher.',

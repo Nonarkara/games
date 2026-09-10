@@ -41,6 +41,10 @@ import { renderTicTacToe } from './games/ticTacToe.js';
 import { renderRockPaperScissors } from './games/rockPaperScissors.js';
 import { renderPaperSoccer } from './games/paperSoccer.js';
 import { renderMemoryMatrix } from './games/memoryMatrix.js';
+import { renderChess } from './games/chess.js';
+import { renderCheckers } from './games/checkers.js';
+import { renderSpiderSolitaire } from './games/spiderSolitaire.js';
+import { renderGo } from './games/go.js';
 import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } from './games/ngsDailySuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
@@ -134,6 +138,10 @@ const gamesCatalog = [
   { id: 'frogger', code: 'FRG', title: 'Frogger', wing: 'arcade', category: 'classics', domain: 'Timing', age: 'All', desc: 'Cross five lanes of traffic. Every crossing rebuilds the road faster.', paper: 'Konami 1981', tags: ['Timing', 'Lanes', 'Classic'], renderer: renderFrogger },
   { id: 'connect-four', code: 'CF4', title: 'Connect Four', wing: 'arcade', category: 'adult-mind', domain: 'Adversarial play', age: 'All', desc: 'Drop discs into columns and connect four before the computer does.', tags: ['Opponent', 'Minimax', 'Strategy'], renderer: renderConnectFour },
   { id: 'solitaire', code: 'KLD', title: 'Klondike Solitaire', wing: 'arcade', category: 'classics', domain: 'Sequencing', age: 'All', desc: 'Build alternating-color stacks, then move each suit from Ace to King.', tags: ['Cards', 'Patience', 'Classic'], renderer: renderSolitaire },
+  { id: 'chess', code: 'CHS', title: 'Chess', wing: 'arcade', category: 'classics', domain: 'Adversarial play', age: '10+', desc: 'Move your pieces against a depth-3 alphabeta. Full rules: castling, en passant, promotion.', tags: ['Opponent', 'Strategy', 'Classic'], renderer: renderChess },
+  { id: 'checkers', code: 'CHK', title: 'Checkers', wing: 'arcade', category: 'classics', domain: 'Adversarial play', age: '8+', desc: 'Move your men on an American 8×8 board. Mandatory captures, multi-jumps, kinging.', tags: ['Opponent', 'Strategy', 'Classic'], renderer: renderCheckers },
+  { id: 'spider-solitaire', code: 'SPD', title: 'Spider Solitaire', wing: 'arcade', category: 'classics', domain: 'Sequencing', age: '10+', desc: 'Build K→A runs across two decks and 10 columns. 1-suit (any stack) or 4-suit (same suit).', tags: ['Cards', 'Patience', 'Classic'], renderer: renderSpiderSolitaire },
+  { id: 'go', code: 'GO', title: 'Go', wing: 'arcade', category: 'classics', domain: 'Adversarial play', age: '12+', desc: 'Place stones on 9×9, 11×11, 13×13, or 19×19. Beginner, intermediate, or pro AI. Komi 6.5.', tags: ['Opponent', 'Strategy', 'Ancient', 'Board game'], renderer: renderGo },
   { id: 'number-chain', code: 'NCH', title: 'Number Chain', wing: 'learn', category: 'math-logic', domain: 'Patterns', age: '10+', desc: 'Find the rule linking a number sequence, then enter the next number.', tags: ['Patterns', 'Reasoning'], renderer: renderNumberChain },
   { id: 'word-guess', code: 'WRD', title: 'Word Guess', wing: 'learn', category: 'language', domain: 'Vocabulary', age: '10+', desc: 'Guess a five-letter word in six tries. Green is the right place. Orange is in the word.', tags: ['Words', 'Deduction'], renderer: renderWordGuess },
   { id: 'mate-in-one', code: 'MT1', title: 'Mate in One', wing: 'learn', category: 'math-logic', domain: 'Tactics', age: '8+', desc: 'Six named mating patterns. Find the single move that ends the game.', tags: ['Chess', 'Tactics', 'Pattern'], renderer: renderMateInOne },
