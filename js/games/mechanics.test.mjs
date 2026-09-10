@@ -67,6 +67,8 @@ import {
   applyMove,
   rayInfo,
   SHIELD_R,
+  clearTheRing,
+  inPenaltyArea,
 } from './paperSoccer.js';
 
 // WCST: every dimension maps to the stable reference cards without exposing the rule.
@@ -604,6 +606,76 @@ assert.ok(SHIELD_R > BLOCK_RADIUS + 1,
   const mateGot = clampMove(mate, { x: 62.7, y: 34 }, s);
   assert.ok(Math.hypot(mateGot.x - carrier.x, mateGot.y - carrier.y) < SHIELD_R,
     'the shield holds off opponents only, never your own side');
+}
+
+// 8. Ported from SuperLeague, stripped of ratings. Three rules that together
+// make a packed box playable instead of a wall.
+{
+  // (a) THE BALL DOES NOT DIE ON A SHIN. A struck shot squirms past an
+  // outfield body; a placed one is held. Before this, any man in the lane was
+  // an unbeatable wall and shots from a crowded box were pointless.
+  const shooter = { id: 'r1', team: 'red', role: 'field', x: 88, y: 34 };
+  const ball = { x: 88, y: 34 };
+  const inTheWay = [{ id: 'd1', team: 'blue', role: 'field', x: 92, y: 34 }];
+  assert.notEqual(resolveKick(ball, { x: 105, y: 34 }, 1, inTheWay, { shooter }).kind, 'block',
+    'a struck shot is not held by a shin');
+  assert.equal(resolveKick(ball, { x: 105, y: 34 }, 0.3, inTheWay, { shooter }).kind, 'block',
+    'a placed ball still dies on him');
+
+  // It stays deterministic — the board animates one resolve and state commits
+  // another, so a random element here would show the ball beating a man and
+  // then count it blocked.
+  const a = resolveKick(ball, { x: 105, y: 34 }, 1, inTheWay, { shooter });
+  const b = resolveKick(ball, { x: 105, y: 34 }, 1, inTheWay, { shooter });
+  assert.equal(a.kind, b.kind, 'the same shot must resolve the same way every time');
+
+  // (b) CLEAR THE RING. Closing inside the shield is already forbidden, but a
+  // ball played to a man ALREADY stood beside two opponents left bodies in his
+  // face that no rule asked to move. When it arrives, they give ground.
+  const st = createMatch();
+  [...st.red, ...st.blue].forEach(p => { p.x = 10; p.y = 64; });
+  const carrier = st.red[1]; carrier.x = 88; carrier.y = 34;
+  st.blue[1].x = 89; st.blue[1].y = 34;      // standing on him
+  st.blue[2].x = 87; st.blue[2].y = 36;
+  clearTheRing(st, carrier);
+  for (const d of [st.blue[1], st.blue[2]]) {
+    assert.ok(Math.hypot(d.x - carrier.x, d.y - carrier.y) >= SHIELD_R - 0.05,
+      'a man standing on the carrier gives ground when the ball arrives');
+  }
+  // The keeper does not: closing a man down in your own box is the job.
+  const gk = st.blue.find(p => p.role === 'gk');
+  gk.x = carrier.x + 1; gk.y = carrier.y;
+  clearTheRing(st, carrier);
+  assert.ok(Math.hypot(gk.x - carrier.x, gk.y - carrier.y) < SHIELD_R, 'the keeper is exempt');
+
+  // (c) THE BOUNCING ROD. A ball reaching a man in the box comes off him at
+  // goal — that is what he is in there for. It must NOT be an automatic goal:
+  // "a ball played into the box was a goal whoever was standing there" is the
+  // failure SuperLeague names in isTapIn. Marking him has to cost him, and
+  // here that falls out of the geometry rather than a bonus rule.
+  const rodGoals = marked => {
+    let scored = 0;
+    for (let i = 0; i < 24; i++) {
+      const t = createMatch();
+      [...t.red, ...t.blue].forEach(p => { p.x = 10; p.y = 64; });
+      const k = t.red[1]; k.x = 70; k.y = 28 + i * 0.6;
+      t.possession = 'red'; t.possessorId = k.id; t.ball = { x: k.x, y: k.y }; t.phase = 'kick';
+      const rod = t.red[2]; rod.x = 95; rod.y = 28 + i * 0.6;
+      t.blue[1].x = 99; t.blue[1].y = 20; t.blue[2].x = 99; t.blue[2].y = 48;
+      if (marked) { t.blue[3].x = rod.x + 2.5; t.blue[3].y = rod.y; }
+      const keeper = t.blue.find(p => p.role === 'gk'); keeper.x = 103; keeper.y = 34;
+      const before = matchScore(t, 'red');
+      const aim = aimFromPointer(t.ball, { x: rod.x, y: rod.y });
+      if (aim) applyKick(t, aim.angle, aim.power);
+      if (matchScore(t, 'red') > before) scored++;
+    }
+    return scored;
+  };
+  const free = rodGoals(false);
+  const shackled = rodGoals(true);
+  assert.ok(free > 0, 'a man in the box must be able to turn one in');
+  assert.ok(free < 24, 'but a ball into the box is not an automatic goal');
+  assert.ok(shackled < free, `marking the box must buy something (${shackled} marked vs ${free} free)`);
 }
 
 

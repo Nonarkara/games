@@ -65,6 +65,20 @@ export const MIN_SEP = 2.6;
 // opponents of the ball carrier it does the one job it was ever for — keeping
 // a shooting angle alive. Everyone else still runs wherever they like.
 export const SHIELD_R = 7;
+// Struck, not placed. Past this weight a body no longer HOLDS the ball — it
+// comes off him. SuperLeague reads this off the shooter's rating; Paper Soccer
+// has no ratings, so every player strikes it the same and the weight alone
+// decides. (SuperLeague: DRIVE_ON.)
+export const DRIVE_ON = 0.55;
+// How much of a struck ball survives the body it hits. SuperLeague scales this
+// with a SHOT rating from 0.12 to 0.78; with no ratings, everyone gets the
+// middle of that range.
+export const DRILLS_THROUGH = 0.45;
+// The box, and how far a man standing in it can turn a ball that reaches him.
+// SuperLeague makes the arc a SHOT rating; here it is the same for everyone.
+export const BOX_DEPTH = 18;
+export const BOX_HALF = 22;
+export const REDIRECT_ARC = 0.85;   // radians off the line the ball arrived on
 export const CANCEL_RADIUS = 3.5; // Drag within this radius of the ball to cancel kick
 export const GOALS_TO_WIN = 3;
 export const CHARGE_MS = 1050;
@@ -326,6 +340,47 @@ export function isOffside(player, opponents, ball) {
   return player.x < secondLast && player.x < ball.x;
 }
 
+/** True when the line of this kick would carry it into the mouth. */
+export function isStrike(ball, dest, team) {
+  const line = team === 'red' ? PITCH.length : 0;
+  const at = xAt(ball, dest, line);
+  return Boolean(at && inMouth(at.y));
+}
+
+/** Inside the attacking penalty area — where a man becomes a bouncing rod. */
+export function inPenaltyArea(man, attackingTeam) {
+  const line = attackingTeam === 'red' ? PITCH.length : 0;
+  return Math.abs(man.x - line) <= BOX_DEPTH
+    && Math.abs(man.y - PITCH.width / 2) <= BOX_HALF;
+}
+
+/**
+ * The emptiest part of the mouth as it looks from where he is standing — not
+ * the middle, not a fixed corner. Sample the goal line, score each point by
+ * how far it sits from the keeper and from every body in the lane, take the
+ * best. Pure geometry, so it ports to a game with no ratings unchanged.
+ */
+export function bestGap(from, team, defenders) {
+  const line = team === 'red' ? PITCH.length : 0;
+  const { y0, y1 } = goalMouthY();
+  const keeper = defenders.find(d => d.role === 'gk');
+  const guard = keeper ? keeper.y : PITCH.width / 2;
+  let best = null;
+  for (let i = 0; i <= 12; i++) {
+    const y = y0 + 0.6 + (i / 12) * (y1 - y0 - 1.2);
+    const target = { x: line, y };
+    let room = Math.abs(y - guard);
+    for (const d of defenders) {
+      if (d.role === 'gk') continue;
+      const near = nearestOnSegment(from, target, d);
+      if (near.t <= 0.02) continue;
+      room = Math.min(room, near.gap * 1.4);
+    }
+    if (!best || room > best.room) best = { room, target };
+  }
+  return best ? best.target : { x: line, y: PITCH.width / 2 };
+}
+
 export function kickTravel(power) {
   const p = Math.max(0, Math.min(Number(power) || 0, POWER_CEILING));
   const base = Math.min(p, 1) * MAX_KICK;
@@ -413,6 +468,7 @@ export function firstBlocker(ball, dest, defenders = []) {
  */
 export function resolveKick(ball, dest, power, defenders = [], options = {}) {
   const tableSoccer = Boolean(options.tableSoccer);
+  const shooter = options.shooter || null;
   const allowBank = options.bank !== false;
   const over = power > 1;
 
@@ -466,6 +522,59 @@ export function resolveKick(ball, dest, power, defenders = [], options = {}) {
   const atRedLine = ball.x > 0 ? xAt(ball, dest, 0) : null;
   const atBlueLine = ball.x < PITCH.length ? xAt(ball, dest, PITCH.length) : null;
   const exitT = atRedLine?.t ?? atBlueLine?.t ?? 1;
+
+  // THE BALL DOES NOT DIE ON A SHIN.
+  //
+  // A struck shot that meets an outfield body is not gathered: it goes under
+  // him, off him, past him, and carries on at goal with what is left of its
+  // pace. How much is left is how hard it was hit and how square the contact
+  // was — dead centre takes more out of it than a graze off a heel. If what
+  // survives cannot reach the line it dies on him after all and comes loose;
+  // if it can, the next body and then the keeper are all that is left.
+  //
+  // This does not break the conservation law. Contact still happens exactly
+  // where the drawn disc says it does — the law is that the blocking radius
+  // matches the radius you can see, not that touching a man ends the move.
+  if (block && block.t < exitT && block.player.role !== 'gk'
+      && shooter && power >= DRIVE_ON && isStrike(ball, dest, shooter.team)) {
+    const reach = BLOCK_RADIUS;
+    const square = Math.max(0, Math.min(1, 1 - block.gap / reach));
+    const survive = DRILLS_THROUGH * Math.min(1, 0.45 + 0.7 * power) * (1 - 0.5 * square);
+    const onward = power * survive;
+    const line = shooter.team === 'red' ? PITCH.length : 0;
+    const toLine = Math.abs(line - block.point.x);
+    if (kickTravel(onward) > toLine + 0.5) {
+      // It squirms through, weaker, and everyone still in front of it gets
+      // their turn — one body you beat, two stop you. Cut the line to what
+      // the remaining pace can actually carry, so the next man judges it at
+      // the weight it really has.
+      const nudge = Math.max(0, reach - block.gap) * 0.6;
+      const side = Math.sign((block.player.y - block.point.y) || 1);
+      const aimed = { x: dest.x, y: dest.y - side * nudge };
+      const span = dist(block.point, aimed) || 1;
+      const left = kickTravel(onward);
+      const on = {
+        x: block.point.x + (aimed.x - block.point.x) / span * left,
+        y: block.point.y + (aimed.y - block.point.y) / span * left
+      };
+      const rest = defenders.filter(d => d !== block.player);
+      const after = resolveKick(block.point, on, onward, rest, { ...options, bank: false, shooter });
+      if (after.kind !== 'block') return { ...after, deflectedBy: block.player.id };
+    }
+    // Not enough left on it: charged down. The ball is loose a couple of
+    // yards back toward the shooter and whoever reacts first has it.
+    const back = Math.min(2.5, dist(ball, block.point) * 0.5);
+    const len = dist(ball, block.point) || 1;
+    return {
+      kind: 'deflect',
+      dest: {
+        x: block.point.x - (block.point.x - ball.x) / len * back,
+        y: block.point.y - (block.point.y - ball.y) / len * back
+      },
+      by: block.player.id,
+      point: block.point
+    };
+  }
 
   if (block && block.t < exitT) {
     if (tableSoccer && power >= 0.65) {
@@ -567,7 +676,7 @@ export function applyKick(state, angle, power, options = {}) {
   );
 
   const dest = kickDestination(state.ball, angle, power);
-  const result = resolveKick(state.ball, dest, power, opponents, options);
+  const result = resolveKick(state.ball, dest, power, opponents, { ...options, shooter: kicker });
 
   if (result.kind === 'woodwork') {
     state.ball = { ...result.dest };
@@ -628,6 +737,55 @@ export function applyKick(state, angle, power, options = {}) {
   if (claim.team === kickingTeam && offsideIds.has(claim.id)) {
     return takeOver(state, closestTo(state.ball, opponents).player, 'OFFSIDE');
   }
+  // THE BOUNCING ROD.
+  //
+  // A forward in the box does not trap the ball and look up. It hits him and
+  // it goes at the goal — off a shin, a hip, the back of a heel — because that
+  // is what a man in the six-yard box is FOR, and with his back to goal he
+  // does not need to be facing it to score. SuperLeague makes how far he can
+  // turn it a SHOT rating; Paper Soccer has no ratings, so every player turns
+  // it the same REDIRECT_ARC and only the geometry decides.
+  //
+  // This is the answer to a packed box: you do not need a clean lane to the
+  // net, you need a man in there and a ball that reaches him.
+  if (claim.team === kickingTeam && claim.id !== kicker.id
+      && claim.role !== 'gk' && inPenaltyArea(claim, kickingTeam)) {
+    const arrive = Math.atan2(claim.y - state.ball.y, claim.x - state.ball.x);
+    const aim = bestGap(claim, kickingTeam, opponents);
+    const want = Math.atan2(aim.y - claim.y, aim.x - claim.x);
+    let turn = Math.atan2(Math.sin(want - arrive), Math.cos(want - arrive));
+    // More turn than a body can give it: the ball goes where he could actually
+    // send it, which is usually nowhere good.
+    //
+    // Marking the box is already paid for by geometry and needs no extra rule:
+    // a man on his shoulder is a body in the lane, and he also drags bestGap's
+    // aim off the corner it wanted. Measured, that alone takes a free man in
+    // the box from 20 of 24 to 0. An explicit "he cannot set himself" penalty
+    // on the arc was tried here and changed literally nothing in any geometry
+    // I could build, so it is not in the code pretending to.
+    if (Math.abs(turn) > REDIRECT_ARC) turn = Math.sign(turn) * REDIRECT_ARC;
+    const angle = arrive + turn;
+    const from = { x: claim.x, y: claim.y };
+    const flickDest = kickDestination(from, angle, 1);
+    const flick = resolveKick(from, flickDest, 1, opponents.filter(d => d !== claim),
+      { shooter: claim });
+    if (flick.kind === 'goal') {
+      state.ball = { ...flick.dest };
+      state.score[flick.scorer] += 1;
+      state.log = 'OFF THE ROD — GOAL!';
+      if (state.score[flick.scorer] >= GOALS_TO_WIN) {
+        state.winner = flick.scorer;
+        state.phase = 'over';
+        return state;
+      }
+      resetKickoff(state, otherTeam(flick.scorer));
+      return state;
+    }
+    // Not in: the ball is live where the flick died, and whoever reacts has it.
+    state.ball = { ...(flick.dest || flickDest) };
+    return takeOver(state, closestTo(state.ball, allPlayers(state)).player, 'FLICKED ON IN THE BOX');
+  }
+
   const defaultLog = result.bank
     ? (claim.team === kickingTeam ? 'BANK PASS COMPLETED' : 'TURNOVER OFF THE CUSHION')
     : (claim.team === kickingTeam ? 'ON THE BALL' : 'TURNOVER');
@@ -639,6 +797,47 @@ export function applyKick(state, angle, power, options = {}) {
  * his side gets the one move before the next kick. The single place a turn
  * changes hands, so the rule cannot drift between outcomes.
  */
+/**
+ * The daylight round the man on the ball, made absolute.
+ *
+ * clampMove already forbids a defender from CLOSING inside the shield. That is
+ * not enough on its own: the ball gets played to a man who is ALREADY standing
+ * beside an opponent, and now there is a body in his face that no rule asks to
+ * move. Two of those and every lane is shut.
+ *
+ * In the real game you cannot stand on a man — put your body in his way and
+ * the referee gives a foul. So when the ball arrives, anyone inside the ring
+ * gives ground: straight back along the line he is already on, the shortest
+ * move that clears it, no further. He has not been beaten, he is a yard off,
+ * which is where a defender is entitled to be.
+ *
+ * The keeper is exempt. Closing a man down in your own six-yard box is the job.
+ */
+export function clearTheRing(state, carrier) {
+  if (!carrier) return state;
+  for (const foe of teamOf(state, otherTeam(carrier.team))) {
+    if (foe.role === 'gk') continue;
+    let dx = foe.x - carrier.x;
+    let dy = foe.y - carrier.y;
+    let gap = Math.hypot(dx, dy);
+    if (gap >= SHIELD_R) continue;
+    if (gap < 1e-6) { dx = carrier.team === 'red' ? 1 : -1; dy = 0; gap = 1; }
+    let spot = { x: carrier.x + (dx / gap) * SHIELD_R, y: carrier.y + (dy / gap) * SHIELD_R };
+    if (spot.x < 0 || spot.x > PITCH.length || spot.y < 0 || spot.y > PITCH.width) {
+      // Backed against a touchline: swing round the ring until there is room.
+      const base = Math.atan2(dy, dx);
+      for (let i = 1; i <= 24; i++) {
+        const turn = base + ((i % 2 ? 1 : -1) * Math.ceil(i / 2) * Math.PI) / 12;
+        const trial = { x: carrier.x + Math.cos(turn) * SHIELD_R, y: carrier.y + Math.sin(turn) * SHIELD_R };
+        if (trial.x >= 0 && trial.x <= PITCH.length && trial.y >= 0 && trial.y <= PITCH.width) { spot = trial; break; }
+      }
+    }
+    foe.x = Math.max(0, Math.min(PITCH.length, spot.x));
+    foe.y = Math.max(0, Math.min(PITCH.width, spot.y));
+  }
+  return state;
+}
+
 function takeOver(state, player, log) {
   if (!player) return state;
   // Where he came from, so the board can walk him onto the ball instead of
@@ -653,6 +852,7 @@ function takeOver(state, player, log) {
   state.possessorId = player.id;
   state.phase = 'move';
   state.log = log;
+  clearTheRing(state, player);
   return state;
 }
 
@@ -912,6 +1112,9 @@ export function pickCpuKick(state) {
   const team = state.possession;
   const ball = state.ball;
   const { y0, y1 } = goalMouthY();
+  // The machine must judge a shot by the same rules it will be resolved by,
+  // or it previews a game it is not playing.
+  const kicker = findPlayer(state, state.possessorId);
 
   // The machine must respect bodies in the lane too — without `foes` it saw a
   // clean shot from anywhere inside MAX_KICK and took it every single kickoff.
@@ -923,7 +1126,7 @@ export function pickCpuKick(state) {
     const aim = aimFromPointer(ball, goal);
     if (!aim || aim.power > 1) continue;
     const dest = kickDestination(ball, aim.angle, aim.power);
-    const result = resolveKick(ball, dest, aim.power, foes);
+    const result = resolveKick(ball, dest, aim.power, foes, { shooter: kicker });
     if (result.kind === 'goal' && result.scorer === team) return aim;
   }
 
@@ -933,7 +1136,7 @@ export function pickCpuKick(state) {
     const ang = (i / 24) * Math.PI * 2;
     for (const power of [0.22, 0.36, 0.5, 0.66, 0.84]) {
       const dest = kickDestination(ball, ang, power);
-      const result = resolveKick(ball, dest, power, foes);
+      const result = resolveKick(ball, dest, power, foes, { shooter: kicker });
       if (result.kind === 'goal' && result.scorer === team) return { angle: ang, power };
       if (result.kind !== 'play') continue;
       const preview = possessionPreview(state, result.dest, team);
@@ -1100,7 +1303,7 @@ export function renderPaperSoccer(container, onClose) {
           <button type="button" class="ps-skip ps-skip-blue" hidden title="Skip Blue's run">SKIP</button>
         </div>
         <div class="ps-setup" id="ps-setup">
-          <p class="ps-setup-lead">Tactical soccer at chess speed. Each turn, move one runner anywhere inside his reach circle — how far his legs carry him in one turn. Go round a marker, drop into space, whatever gets him free; you just cannot finish standing on someone. Offside is strictly active. Then drag to set kick direction and distance (weight); drag back onto the ball or tap Cancel to abort safely without kicking. Find a man in space and the killer pass is on.</p>
+          <p class="ps-setup-lead">Tactical soccer at chess speed. Each turn, move one runner anywhere inside his reach circle. Go round a marker, drop into space, whatever gets him free; you just cannot finish standing on someone, and nobody may crowd the man on the ball. Offside is strictly active. Drag to set direction and weight, or double-click to shoot. Hit it hard and a defender's shin will not hold it — the ball squirms through, and a team-mate in the box does not trap it, it comes off him at goal.</p>
           <div class="ps-setup-row">
             <span>SEATS</span>
             <button type="button" class="ps-seat is-on" data-seat="cpu">YOU vs MACHINE</button>
@@ -1442,6 +1645,11 @@ export function renderPaperSoccer(container, onClose) {
     });
   }
 
+  /** Whoever is on the ball — a strike is only a strike if someone struck it. */
+  function shooterNow() {
+    return findPlayer(state, state.possessorId);
+  }
+
   /** Opponents of whoever is on the ball — the bodies a kick must beat. */
   function defendersNow() {
     const kicker = findPlayer(state, state.possessorId);
@@ -1450,7 +1658,7 @@ export function renderPaperSoccer(container, onClose) {
 
   function startFlight(angle, power) {
     const dest = kickDestination(state.ball, angle, power);
-    const preview = resolveKick(state.ball, dest, power, defendersNow());
+    const preview = resolveKick(state.ball, dest, power, defendersNow(), { shooter: shooterNow() });
     flying = {
       from: { ...state.ball },
       to: preview.dest,
@@ -1632,7 +1840,7 @@ export function renderPaperSoccer(container, onClose) {
         flying = null;
         state.ball = { ...from };
         const dest = kickDestination(state.ball, angle, power);
-        const resolved = resolveKick(state.ball, dest, power, defendersNow());
+        const resolved = resolveKick(state.ball, dest, power, defendersNow(), { shooter: shooterNow() });
 
         if (resolved.kind === 'goal') {
           state.score[resolved.scorer] += 1;
@@ -1974,7 +2182,7 @@ export function renderPaperSoccer(container, onClose) {
     const power = charge.power != null ? charge.power : 0.25;
     const angle = charge.angle;
     const dest = kickDestination(state.ball, angle, power);
-    const resolved = resolveKick(state.ball, dest, power, defendersNow());
+    const resolved = resolveKick(state.ball, dest, power, defendersNow(), { shooter: shooterNow() });
     const preview = resolved.kind === 'play'
       ? possessionPreview(state, resolved.dest, state.possession)
       : null;
