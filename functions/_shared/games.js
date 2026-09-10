@@ -112,7 +112,10 @@ export const GAME_MAX = Object.freeze({
   'chess': 1000,
   'checkers': 1000,
   'spider-solitaire': 1000,
-  'go': 1000
+  'go': 1000,
+
+  // 2026-09 expansion — Heads Up!
+  'heads-up': 60
 });
 
 export const ALLOWED_GAME_IDS = new Set(Object.keys(GAME_MAX));

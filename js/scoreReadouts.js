@@ -86,6 +86,7 @@ const CUTS = {
   'checkers': [200, 600, 1000],
   'spider-solitaire': [200, 600, 900],
   'go': [200, 600, 1000],
+  'heads-up': [6, 13, 20],
   'ear-trainer': [20, 60, 90],
   'morse-code': [20, 60, 90],
   'word-search': [60, 140, 220],

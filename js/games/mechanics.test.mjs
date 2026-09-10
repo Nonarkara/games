@@ -49,6 +49,7 @@ import {
   newBoard as goNew, neighbors as goNeighbors, groupAt, placeStone, isLegalMove,
   generateMoves as goMoves, scorePosition, bestMove as goBest, boardsEqual
 } from './go.js';
+import { CATEGORIES_PUBLIC as HU_CATS, poolFor as huPool, pickWord as huPick, scoreMessage as huMsg } from './headsUp.js';
 import {
   GOALS_TO_WIN,
   MAX_KICK,
@@ -891,4 +892,26 @@ assert.ok(!gAI2.pass, 'go: intermediate returns a placement');
 const gAI3 = goBest(ge, 'B', 'pro');
 assert.ok(!gAI3.pass, 'go: pro returns a placement');
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, and Go passed');
+/* ── HEADS UP! ─────────────────────────────────────────────────────────── */
+assert.equal(HU_CATS.length, 7, 'heads-up: 6 specific + 1 mixed = 7 categories');
+for (const c of HU_CATS) {
+  assert.ok(c.label && c.id && c.words.length >= 30, `heads-up: ${c.id} has 30+ words and full metadata`);
+}
+const huMixed = HU_CATS.find(c => c.id === 'mixed');
+const huSpec = HU_CATS.filter(c => c.id !== 'mixed');
+assert.ok(huSpec.every(c => c.words.every(w => huMixed.words.includes(w))), 'heads-up: mixed contains every specific word');
+assert.equal(new Set(huMixed.words.map(w => w.toLowerCase())).size, huMixed.words.length, 'heads-up: mixed is deduplicated');
+
+const huP = huPool('food');
+assert.ok(huP.length >= 30, 'heads-up: poolFor returns 30+ words');
+const huState = { remaining: ['only-one'], reshuffles: 0 };
+const huW1 = huPick(huState, HU_CATS[0]);
+assert.equal(huW1, 'only-one', 'heads-up: pickWord returns the queued word');
+huPick(huState, HU_CATS[0]);
+assert.equal(huState.reshuffles, 1, 'heads-up: pickWord reshuffles when empty');
+
+assert.ok(huMsg(30).toLowerCase().includes('telepathic'), 'heads-up: 30 = telepathic');
+assert.ok(huMsg(13).toLowerCase().includes('cracked') || huMsg(13).toLowerCase().includes('warm'), 'heads-up: 13 = warm or cracked');
+assert.ok(huMsg(3).toLowerCase().includes('rusty'), 'heads-up: 3 = rusty');
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, Go, and Heads Up! passed');

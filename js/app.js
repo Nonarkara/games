@@ -30,6 +30,7 @@ import { renderTrailMaking, renderMentalRotation, renderIowaGambling } from './g
 import { renderKingsCup, renderNeverHaveIEver, renderMostLikelyTo } from './games/ngsDrinkingGames.js';
 import { renderCognitiveReflection, renderRavenMatrices, renderSternberg, renderNumberSense } from './games/ngsNewTrainers2.js';
 import { renderRideTheBus, renderPowerHour, renderBuzz, renderTruthOrDare, renderHigherLower, renderTwoTruths } from './games/ngsDrinkingGames2.js';
+import { renderHeadsUp } from './games/headsUp.js';
 import { renderWCST, renderTowerOfLondon, renderMindEyes } from './games/ngsNewTrainers3.js';
 import { renderPosnerCueing, renderChangeBlindness, renderOperationSpan } from './games/ngsAttentionSuite.js';
 import { renderChimpTest, renderCalibration, renderMontyHall } from './games/ngsCuriositySuite.js';
@@ -172,6 +173,7 @@ const gamesCatalog = [
   { id: 'buzz-21', code: 'BUZ', title: 'Buzz (21)', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: 'Count to 21. +1, +2, or +3 each turn. Whoever says 21 drinks.', tags: ['Party', 'Counting', 'Drinking'], renderer: renderBuzz },
   { id: 'truth-or-dare', code: 'TOD', title: 'Truth or Dare', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: '30 truths, 30 dares. Answer or drink.', tags: ['Party', 'Confession', 'Drinking'], renderer: renderTruthOrDare },
   { id: 'higher-lower', code: 'HIL', title: 'Higher or Lower', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: 'Single deck streak. Guess the next card. Drink on a wrong guess.', tags: ['Party', 'Cards', 'Drinking'], renderer: renderHigherLower },
+  { id: 'heads-up', code: 'HEU', title: 'Heads Up!', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: 'All', desc: 'Pick a category, name the word on screen before the 60-second clock runs out.', tags: ['Party', 'Charades', 'Drinking', 'Group'], renderer: renderHeadsUp },
   { id: 'two-truths', code: '2T1', title: '2 Truths & a Lie', wing: 'labs', category: 'drinking', domain: 'Party prompts', age: '18+', desc: 'Tell two true statements and one lie, then let the group vote.', tags: ['Party', 'Deception', 'Drinking'], renderer: renderTwoTruths },
   // ── META ───────────────────────────────────────────────────────────────
   { id: 'about-dr-non', code: 'WHY', title: 'About Dr Non', wing: 'meta', category: 'about', domain: 'Signal', age: 'Everyone', desc: 'MIT Wii photo, a life of games, and why honesty is the product.', tags: ['Story'], renderer: renderAbout }

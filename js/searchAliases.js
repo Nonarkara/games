@@ -99,6 +99,7 @@ export const SEARCH_ALIASES = {
   'checkers': ['checkers', 'draughts', 'dames', 'men', 'kings', 'jump', 'capture', 'red and black'],
   'spider-solitaire': ['spider', 'solitaire', 'patience', 'cards', 'spider solitaire', 'klondike', 'runs'],
   'go': ['go', 'weiqi', 'baduk', 'stones', 'territory', 'komi', 'atari', 'board game', 'ancient'],
+  'heads-up': ['heads up', 'headsup', 'headbanz', 'celebrity head', 'charades', 'party', 'word game', 'forehead', 'ellen', 'drinking'],
   'ear-trainer': ['music', 'pitch', 'hearing', 'ears', 'intervals', 'notes', 'sound', 'listen'],
   'morse-code': ['morse', 'sos', 'dots and dashes', 'telegraph', 'beeps', 'listen'],
   'tower-hanoi': ['hanoi', 'discs', 'rings', 'towers'],

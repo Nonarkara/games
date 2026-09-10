@@ -582,6 +582,13 @@ export const BRAIN_GUIDES = {
     tip: 'Keep the rules for the WHOLE round, not just the moment. Rhyme and categories only work if everyone remembers.',
     stack: ['werbach', 'thaler', 'clear']
   },
+  'heads-up': {
+    label: 'Shared attention under a clock', minutes: '5–15 min per round',
+    practice: 'Pick a category, hold the phone facing the room, name the word out loud before the 60s timer ends.',
+    why: 'Heads Up! is a working demo of shared attention: half the room produces descriptions, half maps them to a target. The skill is calibrating how much information to give without giving it away.',
+    tip: 'Ban one-word clues. Force the cluer to use a comparison or a category; the score jumps on the next round.',
+    stack: ['clear', 'kahneman']
+  },
   'never-have-i': {
     label: 'Confession prompts', minutes: '5–10 min',
     practice: 'Read a statement. If you have done it, put a finger down. Last player with a finger up wins.',

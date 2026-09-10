@@ -109,7 +109,8 @@ const defaultData = {
     'chess': 0,
     'checkers': 0,
     'spider-solitaire': 0,
-    'go': 0
+    'go': 0,
+    'heads-up': 0
   },
   favorites: [],
   favoriteStates: {},
