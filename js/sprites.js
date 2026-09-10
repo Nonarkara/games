@@ -1193,6 +1193,22 @@ export const SPRITES = {
     '..#......#..'
   ],
 
+  // 3×3 grid with one cell highlighted — the one digit a Sudoku needs.
+  'sudoku': [
+    '####..####..',
+    '#..#..#..#..',
+    '#..#..#..#..',
+    '####..####..',
+    '..####..####',
+    '..#..#..#..#',
+    '..#..#..#..#',
+    '..####..####',
+    '####..####..',
+    '#++#..#..#..',
+    '#++#..#..#..',
+    '####..####..'
+  ],
+
   // An ear, being shouted at by three tidy waves.
   'ear-trainer': [
     '..####......',

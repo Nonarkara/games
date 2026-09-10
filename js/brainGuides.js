@@ -293,6 +293,13 @@ export const BRAIN_GUIDES = {
     stack: ['kahneman', 'plasticity', 'clear']
 
   },
+  'sudoku': {
+    label: 'Constraint satisfaction under a clock', minutes: '8–30 min',
+    practice: 'Pick a difficulty, then solve a fresh 9×9 board. Every digit 1–9 appears exactly once per row, column, and 3×3 box.',
+    why: 'A Sudoku generator is a real constraint-satisfaction problem: the published boards can all be solved by pure logic, never guessing. That is what you are training — the difference between "I see it" and "I tried everything".',
+    tip: 'Scan rows AND columns for the same digit, not just the one that is closest. Hidden singles are most often found in the column that is almost full, not the empty one.',
+    stack: ['clear', 'kahneman']
+  },
   'sudoku-sprint': {
     label: 'Constraint satisfaction', minutes: '3–6 min',
     practice: 'Place digits that satisfy every row, column, and box rule without contradiction.',

@@ -1948,6 +1948,76 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   cursor: pointer;
 }
 .sudoku-digit:hover { background: #1a2430; color: var(--ax-red); }
+
+/* 9×9 Sudoku — full board, peer / same-value highlighting, monochrome amber */
+.sdk-board {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  max-width: 460px;
+  margin: 0 auto;
+  background: #f59e0b;
+  padding: 1px;
+  border: 1px solid #f59e0b;
+}
+.sdk-cell {
+  aspect-ratio: 1;
+  min-height: 36px;
+  border: 0;
+  border-right: 1px solid #f59e0b;
+  border-bottom: 1px solid #f59e0b;
+  background: #0a0a0a;
+  color: #f4f4f5;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sdk-cell:hover { background: #18181b; }
+.sdk-cell.is-fixed {
+  background: #1c1917;
+  color: #f59e0b;
+  cursor: default;
+}
+.sdk-cell.is-peer { background: #18181b; }
+.sdk-cell.is-same-val {
+  background: #f59e0b;
+  color: #0a0a0a;
+}
+.sdk-cell.is-selected {
+  outline: 2px solid #f59e0b;
+  outline-offset: -2px;
+  z-index: 1;
+  position: relative;
+}
+.sdk-cell.is-wrong {
+  color: #ef4444;
+}
+@media (min-width: 640px) {
+  .sdk-cell { font-size: 22px; min-height: 44px; }
+}
+.sdk-pad {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  max-width: 460px;
+  margin: 8px auto 0;
+}
+.sdk-digit {
+  min-height: 44px;
+  border: 1px solid #f59e0b;
+  background: #0a0a0a;
+  color: #f59e0b;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.sdk-digit:hover { background: #18181b; }
+.sdk-digit--clr { color: #ef4444; border-color: #ef4444; }
+.sdk-diff { font-family: 'JetBrains Mono', monospace; }
 .fifteen-tile.is-blank {
   background: #0c121a;
   color: transparent;

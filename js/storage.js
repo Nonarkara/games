@@ -110,7 +110,8 @@ const defaultData = {
     'checkers': 0,
     'spider-solitaire': 0,
     'go': 0,
-    'heads-up': 0
+    'heads-up': 0,
+    'sudoku': 0
   },
   favorites: [],
   favoriteStates: {},

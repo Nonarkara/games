@@ -115,7 +115,10 @@ export const GAME_MAX = Object.freeze({
   'go': 1000,
 
   // 2026-09 expansion — Heads Up!
-  'heads-up': 60
+  'heads-up': 60,
+
+  // 2026-09 expansion — Sudoku (fresh board every play)
+  'sudoku': 1200
 });
 
 export const ALLOWED_GAME_IDS = new Set(Object.keys(GAME_MAX));

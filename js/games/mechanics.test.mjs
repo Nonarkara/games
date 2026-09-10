@@ -50,6 +50,7 @@ import {
   generateMoves as goMoves, scorePosition, bestMove as goBest, boardsEqual
 } from './go.js';
 import { CATEGORIES_PUBLIC as HU_CATS, poolFor as huPool, pickWord as huPick, scoreMessage as huMsg } from './headsUp.js';
+import { newSolvedBoard as sdkSolved, isValidPlacement as sdkValid, countSolutions as sdkCount, generatePuzzle as sdkGen, DIFFICULTY as SDK_DIFF } from './sudoku.js';
 import {
   GOALS_TO_WIN,
   MAX_KICK,
@@ -914,4 +915,42 @@ assert.ok(huMsg(30).toLowerCase().includes('telepathic'), 'heads-up: 30 = telepa
 assert.ok(huMsg(13).toLowerCase().includes('cracked') || huMsg(13).toLowerCase().includes('warm'), 'heads-up: 13 = warm or cracked');
 assert.ok(huMsg(3).toLowerCase().includes('rusty'), 'heads-up: 3 = rusty');
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, Go, and Heads Up! passed');
+/* ── SUDOKU ───────────────────────────────────────────────────────────── */
+const sdk0 = sdkSolved();
+assert.equal(sdk0.length, 9, 'sudoku: solved board is 9x9');
+assert.ok(sdk0.every(row => new Set(row).size === 9), 'sudoku: solved has 1-9 in every row');
+for (let c = 0; c < 9; c++) {
+  const col = new Set(sdk0.map(r => r[c]));
+  assert.equal(col.size, 9, `sudoku: solved has 1-9 in column ${c}`);
+}
+for (let b = 0; b < 9; b++) {
+  const br = Math.floor(b / 3) * 3, bc = (b % 3) * 3;
+  const set = new Set();
+  for (let r = 0; r < 3; r++) for (let cc = 0; cc < 3; cc++) set.add(sdk0[br + r][bc + cc]);
+  assert.equal(set.size, 9, `sudoku: solved has 1-9 in box ${b}`);
+}
+
+const empty = Array.from({ length: 9 }, () => Array(9).fill(0));
+assert.ok(sdkValid(empty, 0, 0, 1), 'sudoku: empty board accepts any digit');
+assert.equal(sdkCount(sdk0), 1, 'sudoku: solved board has exactly 1 solution');
+assert.ok(sdkCount(empty) > 1, 'sudoku: empty board has many solutions');
+
+for (const d of Object.keys(SDK_DIFF)) {
+  const { puzzle, solution, givens } = sdkGen(d);
+  const target = SDK_DIFF[d].givens;
+  assert.equal(puzzle.length, 9, `sudoku: ${d} puzzle is 9x9`);
+  assert.ok(Math.abs(givens - target) <= 8, `sudoku: ${d} givens within 8 of target (${target}, got ${givens})`);
+  assert.equal(sdkCount(puzzle), 1, `sudoku: ${d} puzzle has exactly 1 solution`);
+  for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
+    if (puzzle[r][c] !== 0) assert.equal(puzzle[r][c], solution[r][c], `sudoku: ${d} given at (${r},${c}) matches solution`);
+  }
+}
+
+// Two consecutive puzzles at the same difficulty are different
+const pA = sdkGen('medium');
+const pB = sdkGen('medium');
+let same = 0;
+for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) if (pA.puzzle[r][c] !== 0 && pA.puzzle[r][c] === pB.puzzle[r][c]) same++;
+assert.ok(same < 40, 'sudoku: two consecutive medium puzzles differ');
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, Go, Heads Up!, and Sudoku passed');
