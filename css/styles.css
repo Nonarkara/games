@@ -2091,7 +2091,7 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 
 .edge-strip {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.2fr) repeat(4, minmax(0, 1fr));
   gap: 1px;
   border: 1px solid var(--ax-line-2);
   border-top: 0;
@@ -2244,11 +2244,11 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 }
 
 @media (max-width: 720px) {
-  /* One swipe row, not a wall. The headline stays full-width; the four
-     articles scroll sideways with snap — the same pattern the room chooser
-     already uses. Every word is still on the page. */
+  /* One swipe row, not a wall. The headline plus four articles scroll
+     sideways with snap — the same pattern the room chooser already uses.
+     Every word is still on the page. */
   .edge-strip {
-    grid-template-columns: repeat(4, minmax(78vw, 1fr));
+    grid-template-columns: repeat(5, minmax(78vw, 1fr));
     grid-auto-flow: column;
     overflow-x: auto;
     overscroll-behavior-inline: contain;
