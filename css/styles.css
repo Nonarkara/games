@@ -2091,7 +2091,7 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 
 .edge-strip {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1px;
   border: 1px solid var(--ax-line-2);
   border-top: 0;
