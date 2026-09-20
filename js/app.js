@@ -56,6 +56,36 @@ import { aliasesFor } from './searchAliases.js';
 import { MOODS, moodById, gamesForMood, moodsForGame } from './moods.js';
 import { spriteImg } from './sprites.js';
 
+const GAME_DIFFICULTY = {
+  'dual-n-back': 'pro', 'digit-span': 'beginner', 'stroop-match': 'beginner', 'stroop-match-pro': 'pro',
+  'color-march-pro': 'pro', 'go-nogo': 'beginner', 'simon-seq': 'beginner', 'schulte-table': 'beginner',
+  'visual-search': 'beginner', 'corsi-blocks': 'beginner', 'memory-palace': 'beginner', 'flanker': 'beginner',
+  'aim-trainer': 'beginner', 'mental-math': 'beginner', 'mental-math-pro': 'pro', 'mental-math-thai': 'pro',
+  'type-rush': 'beginner', 'reflex-matrix': 'beginner', 'trail-making': 'pro', 'mental-rotation': 'pro',
+  'iowa-gambling': 'pro', 'cog-reflection': 'beginner', 'raven-matrices': 'pro', 'sternberg': 'pro',
+  'number-sense': 'beginner', 'wcst': 'pro', 'tower-london': 'pro', 'mind-eyes': 'beginner',
+  'posner-cueing': 'beginner', 'change-blindness': 'beginner', 'operation-span': 'pro', 'chimp-test': 'beginner',
+  'calibration': 'pro', 'stop-signal': 'pro', 'reaction-gate': 'beginner', 'one-back': 'beginner',
+  'oddball': 'beginner', 'backward-span': 'pro', 'memory-matrix': 'beginner', 'cyber-tetris': 'intermediate',
+  'arcade-breakout': 'intermediate', 'arcade-pong': 'beginner', 'cyber-pacman': 'intermediate',
+  'cyber-snake': 'beginner', 'space-defender': 'intermediate', 'flappy-bird': 'beginner',
+  'minesweeper': 'intermediate', 'slide-2048': 'beginner', 'sudoku-sprint': 'beginner', 'fifteen-puzzle': 'beginner',
+  'cyber-blackjack': 'beginner', 'trivia-master': 'beginner', 'pattern-breaker': 'intermediate',
+  'rom-loader': 'beginner', 'ai-sandbox': 'beginner', 'warehouse-push': 'intermediate',
+  'rock-paper-scissors': 'beginner', 'paper-soccer': 'intermediate', 'monty-hall': 'beginner',
+  'asteroids': 'intermediate', 'frogger': 'intermediate', 'connect-four': 'intermediate',
+  'solitaire': 'intermediate', 'chess': 'pro', 'checkers': 'pro', 'spider-solitaire': 'pro',
+  'go': 'pro', 'sudoku': 'beginner', 'number-chain': 'intermediate', 'word-guess': 'intermediate',
+  'mate-in-one': 'beginner', 'ear-trainer': 'beginner', 'morse-code': 'beginner', 'tower-hanoi': 'beginner',
+  'lights-out': 'beginner', 'nonogram': 'intermediate', 'nim': 'intermediate', 'make-24': 'intermediate',
+  'tic-tac-toe': 'beginner', 'anagram-scramble': 'intermediate', 'word-builder': 'intermediate',
+  'periodic-quest': 'beginner', 'capital-quiz': 'beginner', 'math-safari': 'beginner', 'memory-match': 'beginner',
+  'word-search': 'beginner', 'non-trivial': 'intermediate', 'blow-cartridge': 'beginner', 'kings-cup': 'beginner',
+  'never-have-i': 'beginner', 'most-likely': 'beginner', 'ride-the-bus': 'intermediate', 'power-hour': 'beginner',
+  'buzz-21': 'beginner', 'truth-or-dare': 'beginner', 'higher-lower': 'beginner', 'heads-up': 'beginner',
+  'two-truths': 'beginner', 'about-dr-non': 'beginner',
+};
+
 const WINGS = [
   { id: 'all', label: 'ALL', blurb: 'Full floor' },
   { id: 'train', label: 'TRAIN', blurb: 'Research tasks' },
@@ -548,9 +578,10 @@ class NgsApp {
     const guide = getBrainGuide(game);
     const isNew = ['color-march-pro'].includes(game.id);
     const hasPlayed = this._playedIds?.has(game.id);
+    const difficulty = GAME_DIFFICULTY[game.id] || 'beginner';
     return `
       <li class="select-row ${isFocus ? 'is-focus' : ''}" data-game="${game.id}" tabindex="0" role="option" aria-selected="${isFocus}" aria-label="${game.title}">
-        <span class="select-card-top"><span class="select-code">${game.code}</span><span class="select-state">${isNew ? '<b>NEW</b>' : (hasPlayed ? '<i>PLAYED</i>' : '')}<span class="select-age">${game.age}</span></span></span>
+        <span class="select-card-top"><span class="select-code">${game.code}</span><span class="select-state">${isNew ? '<b>NEW</b>' : (hasPlayed ? '<i>PLAYED</i>' : '')}<span class="select-age">${game.age}</span><span class="select-difficulty ${difficulty}" title="Difficulty">${difficulty}</span></span></span>
         ${spriteImg(game.id, 'cart-sprite')}
         <span class="select-name">${game.title}</span>
         <span class="select-desc">${game.desc}</span>

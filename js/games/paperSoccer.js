@@ -1442,9 +1442,14 @@ export function renderPaperSoccer(container, onClose) {
   }
 
   function resize() {
-    if (!canvas) return;
+    if (!canvas || !canvas.parentElement) return;
     const wrap = canvas.parentElement;
-    const w = Math.max(320, wrap.clientWidth || 640);
+    // clientWidth includes the wrapper's horizontal padding — sizing the
+    // canvas to it overflowed the board by exactly that padding (56px a side
+    // on desktop). Measure the content box instead.
+    const cs = getComputedStyle(wrap);
+    const wrapPadX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    const w = Math.max(320, (wrap.clientWidth || 640) - wrapPadX);
     const h = Math.max(220, Math.min(w * 0.62, (window.innerHeight || 700) * 0.72));
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     canvas.width = Math.round(w * dpr);

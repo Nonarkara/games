@@ -1582,6 +1582,9 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 .select-state { display: flex; align-items: center; gap: 8px; }
 .select-state > b { padding: 4px 5px 3px; background: var(--ax-red); color: #fff; font-size: 7px; line-height: 1; letter-spacing: .1em; }
 .select-state > i { color: var(--ax-ink-3); font-size: 7px; font-style: normal; letter-spacing: .1em; }
+.select-difficulty { font-size: 6px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 2px 5px; border: 1px solid currentColor; color: var(--ax-red); }
+.select-difficulty.intermediate { color: var(--ax-red); }
+.select-difficulty.pro { color: var(--ax-ink); background: var(--ax-ink); color: #fff; }
 .select-name { margin-top: 22px; color: var(--ax-ink); font-family: var(--ax-pixel); font-size: 11px; line-height: 1.45; font-weight: 400; letter-spacing: 0; }
 .select-row.is-focus .select-name { color: var(--ax-red); }
 .select-desc { margin-top: 8px; color: var(--ax-ink-2); font-family: var(--ax-body); font-size: 12px; line-height: 1.45; }

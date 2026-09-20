@@ -329,7 +329,7 @@ export function renderCyberPacman(container, onClose) {
     const ROWS = maze.length, COLS = maze[0].length;
     const TUNNEL_ROWS = [8, 9];
 
-    let pacman = { x: 9, y: 12, dirX: 0, dirY: 0, nextX: 0, nextY: 0 };
+    let pacman = { x: 9, y: 11, dirX: 0, dirY: 0, nextX: 0, nextY: 0 };
     let ghosts = [
       { x: 8, y: 8, color: '#ef4444', dirX: 1, dirY: 0, homeX: 8, homeY: 8 },
       { x: 9, y: 8, color: '#ec4899', dirX: -1, dirY: 0, homeX: 9, homeY: 8 },

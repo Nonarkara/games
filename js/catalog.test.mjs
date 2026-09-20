@@ -18,4 +18,16 @@ for (const game of entries.filter(entry => entry.wing !== 'meta')) {
   assert.doesNotMatch(game.desc, unexplainedJargon, `${game.id} description contains unexplained jargon`);
 }
 
+// Every cartridge needs a visible difficulty sticker.
+const difficultySource = source.split('const GAME_DIFFICULTY = {')[1].split('\n};')[0];
+const difficulties = Object.fromEntries(
+  [...difficultySource.matchAll(/'([^']+)':\s*'([^']+)'/g)].map(match => [match[1], match[2]])
+);
+assert.ok(entries.length > 0, 'expected catalog entries');
+for (const game of entries) {
+  assert.ok(difficulties[game.id], `${game.id} needs a difficulty sticker`);
+  assert.ok(['beginner', 'intermediate', 'pro'].includes(difficulties[game.id]), `${game.id} difficulty must be beginner, intermediate, or pro`);
+}
+assert.equal(Object.keys(difficulties).length, entries.length, 'difficulty map must cover every cartridge exactly once');
+
 console.log(`catalog copy: ${entries.length - 1} playable descriptions are short, action-led, and jargon-free`);
