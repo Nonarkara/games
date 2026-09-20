@@ -423,12 +423,12 @@ export function renderGo(container, onClose) {
 
       container.innerHTML = `
         <div class="${FRAME}">
-          <div class="flex justify-between items-center mb-3 border-b border-amber-500/40 pb-2">
-            <div>
+          <div class="flex justify-between items-center gap-2 mb-3 border-b border-amber-500/40 pb-2">
+            <div class="min-w-0 flex-1">
               <h2 class="text-xl font-black text-amber-400 tracking-wider">GO</h2>
               <p class="text-[10px] text-amber-500/80 uppercase">${SIZE}×${SIZE} · ${levelLabel} · komi 6.5</p>
-              <div class="flex gap-1 mt-1">${sizeBtns}</div>
-              <div class="flex gap-1 mt-1">${levelBtns}</div>
+              <div class="flex flex-wrap gap-1 mt-1">${sizeBtns}</div>
+              <div class="flex flex-wrap gap-1 mt-1">${levelBtns}</div>
             </div>
             ${closeButton()}
           </div>
@@ -438,7 +438,7 @@ export function renderGo(container, onClose) {
             <span>WHITE (CPU)<br><b class="text-zinc-100 text-base">${captures.B}</b></span>
           </div>
           <div class="flex justify-center mb-3">
-            <svg viewBox="-10 -10 ${boardPx + 20} ${boardPx + 20}" width="${boardPx + 20}" height="${boardPx + 20}" style="background:#1c1917;border:1px solid #a16207">
+            <svg viewBox="-10 -10 ${boardPx + 20} ${boardPx + 20}" width="100%" style="max-width:${boardPx + 20}px;height:auto;background:#1c1917;border:1px solid #a16207;display:block">
               ${lines.join('')}
               ${stars.join('')}
               ${cells.join('')}

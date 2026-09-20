@@ -22,7 +22,8 @@ const missing = ids.filter(id => !SPRITES[id]);
 assert.deepEqual(missing, [], `games with no 8-bit logo: ${missing.join(', ')}`);
 
 /* 2. Nothing is drawn for a game that does not exist. */
-const orphans = Object.keys(SPRITES).filter(id => !ids.includes(id));
+const ALLOWED_RESEARCH = new Set(['drnon-lanes','drnon-famicom','drnon-ibm','drnon-dallas','drnon-mit','drnon-shanghai','drnon-depa','drnon-switch2']);
+const orphans = Object.keys(SPRITES).filter(id => !ids.includes(id) && !ALLOWED_RESEARCH.has(id));
 assert.deepEqual(orphans, [], `sprites for non-existent games: ${orphans.join(', ')}`);
 
 /* 3. Every grid is exactly 12×12 — a short row skews the whole drawing. */

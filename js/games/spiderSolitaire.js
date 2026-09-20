@@ -310,32 +310,32 @@ export function renderSpiderSolitaire(container, onClose) {
           const red = c.red ? 'text-red-400' : 'text-zinc-100';
           const back = face ? `bg-zinc-900 border-amber-500/40 ${red}` : 'bg-amber-700 border-amber-700';
           return `<button data-card="${ci},${i}" aria-label="${c.r}${c.s}${face ? '' : ' face down'}"
-            class="${back} ${offset} w-12 sm:w-16 h-16 sm:h-20 border-2 flex flex-col items-center justify-center font-black text-sm sm:text-lg select-none">
+            class="${back} ${offset} w-10 sm:w-16 h-16 sm:h-20 border-2 flex flex-col items-center justify-center font-black text-sm sm:text-lg select-none">
             ${face ? `${c.r}<span class="text-base sm:text-xl ${red}">${c.s}</span>` : '<span class="text-amber-900">◆</span>'}
           </button>`;
         }).join('');
         const emptyClick = col.length === 0
-          ? `<button data-empty="${ci}" class="w-12 sm:w-16 h-16 sm:h-20 border-2 border-dashed border-amber-500/30 flex items-center justify-center text-amber-500/40 text-xs">+</button>`
+          ? `<button data-empty="${ci}" class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-dashed border-amber-500/30 flex items-center justify-center text-amber-500/40 text-xs">+</button>`
           : '';
         const isSelCol = sel && sel.fromCol === ci;
         const ring = isSelCol ? 'ring-2 ring-amber-400' : '';
-        return `<div data-col="${ci}" class="${ring} flex flex-col items-center gap-0 mr-2 last:mr-0 min-w-[3rem] sm:min-w-[4rem]">${cards}${emptyClick}</div>`;
+        return `<div data-col="${ci}" class="${ring} flex flex-col items-center gap-0 mr-1 sm:mr-2 last:mr-0 min-w-[2.5rem] sm:min-w-[4rem]">${cards}${emptyClick}</div>`;
       }).join('');
 
       const stockLabel = state.stock.length === 0
         ? '<span class="text-amber-500/40 text-xs">EMPTY</span>'
         : `<span class="text-amber-400 text-xs font-bold">${state.stock.length}</span>`;
       const stockBtn = state.stock.length === 0
-        ? `<div class="w-12 sm:w-16 h-16 sm:h-20 border-2 border-amber-500/30 bg-zinc-900/30 flex items-center justify-center text-amber-500/30 text-xs">EMPTY</div>`
-        : `<button data-stock class="w-12 sm:w-16 h-16 sm:h-20 border-2 border-amber-700 bg-amber-700 flex items-center justify-center text-amber-900 font-black">${stockLabel}</button>`;
+        ? `<div class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-amber-500/30 bg-zinc-900/30 flex items-center justify-center text-amber-500/30 text-xs">EMPTY</div>`
+        : `<button data-stock class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-amber-700 bg-amber-700 flex items-center justify-center text-amber-900 font-black">${stockLabel}</button>`;
 
       const foundations = state.foundations.map((f, i) => {
         const top = f[f.length - 1];
         if (!top) {
-          return `<div data-found="${i}" class="w-12 sm:w-16 h-16 sm:h-20 border-2 border-amber-500/30 bg-zinc-900/30 flex items-center justify-center text-amber-500/30 text-xs">F${i + 1}</div>`;
+          return `<div data-found="${i}" class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-amber-500/30 bg-zinc-900/30 flex items-center justify-center text-amber-500/30 text-xs">F${i + 1}</div>`;
         }
         const red = top.red ? 'text-red-400' : 'text-zinc-100';
-        return `<div class="w-12 sm:h-16 sm:h-20 border-2 border-green-500/60 bg-zinc-900 flex flex-col items-center justify-center text-green-400 font-black text-lg">
+        return `<div class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-green-500/60 bg-zinc-900 flex flex-col items-center justify-center text-green-400 font-black text-lg">
           ${top.r}<span class="${red}">${top.s}</span>
         </div>`;
       }).join('');

@@ -26,6 +26,8 @@ import {
   renderCorsiBlocks, renderFlanker, renderMemoryPalace
 } from './games/trainerGames.js';
 import { renderAbout } from './games/about.js';
+import { renderResearch } from './games/research.js';
+import { previewHtmlFor } from './gamePreviews.js';
 import { renderTrailMaking, renderMentalRotation, renderIowaGambling } from './games/ngsNewTrainers.js';
 import { renderKingsCup, renderNeverHaveIEver, renderMostLikelyTo } from './games/ngsDrinkingGames.js';
 import { renderCognitiveReflection, renderRavenMatrices, renderSternberg, renderNumberSense } from './games/ngsNewTrainers2.js';
@@ -308,6 +310,7 @@ class NgsApp {
           <input id="search-input" type="search" placeholder="colour, pacman, chess, memory…" value="${this.searchQuery}" aria-label="Search games" />
         </label>
         <p class="arcade-play-count"><b id="played-count">${stats.gamesPlayed || 0}</b><span>PLAYS</span></p>
+        <button id="research-link" class="arcade-research-link" type="button" aria-label="Open Research">RESEARCH</button>
         <button id="about-link" class="arcade-about-link" type="button" aria-label="Open the About panel">WHY</button>
         <button id="sound-toggle-btn" class="arcade-sound" type="button" aria-label="Toggle sound">${soundFx.muted ? 'MUTED' : 'SOUND'}</button>
       </div>
@@ -617,6 +620,7 @@ class NgsApp {
     }
 
     const renderBriefing = () => {
+      const preview = previewHtmlFor(game);
       container.innerHTML = `
         <article class="brain-briefing route-${game.wing}" aria-labelledby="briefing-title">
           <header class="briefing-header">
@@ -631,9 +635,10 @@ class NgsApp {
                 <p class="briefing-label">THE BRAIN BRIEFING</p>
               </div>
               <h3>${guide.label}</h3>
+              <figure class="briefing-preview" aria-label="Animated preview — how this game looks in the first 5 seconds">${preview}</figure>
               <div class="briefing-step"><b>1</b><div><span>HOW TO PLAY</span><p>${game.desc}</p></div></div>
               <div class="briefing-step"><b>2</b><div><span>IN THE ROUND</span><p>${guide.practice}</p></div></div>
-              <div class="briefing-step"><b>3</b><div><span>WHY IT MATTERS</span><p>${guide.why}</p></div></div>
+              <div class="briefing-step"><b>3</b><div><span>WHY IT MATTERS — FOR THE BRAIN</span><p>${guide.why}</p></div></div>
             </div>
             <aside class="briefing-side">
               <p class="briefing-label">COACH NOTE</p>
@@ -683,6 +688,28 @@ class NgsApp {
     renderBriefing();
   }
 
+  openResearch() {
+    soundFx.playClick();
+    soundFx.init();
+    const overlay = document.querySelector('#game-modal-overlay');
+    const container = document.querySelector('#game-modal-container');
+    if (!overlay || !container) return;
+    if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
+    this._modalOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    overlay.classList.remove('hidden');
+    container.innerHTML = '';
+    const closeResearch = () => {
+      overlay.classList.add('hidden');
+      container.innerHTML = '';
+      if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
+      const opener = this._modalOpener;
+      this._modalOpener = null;
+      if (opener && opener.isConnected) opener.focus();
+    };
+    this._releaseModalUX = bindModalUX(overlay, closeResearch);
+    renderResearch(container, closeResearch);
+  }
+
   bindEvents() {
     document.addEventListener('input', (e) => {
       if (e.target.id === 'search-input') {
@@ -708,6 +735,11 @@ class NgsApp {
         soundFx.init();
         const muted = soundFx.toggleMute();
         if (btn) btn.textContent = muted ? 'MUTED' : 'SOUND';
+        return;
+      }
+
+      if (e.target.id === 'research-link' || e.target.closest('#research-link')) {
+        this.openResearch();
         return;
       }
 
