@@ -7,6 +7,48 @@
  */
 
 export const BRAIN_GUIDES = {
+  'verbal-fluency': {
+    label: 'Name as many as you can', minutes: '1–2 min',
+    practice: 'A category appears. Type one word, press ENTER, keep going until the clock stops. Repeats do not count twice.',
+    why: 'Retrieval is a separate skill from knowing. You already hold hundreds of animals; the task is getting them OUT under time pressure, which is why people stall at fifteen and then find six more in the last ten seconds. Clinicians use this exact task because that stall is informative.',
+    tip: 'Stop hunting alphabetically and travel instead — farm, then jungle, then ocean, then the pet shop. Moving between clusters beats grinding one.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'digit-symbol': {
+    label: 'Look it up, type it, move', minutes: '1–2 min',
+    practice: 'The key stays on screen the entire time. Read the shape, type its digit, next one arrives immediately.',
+    why: 'Nothing here is hidden and nothing needs remembering, which is the point: it isolates raw lookup speed. That makes it the most sleep-sensitive score on the floor — it moves with how rested you are far more than with how much you practise.',
+    tip: 'Do not try to memorise the key. People who trust the key beat people who race it, because a wrong guess costs more than the glance.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'reversi': {
+    label: 'Corners are forever', minutes: '6–10 min',
+    practice: 'Place a disc so it traps a line of the machine\u2019s between yours. Every disc in that line turns. Most discs when nobody can move wins.',
+    why: 'The board can invert twice in three moves, so counting who is ahead in the middle of a game tells you almost nothing. It trains you to evaluate a position by its structure — who owns the corners, who has to move — instead of by the score in front of you.',
+    tip: 'Never take a square touching a corner early; it hands the corner over. Having fewer discs at the halfway mark is usually the stronger position.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'dots-boxes': {
+    label: 'Give a little, get a lot', minutes: '4–7 min',
+    practice: 'Draw one line per turn. Complete a box and it is yours and you draw again. When every line is drawn, most boxes wins.',
+    why: 'A five-year-old can play it and almost nobody plays it well, because the winning move feels like a mistake: late on you deliberately hand over a short chain so your opponent is forced to open a long one for you. Learning to prefer that is genuine strategic inversion.',
+    tip: 'Count the chain before you open it. Two boxes given away to be handed six is a trade you should take every time.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'flood-it': {
+    label: 'Fill the board from the corner', minutes: '3–5 min',
+    practice: 'Pick an ink. The blob in the top-left corner becomes it, and everything already touching that blob joins in. Twenty-two moves to turn the whole board.',
+    why: 'The greedy move — whichever ink swallows the most squares this turn — is not the best move, and the board shows you that within about six turns. It is the cleanest demonstration of local optimum versus plan that fits on a phone screen.',
+    tip: 'Look for the ink that joins two separate blobs rather than the one that eats most. Width now beats size now.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'peg-solitaire': {
+    label: 'Thirty-two down to one', minutes: '5–10 min',
+    practice: 'Tap a peg, then tap an empty hole two squares away in a straight line. The peg you jumped comes off the board.',
+    why: 'Every jump is reversible in your head and irreversible on the board, so the cost of not looking ahead arrives later and unmistakably — you end with four pegs stranded in different corners. It teaches you to feel the shape of a dead end before you walk into it.',
+    tip: 'Keep the pegs touching. A peg with no neighbour can never be taken, so every stranded peg is a point you have already lost.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
   'reaction-gate': {
     label: 'Wait, then tap', minutes: '2–3 min',
     practice: 'Do nothing until the box turns orange, then tap it. Tapping too soon is a miss.',

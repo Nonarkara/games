@@ -953,4 +953,140 @@ let same = 0;
 for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) if (pA.puzzle[r][c] !== 0 && pA.puzzle[r][c] === pB.puzzle[r][c]) same++;
 assert.ok(same < 40, 'sudoku: two consecutive medium puzzles differ');
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, Go, Heads Up!, and Sudoku passed');
+
+// ── MIND GYM: six cartridges, six rule-sets that must not drift ──────────
+import {
+  FLUENCY_SETS, checkFluency, normalizeWord, makeSymbolKey, digitFor, CODE_SHAPES,
+  newReversiBoard, reversiFlips, reversiLegalMoves, applyReversi, reversiCount, pickReversiMove,
+  dbEdge, dbBoxEdges, dbAllEdges, dbBoxSides, applyDbEdge, pickDbEdge, DB_SIZE,
+  makeFloodGrid, floodRegion, applyFlood, floodSolved, FLOOD_INKS,
+  newPegBoard, pegMoves, applyPegMove, pegsLeft, PEG_INVALID
+} from './ngsMindGym.js';
+
+// Category fluency scores only what it can actually verify. Padding with
+// invented animals is the one way to inflate the number without improving the
+// retrieval, so the judge has to reject it.
+{
+  const animals = FLUENCY_SETS.find(s => s.name === 'ANIMALS');
+  assert.ok(FLUENCY_SETS.length >= 4, 'more than one category, or it is memorised in a week');
+  for (const set of FLUENCY_SETS) {
+    assert.ok(set.words.length >= 60, `${set.name} needs a deep list, got ${set.words.length}`);
+    assert.equal(new Set(set.words.map(normalizeWord)).size, new Set(set.words.map(normalizeWord)).size);
+  }
+  assert.equal(checkFluency(animals, 'Tiger').verdict, 'ok');
+  assert.equal(checkFluency(animals, ' tiger ').verdict, 'ok', 'whitespace and case must not matter');
+  assert.equal(checkFluency(animals, 'zxqwvb').verdict, 'unknown', 'invented words earn nothing');
+  assert.equal(checkFluency(animals, 'ox').verdict, 'short');
+  // A plural is the same animal — counting both would be free points.
+  const used = new Set([checkFluency(animals, 'tiger').key]);
+  assert.equal(checkFluency(animals, 'tigers', used).verdict, 'dup');
+}
+
+// Symbol coding: the key is reshuffled every round, so the mapping is never
+// something you can learn instead of look up.
+{
+  const a = makeSymbolKey(), b = makeSymbolKey(() => 0.42);
+  assert.equal(a.size, 9);
+  assert.deepEqual([...a.values()].sort((x, y) => x - y), [1,2,3,4,5,6,7,8,9]);
+  for (const shape of CODE_SHAPES) assert.ok(digitFor(a, shape) >= 1, 'every shape has a digit');
+  assert.equal(digitFor(b, '\u2603'), null, 'an unknown shape has no digit');
+  assert.equal(new Set(CODE_SHAPES).size, 9, 'nine distinct shapes, or two look the same');
+}
+
+// Reversi: a move is only legal if it flips, and it must flip every trapped line.
+{
+  let board = newReversiBoard();
+  assert.equal(reversiLegalMoves(board, 1).length, 4, 'the opening has exactly four moves');
+  assert.equal(reversiFlips(board, 0, 1).length, 0, 'a corner is not legal on move one');
+  assert.equal(applyReversi(board, 0, 1), null, 'an illegal move changes nothing');
+  const m = reversiLegalMoves(board, 1)[0];
+  board = applyReversi(board, m, 1);
+  const { black, white } = reversiCount(board);
+  assert.equal(black, 4, 'placed one and flipped one');
+  assert.equal(white, 1);
+  // The machine must never return a move it is not allowed to play.
+  for (let i = 0; i < 6; i++) {
+    const player = i % 2 ? 2 : 1;
+    const pick = pickReversiMove(board, player);
+    if (pick == null) break;
+    assert.ok(reversiFlips(board, pick, player).length > 0, 'CPU picked an illegal square');
+    board = applyReversi(board, pick, player);
+  }
+  // Corners are the whole strategy, so the weighting has to prefer one.
+  const corner = new Array(64).fill(0);
+  corner[0] = 0; corner[1] = 2; corner[2] = 1;       // playing 0 flips 1
+  assert.equal(pickReversiMove(corner, 1), 0, 'a free corner must be taken');
+}
+
+// Dots and Boxes: the fourth side claims the box AND keeps the turn. Both
+// halves matter — without the second the endgame strategy disappears.
+{
+  assert.equal(dbAllEdges().length, 2 * DB_SIZE * (DB_SIZE + 1));
+  let drawn = new Set();
+  const box = dbBoxEdges(0, 0);
+  box.slice(0, 3).forEach(e => { drawn = applyDbEdge(drawn, e).drawn; });
+  assert.equal(dbBoxSides(drawn, 0, 0), 3);
+  assert.equal(applyDbEdge(drawn, box[0]), null, 'a drawn line cannot be redrawn');
+  const closing = applyDbEdge(drawn, box[3]);
+  assert.deepEqual(closing.completed, [[0, 0]], 'the fourth side claims exactly that box');
+  // Two boxes sitting at three sides is the state that separates a CPU which
+  // takes free points from one that does not. With only ONE such box the
+  // safe-edge filter happens to force the same move anyway, so a test built on
+  // that proves nothing — it passes with the shortcut deleted.
+  let twoOpen = new Set();
+  dbBoxEdges(0, 0).slice(0, 3).forEach(e => { twoOpen = applyDbEdge(twoOpen, e).drawn; });
+  dbBoxEdges(2, 2).slice(0, 3).forEach(e => { twoOpen = applyDbEdge(twoOpen, e).drawn; });
+  const taken = pickDbEdge(twoOpen, DB_SIZE, () => 0);
+  assert.ok(applyDbEdge(twoOpen, taken).completed.length > 0,
+    'with free boxes on the board the CPU must close one');
+  // With nothing free it must not hand over a third side while a safe line exists.
+  const fresh = pickDbEdge(new Set(), DB_SIZE, () => 0);
+  const after = applyDbEdge(new Set(), fresh).drawn;
+  let gifted = false;
+  for (let r = 0; r < DB_SIZE; r++) for (let c = 0; c < DB_SIZE; c++) {
+    if (dbBoxSides(after, r, c) === 3) gifted = true;
+  }
+  assert.equal(gifted, false, 'the opening move must not gift a box');
+}
+
+// Flood It: the corner blob is what spreads, and a same-ink tap must not
+// silently cost a move — that would make the budget a lie.
+{
+  const solid = new Array(144).fill(2);
+  assert.ok(floodSolved(solid));
+  assert.equal(floodRegion(solid).size, 144, 'one ink means the region is the board');
+  assert.equal(applyFlood(solid, 2), null, 'repicking the same ink is refused, not charged');
+  const grid = makeFloodGrid();
+  assert.equal(grid.length, 144);
+  assert.ok(grid.every(v => v >= 0 && v < FLOOD_INKS.length));
+  const other = [...Array(FLOOD_INKS.length).keys()].find(i => i !== grid[0]);
+  const next = applyFlood(grid, other);
+  assert.ok(floodRegion(next).size >= floodRegion(grid).size, 'a flood never shrinks the blob');
+  assert.equal(next[0], other, 'the corner takes the ink you picked');
+  // Inks are told apart by mark, not hue — the floor only has one amber.
+  assert.equal(new Set(FLOOD_INKS).size, FLOOD_INKS.length, 'every ink needs its own mark');
+}
+
+// Peg Solitaire: a jump removes the peg jumped, and only straight two-square
+// jumps into a hole are legal. The board's cut corners must stay unplayable.
+{
+  const board = newPegBoard();
+  assert.equal(board.length, 49);
+  assert.equal(pegsLeft(board), 32, 'English board opens with 32 pegs and a hole');
+  assert.equal(board[3 * 7 + 3], 0, 'the centre is the empty hole');
+  assert.equal(board[0], PEG_INVALID, 'the corners are cut out of the board');
+  assert.equal(pegMoves(board).length, 4, 'four opening jumps, all into the centre');
+  const move = pegMoves(board)[0];
+  const after = applyPegMove(board, move);
+  assert.equal(pegsLeft(after), 31, 'a jump removes exactly one peg');
+  assert.equal(after[move.over], 0, 'the peg jumped over comes off');
+  assert.equal(after[move.to], 1, 'the jumper lands in the hole');
+  assert.equal(applyPegMove(after, { from: move.to, over: move.over, to: move.from }), null,
+    'you cannot jump into a hole with no peg between');
+  // Every reachable move must stay on the playable board.
+  for (const m of pegMoves(after)) {
+    assert.notEqual(board[m.to], PEG_INVALID, 'a jump may never land on a cut corner');
+  }
+}
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, Go, Heads Up!, Sudoku, and the Mind Gym six passed');

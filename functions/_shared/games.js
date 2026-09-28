@@ -6,6 +6,13 @@
  * both directions so an unknown cartridge can never mint a server session.
  */
 export const GAME_MAX = Object.freeze({
+  // Mind Gym 2026
+  'verbal-fluency': 200,
+  'digit-symbol': 400,
+  'reversi': 64,
+  'dots-boxes': 16,
+  'flood-it': 320,
+  'peg-solitaire': 32,
   // 2026 expansion
   'asteroids': 99999,
   'frogger': 9999,

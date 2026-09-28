@@ -3111,3 +3111,104 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 .game-modal-container .flex.justify-between > div { min-width: 0; }
 .game-modal-container .flex.justify-between h2,
 .game-modal-container .flex.justify-between p { overflow-wrap: anywhere; }
+
+/* Today's Five — five carts chosen by the date. Deliberately not a streak
+   (js/daily.js says why), so the copy promises nothing and takes nothing. */
+.daily-strip {
+  border: 1px solid var(--ax-line-2);
+  border-top: 0;
+  background: var(--ax-panel);
+}
+.daily-head {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 24px 18px 17px;
+  border-bottom: 1px solid var(--ax-line-2);
+}
+.daily-kicker {
+  margin: 0;
+  color: var(--ax-red);
+  font-family: var(--ax-pixel);
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+.daily-head h2 {
+  margin: 10px 0 0;
+  font-family: var(--ax-pixel);
+  font-size: clamp(12px, 2vw, 16px);
+  line-height: 1.4;
+  font-weight: 400;
+  color: var(--ax-ink);
+}
+.daily-note {
+  margin: 0;
+  color: var(--ax-ink-2);
+  font-family: var(--ax-body);
+  font-size: 12px;
+  line-height: 1.5;
+  max-width: 68ch;
+}
+.daily-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  background: var(--ax-line-2);
+}
+.daily-list button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 18px;
+  border: 0;
+  background: var(--ax-panel);
+  color: var(--ax-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--t-state) ease;
+}
+.daily-list button:hover { background: #1a2430; }
+.daily-list button:focus-visible { outline: 2px solid var(--ax-red); outline-offset: -3px; }
+.daily-n {
+  color: var(--ax-ink-3);
+  font-family: var(--ax-pixel);
+  font-size: 9px;
+  min-width: 14px;
+  flex-shrink: 0;
+}
+.daily-sprite {
+  width: 26px;
+  height: 26px;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+.daily-title {
+  font-family: var(--ax-pixel);
+  font-size: 10px;
+  line-height: 1.4;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.daily-meta {
+  margin-left: auto;
+  color: var(--ax-ink-3);
+  font-family: var(--ax-body);
+  font-size: 10px;
+  letter-spacing: .06em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@media (min-width: 900px) {
+  .daily-head { grid-template-columns: .618fr 1fr; align-items: start; gap: 34px; }
+  .daily-list { grid-template-columns: repeat(5, 1fr); }
+  .daily-list button { flex-direction: column; align-items: flex-start; min-height: 112px; gap: 8px; }
+  .daily-meta { margin-left: 0; }
+  .daily-sprite { width: 32px; height: 32px; }
+}

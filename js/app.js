@@ -32,6 +32,10 @@ import { renderTrailMaking, renderMentalRotation, renderIowaGambling } from './g
 import { renderKingsCup, renderNeverHaveIEver, renderMostLikelyTo } from './games/ngsDrinkingGames.js';
 import { renderCognitiveReflection, renderRavenMatrices, renderSternberg, renderNumberSense } from './games/ngsNewTrainers2.js';
 import { renderRideTheBus, renderPowerHour, renderBuzz, renderTruthOrDare, renderHigherLower, renderTwoTruths } from './games/ngsDrinkingGames2.js';
+import {
+  renderVerbalFluency, renderSymbolCoding, renderReversi,
+  renderDotsBoxes, renderFloodIt, renderPegSolitaire
+} from './games/ngsMindGym.js';
 import { renderHeadsUp } from './games/headsUp.js';
 import { renderWCST, renderTowerOfLondon, renderMindEyes } from './games/ngsNewTrainers3.js';
 import { renderPosnerCueing, renderChangeBlindness, renderOperationSpan } from './games/ngsAttentionSuite.js';
@@ -53,10 +57,14 @@ import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } 
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
 import { aliasesFor } from './searchAliases.js';
+import { dailyFive, dailyLabel } from './daily.js';
 import { MOODS, moodById, gamesForMood, moodsForGame } from './moods.js';
 import { spriteImg } from './sprites.js';
 
 const GAME_DIFFICULTY = {
+  'verbal-fluency': 'beginner', 'digit-symbol': 'beginner',
+  'reversi': 'pro', 'dots-boxes': 'intermediate',
+  'flood-it': 'intermediate', 'peg-solitaire': 'pro',
   'dual-n-back': 'pro', 'digit-span': 'beginner', 'stroop-match': 'beginner', 'stroop-match-pro': 'pro',
   'color-march-pro': 'pro', 'go-nogo': 'beginner', 'simon-seq': 'beginner', 'schulte-table': 'beginner',
   'visual-search': 'beginner', 'corsi-blocks': 'beginner', 'memory-palace': 'beginner', 'flanker': 'beginner',
@@ -145,6 +153,8 @@ const gamesCatalog = [
   { id: 'oddball', code: 'ODD', title: 'Oddball', wing: 'train', category: 'memory-focus', domain: 'Rare-target attention', age: 'All', desc: 'Tap only when the rare shape appears. Ignore the common one.', paper: 'Squires 1975', tags: ['Attention', 'P300', 'Daily'], renderer: renderOddball },
   { id: 'backward-span', code: 'BDS', title: 'Backward Span', wing: 'train', category: 'memory-focus', domain: 'Working memory', age: 'Teen+', desc: 'Watch the numbers, then type them last to first.', paper: 'Miller 1956', tags: ['Capacity', 'Recall', 'Daily'], renderer: renderBackwardSpan },
   { id: 'memory-matrix', code: 'MMG', title: 'Memory Matrix', wing: 'train', category: 'memory-focus', domain: 'Spatial pattern', age: 'All', desc: 'Watch the lit cells, then tap the same cells from memory.', tags: ['Memory', 'Spatial', 'Pattern'], renderer: renderMemoryMatrix },
+  { id: 'verbal-fluency', code: 'VFL', title: 'Category Fluency', wing: 'train', category: 'memory-focus', domain: 'Word retrieval', age: '10+', desc: 'Name as many animals, foods or countries as you can before the clock stops.', paper: 'Benton 1968', tags: ['Words', 'Retrieval', 'Timed'], renderer: renderVerbalFluency },
+  { id: 'digit-symbol', code: 'DSS', title: 'Symbol Coding', wing: 'train', category: 'skills', domain: 'Processing speed', age: '10+', desc: 'Read the key, type the digit matching each shape, keep going for 90 seconds.', paper: 'Wechsler 1981', tags: ['Speed', 'Lookup', 'Timed'], renderer: renderSymbolCoding },
   // ── ARCADE ─────────────────────────────────────────────────────────────
   { id: 'cyber-tetris', code: 'TET', title: 'Cyber Tetris 1984', wing: 'arcade', category: 'classics', domain: 'Spatial', age: 'All', desc: 'Rotate falling blocks to complete rows without leaving gaps.', tags: ['Classic', 'Puzzle'], renderer: renderCyberTetris },
   { id: 'arcade-breakout', code: 'BRK', title: 'Breakout 1976', wing: 'arcade', category: 'classics', domain: 'Prediction', age: 'All', desc: 'Move the paddle. Bounce the ball. Break every brick.', tags: ['Classic', 'Open source', 'Touch'], credit: 'Ania Kubow · MIT', source: 'https://github.com/kubowania/breakout', renderer: renderArcadeBreakout },
@@ -166,6 +176,8 @@ const gamesCatalog = [
   { id: 'rock-paper-scissors', code: 'RPS', title: 'Rock Paper Scissors', wing: 'arcade', category: 'casual-friv', domain: 'Prediction', age: 'All', desc: 'Pick rock, paper, or scissors. The CPU reads your habits — mix it up.', tags: ['Casual', 'Prediction'], renderer: renderRockPaperScissors },
   { id: 'paper-soccer', code: 'PSF', title: 'Paper Soccer', wing: 'arcade', category: 'casual-friv', domain: 'Table soccer', age: 'All', desc: 'Place a pass, then move one man. First to three goals.', tags: ['Two player', 'Soccer', 'Table', 'Opponent'], renderer: renderPaperSoccer },
 
+  { id: 'reversi', code: 'RVS', title: 'Reversi', wing: 'arcade', category: 'puzzle', domain: 'Board strategy', age: '8+', desc: 'Place a disc to catch their line between two of yours, and the whole line flips.', tags: ['Othello', 'Board', 'Opponent'], renderer: renderReversi },
+  { id: 'dots-boxes', code: 'DTB', title: 'Dots and Boxes', wing: 'arcade', category: 'puzzle', domain: 'Chain parity', age: '8+', desc: 'Draw one line a turn. Close the fourth side of a box to claim it and go again.', tags: ['Board', 'Opponent', 'Paper'], renderer: renderDotsBoxes },
   // ── LEARN ──────────────────────────────────────────────────────────────
   { id: 'monty-hall', code: 'MTY', title: 'Monty Hall', wing: 'learn', category: 'math-logic', domain: 'Probability', age: 'All', desc: 'Pick a door, see one empty door opened, then choose whether to stay or switch.', paper: 'Selvin 1975', tags: ['Probability', 'Bayes', 'Argument-settler'], renderer: renderMontyHall },
   { id: 'asteroids', code: 'AST', title: 'Asteroids', wing: 'arcade', category: 'classics', domain: 'Spatial control', age: 'All', desc: 'Rotate, then hit the rocks. They split. Flying off one edge brings you back.', paper: 'Atari 1979', tags: ['Vector', 'Momentum', 'Classic'], renderer: renderAsteroids },
@@ -196,6 +208,8 @@ const gamesCatalog = [
   { id: 'memory-match', code: 'MEM', title: 'Memory Match', wing: 'learn', category: 'kids-edu', domain: 'Pairs', age: '5+', desc: 'Flip two cards at a time and match the animal pairs.', tags: ['Memory', 'Kids'], renderer: renderMemoryMatch },
   { id: 'word-search', code: 'WSR', title: 'Word Search Quest', wing: 'learn', category: 'kids-edu', domain: 'Vocabulary', age: '7+', desc: 'Find every hidden word in the letter grid.', tags: ['Words', 'Kids'], renderer: renderWordSearch },
 
+  { id: 'flood-it', code: 'FLD', title: 'Flood It', wing: 'learn', category: 'math-logic', domain: 'Look-ahead', age: '8+', desc: 'Pick an ink and the corner blob eats everything touching it. Fill the board in 22 moves.', tags: ['Puzzle', 'Planning', 'Grid'], renderer: renderFloodIt },
+  { id: 'peg-solitaire', code: 'PEG', title: 'Peg Solitaire', wing: 'learn', category: 'math-logic', domain: 'Planning', age: '8+', desc: 'Move a peg over its neighbour into the hole behind it. Take thirty-two down to one.', tags: ['Puzzle', 'Planning', 'Solo'], renderer: renderPegSolitaire },
   // ── LABS ───────────────────────────────────────────────────────────────
   { id: 'non-trivial', code: 'NTR', title: 'Non-Trivial', wing: 'labs', category: 'labs', domain: 'Personal', age: 'Friends', desc: 'Answer questions drawn from Dr Non’s writing on books, cities, bikes, and sound.', tags: ['Trivia', 'Friends'], renderer: renderNonTrivial },
   { id: 'blow-cartridge', code: 'BIC', title: 'Blow Into The Cartridge', wing: 'labs', category: 'labs', domain: 'Party host', age: 'Party', desc: 'Pick a 90s/00s deck, shout answers together, and keep score on paper.', tags: ['Party', '90s'], renderer: renderBlowIntoTheCartridge },
@@ -231,6 +245,7 @@ class NgsApp {
     this.renderHeader();
     this.renderWingBar();
     this.renderAttract();
+    this.renderDaily();
     this.renderGameBay();
     this.bindEvents();
   }
@@ -345,6 +360,40 @@ class NgsApp {
         <button id="sound-toggle-btn" class="arcade-sound" type="button" aria-label="Toggle sound">${soundFx.muted ? 'MUTED' : 'SOUND'}</button>
       </div>
     `;
+  }
+
+  /**
+   * Today's Five. Five carts chosen by the date, the same five for everyone,
+   * gone tomorrow. Deliberately not a streak — see js/daily.js for why.
+   */
+  renderDaily() {
+    const el = document.querySelector('#recommended-strip');
+    if (!el) return;
+    const picks = dailyFive(gamesCatalog);
+    if (!picks.length) { el.hidden = true; return; }
+    el.hidden = false;
+    el.className = 'daily-strip';
+    el.innerHTML = `
+      <header class="daily-head">
+        <div>
+          <p class="daily-kicker">TODAY'S FIVE · ${dailyLabel()}</p>
+          <h2>Five carts, picked by the date.</h2>
+        </div>
+        <p class="daily-note">The same five for everyone today, a different five tomorrow.
+          Miss a day and nothing is lost — there is no streak here to break.</p>
+      </header>
+      <ol class="daily-list">
+        ${picks.map((game, i) => `
+          <li><button type="button" data-game="${game.id}" aria-label="Play ${game.title}">
+            <span class="daily-n">${i + 1}</span>
+            ${spriteImg(game.id, 'daily-sprite')}
+            <span class="daily-title">${game.title}</span>
+            <span class="daily-meta">${getBrainGuide(game).minutes} · ${WING_META[game.wing]?.title || game.wing.toUpperCase()}</span>
+          </button></li>`).join('')}
+      </ol>`;
+    el.querySelectorAll('[data-game]').forEach(b => {
+      b.onclick = () => this.launchGame(b.dataset.game);
+    });
   }
 
   renderAttract() {
@@ -576,7 +625,8 @@ class NgsApp {
     const high = StorageService.getHighScore(game.id);
     const isFocus = game.id === this.focusId;
     const guide = getBrainGuide(game);
-    const isNew = ['color-march-pro'].includes(game.id);
+    const isNew = ['color-march-pro', 'verbal-fluency', 'digit-symbol',
+      'reversi', 'dots-boxes', 'flood-it', 'peg-solitaire'].includes(game.id);
     const hasPlayed = this._playedIds?.has(game.id);
     const difficulty = GAME_DIFFICULTY[game.id] || 'beginner';
     return `

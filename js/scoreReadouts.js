@@ -10,6 +10,12 @@ import { BRAIN_GUIDES } from './brainGuides.js';
 
 /** Absolute cutoffs: score < cuts[0] rough, < cuts[1] warming, < cuts[2] solid, else sharp. */
 const CUTS = {
+  'verbal-fluency': [10, 16, 24],
+  'digit-symbol': [25, 40, 58],
+  'reversi': [25, 33, 42],
+  'dots-boxes': [5, 8, 11],
+  'flood-it': [55, 95, 160],
+  'peg-solitaire': [22, 28, 31],
   'nonogram': [100, 240, 380],
   'nim': [1, 100, 200],
   'make-24': [40, 120, 200],

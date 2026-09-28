@@ -19,6 +19,12 @@
  */
 
 export const SEARCH_ALIASES = {
+  'verbal-fluency': ['fluency', 'name as many', 'word retrieval', 'animals', 'categories', 'fas test', 'talking'],
+  'digit-symbol': ['symbol coding', 'dsst', 'processing speed', 'coding', 'substitution', 'wechsler', 'shapes and numbers'],
+  'reversi': ['othello', 'reversi', 'discs', 'flip', 'board game', 'corners'],
+  'dots-boxes': ['dots and boxes', 'boxes', 'squares game', 'paper game', 'chains', 'dots'],
+  'flood-it': ['flood it', 'flood', 'fill the board', 'colour fill', 'color fill', 'blob'],
+  'peg-solitaire': ['peg solitaire', 'pegs', 'jump the peg', 'solitaire board', 'hi q', 'marbles'],
   /* ── the one that started this ─────────────────────────────────────── */
   'stroop-match': ['colour', 'color', 'colours', 'colors', 'red', 'blue', 'green', 'yellow',
                    'orange', 'amber', 'ink', 'word colour', 'stroop', 'name the colour', 'coloured words'],
