@@ -5,6 +5,7 @@
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';
 import { ScopedKeyboard, showResult } from '../ui.js';
+import { escapeHtml } from '../scoreGate.js';
 
 export function renderAIGameStudio(container, onClose) {
   let promptText = "A cyber runner dodging red laser beams and collecting golden stars";
@@ -32,6 +33,10 @@ export function renderAIGameStudio(container, onClose) {
   }
 
   function renderUI() {
+    const safePrompt = escapeHtml(promptText);
+    const safePlayer = escapeHtml(playerSprite);
+    const safeObstacle = escapeHtml(obstacleSprite);
+    const safeItem = escapeHtml(itemSprite);
     container.innerHTML = `
       <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-2xl mx-auto font-mono-hud">
         <div class="flex justify-between items-center gap-2 mb-6 border-b border-amber-500/40 pb-3">
@@ -51,7 +56,7 @@ export function renderAIGameStudio(container, onClose) {
               ✨ PROMPT YOUR CUSTOM GAME IDEA:
             </label>
             <div class="flex flex-col sm:flex-row gap-2 mb-4">
-              <input id="ai-prompt-input" type="text" value="${promptText}" class="w-full bg-black border border-amber-500/60 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400" placeholder="e.g. A cyber knight dodging falling meteors..." />
+              <input id="ai-prompt-input" type="text" value="${safePrompt}" class="w-full bg-black border border-amber-500/60 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400" placeholder="e.g. A cyber knight dodging falling meteors..." />
               <button id="ai-generate-btn" class="w-full sm:w-auto px-4 sm:px-6 py-3 bg-amber-600 hover:bg-amber-500 text-black font-black text-xs uppercase whitespace-nowrap shadow-lg">
                 ⚡ BUILD & PLAY
               </button>
@@ -74,15 +79,15 @@ export function renderAIGameStudio(container, onClose) {
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-zinc-950 p-4 border border-amber-500/40 mb-6 text-xs">
             <div>
               <span class="text-zinc-400 block mb-1">HERO AVATAR:</span>
-              <input id="param-player" type="text" value="${playerSprite}" class="w-full bg-black border border-zinc-700 p-2 text-center text-lg" />
+              <input id="param-player" type="text" value="${safePlayer}" class="w-full bg-black border border-zinc-700 p-2 text-center text-lg" />
             </div>
             <div>
               <span class="text-zinc-400 block mb-1">HAZARD:</span>
-              <input id="param-obs" type="text" value="${obstacleSprite}" class="w-full bg-black border border-zinc-700 p-2 text-center text-lg" />
+              <input id="param-obs" type="text" value="${safeObstacle}" class="w-full bg-black border border-zinc-700 p-2 text-center text-lg" />
             </div>
             <div>
               <span class="text-zinc-400 block mb-1">STAR REWARD:</span>
-              <input id="param-item" type="text" value="${itemSprite}" class="w-full bg-black border border-zinc-700 p-2 text-center text-lg" />
+              <input id="param-item" type="text" value="${safeItem}" class="w-full bg-black border border-zinc-700 p-2 text-center text-lg" />
             </div>
           </div>
         ` : `
@@ -202,7 +207,7 @@ export function renderAIGameStudio(container, onClose) {
           showResult({
             container,
             title: 'GAME OVER',
-            message: `Prompt: "${promptText.slice(0, 48)}${promptText.length > 48 ? '…' : ''}"`,
+            message: `Prompt: "${escapeHtml(promptText.slice(0, 48))}${promptText.length > 48 ? '…' : ''}"`,
             score,
             gameId: 'ai-sandbox',
             onRestart: () => { isPlaying = true; renderUI(); startCanvasEngine(); },

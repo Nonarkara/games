@@ -99,7 +99,9 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'service_unavailable' }, 503);
   }
 
-  const board = await readBoard(env, game_id);
+  let board;
+  try { board = await readBoard(env, game_id); }
+  catch { return json({ error: 'service_unavailable' }, 503); }
   const rank = board.findIndex(entry => entry.s === score && entry.i === initials) + 1;
   return json({ game_id, board, accepted: true, your_score: score, your_rank: rank || null });
 }

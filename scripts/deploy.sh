@@ -50,6 +50,7 @@ echo ""
 # 2. Test
 echo "▶ Test (npm test)"
 npm test
+npm run test:security
 echo ""
 
 if $DRY_RUN; then
@@ -67,8 +68,10 @@ npx wrangler d1 migrations apply ngs-leaderboard --remote
 echo ""
 
 # 4. Deploy
+PUBLIC_BUILD=$(node scripts/build-public.mjs)
+trap 'rm -rf -- "$PUBLIC_BUILD"' EXIT
 echo "▶ Deploy (wrangler pages, production branch)"
-npx wrangler pages deploy . --project-name="$PROJECT" --branch=main \
+npx wrangler pages deploy "$PUBLIC_BUILD" --project-name="$PROJECT" --branch=main \
   --commit-dirty=true --commit-hash="$COMMIT" --commit-message="$COMMIT_MSG"
 
 # 5. Smoke — versioned alias (immune to 4h-stale zone cache)

@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = Number(process.env.PORT || 3000);
+const HOST = process.env.HOST || '127.0.0.1';
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -36,6 +37,21 @@ const server = http.createServer((req, res) => {
       return;
     }
     let reqPath = parsedUrl.pathname === '/' ? '/index.html' : decodeURIComponent(parsedUrl.pathname);
+    const segments = reqPath.split(/[\\/]/);
+    const publicRoots = new Set(['js', 'css', 'public', 'vendor', 'fonts', 'images']);
+    const publicFiles = new Set(['index.html', 'favicon.ico', 'robots.txt', 'sitemap.xml', 'manifest.json']);
+    const first = segments.find(Boolean);
+    if (segments.some(part => part.startsWith('.')) ||
+        !(publicRoots.has(first) || publicFiles.has(first)) || /\.test\.(?:js|mjs)$/.test(reqPath)) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff' });
+      res.end('Not Found');
+      return;
+    }
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      res.writeHead(405, { Allow: 'GET, HEAD' });
+      res.end('Method Not Allowed');
+      return;
+    }
     const filePath = path.resolve(__dirname, `.${path.normalize(reqPath)}`);
     if (filePath !== __dirname && !filePath.startsWith(`${__dirname}${path.sep}`)) {
       res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -56,8 +72,8 @@ const server = http.createServer((req, res) => {
           res.end(`<h1 style="font-family:sans-serif;padding:2rem;">Server Error: ${err.code}</h1>`, 'utf-8');
         }
       } else {
-        res.writeHead(200, { 'Content-Type': contentType });
-        res.end(content, 'utf-8');
+        res.writeHead(200, { 'Content-Type': contentType, 'X-Content-Type-Options': 'nosniff' });
+        res.end(req.method === 'HEAD' ? undefined : content);
       }
     });
   } catch (e) {
@@ -66,6 +82,6 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`🎮 Dr Non — Non-Gaming System running at http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`🎮 Dr Non — Non-Gaming System running at http://localhost:${server.address().port}`);
 });
