@@ -81,7 +81,7 @@ cd games
 node server.js
 ```
 
-Same entry: `npm start`. Open [http://localhost:3000](http://localhost:3000).
+Same entry: `npm start`. Open [http://localhost:3000](http://localhost:3000). The development server binds to loopback (`127.0.0.1`) by default and refuses dotfiles and `node_modules`. `PORT` selects another port; an explicit `HOST` override is only for a network you intend to expose this development server to.
 
 Then play like a visitor: pick a wing (TRAIN / ARCADE / LEARN / LABS), open a title, read the briefing, start the round. Optional checks for people changing code:
 

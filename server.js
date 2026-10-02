@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = Number(process.env.PORT || 3000);
+const HOST = process.env.HOST || '127.0.0.1';
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -36,6 +37,12 @@ const server = http.createServer((req, res) => {
       return;
     }
     let reqPath = parsedUrl.pathname === '/' ? '/index.html' : decodeURIComponent(parsedUrl.pathname);
+    // Development serves the repo root; never expose local metadata or secrets.
+    if (reqPath.split('/').some(part => part.startsWith('.') || part === 'node_modules')) {
+      res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Forbidden');
+      return;
+    }
     const filePath = path.resolve(__dirname, `.${path.normalize(reqPath)}`);
     if (filePath !== __dirname && !filePath.startsWith(`${__dirname}${path.sep}`)) {
       res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -66,6 +73,6 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`🎮 Dr Non — Non-Gaming System running at http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`🎮 Dr Non — Non-Gaming System running at http://${HOST}:${server.address().port}`);
 });
