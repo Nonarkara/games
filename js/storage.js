@@ -18,6 +18,7 @@
  */
 
 import { sanitizeBoard } from './scoreGate.js';
+import { isNewPersonalBest } from './scoreReadouts.js';
 
 const STORAGE_KEY   = 'ngs_data_v1';
 const LEGACY_KEY    = 'omni_arcade_data_v1';
@@ -117,7 +118,8 @@ const defaultData = {
   favoriteStates: {},
   gamesPlayed: 0,
   theme: 'cyber', // 'cyber' | 'retro' | 'light'
-  customGames: []
+  customGames: [],
+  briefingSeen: {}
 };
 
 /**
@@ -178,7 +180,8 @@ export class StorageService {
         favoriteStates: parsed.favoriteStates && typeof parsed.favoriteStates === 'object'
           ? parsed.favoriteStates
           : Object.fromEntries((Array.isArray(parsed.favorites) ? parsed.favorites : []).map(id => [id, { value: true, updatedAt: 0 }])),
-        customGames: Array.isArray(parsed.customGames) ? parsed.customGames : []
+        customGames: Array.isArray(parsed.customGames) ? parsed.customGames : [],
+        briefingSeen: parsed.briefingSeen && typeof parsed.briefingSeen === 'object' ? parsed.briefingSeen : {}
       };
     } catch (e) {
       console.warn('[NGS] LocalStorage access error:', e);
@@ -200,10 +203,23 @@ export class StorageService {
     return data.highScores[gameId] || 0;
   }
 
+  static hasSeenBriefing(gameId) {
+    return Boolean(this.getData().briefingSeen?.[gameId]);
+  }
+
+  /** Remember that this player has played, or chosen skip, for this cartridge. */
+  static markBriefingSeen(gameId) {
+    const data = this.getData();
+    data.briefingSeen = data.briefingSeen || {};
+    if (data.briefingSeen[gameId]) return;
+    data.briefingSeen[gameId] = Date.now();
+    this.saveData(data);
+  }
+
   static updateHighScore(gameId, score) {
     const data = this.getData();
     const currentHigh = data.highScores[gameId] || 0;
-    if (score > currentHigh) {
+    if (isNewPersonalBest(currentHigh, score)) {
       data.highScores[gameId] = score;
       data.gamesPlayed = (data.gamesPlayed || 0) + 1;
       this.saveData(data);

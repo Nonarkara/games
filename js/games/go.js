@@ -415,10 +415,10 @@ export function renderGo(container, onClose) {
       // Header now carries size + level selectors so the player can change them mid-game
       // (each click restarts the game with the new settings).
       const sizeBtns = [9, 11, 13, 19].map(s =>
-        `<button data-size="${s}" class="px-2 py-0.5 text-[10px] border ${SIZE === s ? 'border-amber-400 text-amber-400' : 'border-amber-500/30 text-amber-500/60'}">${s}×${s}</button>`
+        `<button data-size="${s}" class="go-choice border ${SIZE === s ? 'border-amber-400 text-amber-400' : 'border-amber-500/30 text-amber-500/60'}">${s}×${s}</button>`
       ).join('');
       const levelBtns = ['beginner', 'intermediate', 'pro'].map(l =>
-        `<button data-level="${l}" class="px-2 py-0.5 text-[10px] border ${LEVEL === l ? 'border-amber-400 text-amber-400' : 'border-amber-500/30 text-amber-500/60'}">${l.toUpperCase()}</button>`
+        `<button data-level="${l}" class="go-choice border ${LEVEL === l ? 'border-amber-400 text-amber-400' : 'border-amber-500/30 text-amber-500/60'}">${l.toUpperCase()}</button>`
       ).join('');
 
       container.innerHTML = `
@@ -445,9 +445,9 @@ export function renderGo(container, onClose) {
             </svg>
           </div>
           <div class="flex flex-wrap gap-2 justify-center mb-2">
-            <button data-act="pass" class="px-3 py-2 border border-amber-500 text-amber-400 text-xs font-bold">PASS</button>
-            <button data-act="undo" class="px-3 py-2 border border-amber-500/40 text-amber-500/70 text-xs font-bold">UNDO</button>
-            <button data-act="resign" class="px-3 py-2 border border-red-500/40 text-red-400 text-xs font-bold">RESIGN</button>
+            <button data-act="pass" class="go-choice border border-amber-500 text-amber-400 text-xs font-bold">PASS</button>
+            <button data-act="undo" class="go-choice border border-amber-500/40 text-amber-500/70 text-xs font-bold">UNDO</button>
+            <button data-act="resign" class="go-choice border border-red-500/40 text-red-400 text-xs font-bold">RESIGN</button>
           </div>
           <p class="mt-2 text-[11px] leading-relaxed text-zinc-400 text-center">
             ${LEVEL === 'beginner'

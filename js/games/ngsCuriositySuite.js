@@ -271,7 +271,7 @@ export function renderMontyHall(container, onClose) {
     const DOOR = (i, state) => {
       const isOpen = opened === i && state !== 'reveal';
       const revealed = state === 'reveal';
-      const label = revealed ? (i === prize ? '🏆' : '🐐') : (isOpen ? '🐐' : String(i + 1));
+      const label = revealed ? (i === prize ? 'PRIZE' : 'GOAT') : (isOpen ? 'GOAT' : String(i + 1));
       const cls = revealed
         ? (i === prize ? 'border-amber-400 bg-amber-500/20' : 'border-zinc-700 bg-zinc-900 opacity-60')
         : isOpen
@@ -279,7 +279,7 @@ export function renderMontyHall(container, onClose) {
           : picked === i
             ? 'border-amber-400 bg-amber-500/20'
             : 'border-zinc-600 bg-zinc-900 hover:border-amber-400';
-      return `<button class="mh-door aspect-[2/3] border-2 ${cls} text-4xl font-black flex flex-col items-center justify-center gap-2" data-i="${i}" ${isOpen || revealed ? 'disabled' : ''}>
+      return `<button class="mh-door aspect-[2/3] border-2 ${cls} text-lg font-black flex flex-col items-center justify-center gap-2" data-i="${i}" ${isOpen || revealed ? 'disabled' : ''}>
         <span>${label}</span>${picked === i && !revealed ? '<span class="text-[9px] text-amber-400 tracking-widest">YOUR PICK</span>' : ''}
       </button>`;
     };

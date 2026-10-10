@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { explainScore, hasScoreProfile } from './scoreReadouts.js';
+import { explainScore, hasScoreProfile, isNewPersonalBest } from './scoreReadouts.js';
 
 const appSource = readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const catalogBlock = appSource.split('const gamesCatalog = [')[1].split('];')[0];
@@ -83,5 +83,18 @@ assert.equal(explainScore('paper-soccer', 3).band, 'sharp');
 
 assert.equal(explainScore('about-dr-non', 1), null);
 assert.equal(explainScore('aim-trainer', null), null);
+
+// A score of 0 is a cold start, never a personal best — including the
+// first run, when the stored high is still 0. Snake and Flappy both land here.
+assert.equal(explainScore('cyber-snake', 0).band, 'rough');
+assert.equal(explainScore('flappy-bird', 0).band, 'rough');
+assert.doesNotMatch(`${explainScore('cyber-snake', 0).title} ${explainScore('flappy-bird', 0).title}`, /best/i);
+assert.equal(isNewPersonalBest(0, 0), false);
+assert.equal(isNewPersonalBest(undefined, 0), false);
+assert.equal(isNewPersonalBest(null, 0), false);
+assert.equal(isNewPersonalBest(0, 1), true);
+assert.equal(isNewPersonalBest(10, 10), false);
+assert.equal(isNewPersonalBest(10, 9), false);
+assert.equal(isNewPersonalBest(40, 41), true);
 
 console.log(`score readouts: ${gameIds.filter(id => !skip.has(id)).length} playable games covered`);

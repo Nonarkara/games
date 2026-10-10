@@ -42,8 +42,8 @@ function gameFrame({ title, subtitle, score, high, credit, canvasId }) {
         <button class="oss-game__serve" id="oss-serve" type="button">START ROUND</button>
       </div>
       <div class="oss-game__controls">
-        <span>KEYS: ARROWS / A D</span>
-        <span>TOUCH: DRAG ON SCREEN</span>
+        <span class="hint-keys">KEYS: ARROWS / A D</span>
+        <span class="hint-touch">TOUCH: DRAG ON SCREEN</span>
         <a href="${credit.url}" target="_blank" rel="noopener">SOURCE: ${credit.name} · MIT</a>
       </div>
     </section>`;

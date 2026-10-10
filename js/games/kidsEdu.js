@@ -60,7 +60,7 @@ export function renderMathSafari(container, onClose) {
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-4 mb-6 text-xs font-bold">
             <div>SCORE: <span id="math-score" class="text-white text-lg">${score}</span></div>
             <div>HIGH SCORE: <span class="text-amber-400 text-lg">${high}</span></div>
-            <div>LIVES: <span id="math-lives" class="text-red-500 text-lg">${'❤️'.repeat(lives)}</span></div>
+            <div>LIVES: <span id="math-lives" class="text-red-500 text-lg">${'●'.repeat(lives)}${'○'.repeat(Math.max(0, 3 - lives))}</span></div>
           </div>
 
           <div id="math-display" class="bg-zinc-900 border border-amber-500/60 p-8 text-center mb-6">
@@ -121,7 +121,7 @@ export function renderMemoryMatch(container, onClose) {
   start();
 
   function start() {
-    const icons = ['🦁', '🐯', '🐼', '🐨', '🦊', '🦒', '🐘', '🦩'];
+    const icons = ['LION', 'TIGER', 'PANDA', 'KOALA', 'FOX', 'GIRAFFE', 'ELEPHANT', 'FLAMINGO'];
     let cards = [...icons, ...icons].sort(() => Math.random() - 0.5);
     let flipped = [];
     let matched = [];
@@ -154,8 +154,8 @@ export function renderMemoryMatch(container, onClose) {
             ${cards.map((icon, idx) => {
               const isFlipped = flipped.includes(idx) || matched.includes(idx);
               return `
-                <button class="memory-card-btn aspect-square text-3xl flex items-center justify-center font-bold transition border ${isFlipped ? 'bg-amber-950 border-amber-400 text-white' : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-500'}" data-idx="${idx}">
-                  ${isFlipped ? icon : '❓'}
+                <button class="memory-card-btn aspect-square text-[11px] leading-tight px-1 flex items-center justify-center font-bold transition border ${isFlipped ? 'bg-amber-950 border-amber-400 text-white' : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-500'}" data-idx="${idx}">
+                  ${isFlipped ? icon : '?'}
                 </button>
               `;
             }).join('')}

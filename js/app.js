@@ -56,6 +56,8 @@ import { renderSudoku } from './games/sudoku.js';
 import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } from './games/ngsDailySuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
+import { gameIdFromSearch, gameQuery } from './deepLink.js';
+import { scrubIconEmoji } from './stageHygiene.js';
 import { aliasesFor } from './searchAliases.js';
 import { dailyFive, dailyLabel } from './daily.js';
 import { MOODS, moodById, gamesForMood, moodsForGame } from './moods.js';
@@ -248,6 +250,46 @@ class NgsApp {
     this.renderDaily();
     this.renderGameBay();
     this.bindEvents();
+    this.bindInputMode();
+    this.bindDeepLink();
+  }
+
+  bindInputMode() {
+    const apply = () => {
+      const touch = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+      document.documentElement.dataset.input = touch ? 'touch' : 'keys';
+    };
+    apply();
+    window.matchMedia('(pointer: coarse)').addEventListener('change', apply);
+  }
+
+  knowsGame(gameId) {
+    if (StorageService.hasSeenBriefing(gameId)) return true;
+    return AnalyticsService.getLog().some(entry => entry.gameId === gameId);
+  }
+
+  bindDeepLink() {
+    window.addEventListener('popstate', () => {
+      if (this._suppressPop) {
+        this._suppressPop = false;
+        return;
+      }
+      const id = gameIdFromSearch(location.search);
+      const overlay = document.querySelector('#game-modal-overlay');
+      const open = overlay && !overlay.classList.contains('hidden');
+      if (id && gamesCatalog.some(g => g.id === id)) {
+        if (!open || this._openGameId !== id) this.launchGame(id, { fromHistory: true });
+        return;
+      }
+      if (open) this._closeGame?.({ fromHistory: true });
+    });
+
+    const id = gameIdFromSearch(location.search);
+    if (!id || !gamesCatalog.some(g => g.id === id)) return;
+    const gameUrl = gameQuery(id);
+    history.replaceState({ ngsHub: true }, '', location.pathname);
+    history.pushState({ ngsGame: id }, '', gameUrl);
+    this.launchGame(id, { fromHistory: true });
   }
 
   playableCount() {
@@ -648,7 +690,10 @@ class NgsApp {
     });
   }
 
-  launchGame(gameId) {
+  launchGame(gameId, opts = {}) {
+    if (this._openGameId && this._openGameId !== gameId && this._closeGame) {
+      this._closeGame({ fromHistory: true });
+    }
     soundFx.playClick();
     soundFx.init();
     const game = gamesCatalog.find(g => g.id === gameId);
@@ -657,6 +702,11 @@ class NgsApp {
     const overlay = document.querySelector('#game-modal-overlay');
     const container = document.querySelector('#game-modal-container');
     if (!overlay || !container) return;
+
+    if (!opts.fromHistory && gameIdFromSearch(location.search) !== game.id) {
+      history.pushState({ ngsGame: game.id }, '', gameQuery(game.id));
+    }
+    this._openGameId = game.id;
 
     if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
 
@@ -672,22 +722,38 @@ class NgsApp {
     let didStart = false;
     let sessionScore = 0;
 
-    const closeGame = () => {
+    const closeGame = (reason = {}) => {
+      if (this._openGameId !== game.id && overlay.classList.contains('hidden')) return;
       const durationMs = startedAt ? Date.now() - startedAt : 0;
       if (didStart) {
         try { AnalyticsService.log(game.id, game.category, sessionScore, durationMs); } catch (e) { /* ignore */ }
       }
+      if (this._stageObserver) { this._stageObserver.disconnect(); this._stageObserver = null; }
+      try {
+        container._beforeClose?.();
+        container.querySelector('.game-session-stage')?._beforeClose?.();
+      } catch (e) { /* the shell exit still closes */ }
+      container._beforeClose = null;
+      const stageEl = container.querySelector('.game-session-stage');
+      if (stageEl) stageEl._beforeClose = null;
       session.teardown();
       overlay.classList.add('hidden');
       container.innerHTML = '';
       if (this._releaseModalUX) { this._releaseModalUX(); this._releaseModalUX = null; }
+      this._openGameId = null;
+      this._closeGame = null;
       this.renderRailMeta();
       this.renderGameBay();
       if (didStart) this.renderAttract();
       const opener = this._modalOpener;
       this._modalOpener = null;
       if (opener && opener.isConnected) opener.focus();
+      if (!reason.fromHistory && gameIdFromSearch(location.search) === game.id) {
+        this._suppressPop = true;
+        history.back();
+      }
     };
+    this._closeGame = closeGame;
 
     this._releaseModalUX = bindModalUX(overlay, closeGame);
     const guide = getBrainGuide(game);
@@ -703,11 +769,27 @@ class NgsApp {
     const renderBriefing = () => {
       const preview = previewHtmlFor(game);
       container.innerHTML = `
+        <div class="game-session-shell route-${game.wing}">
+        <header class="game-session-bar">
+          <div><b>${game.code}</b><span class="game-session-title">${game.title}</span></div>
+          <details>
+            <summary>BRAIN NOTE</summary>
+            <div>
+              <b>${guide.label}</b>
+              <p><span>HOW TO PLAY</span> ${game.desc}</p>
+              <p><span>IN THE ROUND</span> ${guide.practice}</p>
+              <p><span>WHY</span> ${guide.why}</p>
+              <p>${guide.tip}</p>
+              <small>${TRANSFER_CAVEAT}</small>
+            </div>
+          </details>
+          <button type="button">EXIT</button>
+        </header>
+        <div class="game-session-stage">
         <article class="brain-briefing route-${game.wing}" aria-labelledby="briefing-title">
           <header class="briefing-header">
             <div class="briefing-code">${game.code}</div>
             <div><p>${game.wing.toUpperCase()} · ${guide.minutes} · ${game.age}</p><h2 id="briefing-title">${game.title}</h2></div>
-            <button class="briefing-close" type="button" aria-label="Close game">CLOSE</button>
           </header>
           <div class="briefing-grid">
             <div class="briefing-primary">
@@ -730,13 +812,16 @@ class NgsApp {
               <button class="briefing-skip" type="button">SKIP — I KNOW THIS ONE</button>
             </aside>
           </div>
-        </article>`;
-      container.querySelector('.briefing-close').onclick = closeGame;
-      container.querySelector('.briefing-play').onclick = renderGame;
+        </article>
+        </div>
+        </div>`;
+      scrubIconEmoji(container);
+      container.querySelector('.game-session-bar > button').onclick = closeGame;
+      container.querySelector('.briefing-play').onclick = enterPlay;
       // Keyboard entry point lands on PLAY, inside the dialog.
       container.querySelector('.briefing-play').focus();
       const skip = container.querySelector('.briefing-skip');
-      if (skip) skip.onclick = renderGame;
+      if (skip) skip.onclick = enterPlay;
     };
 
     const renderGame = () => {
@@ -745,10 +830,17 @@ class NgsApp {
       container.innerHTML = `
         <div class="game-session-shell route-${game.wing}">
           <header class="game-session-bar">
-            <div><b>${game.code}</b><span>${game.title}</span></div>
+            <div><b>${game.code}</b><span class="game-session-title">${game.title}</span></div>
             <details>
               <summary>BRAIN NOTE</summary>
-              <div><b>${guide.label}</b><p>${guide.practice}</p><small>${TRANSFER_CAVEAT}</small></div>
+              <div>
+                <b>${guide.label}</b>
+                <p><span>HOW TO PLAY</span> ${game.desc}</p>
+                <p><span>IN THE ROUND</span> ${guide.practice}</p>
+                <p><span>WHY</span> ${guide.why}</p>
+                <p>${guide.tip}</p>
+                <small>${TRANSFER_CAVEAT}</small>
+              </div>
             </details>
             <button type="button">EXIT</button>
           </header>
@@ -759,14 +851,45 @@ class NgsApp {
       container._recordScore = recordScore;
       stage._recordScore = recordScore;
       container.querySelector('.game-session-bar > button').onclick = closeGame;
+      const dress = () => {
+        scrubIconEmoji(stage);
+        const sprite = spriteImg(game.id, 'game-head-sprite');
+        if (sprite) {
+          stage.querySelectorAll('span.text-3xl, span.labs-card-icon').forEach(span => {
+            if (span.querySelector('img') || span.textContent.trim()) return;
+            span.innerHTML = sprite;
+          });
+        }
+        stage.querySelectorAll('p, div').forEach(el => {
+          if (el.querySelector('div, p, button, canvas, svg, input, .hint-keys, .hint-touch')) return;
+          if (el.closest('.chess-board, .sdk-board, .chess-meta, .axiom-result-card, .host-question, .host-fact, .labs-option')) return;
+          const cls = typeof el.className === 'string' ? el.className : '';
+          if (!/text-\[(9|10|11)px\]|text-zinc-[45]00|text-amber-500/.test(cls)) return;
+          if (el.textContent.trim().length > 80) el.classList.add('game-help');
+        });
+      };
       game.renderer(stage, closeGame);
+      dress();
+      if (this._stageObserver) this._stageObserver.disconnect();
+      let dressing = false;
+      this._stageObserver = new MutationObserver(() => {
+        if (dressing) return;
+        dressing = true;
+        dress();
+        dressing = false;
+      });
+      this._stageObserver.observe(stage, { childList: true, subtree: true, characterData: true });
     };
 
-    // Briefing first, every time. The attract screen's CONTINUE button is
-    // the one-tap path for returning players; opening a cartridge from the
-    // floor always re-shows what it trains. Closing without PLAY never
-    // counts as a session.
-    renderBriefing();
+    const enterPlay = () => {
+      StorageService.markBriefingSeen(game.id);
+      renderGame();
+    };
+
+    // First open shows the briefing. After one play or one skip, later opens
+    // go straight in. BRAIN NOTE still holds the full note.
+    if (this.knowsGame(game.id)) enterPlay();
+    else renderBriefing();
   }
 
   openResearch() {

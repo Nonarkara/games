@@ -1288,7 +1288,7 @@ export function renderPaperSoccer(container, onClose) {
       <div class="${FRAME}">
         <div class="flex justify-between items-center px-3 pt-2.5 pb-2 border-b border-amber-500/40">
           <div class="flex items-center gap-3">
-            <span class="text-xl text-amber-400" aria-hidden="true">⚽</span>
+            <span class="text-xl text-amber-400" aria-hidden="true">PS</span>
             <div>
               <h2 class="text-sm font-black text-amber-400 tracking-wider">PAPER SOCCER</h2>
               <p class="text-[10px] text-amber-500/80 uppercase">Point · hold for weight · release · first to three</p>
@@ -2361,7 +2361,7 @@ export function renderPaperSoccer(container, onClose) {
         : flying
           ? 'BALL IN FLIGHT...'
           : celebration
-            ? `⚽ ${celebration.scorer.toUpperCase()} SCORED!`
+            ? `${celebration.scorer.toUpperCase()} SCORED!`
             : cpuBusy
               ? 'MACHINE THINKING...'
               : state.phase === 'kick'
@@ -2426,7 +2426,7 @@ export function renderPaperSoccer(container, onClose) {
     ctx.font = '16px "Press Start 2P", monospace';
     ctx.textAlign = 'center';
     ctx.fillStyle = AMBER;
-    ctx.fillText('⚽ GOAL! ⚽', 0, -14);
+    ctx.fillText('GOAL', 0, -14);
 
     ctx.font = '10px "Press Start 2P", monospace';
     ctx.fillStyle = celebration.scorer === 'red' ? RED : BLUE;

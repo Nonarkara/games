@@ -21,7 +21,7 @@ export function resolveRPS(player, cpu) {
   return 'lose';
 }
 
-export const RPS_ICONS = { rock: '✊', paper: '✋', scissors: '✌' };
+export const RPS_ICONS = { rock: 'R', paper: 'P', scissors: 'S' };
 
 /**
  * Frequency-prediction AI: tracks the player's move history and counters

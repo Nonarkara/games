@@ -23,7 +23,7 @@ export const decks = [
   {
     id: 'artifacts',
     title: 'Artifacts',
-    icon: '🕹',
+    icon: 'ART',
     color: 'c-labs',
     blurb: 'The objects. Plastic, batteries, and moving parts.',
     questions: [
@@ -196,7 +196,7 @@ export const decks = [
   {
     id: 'screen',
     title: 'Screen',
-    icon: '📼',
+    icon: 'SCR',
     color: 'c-math',
     blurb: 'Film, TV, and everything on a Saturday morning.',
     questions: [
@@ -369,7 +369,7 @@ export const decks = [
   {
     id: 'sound',
     title: 'Sound',
-    icon: '📻',
+    icon: 'SND',
     color: 'c-music',
     blurb: 'Grunge, Britpop, boy bands, and the death of the CD single.',
     questions: [
@@ -542,7 +542,7 @@ export const decks = [
   {
     id: 'pixels',
     title: 'Pixels',
-    icon: '🎮',
+    icon: 'PIX',
     color: 'c-arcade',
     blurb: 'Consoles, arcades, and the four-player split screen.',
     questions: [
@@ -715,7 +715,7 @@ export const decks = [
   {
     id: 'dialup',
     title: 'Dial-Up',
-    icon: '💾',
+    icon: 'NET',
     color: 'c-science',
     blurb: 'The web before it knew what it was doing.',
     questions: [
@@ -888,7 +888,7 @@ export const decks = [
   {
     id: 'playground',
     title: 'Playground',
-    icon: '🍬',
+    icon: 'TOY',
     color: 'c-kids',
     blurb: 'Toys, snacks, fads, and everything the school banned.',
     questions: [

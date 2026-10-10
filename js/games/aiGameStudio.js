@@ -9,9 +9,9 @@ import { escapeHtml } from '../scoreGate.js';
 
 export function renderAIGameStudio(container, onClose) {
   let promptText = "A cyber runner dodging red laser beams and collecting golden stars";
-  let playerSprite = "🐱";
-  let obstacleSprite = "🔥";
-  let itemSprite = "⭐";
+  let playerSprite = "CAT";
+  let obstacleSprite = "BEAM";
+  let itemSprite = "STAR";
   let gameSpeed = 5;
 
   let isPlaying = false;
@@ -21,10 +21,10 @@ export function renderAIGameStudio(container, onClose) {
   let kb = null;
 
   const presets = [
-    { title: "🐱 Cyber Cat Runner", prompt: "A neon cat dodging falling fireballs", player: "🐱", obs: "🔥", item: "🐟" },
-    { title: "🥷 Ninja Laser Dodge", prompt: "A stealth ninja dodging laser traps", player: "🥷", obs: "⚡", item: "💎" },
-    { title: "🚀 Astro Rocket Collector", prompt: "A rocket dodging space asteroids", player: "🚀", obs: "☄️", item: "⭐" },
-    { title: "🐸 Bouncy Frog Safari", prompt: "A frog leaping past spikes for flies", player: "🐸", obs: "🌵", item: "🦟" }
+    { title: "Cyber Cat Runner", prompt: "A neon cat dodging falling fireballs", player: "CAT", obs: "FIRE", item: "FISH" },
+    { title: "Ninja Laser Dodge", prompt: "A stealth ninja dodging laser traps", player: "NINJA", obs: "BEAM", item: "GEM" },
+    { title: "Astro Rocket Collector", prompt: "A rocket dodging space asteroids", player: "SHIP", obs: "ROCK", item: "STAR" },
+    { title: "Bouncy Frog Safari", prompt: "A frog leaping past spikes for flies", player: "FROG", obs: "SPIKE", item: "FLY" }
   ];
 
   function fullCleanup() {
@@ -53,12 +53,12 @@ export function renderAIGameStudio(container, onClose) {
         ${!isPlaying ? `
           <div class="bg-zinc-950 border border-amber-500/40 p-5 mb-6">
             <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
-              ✨ PROMPT YOUR CUSTOM GAME IDEA:
+              PROMPT YOUR CUSTOM GAME IDEA:
             </label>
             <div class="flex flex-col sm:flex-row gap-2 mb-4">
               <input id="ai-prompt-input" type="text" value="${safePrompt}" class="w-full bg-black border border-amber-500/60 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400" placeholder="e.g. A cyber knight dodging falling meteors..." />
               <button id="ai-generate-btn" class="w-full sm:w-auto px-4 sm:px-6 py-3 bg-amber-600 hover:bg-amber-500 text-black font-black text-xs uppercase whitespace-nowrap shadow-lg">
-                ⚡ BUILD & PLAY
+                BUILD AND PLAY
               </button>
             </div>
 
@@ -94,7 +94,7 @@ export function renderAIGameStudio(container, onClose) {
           <div class="flex flex-wrap justify-between items-center gap-3 bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>SCORE: <span id="ai-score" class="text-white text-base">0</span></div>
             <div>HIGH SCORE: <span id="ai-high" class="text-amber-400 text-base">${high}</span></div>
-            <button id="ai-stop-btn" class="px-3 py-1 bg-zinc-900 border border-amber-500/40 text-amber-400 hover:bg-amber-900 text-xs">⚙️ REDESIGN</button>
+            <button id="ai-stop-btn" class="go-choice bg-zinc-900 border border-amber-500/40 text-amber-400 hover:bg-amber-900 text-xs">REDESIGN</button>
           </div>
 
           <div class="relative flex justify-center mb-4">
@@ -103,7 +103,7 @@ export function renderAIGameStudio(container, onClose) {
 
           <div class="flex justify-center">
             <button id="ai-jump-btn" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-black text-lg tracking-wider border border-amber-400">
-              🚀 JUMP / LEAP (SPACEBAR)
+              <span class="hint-touch">JUMP</span><span class="hint-keys">SPACEBAR</span>
             </button>
           </div>
         `}
@@ -118,9 +118,9 @@ export function renderAIGameStudio(container, onClose) {
     if (!isPlaying) {
       container.querySelector('#ai-generate-btn').onclick = () => {
         promptText = container.querySelector('#ai-prompt-input').value;
-        playerSprite = container.querySelector('#param-player').value || "🐱";
-        obstacleSprite = container.querySelector('#param-obs').value || "🔥";
-        itemSprite = container.querySelector('#param-item').value || "⭐";
+        playerSprite = container.querySelector('#param-player').value || "CAT";
+        obstacleSprite = container.querySelector('#param-obs').value || "BEAM";
+        itemSprite = container.querySelector('#param-item').value || "STAR";
         soundFx.playWin();
         isPlaying = true;
         renderUI();

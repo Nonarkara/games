@@ -288,7 +288,7 @@ export function renderReflexMatrix(container, onClose) {
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>SCORE: <span class="text-white text-base">${score}</span></div>
             <div>WAVE: <span class="text-amber-400 text-base">${wave}</span></div>
-            <div>LIVES: <span class="text-red-500 text-base">${'❤️'.repeat(Math.max(0,lives))}</span></div>
+            <div>LIVES: <span class="text-red-500 text-base">${'●'.repeat(Math.max(0, lives))}${'○'.repeat(Math.max(0, 3 - lives))}</span></div>
           </div>
 
           <div class="grid gap-1.5 mx-auto" style="grid-template-columns:repeat(${GRID_N},1fr);max-width:360px">
@@ -598,7 +598,7 @@ export function renderSlide2048(container, onClose) {
             `).join('')}
           </div>
 
-          <p class="text-[10px] text-zinc-500 text-center">ARROW KEYS OR SWIPE TO MERGE TILES</p>
+          <p class="text-[10px] text-zinc-500 text-center"><span class="hint-keys">ARROW KEYS TO MERGE TILES</span><span class="hint-touch">SWIPE TO MERGE TILES</span></p>
         </div>
       `;
 

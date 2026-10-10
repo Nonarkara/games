@@ -402,6 +402,18 @@ function familyFor(gameId) {
   return 'generic';
 }
 
+/**
+ * A first-ever run is a personal best only when the score is above zero.
+ * Ties and zeros are not announced as a best.
+ */
+export function isNewPersonalBest(previous, score) {
+  const n = Number(score);
+  if (!Number.isFinite(n) || n <= 0) return false;
+  const prev = Number(previous);
+  const prior = Number.isFinite(prev) ? prev : 0;
+  return n > prior;
+}
+
 function bandKey(score, cuts) {
   const n = Number(score);
   if (!Number.isFinite(n)) return 'warming';

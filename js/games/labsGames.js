@@ -25,7 +25,7 @@ const trivias = [
     id: 'non-reading',
     title: 'Non-Reading Room',
     subtitle: 'Books, authors, ideas — the canon that built the man',
-    icon: '📚',
+    icon: 'READ',
     color: 'c-language',
     questions: [
       { q: "What is Dr Non's favorite Murakami non-fiction?",
@@ -58,7 +58,7 @@ const trivias = [
     id: 'non-bike',
     title: 'Bike Life',
     subtitle: 'Two wheels, 24 km/h, Shanghai',
-    icon: '🚲',
+    icon: 'RIDE',
     color: 'c-arcade',
     questions: [
       { q: "What folding bike does Dr Non ride?",
@@ -91,7 +91,7 @@ const trivias = [
     id: 'non-shanghai',
     title: 'Shanghai Stories',
     subtitle: 'Three years, a thousand horn honks',
-    icon: '🌃',
+    icon: 'CITY',
     color: 'c-kids',
     questions: [
       { q: "When did Dr Non first arrive in Shanghai?",
@@ -124,7 +124,7 @@ const trivias = [
     id: 'non-thinkers',
     title: 'Philosophers\' Table',
     subtitle: 'Kant, Hume, Confucius, the lot',
-    icon: '🧠',
+    icon: 'MIND',
     color: 'c-science',
     questions: [
       { q: "Whose enlightenment quote: 'men emerge from their self-imposed immaturity'?",
@@ -157,7 +157,7 @@ const trivias = [
     id: 'non-sound',
     title: 'Sound & Frequency',
     subtitle: 'Podcasts, ukulele, what he listens to while biking',
-    icon: '🎧',
+    icon: 'SOUND',
     color: 'c-music',
     questions: [
       { q: "Two philosophy podcasts Dr Non listens to:",

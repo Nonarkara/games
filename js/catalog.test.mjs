@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { gameIdFromSearch, gameQuery } from './deepLink.js';
 
 const source = readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const catalog = source.split('const gamesCatalog = [')[1].split('\n];')[0];
@@ -29,5 +30,16 @@ for (const game of entries) {
   assert.ok(['beginner', 'intermediate', 'pro'].includes(difficulties[game.id]), `${game.id} difficulty must be beginner, intermediate, or pro`);
 }
 assert.equal(Object.keys(difficulties).length, entries.length, 'difficulty map must cover every cartridge exactly once');
+
+// Every playable cartridge has a shareable ?game= URL, and the sitemap lists it.
+const sitemap = readFileSync(new URL('../sitemap.xml', import.meta.url), 'utf8');
+assert.match(source, /history\.pushState/);
+const playable = entries.filter(entry => entry.id !== 'about-dr-non');
+for (const game of playable) {
+  assert.equal(gameIdFromSearch(gameQuery(game.id)), game.id, `${game.id} deep link must round-trip`);
+  assert.match(sitemap, new RegExp(`game=${game.id}</loc>`), `${game.id} missing from sitemap`);
+}
+assert.equal(gameIdFromSearch(''), null);
+assert.equal(gameIdFromSearch('?game=../etc'), null);
 
 console.log(`catalog copy: ${entries.length - 1} playable descriptions are short, action-led, and jargon-free`);

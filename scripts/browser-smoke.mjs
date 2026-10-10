@@ -1,7 +1,21 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
+// Node 22 has a global WebSocket. Node 20 only has it behind this flag.
+if (typeof WebSocket !== 'function') {
+  if (process.execArgv.some(arg => arg.includes('experimental-websocket'))) {
+    console.error('WebSocket is missing even with --experimental-websocket');
+    process.exit(1);
+  }
+  const child = spawnSync(
+    process.execPath,
+    ['--experimental-websocket', ...process.execArgv, ...process.argv.slice(1)],
+    { stdio: 'inherit' }
+  );
+  process.exit(child.status ?? 1);
+}
 
 const chromePath = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const baseUrl = process.env.SMOKE_URL || 'http://127.0.0.1:3000';
@@ -153,13 +167,22 @@ try {
   const briefing = await main.evaluate(`(() => {
     document.querySelector('[data-wing="arcade"]').click();
     document.querySelector('[data-game="arcade-breakout"]').click();
+    const exits = [...document.querySelectorAll('button')].filter(b => {
+      if (b.textContent.replace(/\\s+/g, ' ').trim() !== 'EXIT') return false;
+      const s = getComputedStyle(b);
+      const r = b.getBoundingClientRect();
+      return s.display !== 'none' && s.visibility !== 'hidden' && r.width >= 1 && r.height >= 1;
+    }).length;
     return {
       title: document.querySelector('#briefing-title')?.textContent,
       play: document.querySelector('.briefing-play')?.textContent,
-      hidden: document.querySelector('#game-modal-overlay')?.classList.contains('hidden')
+      hidden: document.querySelector('#game-modal-overlay')?.classList.contains('hidden'),
+      closes: document.querySelectorAll('.briefing-close').length,
+      exits
     };
   })()`);
   if (briefing.title !== 'Breakout 1976' || briefing.hidden) throw new Error('Breakout briefing did not open');
+  if (briefing.closes !== 0 || briefing.exits !== 1) throw new Error(`briefing should keep only the shell EXIT: ${JSON.stringify(briefing)}`);
   await main.screenshot(screenshots.briefing);
 
   await main.evaluate(`document.querySelector('.briefing-play').click()`);
@@ -269,18 +292,37 @@ try {
         const row = document.querySelector('.select-row[data-game="${id}"]');
         if (!row) return { found: false };
         row.click();
+        const exits = [...document.querySelectorAll('button')].filter(b => {
+          if (b.textContent.replace(/\\s+/g, ' ').trim() !== 'EXIT') return false;
+          const s = getComputedStyle(b);
+          const r = b.getBoundingClientRect();
+          return s.display !== 'none' && s.visibility !== 'hidden' && r.width >= 1 && r.height >= 1;
+        }).length;
         return {
           found: true,
           title: document.querySelector('#briefing-title')?.textContent || '',
           hasPractice: Boolean(document.querySelector('.briefing-step:nth-of-type(2) p')?.textContent),
           hasCaveat: /not promised/i.test(document.querySelector('.briefing-caveat')?.textContent || ''),
-          hasStart: Boolean(document.querySelector('.briefing-play'))
+          hasStart: Boolean(document.querySelector('.briefing-play')),
+          // The briefing uses the same shell as play, so a stage that still
+          // holds the briefing is not "already in play".
+          inPlay: Boolean(document.querySelector('.game-session-stage')) && !document.querySelector('.brain-briefing'),
+          closes: document.querySelectorAll('.briefing-close').length,
+          exits
         };
       })()`);
-      if (!opened.found || !opened.title || !opened.hasPractice || !opened.hasCaveat || !opened.hasStart) {
-        throw new Error(`${id} has an incomplete briefing: ${JSON.stringify(opened)}`);
+      if (!opened.found) throw new Error(`${id} row missing`);
+      // A game already played in this profile opens straight in. First opens
+      // still have to clear the briefing gate, and that gate has no CLOSE of its own.
+      if (!opened.inPlay) {
+        if (!opened.title || !opened.hasPractice || !opened.hasCaveat || !opened.hasStart) {
+          throw new Error(`${id} has an incomplete briefing: ${JSON.stringify(opened)}`);
+        }
+        if (opened.closes !== 0 || opened.exits !== 1) {
+          throw new Error(`${id} briefing should keep only the shell EXIT: ${JSON.stringify(opened)}`);
+        }
+        await page.evaluate(`document.querySelector('.briefing-play').click()`);
       }
-      await page.evaluate(`document.querySelector('.briefing-play').click()`);
       await delay(extraDelay);
       return page.evaluate(`(() => {
         const stage = document.querySelector('.game-session-stage');
@@ -296,11 +338,24 @@ try {
             right: Math.round(rect.right),
             width: Math.round(rect.width)
           })) : [];
+        const exits = [...document.querySelectorAll('button')].filter(b => {
+          if (b.textContent.replace(/\\s+/g, ' ').trim() !== 'EXIT') return false;
+          const s = getComputedStyle(b);
+          const r = b.getBoundingClientRect();
+          return s.display !== 'none' && s.visibility !== 'hidden' && r.width >= 1 && r.height >= 1;
+        }).length;
+        const mineCells = [...document.querySelectorAll('.mine-cell')].map(el => {
+          const r = el.getBoundingClientRect();
+          return Math.min(r.width, r.height);
+        });
         return {
           mounted: Boolean(stage?.firstElementChild),
           height: stage?.firstElementChild?.getBoundingClientRect().height || 0,
           overflow: stage ? stage.scrollWidth - stage.clientWidth : 999,
-          viewport: innerWidth
+          viewport: innerWidth,
+          exits,
+          mineCount: mineCells.length,
+          mineMin: mineCells.length ? Math.min(...mineCells) : null
         , offenders };
       })()`);
     });
@@ -309,6 +364,12 @@ try {
     }
     if (!result.mounted || result.height < 1) throw new Error(`${id} mounted an empty play surface`);
     if (result.overflow > 2) throw new Error(`${id} overflows its ${viewportWidth}px stage by ${result.overflow}px: ${JSON.stringify(result.offenders)}`);
+    if (id === 'cyber-tetris' && result.exits !== 1) {
+      throw new Error(`cyber-tetris shows ${result.exits} EXIT buttons`);
+    }
+    if (id === 'minesweeper' && (result.mineCount < 64 || result.mineMin < 40)) {
+      throw new Error(`minesweeper cells are ${result.mineMin}px across ${result.mineCount} cells`);
+    }
     catalogSweep.push(id);
     if (['arcade-pong', 'dual-n-back', 'cyber-tetris', 'math-safari', 'blow-cartridge'].includes(id)) {
       sampledGames.push({ id, mounted: result.mounted, overflow: result.overflow });
