@@ -729,6 +729,13 @@ class NgsApp {
         try { AnalyticsService.log(game.id, game.category, sessionScore, durationMs); } catch (e) { /* ignore */ }
       }
       if (this._stageObserver) { this._stageObserver.disconnect(); this._stageObserver = null; }
+      try {
+        container._beforeClose?.();
+        container.querySelector('.game-session-stage')?._beforeClose?.();
+      } catch (e) { /* the shell exit still closes */ }
+      container._beforeClose = null;
+      const stageEl = container.querySelector('.game-session-stage');
+      if (stageEl) stageEl._beforeClose = null;
       session.teardown();
       overlay.classList.add('hidden');
       container.innerHTML = '';
@@ -762,11 +769,27 @@ class NgsApp {
     const renderBriefing = () => {
       const preview = previewHtmlFor(game);
       container.innerHTML = `
+        <div class="game-session-shell route-${game.wing}">
+        <header class="game-session-bar">
+          <div><b>${game.code}</b><span class="game-session-title">${game.title}</span></div>
+          <details>
+            <summary>BRAIN NOTE</summary>
+            <div>
+              <b>${guide.label}</b>
+              <p><span>HOW TO PLAY</span> ${game.desc}</p>
+              <p><span>IN THE ROUND</span> ${guide.practice}</p>
+              <p><span>WHY</span> ${guide.why}</p>
+              <p>${guide.tip}</p>
+              <small>${TRANSFER_CAVEAT}</small>
+            </div>
+          </details>
+          <button type="button">EXIT</button>
+        </header>
+        <div class="game-session-stage">
         <article class="brain-briefing route-${game.wing}" aria-labelledby="briefing-title">
           <header class="briefing-header">
             <div class="briefing-code">${game.code}</div>
             <div><p>${game.wing.toUpperCase()} · ${guide.minutes} · ${game.age}</p><h2 id="briefing-title">${game.title}</h2></div>
-            <button class="briefing-close" type="button" aria-label="Close game">CLOSE</button>
           </header>
           <div class="briefing-grid">
             <div class="briefing-primary">
@@ -789,9 +812,11 @@ class NgsApp {
               <button class="briefing-skip" type="button">SKIP — I KNOW THIS ONE</button>
             </aside>
           </div>
-        </article>`;
+        </article>
+        </div>
+        </div>`;
       scrubIconEmoji(container);
-      container.querySelector('.briefing-close').onclick = closeGame;
+      container.querySelector('.game-session-bar > button').onclick = closeGame;
       container.querySelector('.briefing-play').onclick = enterPlay;
       // Keyboard entry point lands on PLAY, inside the dialog.
       container.querySelector('.briefing-play').focus();

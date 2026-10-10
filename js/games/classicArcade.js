@@ -46,8 +46,8 @@ export function renderCyberTetris(container, onClose) {
           </div>
         </div>
         <div class="oss-game__controls">
-          <span>ARROWS MOVE · UP ROTATE · SPACE HARD DROP</span>
-          <button type="button" id="close-game-btn">EXIT</button>
+          <span class="hint-keys">ARROWS MOVE · UP ROTATE · SPACE HARD DROP</span>
+          <span class="hint-touch">THE PAD MOVES, ROTATES, AND DROPS</span>
         </div>
       </section>
     `;
@@ -245,12 +245,12 @@ export function renderCyberTetris(container, onClose) {
     document.addEventListener('visibilitychange', onVis);
     releaseVisibility = () => document.removeEventListener('visibilitychange', onVis);
 
-    const closeBtn = container.querySelector('#close-game-btn');
-    closeBtn.onclick = () => {
+    // The shell EXIT is the only close control. Teardown still has to stop
+    // the well and the visibility listener, which sit on document.
+    container._beforeClose = () => {
       stopLoop();
       kb.destroy();
-      releaseVisibility();
-      onClose();
+      if (releaseVisibility) releaseVisibility();
     };
   }
 }

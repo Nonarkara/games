@@ -309,7 +309,8 @@ export function renderMinesweeper(container, onClose) {
             <div>SAFE: <span class="text-white">${revealedCount}/${safeTiles}</span></div>
           </div>
 
-          <div class="grid grid-cols-8 gap-1 p-3 bg-zinc-950 border border-amber-500/40 mb-4">
+          <div class="mine-scroll">
+          <div class="mine-board" role="grid" aria-label="Mine field">
             ${grid.map((row, r) => row.map((cell, c) => {
               let content = '';
               let cls = 'mine-cell bg-zinc-900 border-zinc-700 hover:bg-amber-950 text-zinc-400';
@@ -320,8 +321,9 @@ export function renderMinesweeper(container, onClose) {
               } else if (cell.flagged) {
                 content = 'F'; cls = 'bg-zinc-900 border-amber-500/50';
               }
-              return `<button class="${cls} mine-cell aspect-square flex items-center justify-center font-bold text-sm border transition" style="touch-action:manipulation" data-r="${r}" data-c="${c}">${content}</button>`;
+              return `<button class="${cls} mine-cell flex items-center justify-center font-bold text-sm border transition" style="touch-action:manipulation" data-r="${r}" data-c="${c}">${content}</button>`;
             }).join('')).join('')}
+          </div>
           </div>
 
           <p class="text-[10px] text-zinc-500 text-center"><span class="hint-keys">LEFT-CLICK REVEALS · RIGHT-CLICK FLAGS</span><span class="hint-touch">TAP REVEALS · LONG-PRESS FLAGS</span></p>
