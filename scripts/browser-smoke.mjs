@@ -274,13 +274,19 @@ try {
           title: document.querySelector('#briefing-title')?.textContent || '',
           hasPractice: Boolean(document.querySelector('.briefing-step:nth-of-type(2) p')?.textContent),
           hasCaveat: /not promised/i.test(document.querySelector('.briefing-caveat')?.textContent || ''),
-          hasStart: Boolean(document.querySelector('.briefing-play'))
+          hasStart: Boolean(document.querySelector('.briefing-play')),
+          inPlay: Boolean(document.querySelector('.game-session-stage'))
         };
       })()`);
-      if (!opened.found || !opened.title || !opened.hasPractice || !opened.hasCaveat || !opened.hasStart) {
-        throw new Error(`${id} has an incomplete briefing: ${JSON.stringify(opened)}`);
+      if (!opened.found) throw new Error(`${id} row missing`);
+      // A game already played in this profile opens straight in. First opens
+      // still have to clear the briefing gate.
+      if (!opened.inPlay) {
+        if (!opened.title || !opened.hasPractice || !opened.hasCaveat || !opened.hasStart) {
+          throw new Error(`${id} has an incomplete briefing: ${JSON.stringify(opened)}`);
+        }
+        await page.evaluate(`document.querySelector('.briefing-play').click()`);
       }
-      await page.evaluate(`document.querySelector('.briefing-play').click()`);
       await delay(extraDelay);
       return page.evaluate(`(() => {
         const stage = document.querySelector('.game-session-stage');

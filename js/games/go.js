@@ -445,9 +445,9 @@ export function renderGo(container, onClose) {
             </svg>
           </div>
           <div class="flex flex-wrap gap-2 justify-center mb-2">
-            <button data-act="pass" class="px-3 py-2 border border-amber-500 text-amber-400 text-xs font-bold">PASS</button>
-            <button data-act="undo" class="px-3 py-2 border border-amber-500/40 text-amber-500/70 text-xs font-bold">UNDO</button>
-            <button data-act="resign" class="px-3 py-2 border border-red-500/40 text-red-400 text-xs font-bold">RESIGN</button>
+            <button data-act="pass" class="go-choice border border-amber-500 text-amber-400 text-xs font-bold">PASS</button>
+            <button data-act="undo" class="go-choice border border-amber-500/40 text-amber-500/70 text-xs font-bold">UNDO</button>
+            <button data-act="resign" class="go-choice border border-red-500/40 text-red-400 text-xs font-bold">RESIGN</button>
           </div>
           <p class="mt-2 text-[11px] leading-relaxed text-zinc-400 text-center">
             ${LEVEL === 'beginner'

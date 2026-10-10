@@ -3361,6 +3361,7 @@ html[data-input="keys"] .hint-touch { display: none; }
   overflow-x: auto;
   max-width: 100%;
 }
+.game-session-stage .flex-wrap { flex-wrap: wrap; max-width: 100%; min-width: 0; }
 .game-session-stage .overflow-x-auto > .flex {
   flex-wrap: nowrap;
   width: max-content;
@@ -3369,7 +3370,7 @@ html[data-input="keys"] .hint-touch { display: none; }
 }
 @media (max-width: 520px) {
   .game-session-stage:has(.sdk-board) { padding-left: 2px; padding-right: 2px; }
-  .game-session-stage .sdk-board { width: 100%; max-width: none; }
+  .game-session-stage .sdk-board { width: calc(100% + 16px); max-width: none; margin-left: -8px; margin-right: -8px; }
   .sdk-cell { min-height: 40px; aspect-ratio: auto; font-size: 16px; }
 }
 

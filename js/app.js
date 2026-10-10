@@ -836,7 +836,7 @@ class NgsApp {
           });
         }
         stage.querySelectorAll('p, div').forEach(el => {
-          if (el.querySelector('div, p, button, canvas, svg, input')) return;
+          if (el.querySelector('div, p, button, canvas, svg, input, .hint-keys, .hint-touch')) return;
           if (el.closest('.chess-board, .sdk-board, .chess-meta, .axiom-result-card, .host-question, .host-fact, .labs-option')) return;
           const cls = typeof el.className === 'string' ? el.className : '';
           if (!/text-\[(9|10|11)px\]|text-zinc-[45]00|text-amber-500/.test(cls)) return;

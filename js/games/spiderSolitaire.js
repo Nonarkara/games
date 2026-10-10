@@ -356,7 +356,7 @@ export function renderSpiderSolitaire(container, onClose) {
           </div>
           <div class="flex flex-wrap gap-2 mb-4 items-center">
             <div class="mr-4">${stockBtn}</div>
-            <div class="flex gap-1">${foundations}</div>
+            <div class="flex flex-wrap gap-1" style="width:100%;min-width:0">${foundations}</div>
           </div>
           <div class="overflow-x-auto pb-4">
             <div class="flex flex-nowrap items-start pl-0">${cols}</div>
