@@ -87,7 +87,7 @@ export function renderBlowIntoTheCartridge(container, onClose) {
             </button>`;
           }).join('')}
           <button class="labs-card labs-card--mixed" data-deck="mixed">
-            <span class="labs-card-icon">🎲</span>
+            <span class="labs-card-icon">ALL</span>
             <span class="labs-card-title">Everything, shuffled</span>
             <span class="labs-card-sub">All six decks in one run. This is the all-night setting.</span>
             <span class="labs-card-meta">0 · ${left} left of ${TOTAL}</span>
@@ -96,7 +96,7 @@ export function renderBlowIntoTheCartridge(container, onClose) {
 
         <div class="host-settings">
           <button class="host-timer-btn" id="host-timer">
-            ⏱ ${secs() ? `${secs()}s per question` : 'No timer — reveal manually'}
+            ${secs() ? `${secs()}s per question` : 'No timer — reveal manually'}
           </button>
           ${state.asked.size ? `<button class="labs-back" id="host-reset">↺ reset the ${state.asked.size} already asked</button>` : ''}
         </div>
@@ -124,7 +124,7 @@ export function renderBlowIntoTheCartridge(container, onClose) {
   function start(deckId) {
     soundFx.playClick();
     const chosen = deckId === 'mixed'
-      ? { id: 'mixed', title: 'Everything', icon: '🎲', color: 'c-labs' }
+      ? { id: 'mixed', title: 'Everything', icon: 'ALL', color: 'c-labs' }
       : decks.find(d => d.id === deckId);
     if (!chosen) return;
 
@@ -175,7 +175,7 @@ export function renderBlowIntoTheCartridge(container, onClose) {
 
         <div class="labs-foot">
           <button class="labs-back" id="host-hub">← decks</button>
-          <span class="labs-foot-meta" id="host-hint">${t ? 'Tap or SPACE to reveal early' : 'Tap or SPACE to reveal'}</span>
+          <span class="labs-foot-meta" id="host-hint"><span class="hint-keys">${t ? 'SPACE to reveal early' : 'SPACE to reveal'}</span><span class="hint-touch">${t ? 'Tap to reveal early' : 'Tap to reveal'}</span></span>
         </div>
       </div>`;
 
@@ -217,8 +217,8 @@ export function renderBlowIntoTheCartridge(container, onClose) {
     fact.hidden = false;
 
     const hint = $('#host-hint', container);
-    if (hint) hint.textContent = state.queue.length
-      ? `Tap or SPACE for the next one · ${state.queue.length} left`
+    if (hint) hint.innerHTML = state.queue.length
+      ? `<span class="hint-keys">SPACE for the next one · ${state.queue.length} left</span><span class="hint-touch">Tap for the next one · ${state.queue.length} left</span>`
       : 'Last one in this deck';
   }
 

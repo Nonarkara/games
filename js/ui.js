@@ -7,7 +7,7 @@
  */
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
-import { explainScore } from './scoreReadouts.js';
+import { explainScore, isNewPersonalBest } from './scoreReadouts.js';
 import { escapeHtml, sanitizeBoard } from './scoreGate.js';
 
 export class ScopedKeyboard {
@@ -110,8 +110,9 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
 
   let isNewHigh = false;
   if (gameId !== null && score !== null) {
-    const res = StorageService.updateHighScore(gameId, score);
-    isNewHigh = res.isNewHigh;
+    const previous = StorageService.getHighScore(gameId);
+    isNewHigh = isNewPersonalBest(previous, score);
+    StorageService.updateHighScore(gameId, score);
   }
   // soundFx has no generic play(name) dispatcher — call the method directly.
   soundFx[tone === 'win' ? 'playWin' : 'playGameOver']();
@@ -139,7 +140,6 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   overlay.className = 'axiom-result-overlay';
   overlay.innerHTML = `
     <div class="axiom-result-card axiom-result-${tone}" role="dialog" aria-modal="true">
-      <div class="axiom-result-glyph">${tone === 'win' ? '★' : '✓'}</div>
       <h3 class="axiom-result-title">${title}</h3>
       ${message ? `<p class="axiom-result-msg">${message}</p>` : ''}
       ${score !== null ? `<div class="axiom-result-score"><span class="axiom-result-score-label">FINAL SCORE</span><span class="axiom-result-score-value">${score}</span></div>` : ''}
@@ -151,7 +151,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
           <p class="axiom-result-readout-feel">${readout.feel}</p>
           <p class="axiom-result-readout-tip"><span>NEXT</span> ${readout.tip}</p>
         </aside>` : ''}
-      ${isNewHigh ? `<div class="axiom-result-high">▲ NEW HIGH SCORE</div>` : ''}
+      ${isNewHigh ? `<div class="axiom-result-high">NEW BEST</div>` : ''}
       ${qualifies ? `
         <form class="axiom-initials" id="initials-form">
           <label class="axiom-initials-label" for="initials-input">YOU MADE THE BOARD — SIGN IT</label>
@@ -163,8 +163,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
         </form>` : ''}
       <div id="result-board">${qualifies ? '' : boardHtml()}</div>
       <div class="axiom-result-actions">
-        ${onRestart ? `<button class="axiom-btn axiom-btn-primary" id="result-restart">▶ PLAY AGAIN</button>` : ''}
-        <button class="axiom-btn axiom-btn-ghost" id="result-close">✕ CLOSE</button>
+        ${onRestart ? `<button class="axiom-btn axiom-btn-primary" id="result-restart">PLAY AGAIN</button>` : ''}
       </div>
     </div>`;
   container.appendChild(overlay);
@@ -228,8 +227,8 @@ export function attachReady(root, onGo) {
   const gate = document.createElement('button');
   gate.type = 'button';
   gate.className = 'ngs-ready-gate';
-  gate.textContent = 'TAP OR PRESS ANY KEY';
-  gate.setAttribute('aria-label', 'Tap or press any key to start this round');
+  gate.innerHTML = '<span class="hint-touch">TAP TO START</span><span class="hint-keys">PRESS ANY KEY</span>';
+  gate.setAttribute('aria-label', 'Start this round');
 
   // Most gated rounds are keyboard-driven (P/L, arrows, space). A click-only
   // gate stranded those players: their first keypress went nowhere and the

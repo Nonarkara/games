@@ -202,7 +202,7 @@ export function previewHtmlFor(game) {
       <p class="pv-cap">Read the bounce — be there before it arrives</p>`,
     pacman: `
       <div class="pv-scene pv-pacman" aria-hidden="true">
-        <span class="pv-pac">◉</span><span class="pv-dots">• • •</span><span class="pv-ghost">👾</span>
+        <span class="pv-pac">◉</span><span class="pv-dots">• • •</span><span class="pv-ghost">GH</span>
       </div>
       <p class="pv-cap">Eat the dots — don’t get eaten</p>`,
     math: `
@@ -308,7 +308,7 @@ export function previewHtmlFor(game) {
       <p class="pv-cap">Grow without biting your tail</p>`,
     shooter: `
       <div class="pv-scene pv-shooter" aria-hidden="true">
-        <span class="pv-inv">👾 👾</span><span class="pv-laser">↑</span><span class="pv-ship">▲</span>
+        <span class="pv-inv">GH GH</span><span class="pv-laser">↑</span><span class="pv-ship">▲</span>
       </div>
       <p class="pv-cap">Lead the target — shoot where it will be</p>`,
     asteroids: `
@@ -318,7 +318,7 @@ export function previewHtmlFor(game) {
       <p class="pv-cap">Thrust in taps — rocks split when hit</p>`,
     frogger: `
       <div class="pv-scene pv-frogger" aria-hidden="true">
-        <span>▬</span><span class="pv-frog">🐸</span><span>▬ ▬</span>
+        <span>▬</span><span class="pv-frog">FR</span><span>▬ ▬</span>
       </div>
       <p class="pv-cap">Read the gaps — cross before they close</p>`,
     soccer: `
@@ -348,7 +348,7 @@ export function previewHtmlFor(game) {
       <p class="pv-cap">Hear it — name the interval or code</p>`,
     geo: `
       <div class="pv-scene pv-geo" aria-hidden="true">
-        <span>🇹🇭</span><em>→</em><span>Bangkok</span>
+        <span>TH</span><em>→</em><span>Bangkok</span>
       </div>
       <p class="pv-cap">Country → capital — ten quick rounds</p>`,
     periodic: `
@@ -363,12 +363,12 @@ export function previewHtmlFor(game) {
       <p class="pv-cap">Guess the code — colour + place hints each try</p>`,
     match: `
       <div class="pv-scene pv-match" aria-hidden="true">
-        <span class="pv-card">?</span><span class="pv-card">🐯</span><span class="pv-card">?</span><span class="pv-card">🐯</span>
+        <span class="pv-card">?</span><span class="pv-card">TG</span><span class="pv-card">?</span><span class="pv-card">TG</span>
       </div>
       <p class="pv-cap">Flip two — match the pairs</p>`,
     flap: `
       <div class="pv-scene pv-flap" aria-hidden="true">
-        <span class="pv-bird">🐦</span><span class="pv-pipe">▐</span><span class="pv-pipe">▐</span>
+        <span class="pv-bird">B</span><span class="pv-pipe">▐</span><span class="pv-pipe">▐</span>
       </div>
       <p class="pv-cap">Tap to fly — don’t hit the pipes</p>`,
     merge: `

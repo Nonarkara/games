@@ -286,7 +286,7 @@ export function renderCyberPacman(container, onClose) {
           <div>HIGH: <span id="pac-high" class="text-amber-400 font-extrabold text-base">${high}</span></div>
         </div>
 
-        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">Arrow keys or the pad below to turn · eat every dot · avoid ghosts, or eat them during ⚡ power mode</div>
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3"><span class="hint-keys">Arrow keys to turn</span><span class="hint-touch">The pad below to turn</span> · eat every dot · avoid ghosts, or eat them during power mode</div>
 
         <div class="relative flex justify-center mb-4">
           <canvas id="pac-canvas" width="360" height="360" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:360px"></canvas>
@@ -555,7 +555,7 @@ export function renderRomLoader(container, onClose) {
       </div>
 
       <div class="bg-zinc-950 border border-dashed border-amber-500/60 p-8 text-center mb-6">
-        <div class="text-4xl mb-3">📁</div>
+        <div class="text-sm font-black tracking-widest mb-3">FILE</div>
         <h3 class="text-lg font-bold text-amber-400 mb-2">Select a Local Game File</h3>
         <p class="text-xs text-zinc-400 mb-4">Supports <code>.nes</code>, <code>.gb</code>, <code>.sfc</code>, <code>.swf</code>. This tool reads file metadata only — it does not run emulation.</p>
         <input id="rom-file-input" type="file" accept=".nes,.gb,.sfc,.swf" class="hidden" />

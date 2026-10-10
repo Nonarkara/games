@@ -326,16 +326,16 @@ export function renderSpiderSolitaire(container, onClose) {
         ? '<span class="text-amber-500/40 text-xs">EMPTY</span>'
         : `<span class="text-amber-400 text-xs font-bold">${state.stock.length}</span>`;
       const stockBtn = state.stock.length === 0
-        ? `<div class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-amber-500/30 bg-zinc-900/30 flex items-center justify-center text-amber-500/30 text-xs">EMPTY</div>`
+        ? `<div class="spider-slot border-2 border-amber-500/30 bg-zinc-900/30 flex items-center justify-center text-amber-500/30 text-xs">EMPTY</div>`
         : `<button data-stock class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-amber-700 bg-amber-700 flex items-center justify-center text-amber-900 font-black">${stockLabel}</button>`;
 
       const foundations = state.foundations.map((f, i) => {
         const top = f[f.length - 1];
         if (!top) {
-          return `<div data-found="${i}" class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-amber-500/30 bg-zinc-900/30 flex items-center justify-center text-amber-500/30 text-xs">F${i + 1}</div>`;
+          return `<div data-found="${i}" class="spider-slot border-2 border-amber-500/30 bg-zinc-900/30 flex items-center justify-center text-amber-500/30 text-xs">F${i + 1}</div>`;
         }
         const red = top.red ? 'text-red-400' : 'text-zinc-100';
-        return `<div class="w-10 sm:w-16 h-16 sm:h-20 border-2 border-green-500/60 bg-zinc-900 flex flex-col items-center justify-center text-green-400 font-black text-lg">
+        return `<div class="spider-slot border-2 border-green-500/60 bg-zinc-900 flex flex-col items-center justify-center text-green-400 font-black text-lg">
           ${top.r}<span class="${red}">${top.s}</span>
         </div>`;
       }).join('');
@@ -350,7 +350,7 @@ export function renderSpiderSolitaire(container, onClose) {
             ${closeButton()}
           </div>
           <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-2 mb-2 text-xs font-bold text-center">
-            <span>MODE<br><button data-mode class="px-2 py-0.5 border border-amber-500 text-amber-400">${mode === '1-suit' ? '1-SUIT' : '4-SUIT'}</button></span>
+            <span>MODE<br><button data-mode class="go-choice border border-amber-500 text-amber-400">${mode === '1-suit' ? '1-SUIT' : '4-SUIT'}</button></span>
             <span>MOVES<br><b class="text-amber-400 text-base">${moves}</b></span>
             <span>STOCK<br><b class="text-amber-400 text-base">${state.stock.length}</b></span>
           </div>

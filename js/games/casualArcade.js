@@ -39,7 +39,7 @@ export function renderFlappyBird(container, onClose) {
         </div>
 
         <button id="flap-btn" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-black text-lg tracking-wider border border-amber-400">
-          ⚡ TAP / FLAP WINGS (SPACEBAR)
+          <span class="hint-touch">TAP TO FLAP</span><span class="hint-keys">SPACEBAR TO FLAP</span>
         </button>
       </div>
     `;
@@ -262,7 +262,7 @@ export function renderMinesweeper(container, onClose) {
       setTimeout(() => {
         showResult({
           container,
-          title: '💥 DETONATED',
+          title: 'DETONATED',
           message: 'You stepped on a mine.',
           gameId: 'minesweeper',
           score: revealedCount * 10,
@@ -298,15 +298,15 @@ export function renderMinesweeper(container, onClose) {
               <span class="text-3xl text-amber-400">💣</span>
               <div>
                 <h2 class="text-2xl font-black text-amber-400 tracking-wider">MINESWEEPER PRO</h2>
-                <p class="text-[10px] text-amber-500/80 uppercase">TAP A CELL TO OPEN IT · LONG-PRESS TO FLAG A MINE</p>
+                <p class="text-[10px] text-amber-500/80 uppercase"><span class="hint-touch">TAP TO OPEN · LONG-PRESS TO FLAG</span><span class="hint-keys">CLICK TO OPEN · RIGHT-CLICK TO FLAG</span></p>
               </div>
             </div>
             <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
           </div>
 
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
-            <div>🚩 FLAGS: <span id="mine-flags" class="text-amber-400">${flagsLeft}</span></div>
-            <div>🟩 SAFE: <span class="text-white">${revealedCount}/${safeTiles}</span></div>
+            <div>FLAGS: <span id="mine-flags" class="text-amber-400">${flagsLeft}</span></div>
+            <div>SAFE: <span class="text-white">${revealedCount}/${safeTiles}</span></div>
           </div>
 
           <div class="grid grid-cols-8 gap-1 p-3 bg-zinc-950 border border-amber-500/40 mb-4">
@@ -314,17 +314,17 @@ export function renderMinesweeper(container, onClose) {
               let content = '';
               let cls = 'mine-cell bg-zinc-900 border-zinc-700 hover:bg-amber-950 text-zinc-400';
               if (cell.revealed) {
-                if (cell.mine) { content = '💣'; cls = 'bg-red-950 border-red-500 text-white'; }
+                if (cell.mine) { content = '*'; cls = 'bg-red-950 border-red-500 text-white'; }
                 else if (cell.count > 0) { content = cell.count; cls = 'bg-black border-amber-500/40 text-amber-300'; }
                 else { cls = 'bg-black border-zinc-800 text-zinc-600'; }
               } else if (cell.flagged) {
-                content = '🚩'; cls = 'bg-zinc-900 border-amber-500/50';
+                content = 'F'; cls = 'bg-zinc-900 border-amber-500/50';
               }
               return `<button class="${cls} mine-cell aspect-square flex items-center justify-center font-bold text-sm border transition" style="touch-action:manipulation" data-r="${r}" data-c="${c}">${content}</button>`;
             }).join('')).join('')}
           </div>
 
-          <p class="text-[10px] text-zinc-500 text-center">LEFT-CLICK REVEAL · RIGHT-CLICK (OR LONG-PRESS) TO FLAG</p>
+          <p class="text-[10px] text-zinc-500 text-center"><span class="hint-keys">LEFT-CLICK REVEALS · RIGHT-CLICK FLAGS</span><span class="hint-touch">TAP REVEALS · LONG-PRESS FLAGS</span></p>
         </div>
       `;
 

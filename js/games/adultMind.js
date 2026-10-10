@@ -302,7 +302,7 @@ export function renderBlackjack(container, onClose) {
           if (pt > 21) {
             soundFx.playHit();
             gameState = 'ended';
-            message = '💥 BUST! Hand exceeded 21.';
+            message = 'BUST. Hand exceeded 21.';
             notePeak();
             render();
             setTimeout(() => { gameState = 'betting'; render(); }, 1600);
@@ -334,10 +334,10 @@ export function renderBlackjack(container, onClose) {
       if (dt > 21 || pt > dt) {
         soundFx.playWin();
         bankroll += bet * 2;
-        message = '🎉 WINNER! Beat dealer hand!';
+        message = 'WINNER. Beat the dealer hand.';
       } else if (pt === dt) {
         bankroll += bet;
-        message = '🤝 PUSH! Equal totals.';
+        message = 'PUSH. Equal totals.';
       } else {
         soundFx.playHit();
         message = 'Dealer wins this round.';

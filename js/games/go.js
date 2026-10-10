@@ -415,10 +415,10 @@ export function renderGo(container, onClose) {
       // Header now carries size + level selectors so the player can change them mid-game
       // (each click restarts the game with the new settings).
       const sizeBtns = [9, 11, 13, 19].map(s =>
-        `<button data-size="${s}" class="px-2 py-0.5 text-[10px] border ${SIZE === s ? 'border-amber-400 text-amber-400' : 'border-amber-500/30 text-amber-500/60'}">${s}×${s}</button>`
+        `<button data-size="${s}" class="go-choice border ${SIZE === s ? 'border-amber-400 text-amber-400' : 'border-amber-500/30 text-amber-500/60'}">${s}×${s}</button>`
       ).join('');
       const levelBtns = ['beginner', 'intermediate', 'pro'].map(l =>
-        `<button data-level="${l}" class="px-2 py-0.5 text-[10px] border ${LEVEL === l ? 'border-amber-400 text-amber-400' : 'border-amber-500/30 text-amber-500/60'}">${l.toUpperCase()}</button>`
+        `<button data-level="${l}" class="go-choice border ${LEVEL === l ? 'border-amber-400 text-amber-400' : 'border-amber-500/30 text-amber-500/60'}">${l.toUpperCase()}</button>`
       ).join('');
 
       container.innerHTML = `

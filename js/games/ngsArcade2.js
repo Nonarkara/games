@@ -310,13 +310,13 @@ export function renderFrogger(container, onClose) {
       <div class="${FRAME}">
         ${head('🐸', 'FROGGER', 'Konami 1981 · cross the road, mind the gaps')}
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          Arrow keys or the pad below. Reach the far bank — every crossing scores and the traffic gets faster.
+          <span class="hint-keys">Arrow keys.</span><span class="hint-touch">The pad below.</span> Reach the far bank — every crossing scores and the traffic gets faster.
           The green strip in the middle is safe: wait there and read the next gap. Touch a car and you lose a frog.
         </div>
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-3 text-xs font-bold">
           <div>SCORE <span id="fr-score" class="text-amber-400 text-base">0</span></div>
           <div>CROSSED <span id="fr-cross" class="text-white text-base">0</span></div>
-          <div>FROGS <span id="fr-lives" class="text-white text-base">🐸🐸🐸</span></div>
+          <div>FROGS <span id="fr-lives" class="text-white text-base">●●●</span></div>
         </div>
         <canvas id="fr-cv" width="${W}" height="${H}" class="block mx-auto bg-black border border-amber-500/40" style="max-width:100%;height:auto"></canvas>
         <div class="grid grid-cols-3 gap-2 mt-3 max-w-[260px] mx-auto">
@@ -350,7 +350,7 @@ export function renderFrogger(container, onClose) {
 
     function hit() {
       lives--;
-      livesEl.innerText = '🐸'.repeat(Math.max(0, lives)) || '—';
+      livesEl.innerText = '●'.repeat(Math.max(0, lives)) || '—';
       soundFx.playHit();
       if (lives <= 0) return end();
       reset(false);
@@ -745,7 +745,7 @@ export function renderSolitaire(container, onClose) {
             <div>MOVES <span class="text-white text-base">${moves}</span></div>
             <div>HOME <span class="text-amber-400 text-base">${foundations.reduce((n, f) => n + f.length, 0)}/52</span></div>
             <div>STOCK <span class="text-white text-base">${stock.length}</span></div>
-            <button id="sol-new-deal" style="border:1px solid rgba(245,158,11,0.5);color:#f59e0b;font-size:10px;font-weight:700;padding:4px 8px">NEW DEAL</button>
+            <button id="sol-new-deal" class="go-choice" style="border:1px solid rgba(245,158,11,0.5);color:#f59e0b;font-size:10px;font-weight:700">NEW DEAL</button>
           </div>
 
           <div class="grid grid-cols-7 gap-1 mb-3">
@@ -767,7 +767,7 @@ export function renderSolitaire(container, onClose) {
               <div class="flex flex-col gap-0.5">
                 ${pile.length ? pile.map((card, i) => `
                   <button class="sol-pick" data-from="t" data-pile="${c}" data-idx="${i}"
-                          style="border:0;padding:0;background:transparent;height:${i === pile.length - 1 ? 44 : 30}px">
+                          style="border:0;padding:0;background:transparent;height:${i === pile.length - 1 ? 44 : 40}px">
                     ${cardFace(card, selKey === `t-${c}-${i}`)}
                   </button>`).join('') : ''}
                 <button class="sol-drop" data-kind="t" data-pile="${c}"

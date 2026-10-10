@@ -16,9 +16,6 @@
 import { soundFx } from '../audio.js';
 import { showResult } from '../ui.js';
 
-const FRAME = 'relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-2xl mx-auto font-mono-hud';
-const closeButton = () => '<button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">CLOSE</button>';
-
 export const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
 /* Piece values — the standard textbook numbers. */
@@ -563,31 +560,35 @@ export function renderChess(container, onClose) {
       const inCheckKey = checkSq ? `${checkSq[0]},${checkSq[1]}` : null;
       const moveCount = Math.ceil(history.length / 2);
 
-      const rows = [];
+      const cells = [];
+      cells.push('<div class="chess-label"></div>');
+      for (const file of FILES) cells.push(`<div class="chess-label">${file}</div>`);
       for (let r = 0; r < 8; r++) {
-        const cells = [];
+        cells.push(`<div class="chess-label">${8 - r}</div>`);
         for (let c = 0; c < 8; c++) {
           const dark = (r + c) % 2 === 1;
           const key = `${r},${c}`;
           const isSel = key === selKey;
           const isLegal = legalSet.has(key);
           const isCheck = key === inCheckKey;
-          const bgDark = dark ? 'bg-amber-950/40' : 'bg-zinc-900/40';
-          const ring = isSel ? 'ring-2 ring-amber-400' : isLegal ? 'ring-1 ring-green-400/70' : isCheck ? 'ring-2 ring-red-500' : '';
           const piece = board[r][c];
           const glyph = piece ? GLYPHS[piece] : '';
-          const pieceColor = piece ? (isWhite(piece) ? 'text-amber-200' : 'text-zinc-300') : 'text-zinc-700';
+          const flags = [
+            'chess-sq',
+            dark ? 'is-dark' : 'is-light',
+            isSel ? 'is-sel' : '',
+            isLegal ? 'is-legal' : '',
+            isCheck ? 'is-check' : ''
+          ].filter(Boolean).join(' ');
           cells.push(`
-            <button data-sq="${r},${c}" aria-label="${sqName(r, c)}${piece ? ' ' + pieceType(piece) : ' empty'}"
-              class="${bgDark} ${ring} aspect-square flex items-center justify-center text-3xl sm:text-4xl select-none ${pieceColor}">
-              ${isLegal && !piece ? `<span class="text-green-400/50 text-xs">●</span>` : ''}
-              ${glyph}
+            <button type="button" data-sq="${r},${c}" aria-label="${sqName(r, c)}${piece ? ' ' + pieceType(piece) : ' empty'}" class="${flags}">
+              ${isLegal && !piece ? '<i class="chess-dot"></i>' : ''}
+              ${glyph ? `<span class="chess-piece ${piece && isWhite(piece) ? 'is-white' : 'is-black'}">${glyph}</span>` : ''}
             </button>`);
         }
-        rows.push(`<div class="grid grid-cols-8 gap-0">${cells.join('')}</div>`);
       }
-      const labelsTop = FILES.map(f => `<div class="text-center text-[10px] text-amber-500/70">${f}</div>`).join('');
-      const labelsSide = Array.from({ length: 8 }, (_, r) => `<div class="text-[10px] text-amber-500/70 flex items-center justify-center">${8 - r}</div>`).join('');
+      cells.push('<div class="chess-label"></div>');
+      for (const file of FILES) cells.push(`<div class="chess-label">${file}</div>`);
 
       const statusText = thinking
         ? 'CPU THINKING…'
@@ -597,33 +598,18 @@ export function renderChess(container, onClose) {
         : turn === WHITE ? 'YOUR MOVE' : 'BLACK TO MOVE';
 
       container.innerHTML = `
-        <div class="${FRAME}">
-          <div class="flex justify-between items-center mb-3 border-b border-amber-500/40 pb-2">
-            <div>
-              <h2 class="text-xl font-black text-amber-400 tracking-wider">CHESS</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">Full rules · alphabeta depth ${DEPTH}</p>
-            </div>
-            ${closeButton()}
+        <div class="chess-play">
+          <header class="chess-head">
+            <h2>CHESS</h2>
+            <p>FULL RULES · DEPTH ${DEPTH}</p>
+          </header>
+          <div class="chess-meta">
+            <span>YOU (W)<b>${capturesB}</b></span>
+            <span>MOVE ${moveCount}<b>${statusText}</b></span>
+            <span>CPU (B)<b>${capturesW}</b></span>
           </div>
-          <div class="flex justify-between bg-zinc-950 border border-amber-500/40 p-2 mb-2 text-xs font-bold text-center">
-            <span>YOU (W)<br><b class="text-amber-300 text-base">${capturesB}</b></span>
-            <span>MOVE ${moveCount}<br><b class="text-amber-400 text-base">${statusText}</b></span>
-            <span>CPU (B)<br><b class="text-zinc-300 text-base">${capturesW}</b></span>
-          </div>
-          <div class="px-3 sm:px-6">
-            <div class="grid grid-cols-8 gap-0 mb-0">${labelsTop}</div>
-            <div class="grid grid-cols-[20px_1fr] gap-0">
-              <div class="flex flex-col">${labelsSide}</div>
-              <div>${rows.join('')}</div>
-            </div>
-            <div class="grid grid-cols-8 gap-0 mt-0">${labelsTop}</div>
-          </div>
-          <p class="mt-3 text-[11px] leading-relaxed text-zinc-400 text-center">
-            Tap a white piece to see its moves (green dots), then tap a destination. The CPU searches ${DEPTH} plies with piece-square tables — solid mid-strength play.
-          </p>
+          <div class="chess-board" role="grid">${cells.join('')}</div>
         </div>`;
-
-      container.querySelector('#close-game-btn').onclick = onClose;
       container.querySelectorAll('button[data-sq]').forEach(btn => {
         btn.onclick = () => {
           const [r, c] = btn.dataset.sq.split(',').map(Number);
