@@ -37,11 +37,14 @@ export function renderFlappyBird(container, onClose) {
 
         <div class="relative flex justify-center mb-4">
           <canvas id="flappy-canvas" width="360" height="400" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:360px"></canvas>
+          <p class="press-start-cue" id="flap-cue">PRESS TO START</p>
         </div>
 
-        <button id="flap-btn" class="phone-arcade-controls w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-black text-lg tracking-wider border border-amber-400">
-          <span class="hint-touch">TAP TO FLAP</span><span class="hint-keys">SPACEBAR TO FLAP</span>
-        </button>
+        <div class="phone-arcade-controls">
+          <button id="flap-btn" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-black text-lg tracking-wider border border-amber-400">
+            <span class="hint-touch">TAP TO FLAP</span><span class="hint-keys">SPACEBAR TO FLAP</span>
+          </button>
+        </div>
       </div>
     `;
 
@@ -129,6 +132,7 @@ export function renderFlappyBird(container, onClose) {
       if (over) return;
       if (!armed) {
         armed = true;
+        container.querySelector('#flap-cue')?.remove();
         gameInterval = setInterval(gameLoop, 1000 / 40);
       }
       soundFx.playJump();
@@ -315,7 +319,7 @@ export function renderMinesweeper(container, onClose) {
     function render() {
       const safeTiles = rows * cols - minesCount;
       container.innerHTML = `
-        <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-md mx-auto font-mono-hud">
+        <div class="mine-play relative bg-black border border-amber-500/40 p-6 text-white max-w-md mx-auto font-mono-hud">
           <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
             <div class="flex items-center gap-3">
               <span class="text-3xl text-amber-400">💣</span>

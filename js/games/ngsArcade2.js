@@ -767,7 +767,7 @@ export function renderSolitaire(container, onClose) {
               <div class="flex flex-col gap-0.5">
                 ${pile.length ? pile.map((card, i) => `
                   <button class="sol-pick" data-from="t" data-pile="${c}" data-idx="${i}"
-                          style="border:0;padding:0;background:transparent;height:${i === pile.length - 1 ? 44 : 40}px">
+                          style="border:0;padding:0;background:transparent;height:44px">
                     ${cardFace(card, selKey === `t-${c}-${i}`)}
                   </button>`).join('') : ''}
                 <button class="sol-drop" data-kind="t" data-pile="${c}"

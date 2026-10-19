@@ -373,7 +373,7 @@ export function renderCapitalQuiz(container, onClose) {
     const D = [{c:'Paris',co:'France'},{c:'Tokyo',co:'Japan'},{c:'London',co:'United Kingdom'},{c:'Berlin',co:'Germany'},{c:'Rome',co:'Italy'},{c:'Madrid',co:'Spain'},{c:'Ottawa',co:'Canada'},{c:'Canberra',co:'Australia'},{c:'Brasília',co:'Brazil'},{c:'Cairo',co:'Egypt'},{c:'New Delhi',co:'India'},{c:'Beijing',co:'China'},{c:'Moscow',co:'Russia'},{c:'Athens',co:'Greece'},{c:'Stockholm',co:'Sweden'}];
     let score = 0, q = 0; const max = 10; let current = makeQ();
     function makeQ() { const it = D[Math.floor(Math.random()*D.length)]; const w = D.filter(d=>d!==it).sort(()=>Math.random()-0.5).slice(0,3); return { item: it, options:[it,...w].sort(()=>Math.random()-0.5) }; }
-    function answer(c) { q++; if (c === current.item.c) { score += 10; soundFx.playCoin(); } else soundFx.playHit(); if (q>=max) return showResult({container,title:'GEO COMPLETE',message:`${score}/${max*10} points.`,score,gameId:'capital-quiz',tone:'win',onRestart:()=>start(),onClose}); current = makeQ(); render(); }
+    function answer(c) { q++; if (c === current.item.c) { score += 10; soundFx.playCoin(); } else soundFx.playHit(); if (q>=max) { const passed = score >= 70; return showResult({container,title: passed ? 'GEO COMPLETE' : 'GEO ROUND',message:`${score}/${max*10} points.`,score,gameId:'capital-quiz',tone: passed ? 'win' : 'over',onRestart:()=>start(),onClose}); } current = makeQ(); render(); }
     function render() {
       container.innerHTML = `
         <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">

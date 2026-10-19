@@ -256,7 +256,7 @@ export function renderPowerHour(container, onClose) {
           <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
             <div>MINUTE: <span class="text-amber-400 text-base">${min}/${totalMinutes}</span></div>
             <div>DRINKS: <span class="text-red-500 text-base">${min}</span></div>
-            <button id="ph-auto" style="border:1px solid rgba(245,158,11,0.5);color:#f59e0b;font-size:10px;font-weight:700;padding:4px 8px">${auto ? 'CLOCK ON · <span id=\'ph-clock\'>60s</span>' : 'START CLOCK'}</button>
+            <button id="ph-auto" style="border:1px solid rgba(245,158,11,0.5);color:#f59e0b;font-size:10px;font-weight:700;padding:10px 14px">${auto ? 'CLOCK ON · <span id=\'ph-clock\'>60s</span>' : 'START CLOCK'}</button>
           </div>
           <div class="bg-amber-500/10 border-2 border-amber-500 p-10 mb-4 text-center" style="min-height:200px">
             <div class="text-zinc-400 text-xs mb-3">MINUTE ${min} OF ${totalMinutes}</div>

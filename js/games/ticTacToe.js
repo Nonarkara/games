@@ -126,7 +126,7 @@ export function renderTicTacToe(container, onClose) {
         </p>
         <div class="flex items-center justify-center gap-3 mt-3">
           <span class="text-[10px] text-zinc-500 uppercase">Mode</span>
-          <button id="ttt-mode" class="px-3 py-1 border border-amber-500 text-amber-400 text-xs">${hardMode ? 'HARD (UNBEATABLE)' : 'EASY'}</button>
+          <button id="ttt-mode" class="px-3 border border-amber-500 text-amber-400 text-xs">${hardMode ? 'HARD (UNBEATABLE)' : 'EASY'}</button>
         </div>
       </div>`;
     container.querySelector('#close-game-btn').onclick = onClose;

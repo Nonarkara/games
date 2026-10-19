@@ -268,6 +268,31 @@ class NgsApp {
     return AnalyticsService.getLog().some(entry => entry.gameId === gameId);
   }
 
+  knownGame(id) {
+    return Boolean(id) && gamesCatalog.some(g => g.id === id);
+  }
+
+  /** ?game= that is not a cartridge: drop it and say so, instead of a blank launch. */
+  noteUnknownGame() {
+    const params = new URLSearchParams(location.search);
+    const raw = params.get('game');
+    if (raw == null) return;
+    const id = gameIdFromSearch(location.search);
+    if (this.knownGame(id)) return;
+    params.delete('game');
+    const next = params.toString();
+    history.replaceState({ ngsHub: true }, '', location.pathname + (next ? `?${next}` : '') + location.hash);
+    const header = document.querySelector('.directory-header');
+    if (!header) return;
+    let note = header.querySelector('.unknown-game');
+    if (!note) {
+      note = document.createElement('p');
+      note.className = 'unknown-game';
+      header.appendChild(note);
+    }
+    note.textContent = `No cartridge named “${raw}”. Pick one from the floor.`;
+  }
+
   bindDeepLink() {
     window.addEventListener('popstate', () => {
       if (this._suppressPop) {
@@ -277,15 +302,19 @@ class NgsApp {
       const id = gameIdFromSearch(location.search);
       const overlay = document.querySelector('#game-modal-overlay');
       const open = overlay && !overlay.classList.contains('hidden');
-      if (id && gamesCatalog.some(g => g.id === id)) {
+      if (this.knownGame(id)) {
         if (!open || this._openGameId !== id) this.launchGame(id, { fromHistory: true });
         return;
       }
       if (open) this._closeGame?.({ fromHistory: true });
+      this.noteUnknownGame();
     });
 
     const id = gameIdFromSearch(location.search);
-    if (!id || !gamesCatalog.some(g => g.id === id)) return;
+    if (!this.knownGame(id)) {
+      this.noteUnknownGame();
+      return;
+    }
     const gameUrl = gameQuery(id);
     history.replaceState({ ngsHub: true }, '', location.pathname);
     history.pushState({ ngsGame: id }, '', gameUrl);

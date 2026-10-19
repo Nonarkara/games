@@ -332,8 +332,9 @@ export function renderCyberPacman(container, onClose) {
 
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3"><span class="hint-keys">Arrow keys to turn</span><span class="hint-touch">The pad below to turn</span> · eat every dot · avoid ghosts, or eat them during power mode</div>
 
-        <div class="relative flex justify-center mb-4">
-          <canvas id="pac-canvas" width="360" height="360" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:360px"></canvas>
+        <div class="relative flex justify-center mb-4" style="min-width:0;width:100%">
+          <canvas id="pac-canvas" width="360" height="360" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:min(360px,100%);min-width:0;width:100%"></canvas>
+          <p class="press-start-cue" id="pac-cue">PRESS TO START</p>
         </div>
 
         <div class="phone-arcade-controls grid grid-cols-3 gap-2 max-w-xs mx-auto">
@@ -415,6 +416,7 @@ export function renderCyberPacman(container, onClose) {
     function arm() {
       if (armed || over) return;
       armed = true;
+      container.querySelector('#pac-cue')?.remove();
       ghostHold = 16;
       gameInterval = setInterval(step, 180);
     }

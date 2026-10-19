@@ -114,4 +114,9 @@ for (const id of ['connect-four', 'go', 'chess', 'checkers', 'reversi', 'tic-tac
 assert.match(explainScore('connect-four', 0).tip, /centre/i);
 assert.match(explainScore('chess', 0).tip, /opponent/i);
 
+const capitalLow = explainScore('capital-quiz', 20);
+assert.equal(capitalLow.band, 'rough');
+assert.match(capitalLow.feel, /capital|country|region/i);
+assert.equal(explainScore('capital-quiz', 100).band, 'sharp');
+
 console.log(`score readouts: ${gameIds.filter(id => !skip.has(id)).length} playable games covered`);

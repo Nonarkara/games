@@ -83,7 +83,7 @@ const CUTS = {
   'anagram-scramble': [20, 45, 70],
   'word-builder': [15, 35, 60],
   'periodic-quest': [15, 28, 40],
-  'capital-quiz': [15, 28, 40],
+  'capital-quiz': [40, 70, 90],
   'math-safari': [20, 45, 70],
   'memory-match': [100, 250, 420],
   'word-guess': [20, 60, 100],
@@ -478,6 +478,9 @@ export function explainScore(gameId, score) {
   const skill = guide?.label ? guide.label.toLowerCase() : fam.skill;
   const tip = guide?.tip || copy.tip;
   const winLose = WIN_LOSE.has(gameId);
+  const coaching = guide?.practice && (band === 'rough' || band === 'warming')
+    ? `${copy.feel} ${guide.practice}`
+    : copy.feel;
 
   const range = winLose
     ? ''
@@ -489,7 +492,7 @@ export function explainScore(gameId, score) {
     skill,
     range,
     showScale: !winLose,
-    feel: winLose && guide?.why ? guide.why : copy.feel,
+    feel: winLose && guide?.why ? guide.why : coaching,
     tip,
     tone: band === 'rough' ? 'rough' : (band === 'warming' ? 'ok' : 'good')
   };
