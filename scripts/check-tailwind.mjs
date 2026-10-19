@@ -95,7 +95,7 @@ function isUtility(tok) {
   if (!prefix) return false;
   const rest = base.slice(prefix.length);
   if (/^(?:px|\d+(?:\.\d+)?|full|auto|screen|min|max|fit|none|\[.*\])$/.test(rest)) return true;
-  if (/^(?:black|white|transparent|current)$/.test(rest)) return true;
+  if (/^(?:black|white|transparent|current)(?:\/\d+)?$/.test(rest)) return true;
   if (COLOR.test(rest)) return true;
   if (/^(?:xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl|\[.*\])$/.test(rest)) return true;
   if (/^(?:thin|light|normal|medium|semibold|bold|extrabold|black)$/.test(rest)) return true;
@@ -277,7 +277,13 @@ function withoutRule(cssText, tok) {
 }
 
 function selfTest(cssText, files) {
-  for (const tok of ['h-full', 'ring-2']) {
+  for (const sample of ['text-white/80', 'text-white/50', 'bg-black/40', 'bg-white/10']) {
+    if (!isUtility(sample)) {
+      console.error(`tailwind self-test: ${sample} is not treated as a utility`);
+      process.exit(1);
+    }
+  }
+  for (const tok of ['h-full', 'ring-2', 'text-white/80']) {
     const broken = withoutRule(cssText, tok);
     if (inCss(broken, tok)) {
       console.error(`tailwind self-test: .${tok} still matches after its rule was deleted`);
@@ -293,8 +299,6 @@ function selfTest(cssText, files) {
 
 const css = readFileSync(new URL('../css/tailwind.static.css', import.meta.url), 'utf8');
 const files = sourceFiles();
-selfTest(css, files);
-
 const missing = findMissing(css, files);
 if (missing.size) {
   console.error(`tailwind: ${missing.size} utilities used in js/ have no rule in css/tailwind.static.css`);
@@ -306,4 +310,5 @@ if (missing.size) {
   process.exit(1);
 }
 
-console.log('tailwind: every utility used in js/ has a rule (self-test: deleting .h-full and .ring-2 fails)');
+selfTest(css, files);
+console.log('tailwind: every utility used in js/ has a rule (self-test: deleting .h-full, .ring-2, or .text-white/80 fails)');
