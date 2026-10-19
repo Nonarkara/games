@@ -80,10 +80,6 @@ export function renderFlappyBird(container, onClose) {
       ctx.fillStyle = '#050505';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       paintBird();
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = '14px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('TAP TO START', canvas.width / 2, canvas.height / 2 + 48);
     }
 
     function gameLoop() {
