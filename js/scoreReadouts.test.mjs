@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { explainScore, hasScoreProfile, isNewPersonalBest } from './scoreReadouts.js';
+import { explainScore, hasScoreProfile, isNewPersonalBest, resultMark } from './scoreReadouts.js';
 
 const appSource = readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const catalogBlock = appSource.split('const gamesCatalog = [')[1].split('];')[0];
@@ -13,7 +13,9 @@ assert.deepEqual(missing, [], `games missing score profile: ${missing.join(', ')
 const dualLow = explainScore('dual-n-back', 20);
 assert.equal(dualLow.band, 'rough');
 assert.match(dualLow.feel, /drop|normal|load/i);
-assert.match(dualLow.tip, /chunk|round|quiet/i);
+assert.match(dualLow.tip, /accuracy|two-back|stable/i);
+assert.equal(dualLow.showScale, true);
+assert.match(dualLow.range, /Rough/);
 
 const dualHigh = explainScore('dual-n-back', 200);
 assert.equal(dualHigh.band, 'sharp');
@@ -96,5 +98,20 @@ assert.equal(isNewPersonalBest(0, 1), true);
 assert.equal(isNewPersonalBest(10, 10), false);
 assert.equal(isNewPersonalBest(10, 9), false);
 assert.equal(isNewPersonalBest(40, 41), true);
+
+assert.equal(resultMark('win', 10), '✓');
+assert.equal(resultMark('win', 0), '•');
+assert.equal(resultMark('over', 0), '✕');
+assert.equal(resultMark('over', 40), '✕');
+assert.equal(resultMark('draw', 0), '•');
+
+for (const id of ['connect-four', 'go', 'chess', 'checkers', 'reversi', 'tic-tac-toe']) {
+  const card = explainScore(id, 0);
+  assert.equal(card.showScale, false, `${id} hides the rough/warming scale`);
+  assert.equal(card.range, '');
+  assert.ok(card.tip && card.tip.length > 12, `${id} has a coaching tip`);
+}
+assert.match(explainScore('connect-four', 0).tip, /centre/i);
+assert.match(explainScore('chess', 0).tip, /opponent/i);
 
 console.log(`score readouts: ${gameIds.filter(id => !skip.has(id)).length} playable games covered`);

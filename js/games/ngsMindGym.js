@@ -622,14 +622,14 @@ export function renderDotsBoxes(container, onClose) {
           <div id="db-turn" class="text-white">YOUR LINE</div>
           <div>CPU <span id="db-cpu" class="text-white text-base">0</span></div>
         </div>
-        <div id="db-board" class="mx-auto" style="position:relative;width:264px;height:264px"></div>
+        <div id="db-board" class="mx-auto" style="position:relative;width:268px;height:268px"></div>
       </div>`;
 
     const boardEl = container.querySelector('#db-board');
     const youEl = container.querySelector('#db-you');
     const cpuEl = container.querySelector('#db-cpu');
     const turnEl = container.querySelector('#db-turn');
-    const STEP = 56, PAD = 20;
+    const STEP = 56, PAD = 22;
 
     function draw() {
       const bits = [];
@@ -644,16 +644,16 @@ export function renderDotsBoxes(container, onClose) {
       for (let r = 0; r <= size; r++) for (let c = 0; c < size; c++) {
         const e = dbEdge('h', r, c), on = drawn.has(e);
         bits.push(`<button class="db-e" data-e="${e}" aria-label="line" ${on ? 'disabled' : ''}
-          style="position:absolute;left:${PAD + c * STEP}px;top:${PAD + r * STEP - 20}px;width:${STEP}px;height:40px;
+          style="position:absolute;left:${PAD + c * STEP}px;top:${PAD + r * STEP - 22}px;width:${STEP}px;height:44px;
           background:transparent;border:0;padding:0;cursor:${on ? 'default' : 'pointer'}">
-          <span style="display:block;margin:19px 8px;height:2px;background:${on ? '#f59e0b' : 'rgba(245,158,11,.18)'}"></span></button>`);
+          <span style="display:block;margin:21px 8px;height:2px;background:${on ? '#f59e0b' : 'rgba(245,158,11,.18)'}"></span></button>`);
       }
       for (let r = 0; r < size; r++) for (let c = 0; c <= size; c++) {
         const e = dbEdge('v', r, c), on = drawn.has(e);
         bits.push(`<button class="db-e" data-e="${e}" aria-label="line" ${on ? 'disabled' : ''}
-          style="position:absolute;left:${PAD + c * STEP - 20}px;top:${PAD + r * STEP}px;width:40px;height:${STEP}px;
+          style="position:absolute;left:${PAD + c * STEP - 22}px;top:${PAD + r * STEP}px;width:44px;height:${STEP}px;
           background:transparent;border:0;padding:0;cursor:${on ? 'default' : 'pointer'}">
-          <span style="display:block;margin:8px 19px;width:2px;height:${STEP - 16}px;background:${on ? '#f59e0b' : 'rgba(245,158,11,.18)'}"></span></button>`);
+          <span style="display:block;margin:8px 21px;width:2px;height:${STEP - 16}px;background:${on ? '#f59e0b' : 'rgba(245,158,11,.18)'}"></span></button>`);
       }
       for (let r = 0; r <= size; r++) for (let c = 0; c <= size; c++) {
         bits.push(`<span style="position:absolute;left:${PAD + c * STEP - 3}px;top:${PAD + r * STEP - 3}px;

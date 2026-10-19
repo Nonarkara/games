@@ -7,7 +7,7 @@
  */
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
-import { explainScore, isNewPersonalBest } from './scoreReadouts.js';
+import { explainScore, isNewPersonalBest, resultMark } from './scoreReadouts.js';
 import { escapeHtml, sanitizeBoard } from './scoreGate.js';
 
 export class ScopedKeyboard {
@@ -140,6 +140,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   overlay.className = 'axiom-result-overlay';
   overlay.innerHTML = `
     <div class="axiom-result-card axiom-result-${tone}" role="dialog" aria-modal="true">
+      <div class="axiom-result-glyph" aria-hidden="true">${resultMark(tone, score)}</div>
       <h3 class="axiom-result-title">${title}</h3>
       ${message ? `<p class="axiom-result-msg">${message}</p>` : ''}
       ${score !== null ? `<div class="axiom-result-score"><span class="axiom-result-score-label">FINAL SCORE</span><span class="axiom-result-score-value">${score}</span></div>` : ''}
@@ -147,7 +148,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
         <aside class="axiom-result-readout axiom-result-readout--${readout.tone}" aria-label="What this score means">
           <p class="axiom-result-readout-band">${readout.title}</p>
           <p class="axiom-result-readout-skill">Skill in play: ${readout.skill}</p>
-          <p class="axiom-result-readout-range">${readout.range}</p>
+          ${readout.showScale === false || !readout.range ? '' : `<p class="axiom-result-readout-range">${readout.range}</p>`}
           <p class="axiom-result-readout-feel">${readout.feel}</p>
           <p class="axiom-result-readout-tip"><span>NEXT</span> ${readout.tip}</p>
         </aside>` : ''}

@@ -360,6 +360,43 @@ export function prepareEyesTrial(trial, random = Math.random) {
   return { ...trial, options, correct: options.indexOf(trial.word) };
 }
 
+/**
+ * Pixel eyes for each expression. Gaze is in thirds of the sclera
+ * (-1 left/up, 0 centre, 1 right/down). Brow offset is pixels from the
+ * resting line; tilt drops the outer corner.
+ */
+const EYE_POSES = {
+  PLAYFUL:     { gL: [1, -1], gR: [1, -1], bL: -2, bR: -2, tL: -2, tR: -2 },
+  UPSET:       { gL: [0, 1],  gR: [0, 1],  bL: 3,  bR: 3,  tL: 1,  tR: 1 },
+  INSISTENT:   { gL: [-1, 0], gR: [-1, 0], bL: 1,  bR: 1,  tL: 0,  tR: 0 },
+  PREOCCUPIED: { gL: [1, 0],  gR: [1, -1], bL: 2,  bR: 0,  tL: 0,  tR: 1 },
+  REFLECTIVE:  { gL: [0, -1], gR: [0, -1], bL: -1, bR: -1, tL: 0,  tR: 0 },
+  SAD:         { gL: [0, 1],  gR: [0, 1],  bL: 0,  bR: 0,  tL: 4,  tR: 4 },
+  SUSPICIOUS:  { gL: [-1, 0], gR: [1, 0],  bL: -3, bR: 3,  tL: -1, tR: 2 },
+  DISTRACTED:  { gL: [-1, -1], gR: [1, 1], bL: 0,  bR: 2,  tL: 0,  tR: 2 },
+  DOMINANT:    { gL: [0, 0],  gR: [0, 0],  bL: 4,  bR: 4,  tL: 0,  tR: 0 },
+  SUBMISSIVE:  { gL: [0, 1],  gR: [0, 1],  bL: -4, bR: -4, tL: 1,  tR: 1 }
+};
+
+export function eyesMarkup(word) {
+  const pose = EYE_POSES[word] || EYE_POSES.REFLECTIVE;
+  const eye = (x, gaze, browDy, tilt) => {
+    const px = x + 10 + gaze[0] * 4;
+    const py = 18 + gaze[1] * 3;
+    const browY = 6 + browDy;
+    return `
+      <rect x="${x}" y="${browY}" width="14" height="3" fill="#f59e0b"/>
+      <rect x="${x + 12}" y="${browY + tilt}" width="16" height="3" fill="#f59e0b"/>
+      <rect x="${x}" y="14" width="28" height="16" fill="#f4efe4"/>
+      <rect x="${px}" y="${py}" width="7" height="7" fill="#1a1208"/>`;
+  };
+  return `<svg class="eyes-svg" viewBox="0 0 96 40" width="240" height="100" role="img" aria-label="Eyes looking ${String(word || '').toLowerCase()}" shape-rendering="crispEdges">
+    ${eye(8, pose.gL, pose.bL, pose.tL)}
+    ${eye(58, pose.gR, pose.bR, pose.tR)}
+    <rect x="44" y="22" width="6" height="3" fill="#f59e0b"/>
+  </svg>`;
+}
+
 export function renderMindEyes(container, onClose) {
   start();
   function start() {
@@ -388,11 +425,7 @@ export function renderMindEyes(container, onClose) {
           </div>
           <div class="bg-zinc-900 border border-amber-500/60 p-8 mb-4 text-center" style="min-height:180px">
             <div class="text-zinc-500 text-xs mb-3">EXPRESSION</div>
-            <div class="flex justify-center items-center gap-4 mb-2">
-              <div class="text-8xl text-amber-400">${t.eyes}</div>
-              <div class="text-8xl text-amber-400" style="transform: scaleX(-1)">${t.eyes}</div>
-            </div>
-            <div class="text-zinc-600 text-[10px]">↑ ↑ ↑ ↑ ↑</div>
+            <div class="flex justify-center items-center mb-2">${eyesMarkup(t.word)}</div>
           </div>
           <div class="grid grid-cols-2 gap-3" id="eyes-opts"></div>
         </div>`;

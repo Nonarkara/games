@@ -414,6 +414,21 @@ export function isNewPersonalBest(previous, score) {
   return n > prior;
 }
 
+/**
+ * Result-card mark. A win with a real score is a check. A loss is a cross.
+ * Zero and draws stay a dot — a check on 0 was the lie the audit caught.
+ */
+export function resultMark(tone, score) {
+  const n = Number(score);
+  const scored = Number.isFinite(n) && n > 0;
+  if (tone === 'win' && scored) return '✓';
+  if (tone === 'over' || tone === 'loss' || tone === 'lose') return '✕';
+  return '•';
+}
+
+/** Win/lose carts. A rough/warming/solid/sharp scale describes a drill, not a match. */
+const WIN_LOSE = new Set(['connect-four', 'go', 'chess', 'checkers', 'reversi', 'tic-tac-toe']);
+
 function bandKey(score, cuts) {
   const n = Number(score);
   if (!Number.isFinite(n)) return 'warming';
@@ -461,16 +476,21 @@ export function explainScore(gameId, score) {
   const copy = fam[band];
   const guide = BRAIN_GUIDES[gameId];
   const skill = guide?.label ? guide.label.toLowerCase() : fam.skill;
+  const tip = guide?.tip || copy.tip;
+  const winLose = WIN_LOSE.has(gameId);
 
-  const range = `Rough < ${cuts[0]} · Warming ${cuts[0]}–${cuts[1] - 1} · Solid ${cuts[1]}–${cuts[2] - 1} · Sharp ≥ ${cuts[2]}`;
+  const range = winLose
+    ? ''
+    : `Rough < ${cuts[0]} · Warming ${cuts[0]}–${cuts[1] - 1} · Solid ${cuts[1]}–${cuts[2] - 1} · Sharp ≥ ${cuts[2]}`;
 
   return {
     band,
-    title: copy.title,
+    title: winLose && guide?.label ? guide.label.toUpperCase() : copy.title,
     skill,
     range,
-    feel: copy.feel,
-    tip: copy.tip,
+    showScale: !winLose,
+    feel: winLose && guide?.why ? guide.why : copy.feel,
+    tip,
     tone: band === 'rough' ? 'rough' : (band === 'warming' ? 'ok' : 'good')
   };
 }

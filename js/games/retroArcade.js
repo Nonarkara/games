@@ -19,8 +19,8 @@ export function renderRetroSnake(container, onClose) {
     let over = false;
 
     container.innerHTML = `
-      <div class="relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
-        <div class="flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
+      <div class="phone-arcade phone-arcade--pad relative bg-black border border-amber-500/40 p-4 sm:p-6 text-white max-w-xl mx-auto font-mono-hud">
+        <div class="phone-arcade-head flex justify-between items-center gap-2 mb-4 border-b border-amber-500/40 pb-3">
           <div class="flex items-center gap-2 min-w-0">
             <span class="text-3xl text-amber-400">🐍</span>
             <div class="min-w-0">
@@ -42,7 +42,7 @@ export function renderRetroSnake(container, onClose) {
           <canvas id="snake-canvas" width="400" height="400" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:400px;aspect-ratio:1"></canvas>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+        <div class="phone-arcade-controls grid grid-cols-3 gap-2 max-w-xs mx-auto">
           <div></div>
           <button id="btn-up" class="axiom-dpad-btn">▲</button>
           <div></div>
@@ -60,10 +60,12 @@ export function renderRetroSnake(container, onClose) {
 
     let snake = [{ x: 10, y: 10 }];
     let food = { x: 15, y: 15 };
-    let dx = 1, dy = 0;
-    // Input queue: holds the NEXT direction, applied once per tick.
-    // Rejects direct reversals against the *current* movement.
-    let pendingDx = 1, pendingDy = 0;
+    // Frame 1 is drawn, then the snake waits. The loop starts on the first
+    // key or tap, so sitting on PLAY does not walk it into a wall.
+    let armed = false;
+    let dx = 0, dy = 0;
+    let pendingDx = 0, pendingDy = 0;
+    let gameInterval = null;
 
     function placeFood() {
       let tries = 0;
@@ -80,15 +82,29 @@ export function renderRetroSnake(container, onClose) {
       // Reject if reversing into the PENDING direction — comparing against
       // the current one ate a legal second turn queued inside one tick
       // (Up then Left within 110ms discarded the Left).
-      const refX = pendingDx ?? dx;
-      const refY = pendingDy ?? dy;
-      if (nx === -refX && ny === -refY) return;
+      const refX = pendingDx || dx;
+      const refY = pendingDy || dy;
+      if ((refX || refY) && nx === -refX && ny === -refY) return;
       pendingDx = nx;
       pendingDy = ny;
     }
 
-    function gameLoop() {
+    function arm(nx, ny) {
       if (over) return;
+      if (!armed) {
+        armed = true;
+        dx = nx;
+        dy = ny;
+        pendingDx = nx;
+        pendingDy = ny;
+        gameInterval = setInterval(gameLoop, 110);
+        return;
+      }
+      queueTurn(nx, ny);
+    }
+
+    function gameLoop() {
+      if (over || !armed) return;
 
       // Apply the queued turn for this tick.
       dx = pendingDx;
@@ -143,6 +159,13 @@ export function renderRetroSnake(container, onClose) {
         ctx.fillStyle = idx === 0 ? '#fbbf24' : '#f59e0b';
         ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
       });
+
+      if (!armed) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = '14px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('PRESS TO START', canvas.width / 2, canvas.height / 2);
+      }
     }
 
     function endGame() {
@@ -162,23 +185,22 @@ export function renderRetroSnake(container, onClose) {
 
     const kb = new ScopedKeyboard();
     kb.on({
-      ArrowUp: () => queueTurn(0, -1),
-      ArrowDown: () => queueTurn(0, 1),
-      ArrowLeft: () => queueTurn(-1, 0),
-      ArrowRight: () => queueTurn(1, 0)
+      ArrowUp: () => arm(0, -1),
+      ArrowDown: () => arm(0, 1),
+      ArrowLeft: () => arm(-1, 0),
+      ArrowRight: () => arm(1, 0)
     });
 
-    container.querySelector('#btn-up').onclick = () => queueTurn(0, -1);
-    container.querySelector('#btn-down').onclick = () => queueTurn(0, 1);
-    container.querySelector('#btn-left').onclick = () => queueTurn(-1, 0);
-    container.querySelector('#btn-right').onclick = () => queueTurn(1, 0);
+    container.querySelector('#btn-up').onclick = () => arm(0, -1);
+    container.querySelector('#btn-down').onclick = () => arm(0, 1);
+    container.querySelector('#btn-left').onclick = () => arm(-1, 0);
+    container.querySelector('#btn-right').onclick = () => arm(1, 0);
 
     const closeBtn = container.querySelector('#close-game-btn');
     closeBtn.onclick = () => { clearInterval(gameInterval); kb.destroy(); onClose(); };
 
     placeFood();
     draw();
-    const gameInterval = setInterval(gameLoop, 110);
   }
 }
 

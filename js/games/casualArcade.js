@@ -4,6 +4,7 @@
 import { soundFx } from '../audio.js';
 import { StorageService } from '../storage.js';
 import { ScopedKeyboard, showResult } from '../ui.js';
+import { isNewPersonalBest } from '../scoreReadouts.js';
 
 /* ===========================================================================
  * 1. FLAPPY CYBER BIRD
@@ -17,8 +18,8 @@ export function renderFlappyBird(container, onClose) {
     let over = false;
 
     container.innerHTML = `
-      <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+      <div class="phone-arcade phone-arcade--flap relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
+        <div class="phone-arcade-head flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
           <div class="flex items-center gap-3">
             <span class="text-3xl text-amber-400">🐦</span>
             <div>
@@ -38,7 +39,7 @@ export function renderFlappyBird(container, onClose) {
           <canvas id="flappy-canvas" width="360" height="400" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:360px"></canvas>
         </div>
 
-        <button id="flap-btn" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-black text-lg tracking-wider border border-amber-400">
+        <button id="flap-btn" class="phone-arcade-controls w-full py-4 bg-amber-600 hover:bg-amber-500 text-black font-black text-lg tracking-wider border border-amber-400">
           <span class="hint-touch">TAP TO FLAP</span><span class="hint-keys">SPACEBAR TO FLAP</span>
         </button>
       </div>
@@ -50,6 +51,10 @@ export function renderFlappyBird(container, onClose) {
     let bird = { x: 50, y: 180, velocity: 0, gravity: 0.5, lift: -8, radius: 12 };
     let pipes = [];
     let frame = 0;
+    // The bird is painted and held. Gravity starts on the first flap, so a
+    // player who reads the screen for five seconds does not fall.
+    let armed = false;
+    let gameInterval = null;
 
     function createPipe() {
       const gap = 120;
@@ -57,8 +62,29 @@ export function renderFlappyBird(container, onClose) {
       pipes.push({ x: canvas.width, top: topHeight, bottom: topHeight + gap, passed: false });
     }
 
+    function paintBird() {
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f97316';
+      ctx.fillRect(bird.x + 8, bird.y - 3, 8, 5);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(bird.x + 2, bird.y - 5, 3, 3);
+    }
+
+    function paintIdle() {
+      ctx.fillStyle = '#050505';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      paintBird();
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '14px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('TAP TO START', canvas.width / 2, canvas.height / 2 + 48);
+    }
+
     function gameLoop() {
-      if (over) return;
+      if (over || !armed) return;
       frame++;
       ctx.fillStyle = '#050505';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -96,19 +122,15 @@ export function renderFlappyBird(container, onClose) {
         if (p.x + 45 < 0) pipes.splice(i, 1);
       }
 
-      // Bird with a little beak.
-      ctx.fillStyle = '#fbbf24';
-      ctx.beginPath();
-      ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#f97316';
-      ctx.fillRect(bird.x + 8, bird.y - 3, 8, 5);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(bird.x + 2, bird.y - 5, 3, 3);
+      paintBird();
     }
 
     function flap() {
       if (over) return;
+      if (!armed) {
+        armed = true;
+        gameInterval = setInterval(gameLoop, 1000 / 40);
+      }
       soundFx.playJump();
       bird.velocity = bird.lift;
     }
@@ -120,9 +142,10 @@ export function renderFlappyBird(container, onClose) {
       showResult({
         container,
         title: 'BIRD DOWN',
-        message: score >= 10 ? 'Smooth flying!' : 'Keep flapping!',
+        message: isNewPersonalBest(high, score) ? 'A new personal best.' : 'The pipes caught the bird.',
         score,
         gameId: 'flappy-bird',
+        tone: 'over',
         onRestart: () => start(),
         onClose
       });
@@ -139,7 +162,7 @@ export function renderFlappyBird(container, onClose) {
     canvas.onclick = flap;
     canvas.ontouchstart = (e) => { e.preventDefault(); flap(); };
 
-    const gameInterval = setInterval(gameLoop, 1000 / 40);
+    paintIdle();
   }
 }
 

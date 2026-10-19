@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { applyToLMove, minimumToLMoves, prepareEyesTrial, TOL_CAPACITIES, wcstBucketFor } from './ngsNewTrainers3.js';
+import { applyToLMove, eyesMarkup, minimumToLMoves, prepareEyesTrial, TOL_CAPACITIES, wcstBucketFor } from './ngsNewTrainers3.js';
+import { renderTwoTruths } from './ngsDrinkingGames2.js';
 import {
   WAREHOUSE_LEVELS,
   lightsSolved,
@@ -106,6 +107,11 @@ assert.equal(minimumToLMoves(tolStart, [['blue', 'green'], ['red'], []]), 7);
 const eyes = prepareEyesTrial({ word: 'PLAYFUL', options: ['PLAYFUL', 'SERIOUS', 'ANGRY', 'CONFUSED'] }, () => 0);
 assert.notEqual(eyes.correct, 0);
 assert.equal(eyes.options[eyes.correct], 'PLAYFUL');
+const sadEyes = eyesMarkup('SAD');
+assert.match(sadEyes, /<svg/);
+assert.match(sadEyes, /<rect/);
+assert.doesNotMatch(sadEyes, /[↗↖←→↑↓◠◡]/);
+assert.match(eyesMarkup('SUSPICIOUS'), /aria-label="Eyes looking suspicious"/);
 
 // Stop-signal staircase moves toward ~50% successful inhibition and remains bounded.
 assert.equal(nextStopDelay(250, true), 300);
@@ -1089,4 +1095,64 @@ import {
   }
 }
 
-console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, Go, Heads Up!, Sudoku, and the Mind Gym six passed');
+// Two Truths: tap a statement, then REVEAL. The old handler read a bare
+// `lieIdx` and threw, so the click did nothing.
+{
+  globalThis.window = globalThis.window || globalThis;
+  function buttonsFrom(html) {
+    const found = [];
+    const re = /<button\b([^>]*)>([\s\S]*?)<\/button>/gi;
+    let m;
+    while ((m = re.exec(html))) {
+      const attrs = m[1];
+      const id = /id="([^"]+)"/.exec(attrs)?.[1] || '';
+      const cls = /class="([^"]*)"/.exec(attrs)?.[1] || '';
+      const idx = /data-idx="([^"]+)"/.exec(attrs)?.[1];
+      const text = m[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const el = {
+        id,
+        className: cls,
+        dataset: idx == null ? {} : { idx },
+        text,
+        onclick: null,
+        click() { if (this.onclick) this.onclick(); }
+      };
+      found.push(el);
+    }
+    return found;
+  }
+  const container = {
+    _html: '',
+    _buttons: [],
+    set innerHTML(value) {
+      this._html = String(value);
+      this._buttons = buttonsFrom(this._html);
+    },
+    get innerHTML() { return this._html; },
+    querySelector(sel) {
+      if (sel.startsWith('#')) return this._buttons.find(b => b.id === sel.slice(1)) || null;
+      return null;
+    },
+    querySelectorAll(sel) {
+      if (!sel.startsWith('.')) return [];
+      const cls = sel.slice(1);
+      return this._buttons.filter(b => b.className.split(/\s+/).includes(cls));
+    }
+  };
+  renderTwoTruths(container, () => {});
+  const choices = container.querySelectorAll('.ttl-opt');
+  assert.equal(choices.length, 3, 'three statements before the vote');
+  choices[0].click();
+  const reveal = container.querySelector('#ttl-reveal');
+  assert.ok(reveal, 'REVEAL THE LIE is on screen after the vote');
+  assert.doesNotThrow(() => reveal.click());
+  assert.match(container.innerHTML, />LIE</);
+  assert.match(container.innerHTML, />TRUE</);
+  const revealed = container.querySelectorAll('.ttl-opt');
+  const lie = revealed.find(b => /\bLIE\b/.test(b.text));
+  assert.ok(lie, 'the lie is marked after reveal');
+  const correct = Number(/CORRECT VOTES:[\s\S]*?text-base">(\d+)</.exec(container.innerHTML)[1]);
+  assert.equal(correct, lie.dataset.idx === '0' ? 1 : 0);
+}
+
+console.log('mechanics: trainers, warehouse, Lights Out, Nonogram, Nim, Make 24, WPM scoring, Tic-Tac-Toe, RPS, Memory Matrix, Colour Match, Color March, Mental Math Pro, Mental Math Thai, Paper Soccer, Chess, Checkers, Spider, Go, Heads Up!, Sudoku, Mind Gym, and Two Truths reveal passed');

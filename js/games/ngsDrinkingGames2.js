@@ -660,7 +660,7 @@ export function renderTwoTruths(container, onClose) {
       container.querySelectorAll('.ttl-opt').forEach(b => b.onclick = () => { vote = parseInt(b.dataset.idx, 10); render(); });
       if (!revealed) {
         const reveal = container.querySelector('#ttl-reveal');
-        if (reveal) reveal.onclick = () => { revealed = true; if (vote === lieIdx) { correct++; soundFx.playCoin(); } else { soundFx.playHit(); } render(); };
+        if (reveal) reveal.onclick = () => { revealed = true; if (vote === current.lieIdx) { correct++; soundFx.playCoin(); } else { soundFx.playHit(); } render(); };
       } else {
         const next = container.querySelector('#ttl-next');
         if (next) next.onclick = () => {

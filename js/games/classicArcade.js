@@ -27,7 +27,7 @@ export function renderCyberTetris(container, onClose) {
           <div>
             <p class="oss-game__eyebrow">CLASSIC WELL · 10×20</p>
             <h2>CYBER TETRIS</h2>
-            <p>Rotate, stack, clear. The well is fully on screen — every row counts.</p>
+            <p>Rotate, stack, clear. Swipe the well, or use the row under it.</p>
           </div>
           <div class="oss-game__score" aria-live="polite">
             <span>SCORE <b id="tetris-score">0</b></span>
@@ -220,6 +220,46 @@ export function renderCyberTetris(container, onClose) {
     container.querySelector('#t-rotate').onclick = rotate;
     container.querySelector('#t-drop').onclick = hardDrop;
 
+    let touchStart = null;
+    const onTouchStart = (e) => {
+      const t = e.changedTouches[0];
+      touchStart = { x: t.clientX, y: t.clientY };
+    };
+    const onTouchEnd = (e) => {
+      if (!touchStart || over) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStart.x;
+      const dy = t.clientY - touchStart.y;
+      touchStart = null;
+      const ax = Math.abs(dx);
+      const ay = Math.abs(dy);
+      if (ax < 18 && ay < 18) rotate();
+      else if (ax > ay) move(dx > 0 ? 1 : -1);
+      else if (dy > 0) hardDrop();
+      else rotate();
+    };
+    canvas.addEventListener('touchstart', onTouchStart, { passive: true });
+    canvas.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    function fitWell() {
+      if (!window.matchMedia('(max-width: 480px)').matches) {
+        canvas.style.width = '';
+        canvas.style.height = '';
+        return;
+      }
+      const pad = container.querySelector('.tetris-pad');
+      const padH = pad ? (pad.getBoundingClientRect().height || 56) : 56;
+      const top = canvas.getBoundingClientRect().top;
+      const avail = Math.floor(window.innerHeight - top - padH - 6);
+      const byWidth = Math.floor((window.innerWidth - 16) * 2);
+      const height = Math.max(160, Math.min(avail, byWidth));
+      canvas.style.height = height + 'px';
+      canvas.style.width = Math.floor(height / 2) + 'px';
+    }
+    fitWell();
+    requestAnimationFrame(fitWell);
+    window.addEventListener('resize', fitWell);
+
     function loop(now) {
       if (over) return;
       const dt = now - lastTime;
@@ -250,6 +290,9 @@ export function renderCyberTetris(container, onClose) {
     container._beforeClose = () => {
       stopLoop();
       kb.destroy();
+      window.removeEventListener('resize', fitWell);
+      canvas.removeEventListener('touchstart', onTouchStart);
+      canvas.removeEventListener('touchend', onTouchEnd);
       if (releaseVisibility) releaseVisibility();
     };
   }
@@ -268,8 +311,8 @@ export function renderCyberPacman(container, onClose) {
     let over = false;
 
     container.innerHTML = `
-      <div class="relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
-        <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
+      <div class="phone-arcade phone-arcade--pad relative bg-black border border-amber-500/40 p-6 text-white max-w-xl mx-auto font-mono-hud">
+        <div class="phone-arcade-head flex justify-between items-center mb-4 border-b border-amber-500/40 pb-3">
           <div class="flex items-center gap-3">
             <span class="text-3xl text-yellow-400">🟡</span>
             <div>
@@ -280,9 +323,10 @@ export function renderCyberPacman(container, onClose) {
           <button id="close-game-btn" class="axiom-close-btn" style="flex-shrink:0">✕ TERMINATE</button>
         </div>
 
-        <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
+        <div class="phone-arcade-hud flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-4 text-xs font-bold">
           <div>SCORE: <span id="pac-score" class="text-amber-400 font-extrabold text-base">0</span></div>
           <div id="pac-status" class="text-zinc-400">DOTS LEFT: <span id="pac-dots">0</span></div>
+          <div>LIVES: <span id="pac-lives" class="text-amber-400 font-extrabold text-base">3</span></div>
           <div>HIGH: <span id="pac-high" class="text-amber-400 font-extrabold text-base">${high}</span></div>
         </div>
 
@@ -292,7 +336,7 @@ export function renderCyberPacman(container, onClose) {
           <canvas id="pac-canvas" width="360" height="360" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:360px"></canvas>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+        <div class="phone-arcade-controls grid grid-cols-3 gap-2 max-w-xs mx-auto">
           <div></div>
           <button id="p-up" class="axiom-dpad-btn">▲</button>
           <div></div>
@@ -336,6 +380,12 @@ export function renderCyberPacman(container, onClose) {
       { x: 8, y: 9, color: '#06b6d4', dirX: 0, dirY: -1, homeX: 8, homeY: 9 }
     ];
     let frightTimer = 0;
+    // Three lives. The maze is drawn and held until the first turn. Ghosts
+    // then stay in the house for ~2.9s (16 ticks × 180ms) before they hunt.
+    let lives = 3;
+    let armed = false;
+    let ghostHold = 0;
+    let gameInterval = null;
 
     for (let r = 0; r < ROWS; r++)
       for (let c = 0; c < COLS; c++)
@@ -354,8 +404,29 @@ export function renderCyberPacman(container, onClose) {
       return pos;
     }
 
+    function parkGhosts() {
+      ghosts.forEach(g => { g.x = g.homeX; g.y = g.homeY; });
+      pacman.x = 9; pacman.y = 11;
+      pacman.dirX = 0; pacman.dirY = 0;
+      pacman.nextX = 0; pacman.nextY = 0;
+      ghostHold = 16;
+    }
+
+    function arm() {
+      if (armed || over) return;
+      armed = true;
+      ghostHold = 16;
+      gameInterval = setInterval(step, 180);
+    }
+
+    function setNext(x, y) {
+      pacman.nextX = x;
+      pacman.nextY = y;
+      arm();
+    }
+
     function step() {
-      if (over) return;
+      if (over || !armed) return;
 
       if (pacman.nextX !== 0 || pacman.nextY !== 0) {
         const nx = pacman.x + pacman.nextX;
@@ -386,6 +457,13 @@ export function renderCyberPacman(container, onClose) {
 
       if (dotsLeft <= 0) { over = true; return winGame(); }
 
+      if (ghostHold > 0) {
+        ghostHold--;
+        draw();
+        return;
+      }
+
+      let caught = false;
       ghosts.forEach(g => {
         const dirs = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
         let possible = dirs.filter(d => {
@@ -415,18 +493,18 @@ export function renderCyberPacman(container, onClose) {
         g.x = wrap(g.x + chosen.x, COLS);
         g.y = wrap(g.y + chosen.y, ROWS);
 
-        if (g.x === pacman.x && g.y === pacman.y) {
+        if (!caught && g.x === pacman.x && g.y === pacman.y) {
           if (frightTimer > 0) {
             soundFx.playWin();
             score += 200;
             g.x = g.homeX; g.y = g.homeY;
             updateHud();
           } else {
-            over = true;
-            loseGame();
+            caught = true;
           }
         }
       });
+      if (caught) return loseLife();
 
       if (frightTimer > 0) frightTimer--;
       draw();
@@ -436,6 +514,8 @@ export function renderCyberPacman(container, onClose) {
       container.querySelector('#pac-score').innerText = score;
       if (score > high) high = score;
       container.querySelector('#pac-high').innerText = high;
+      const livesEl = container.querySelector('#pac-lives');
+      if (livesEl) livesEl.innerText = lives;
       const status = container.querySelector('#pac-status');
       status.innerHTML = frightTimer > 0
         ? `<span class="text-cyan-400">⚡ POWER MODE (${frightTimer})</span>`
@@ -485,6 +565,27 @@ export function renderCyberPacman(container, onClose) {
         ctx.fillRect(g.x * TILE + 5, g.y * TILE + 7, 3, 3);
         ctx.fillRect(g.x * TILE + 12, g.y * TILE + 7, 3, 3);
       });
+
+      if (!armed) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = '13px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('PRESS TO START', canvas.width / 2, canvas.height / 2);
+      }
+    }
+
+    function loseLife() {
+      lives--;
+      soundFx.playHit();
+      if (lives <= 0) {
+        over = true;
+        loseGame();
+        return;
+      }
+      frightTimer = 0;
+      parkGhosts();
+      updateHud();
+      draw();
     }
 
     function winGame() {
@@ -518,22 +619,21 @@ export function renderCyberPacman(container, onClose) {
 
     const kb = new ScopedKeyboard();
     kb.on({
-      ArrowUp: () => { pacman.nextX = 0; pacman.nextY = -1; },
-      ArrowDown: () => { pacman.nextX = 0; pacman.nextY = 1; },
-      ArrowLeft: () => { pacman.nextX = -1; pacman.nextY = 0; },
-      ArrowRight: () => { pacman.nextX = 1; pacman.nextY = 0; }
+      ArrowUp: () => setNext(0, -1),
+      ArrowDown: () => setNext(0, 1),
+      ArrowLeft: () => setNext(-1, 0),
+      ArrowRight: () => setNext(1, 0)
     });
 
-    container.querySelector('#p-up').onclick = () => { pacman.nextX = 0; pacman.nextY = -1; };
-    container.querySelector('#p-down').onclick = () => { pacman.nextX = 0; pacman.nextY = 1; };
-    container.querySelector('#p-left').onclick = () => { pacman.nextX = -1; pacman.nextY = 0; };
-    container.querySelector('#p-right').onclick = () => { pacman.nextX = 1; pacman.nextY = 0; };
+    container.querySelector('#p-up').onclick = () => setNext(0, -1);
+    container.querySelector('#p-down').onclick = () => setNext(0, 1);
+    container.querySelector('#p-left').onclick = () => setNext(-1, 0);
+    container.querySelector('#p-right').onclick = () => setNext(1, 0);
 
     const closeBtn = container.querySelector('#close-game-btn');
     closeBtn.onclick = () => { clearInterval(gameInterval); kb.destroy(); onClose(); };
 
     draw();
-    const gameInterval = setInterval(step, 180);
   }
 }
 

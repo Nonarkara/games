@@ -214,6 +214,9 @@ export function renderReflexMatrix(container, onClose) {
     let over = false;
     let nextSpawn = 0;
     let interval = null;
+    // The grid is on screen. The first wave waits for the first tap, so a
+    // cell cannot expire — and cost a life — before the player has started.
+    let armed = false;
 
     function ttl() { return Math.max(700, 1600 - wave * 80); }
     function spawnGap() { return Math.max(400, 900 - wave * 30); }
@@ -228,8 +231,15 @@ export function renderReflexMatrix(container, onClose) {
       render();
     }
 
+    function arm() {
+      if (armed || over) return;
+      armed = true;
+      nextSpawn = Date.now() + 500;
+      interval = setInterval(tick, 100);
+    }
+
     function tick() {
-      if (over) return;
+      if (over || !armed) return;
       const now = Date.now();
       const expired = active.filter(a => now - a.spawnedAt > a.ttl);
       if (expired.length) {
@@ -297,19 +307,20 @@ export function renderReflexMatrix(container, onClose) {
               return `<button class="rm-cell aspect-square border flex items-center justify-center transition ${a ? 'bg-amber-500 border-amber-300 animate-pulse' : 'bg-zinc-900 border-amber-500/20'}" data-id="${i}"></button>`;
             }).join('')}
           </div>
-          <p class="text-[10px] text-zinc-500 text-center mt-4">TAP AMBER CELLS BEFORE THEY FADE · FASTER = MORE POINTS</p>
+          <p class="text-[10px] text-zinc-500 text-center mt-4">${armed ? 'TAP AMBER CELLS BEFORE THEY FADE · FASTER = MORE POINTS' : 'TAP THE GRID TO START'}</p>
         </div>
       `;
 
       container.querySelector('#close-game-btn').onclick = () => { clearInterval(interval); onClose(); };
       container.querySelectorAll('.rm-cell').forEach(btn => {
-        btn.onclick = () => hit(parseInt(btn.dataset.id));
+        btn.onclick = () => {
+          if (!armed) { arm(); return; }
+          hit(parseInt(btn.dataset.id, 10));
+        };
       });
     }
 
     render();
-    nextSpawn = Date.now() + 600;
-    interval = setInterval(tick, 100);
   }
 }
 

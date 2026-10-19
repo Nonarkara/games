@@ -601,7 +601,7 @@ export function renderConnectFour(container, onClose) {
             : `${moves} moves. It looks five moves ahead and values blocking above building, so the trap is usually set two moves before you see it. Watch the centre column.`,
           score: won ? Math.max(10, 200 - moves * 4) : 0,
           gameId: 'connect-four',
-          tone: won ? 'win' : 'over',
+          tone: won ? 'win' : (title === 'DRAW' ? 'draw' : 'over'),
           onRestart: () => { board = fresh(); over = false; moves = 0; render(); },
           onClose
         });
