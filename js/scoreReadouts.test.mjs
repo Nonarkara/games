@@ -104,6 +104,18 @@ assert.equal(resultMark('win', 0), '•');
 assert.equal(resultMark('over', 0), '✕');
 assert.equal(resultMark('over', 40), '✕');
 assert.equal(resultMark('draw', 0), '•');
+assert.equal(resultMark('win', 20, 'rough'), '•');
+assert.equal(resultMark('win', 30, 'warming'), '•');
+assert.equal(resultMark('win', 10, 'rough'), '•');
+assert.equal(resultMark('win', 15, 'warming'), '•');
+assert.equal(resultMark('win', 80, 'solid'), '✓');
+assert.equal(resultMark('win', 100, 'sharp'), '✓');
+assert.equal(resultMark('over', 20, 'rough'), '✕');
+assert.equal(explainScore('periodic-quest', 20).band, 'rough');
+assert.equal(explainScore('periodic-quest', 30).band, 'rough');
+assert.equal(explainScore('periodic-quest', 80).band, 'solid');
+assert.equal(explainScore('stroop-match-pro', 10).band, 'rough');
+assert.equal(explainScore('ride-the-bus', 15).band, 'warming');
 
 for (const id of ['connect-four', 'go', 'chess', 'checkers', 'reversi', 'tic-tac-toe']) {
   const card = explainScore(id, 0);

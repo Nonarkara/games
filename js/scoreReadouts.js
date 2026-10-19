@@ -78,11 +78,11 @@ const CUTS = {
   'cyber-blackjack': [200, 800, 2500],
   'trivia-master': [30, 55, 80],
   'pattern-breaker': [3, 8, 14],
-  'number-chain': [15, 28, 40],
+  'number-chain': [40, 70, 90],
   'tower-hanoi': [200, 450, 700],
   'anagram-scramble': [20, 45, 70],
   'word-builder': [15, 35, 60],
-  'periodic-quest': [15, 28, 40],
+  'periodic-quest': [40, 70, 90],
   'capital-quiz': [40, 70, 90],
   'math-safari': [20, 45, 70],
   'memory-match': [100, 250, 420],
@@ -415,14 +415,19 @@ export function isNewPersonalBest(previous, score) {
 }
 
 /**
- * Result-card mark. A win with a real score is a check. A loss is a cross.
- * Zero and draws stay a dot — a check on 0 was the lie the audit caught.
+ * Result-card mark. A check is a solid or sharp result with a real score.
+ * A rough or warming round stays a dot even when the game calls it a win.
+ * A loss is a cross. With no band, a win above zero is still a check.
  */
-export function resultMark(tone, score) {
+export function resultMark(tone, score, band) {
   const n = Number(score);
   const scored = Number.isFinite(n) && n > 0;
+  const loss = tone === 'over' || tone === 'loss' || tone === 'lose';
+  if (band === 'rough' || band === 'warming') return loss ? '✕' : '•';
+  if ((band === 'solid' || band === 'sharp') && scored && !loss) return '✓';
+  if (band === 'solid' || band === 'sharp') return loss ? '✕' : '•';
   if (tone === 'win' && scored) return '✓';
-  if (tone === 'over' || tone === 'loss' || tone === 'lose') return '✕';
+  if (loss) return '✕';
   return '•';
 }
 
