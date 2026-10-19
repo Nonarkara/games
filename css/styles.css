@@ -3666,3 +3666,6 @@ html[data-input="keys"] .hint-touch { display: none; }
   font-size: 12px;
   font-weight: 600;
 }
+/* Phone read hides .directory-header > p. This note is one of those
+   paragraphs, and it is the only signal that ?game= missed. */
+.directory-header > p.unknown-game { display: block; }
