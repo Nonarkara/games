@@ -111,6 +111,22 @@ assert.equal(resultMark('win', 15, 'warming'), '•');
 assert.equal(resultMark('win', 80, 'solid'), '✓');
 assert.equal(resultMark('win', 100, 'sharp'), '✓');
 assert.equal(resultMark('over', 20, 'rough'), '✕');
+// Same gate as showResult: win/lose carts hide the scale, so a win stays a check.
+function shownMark(gameId, score, tone) {
+  const readout = explainScore(gameId, score);
+  return resultMark(tone, score, readout?.showScale ? readout.band : undefined);
+}
+assert.equal(shownMark('connect-four', 96, 'win'), '✓');
+assert.equal(shownMark('connect-four', 60, 'win'), '✓');
+assert.equal(shownMark('tic-tac-toe', 200, 'win'), '✓');
+assert.equal(shownMark('tic-tac-toe', 100, 'win'), '✓');
+assert.equal(shownMark('reversi', 30, 'win'), '✓');
+assert.equal(shownMark('periodic-quest', 20, 'win'), '•');
+assert.equal(shownMark('periodic-quest', 30, 'win'), '•');
+assert.equal(shownMark('stroop-match', 10, 'win'), '•');
+assert.equal(shownMark('stroop-match-pro', 10, 'win'), '•');
+assert.equal(shownMark('ride-the-bus', 15, 'win'), '•');
+
 assert.equal(explainScore('periodic-quest', 20).band, 'rough');
 assert.equal(explainScore('periodic-quest', 30).band, 'rough');
 assert.equal(explainScore('periodic-quest', 80).band, 'solid');

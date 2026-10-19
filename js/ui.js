@@ -140,7 +140,7 @@ export function showResult({ container, title = 'GAME OVER', message = '', score
   overlay.className = 'axiom-result-overlay';
   overlay.innerHTML = `
     <div class="axiom-result-card axiom-result-${tone}" role="dialog" aria-modal="true">
-      <div class="axiom-result-glyph" aria-hidden="true">${resultMark(tone, score, readout?.band)}</div>
+      <div class="axiom-result-glyph" aria-hidden="true">${resultMark(tone, score, readout?.showScale ? readout.band : undefined)}</div>
       <h3 class="axiom-result-title">${title}</h3>
       ${message ? `<p class="axiom-result-msg">${message}</p>` : ''}
       ${score !== null ? `<div class="axiom-result-score"><span class="axiom-result-score-label">FINAL SCORE</span><span class="axiom-result-score-value">${score}</span></div>` : ''}
