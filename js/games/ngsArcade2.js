@@ -310,7 +310,7 @@ export function renderFrogger(container, onClose) {
       <div class="${FRAME}">
         ${head('🐸', 'FROGGER', 'Konami 1981 · cross the road, mind the gaps')}
         <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3">
-          <span class="hint-keys">Arrow keys.</span><span class="hint-touch">The pad below.</span> Reach the far bank — every crossing scores and the traffic gets faster.
+          <span class="hint-keys">Arrow keys.</span><span class="hint-touch">Use the pad below.</span> Reach the far bank — every crossing scores and the traffic gets faster.
           The green strip in the middle is safe: wait there and read the next gap. Touch a car and you lose a frog.
         </div>
         <div class="flex justify-between items-center bg-zinc-950 border border-amber-500/40 p-3 mb-3 text-xs font-bold">

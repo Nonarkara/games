@@ -36,7 +36,7 @@ export function renderRetroSnake(container, onClose) {
           <div>HIGH SCORE: <span id="snake-high" class="text-amber-400 text-base">${high}</span></div>
         </div>
 
-        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3"><span class="hint-keys">Arrow keys to turn</span><span class="hint-touch">The pad below to turn</span> · eat the red square · don't hit a wall or your own tail</div>
+        <div class="text-amber-500/80 text-[10px] uppercase text-center mb-3"><span class="hint-keys">Arrow keys to turn</span><span class="hint-touch">Use the pad below to turn</span> · eat the red square · don't hit a wall or your own tail</div>
 
         <div class="relative flex justify-center mb-4" style="min-width:0;width:100%">
           <canvas id="snake-canvas" width="400" height="400" class="w-full h-auto bg-black border border-amber-500/60 shadow-inner" style="max-width:min(400px,100%);min-width:0;width:100%;aspect-ratio:1"></canvas>
