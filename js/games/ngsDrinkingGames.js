@@ -109,7 +109,7 @@ export function renderKingsCup(container, onClose) {
       clearTimeout(timer);
       // Score = cards drawn, matching the server ceiling of 52.
       const score = Math.max(0, rounds);
-      showResult({ container, title: 'RING CLOSED', message: `${rounds} cards drawn.`, score, gameId: 'kings-cup', tone: 'over', onRestart: start, onClose });
+      showResult({ container, title: 'RING CLOSED', message: `${rounds} cards drawn.`, score, gameId: 'kings-cup', tone: rounds >= deck.length ? 'win' : 'over', onRestart: start, onClose });
     }
     draw();
   }
