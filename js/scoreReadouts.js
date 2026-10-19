@@ -478,8 +478,10 @@ export function explainScore(gameId, score) {
   const skill = guide?.label ? guide.label.toLowerCase() : fam.skill;
   const tip = guide?.tip || copy.tip;
   const winLose = WIN_LOSE.has(gameId);
+  // A rough or warming round leads with this game's practice, not the
+  // family paragraph. Breakout was opening on a timing-window line.
   const coaching = guide?.practice && (band === 'rough' || band === 'warming')
-    ? `${copy.feel} ${guide.practice}`
+    ? guide.practice
     : copy.feel;
 
   const range = winLose

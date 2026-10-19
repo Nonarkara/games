@@ -12,7 +12,7 @@ assert.deepEqual(missing, [], `games missing score profile: ${missing.join(', ')
 
 const dualLow = explainScore('dual-n-back', 20);
 assert.equal(dualLow.band, 'rough');
-assert.match(dualLow.feel, /drop|normal|load/i);
+assert.match(dualLow.feel, /square|letter|two turns/i);
 assert.match(dualLow.tip, /accuracy|two-back|stable/i);
 assert.equal(dualLow.showScale, true);
 assert.match(dualLow.range, /Rough/);
@@ -113,6 +113,11 @@ for (const id of ['connect-four', 'go', 'chess', 'checkers', 'reversi', 'tic-tac
 }
 assert.match(explainScore('connect-four', 0).tip, /centre/i);
 assert.match(explainScore('chess', 0).tip, /opponent/i);
+
+const breakoutLow = explainScore('arcade-breakout', 50);
+assert.equal(breakoutLow.band, 'rough');
+assert.match(breakoutLow.feel, /paddle|rebound/i);
+assert.doesNotMatch(breakoutLow.feel, /window was already gone/);
 
 const capitalLow = explainScore('capital-quiz', 20);
 assert.equal(capitalLow.band, 'rough');
