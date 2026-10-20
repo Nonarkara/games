@@ -143,16 +143,35 @@ try {
   // for font swap keeps overflow measurements deterministic in production.
   await main.evaluate(`document.fonts.ready.then(() => true)`);
 
-  const home = await main.evaluate(`(() => ({
-    title: document.title,
-    games: document.querySelectorAll('[data-game]').length,
-    viewport: innerWidth,
-    overflow: document.documentElement.scrollWidth - innerWidth,
-    featureStyle: (() => {
-      const style = getComputedStyle(document.querySelector('.attract-feature'));
-      return { borderLeft: style.borderLeft, boxShadow: style.boxShadow, background: style.backgroundColor };
-    })()
-  }))()`);
+  // The featured hero is rendered from the catalog after fonts settle, so on a
+  // cold cache it can arrive a beat after openPage's wait. Wait for it rather
+  // than dereferencing null — a TypeError from getComputedStyle says nothing
+  // about which selector was missing or why.
+  const heroReady = await main.evaluate(`new Promise(resolve => {
+    const t0 = Date.now();
+    const tick = () => {
+      if (document.querySelector('.attract-feature')) return resolve(true);
+      if (Date.now() - t0 > 8000) return resolve(false);
+      requestAnimationFrame(tick);
+    };
+    tick();
+  })`);
+
+  const home = await main.evaluate(`(() => {
+    const feat = document.querySelector('.attract-feature');
+    return {
+      title: document.title,
+      games: document.querySelectorAll('[data-game]').length,
+      viewport: innerWidth,
+      overflow: document.documentElement.scrollWidth - innerWidth,
+      hasFeature: Boolean(feat),
+      featureStyle: feat ? (() => {
+        const style = getComputedStyle(feat);
+        return { borderLeft: style.borderLeft, boxShadow: style.boxShadow, background: style.backgroundColor };
+      })() : null
+    };
+  })()`);
+  if (!heroReady || !home.hasFeature) throw new Error('the featured hero never rendered — .attract-feature missing after 8s');
   if (Math.abs(home.viewport - viewportWidth) > 2) throw new Error(`home audited at ${home.viewport}px, wanted ${viewportWidth}px`);
   if (home.overflow > 1) throw new Error(`mobile home overflows by ${home.overflow}px`);
   await main.screenshot(screenshots.home);
