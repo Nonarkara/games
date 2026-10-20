@@ -12,6 +12,8 @@ const TABS = [
   { id: 'origin', label: 'ORIGIN', hint: 'How this floor came about' },
   { id: 'philosophy', label: 'WHY GAMES', hint: 'Not killing time' },
   { id: 'science', label: 'SCIENCE', hint: 'Five frameworks' },
+  { id: 'fourps', label: 'THE 4 Ps', hint: 'Purpose · Practical · Proof · People' },
+  { id: 'dopamine', label: 'REWARDS', hint: 'Why games hook you' },
   { id: 'drnon', label: 'DR NON', hint: 'The person — pixel only' },
 ];
 
@@ -42,6 +44,8 @@ export function renderResearch(container, onClose) {
           ${active === 'origin' ? originHtml() : ''}
           ${active === 'philosophy' ? philosophyHtml() : ''}
           ${active === 'science' ? scienceHtml() : ''}
+          ${active === 'fourps' ? fourPsHtml() : ''}
+          ${active === 'dopamine' ? dopamineHtml() : ''}
           ${active === 'drnon' ? drnonHtml() : ''}
         </div>
 
@@ -147,6 +151,131 @@ function philosophyHtml() {
       <p>Huizinga called humans <em>Homo Ludens</em> — the playing animal — in 1938. Bernard Suits defined playing a game as “the voluntary attempt to overcome unnecessary obstacles” in 1978. Jane McGonigal has spent a career showing that games create real optimism and agency under constraint. All three point the same way: we do not play games to escape life. We play games to rehearse the part of life that needs a rule, a limit, and a second try.</p>
 
       <p>Your mama wanted you to do something that gives back. So does this floor. Pick a room — TRAIN, ARCADE, LEARN, or LABS — and give ten minutes to a skill that says its name before it starts. That is not killing time. That is spending it.</p>
+    </section>
+  `;
+}
+
+function fourPsHtml() {
+  return `
+    <section aria-labelledby="fourps-h">
+      <p class="research-kicker">THE 4 Ps · HOW A PROJECT GETS BUILT SO PEOPLE ACTUALLY DO IT</p>
+      <h3 id="fourps-h" class="research-h">Purpose, Practicality, Proof, People. Miss one and the other three do not matter.</h3>
+      <p class="research-lead">I run every project — a smart-city dashboard, a training programme, a conference talk — through the same four questions. They are not a methodology I invented for a slide. They are the checklist I use to decide whether anything will happen after the demo ends.</p>
+
+      <div class="research-pgrid">
+        <article>
+          <span class="research-pgrid-letter">P1</span>
+          <h4>PURPOSE</h4>
+          <p><strong>What is the point, in one sentence someone else could repeat?</strong> Not the feature list. The reason to exist. If the sentence needs the word "platform", it is not finished.</p>
+          <p>On this floor: <em>Kill time. Keep the mind.</em> Every cartridge says what skill it trains before you touch it. There is no other reason any of this exists — no engagement metrics, no time-on-site target, no newsletter. If a change would not help someone get better at one named thing, it does not ship.</p>
+        </article>
+        <article>
+          <span class="research-pgrid-letter">P2</span>
+          <h4>PRACTICALITY</h4>
+          <p><strong>Can the actual person, on an actual Tuesday, actually do this?</strong> Not the demo version. The real one, on a phone, with no training budget and no incentive except the thing itself.</p>
+          <p>On this floor: every round is 1–10 minutes, every control clears a 40px tap target, every game opens in a browser with no install and no account. A game that needs a tutorial is a game half the people will never open. That is why the how-to is a picture before it is a sentence.</p>
+        </article>
+        <article>
+          <span class="research-pgrid-letter">P3</span>
+          <h4>PROOF</h4>
+          <p><strong>What evidence would change my mind, and where is it?</strong> If the answer is "vibes", the project is a preference. If the answer is a number with a source, it is a bet you can settle.</p>
+          <p>On this floor: the claim on every briefing is the narrow one that survives <a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons et al. 2016</a> — near transfer is real, far transfer is contested. We cite it on every cartridge rather than burying it. The score goes on a public board so you can check your own improvement instead of taking mine.</p>
+        </article>
+        <article>
+          <span class="research-pgrid-letter">P4</span>
+          <h4>PEOPLE</h4>
+          <p><strong>What does the person actually get, and why would they come back unprompted?</strong> This is the one most projects skip, and skipping it is why most projects die quietly after launch week.</p>
+          <p><strong>People are not good at listening to instructions.</strong> Tell someone to exercise twice a week and they nod. Put a game in front of them with a score and a leaderboard and the same person opens it four times that week, not because they resolved to, but because the loop pulled them back. That is not manipulation — it is meeting people where the wiring already is. The next tab is the mechanism.</p>
+        </article>
+      </div>
+
+      <h4 class="research-h4">Why P4 has to be last in the sentence and first in the work.</h4>
+      <p>Purpose without people is a mission statement. Practicality without people is a spec. Proof without people is a paper. People without the first three is a casino — and this is exactly where most gamification goes wrong, so it is worth being precise about the line.</p>
+
+      <div class="research-compare">
+        <article><b>INCENTIVE THAT SERVES THE PERSON</b><p>The reward is the thing they were already trying to get. They wanted to close the gap in nine moves; the game made the gap visible and the closing feel good. The score is a thermometer on real progress. Take the game away and the practice does not stop — it just stops being counted.</p></article>
+        <article><b>INCENTIVE THAT SERVES ONLY THE SYSTEM</b><p>The reward is a number that moves whether or not the person improved. Streaks that reset on a Sunday night. Points that buy nothing and mean nothing outside the app. Engagement treated as the outcome instead of as a proxy for it. The player is being farmed, and eventually they notice, and then they never come back.</p></article>
+      </div>
+
+      <p>The line is not "never use a leaderboard". It is: <strong>the reward must be a real measurement of something the person actually wanted.</strong> That is why the top-5 board here is public, why the bands are labelled honestly (a rough round is not dressed up as a win), and why <a href="https://doi.org/10.1177/1529100616661983" target="_blank" rel="noopener">Simons 2016</a> is quoted on the briefing rather than the footer. A game that flatters you into returning is a product. A game that measures you accurately and rewards you for the real improvement is a tool. NGS is trying to be the second one.</p>
+
+      <h4 class="research-h4">So what. Three moves.</h4>
+      <ol class="research-steps">
+        <li><strong>Run the four questions before the work starts, not after.</strong> Purpose first — one sentence, repeatable. Practicality next — the real Tuesday, the real phone. Proof next — the number that would settle it. People last and loudest — what does the human get on the day it launches, and on the day after?</li>
+        <li><strong>If P4 has no honest answer, do not launch.</strong> A dashboard nobody opens is a failure with a domain name attached. The incentive has to be real.</li>
+        <li><strong>Say where the loop stops.</strong> This floor tells you what it trains and refuses to claim it makes you smarter, because a system that oversells will eventually be audited. Honesty is a feature that compounds; the Simons citation stays on the shelf on purpose.</li>
+      </ol>
+
+      <p class="research-sig">Purpose. Practical. Proof. People.</p>
+      <p class="research-sig2">— Dr Non, Bangkok, 2026</p>
+    </section>
+  `;
+}
+
+function dopamineHtml() {
+  return `
+    <section aria-labelledby="dopamine-h">
+      <p class="research-kicker">REWARDS · WHY A GOOD GAME IS DIFFICULT TO PUT DOWN</p>
+      <h3 id="dopamine-h" class="research-h">Points, badges, leaderboards. Three different doses of the same chemical.</h3>
+      <p class="research-lead">Werbach and Hunter's PBL triad — Points, Badges, Leaderboards — is the most-copied framework in the industry and the most-misread one. People treat it as three decoration options. It is not. They are three different psychological instruments, and they hit the reward system at different intensities and different timescales.</p>
+
+      <h4 class="research-h4">The machinery underneath.</h4>
+      <p>Dopamine is not a pleasure chemical. It is a <em>motivation</em> chemical, and it is released in anticipation of a reward, not by the reward itself. This is the single most misquoted fact in pop psychology and it matters here: the click that feels good is the click before the number appears, not the number. Schultz's reward-prediction work is the standard reference — the brain predicts a reward, and <strong>the error between prediction and outcome</strong> is what drives the next attempt.</p>
+      <p>That is the whole mechanism. A game is a machine for manufacturing a small, reliable, repeatable prediction error. Get it right and the player pulls the trigger again. Get it wrong and they feel stupid and leave. The art is not "add dopamine" — it is <strong>make the outcome uncertain enough to be worth chasing, and legible enough that the chase felt fair.</strong></p>
+
+      <h4 class="research-h4">The three instruments, at three doses.</h4>
+      <div class="research-pgrid">
+        <article>
+          <span class="research-pgrid-letter">P</span>
+          <h4>POINTS — fast, small, continuous</h4>
+          <p><strong>What it is:</strong> a running number that ticks up during play.</p>
+          <p><strong>The dose:</strong> the highest frequency, the smallest magnitude. Points fire every few seconds. This is the slot-machine lever, and it is also the training-wheel: points make progress visible while you are still learning the skill.</p>
+          <p><strong>Why it works:</strong> predictability. You know a point is coming. That predictability is what lets you settle into a rhythm — and rhythm is what makes the round feel like work rather than struggle.</p>
+          <p><strong>In NGS:</strong> the live score on every cartridge. It updates mid-round so you can see the loop close.</p>
+        </article>
+        <article>
+          <span class="research-pgrid-letter">B</span>
+          <h4>BADGES — slow, rare, identity-forming</h4>
+          <p><strong>What it is:</strong> a persistent marker that says something about who you are.</p>
+          <p><strong>The dose:</strong> the lowest frequency, the largest magnitude. A badge arrives after hours or weeks. That delay is the entire design — scarcity is what makes it land.</p>
+          <p><strong>Why it works:</strong> it is not about the object. It is about the identity shift from "someone who might do this" to "someone who does this." The badge is a certificate you give yourself.</p>
+          <p><strong>In NGS:</strong> four letters on the board. They are not a username — they are a claim, and claiming it in public is the part that makes it stick.</p>
+        </article>
+        <article>
+          <span class="research-pgrid-letter">L</span>
+          <h4>LEADERBOARDS — social, comparative, volatile</h4>
+          <p><strong>What it is:</strong> your number next to somebody else's.</p>
+          <p><strong>The dose:</strong> continuous, but externally sourced — the stimulus comes from other people, which is why it outlasts anything you can generate alone.</p>
+          <p><strong>Why it works:</strong> social comparison, which humans cannot switch off. It converts a private activity into a public one. This is also the dangerous one: leaderboards that reward raw volume reward the fast and punish the careful, and they are the single most reliable way to make a good product feel hostile to beginners.</p>
+          <p><strong>In NGS:</strong> top 5 per cartridge, so you are comparing against a handful of people rather than a wall of strangers. Per-cartridge, not aggregate — so a goalkeeper and a typist are not on the same board.</p>
+        </article>
+      </div>
+
+      <h4 class="research-h4">The part most designers get wrong: the game should get hotter, or cooler, depending on skill.</h4>
+      <p>You said it precisely, so let me put it in the language the research uses. This is <strong>adaptive difficulty</strong>, and it is the mechanic that separates a game that holds attention for a year from one that holds it for a week. The round should tighten when the player is winning and loosen when the player is drowning.</p>
+      <p>There is a reason this is not just difficulty: a game that never adapts bores the expert and humiliates the beginner within about ten minutes, and both of those end the session. A game that adapts gives a skilled player a puzzle and gives a new player a win, and both of those end in a return. The score bands on this floor — <em>rough, warming, solid, sharp</em> — are exactly this. Rough says come back and do the short version. Sharp says you have outgrown it.</p>
+      <blockquote class="research-quote">A fixed challenge is a wall for one person and a ceiling for another. Adaptive difficulty is the only reason a single game can hold two different skill levels at the same table.</blockquote>
+
+      <h4 class="research-h4">Why this is not slot-machine psychology.</h4>
+      <p>There is a real line here and this floor tries to stay on the right side of it. The comparison that matters: a slot machine makes the reward <em>unpredictable and worthless</em> — you cannot get ahead, the next pull is independent of the last, and the only thing that transfers is the pull itself. A well-designed game makes the reward <em>predictable in structure and real in value</em> — the point you earned is the point you earned, and it moves a number on a board that means something.</p>
+
+      <div class="research-compare">
+        <article><b>STRUCTURED</b><p>The reward maps to a real skill. The score is earned and can be seen improving over weeks. The leaderboard is per-skill, so the comparison is fair. Removing the game removes the practice — the skill is still yours.</p></article>
+        <article><b>EXTRACTIVE</b><p>The reward is random and non-transferable. The streak resets on your birthday. The number goes up regardless of whether you improved. Removing the game leaves nothing. The only thing that transferred was the compulsion.</p></article>
+      </div>
+
+      <p>That is the whole design philosophy of NGS in one sentence: <strong>make the reward a real measurement of something the player actually wanted, then get out of the way.</strong> The dopamine is a side effect of the loop working. It was never the point.</p>
+
+      <h4 class="research-h4">Papers behind this tab.</h4>
+      <ul class="research-papers">
+        <li><a href="https://doi.org/10.1126/science.275.5293.1593" target="_blank" rel="noopener">Schultz, Dayan &amp; Montague 1997 · reward prediction and dopamine</a></li>
+        <li><a href="https://doi.org/10.1016/S0891-0618(97)00081-1" target="_blank" rel="noopener">Schultz 1997 · neural coding of reward</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Motivational_salience" target="_blank" rel="noopener">Berridge &amp; Robinson 1993 · wanting vs liking</a></li>
+        <li><a href="https://doi.org/10.1145/2508859.2513746" target="_blank" rel="noopener">Hamari, Koivisto &amp; Sarsa 2014 · does gamification work?</a></li>
+        <li><a href="https://doi.org/10.1080/00461520.2016.1170155" target="_blank" rel="noopener">Landers et al. 2016 · brain games and cognition</a></li>
+        <li><a href="https://doi.org/10.1016/j.chb.2009.05.004" target="_blank" rel="noopener">Ryan, Rigby &amp; Przybylski 2006 · the motivational pull of games (SDT)</a></li>
+      </ul>
+      <p class="research-note-sm">Hamari et al. 2016 is the honest counterweight: gamification effects are real but modest, and context-dependent. That is consistent with everything else on this floor — the claim is never "games fix you", it is "a well-built loop makes the thing you already meant to do easier to keep doing".</p>
     </section>
   `;
 }

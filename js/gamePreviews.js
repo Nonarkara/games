@@ -94,6 +94,13 @@ const MAP = {
   'mental-math-pro': 'math',
   'mental-math-thai': 'math',
   'type-rush': 'typing',
+  // mind gym six — each needs its own scene, a generic PLAY tile teaches nothing
+  'verbal-fluency': 'fluency',
+  'digit-symbol': 'symbols',
+  'reversi': 'reversi',
+  'dots-boxes': 'dots',
+  'flood-it': 'flood',
+  'peg-solitaire': 'peg',
   // labs party
   'kings-cup': 'party',
   'never-have-i': 'party',
@@ -250,6 +257,53 @@ export function previewHtmlFor(game) {
         <span class="pv-play">▶</span><span>PLAY</span><span class="pv-score">+10</span>
       </div>
       <p class="pv-cap">One short round — score, then beat it</p>`,
+    // ── Mind Gym six. Each scene shows the actual move that scores. ────────
+    fluency: `
+      <div class="pv-scene pv-fluency" aria-hidden="true">
+        <span class="pv-cat">ANIMALS</span>
+        <em class="pv-word-in">cat</em>
+        <span class="pv-tally"><i></i><i></i><i></i><i></i></span>
+      </div>
+      <p class="pv-cap">Name them all before the clock — repeats do not count</p>`,
+    symbols: `
+      <div class="pv-scene pv-symbols" aria-hidden="true">
+        <span class="pv-key"><i>▲</i><b>3</b></span>
+        <span class="pv-key"><i>●</i><b>7</b></span>
+        <span class="pv-key on"><i>◆</i><b>5</b></span>
+      </div>
+      <p class="pv-cap">Read the key, type the number — it stays on screen</p>`,
+    reversi: `
+      <div class="pv-scene pv-reversi" aria-hidden="true">
+        <span class="pv-dis o"></span><span class="pv-dis w"></span><span class="pv-dis w"></span><span class="pv-dis o"></span>
+        <span class="pv-dis o"></span><span class="pv-dis o"></span><span class="pv-drop"></span><span class="pv-dis o"></span>
+        <span class="pv-dis w"></span><span class="pv-dis w"></span><span class="pv-dis w"></span><span class="pv-dis o"></span>
+        <span class="pv-dis o"></span><span class="pv-dis w"></span><span class="pv-dis o"></span><span class="pv-dis w"></span>
+      </div>
+      <p class="pv-cap">Trap their line between yours — the whole line flips</p>`,
+    dots: `
+      <div class="pv-scene pv-dots" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+        <i></i><i class="claim"></i><i class="edge"></i><i></i>
+        <i></i><i class="edge"></i><i class="claim"></i><i></i>
+        <i></i><i></i><i></i><i></i>
+      </div>
+      <p class="pv-cap">One line a turn — close the 4th side, you keep going</p>`,
+    flood: `
+      <div class="pv-scene pv-flood" aria-hidden="true">
+        <i class="f1"></i><i class="f1"></i><i class="f2"></i><i class="f3"></i>
+        <i class="f2"></i><i class="f1"></i><i class="f4"></i><i class="f3"></i>
+        <i class="f3"></i><i class="f5"></i><i class="f2"></i><i class="f5"></i>
+        <i class="f4"></i><i class="f3"></i><i class="f5"></i><i class="f2"></i>
+      </div>
+      <p class="pv-cap">Pick an ink — the corner blob eats what it touches</p>`,
+    peg: `
+      <div class="pv-scene pv-peg" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i class="jump"></i><i></i><i></i>
+        <i></i><i></i><i></i><i class="hole"></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <p class="pv-cap">Hop a peg over the next — 32 down to 1</p>`,
     // aliases
     tower: `
       <div class="pv-scene pv-tower" aria-hidden="true">

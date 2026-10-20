@@ -2855,7 +2855,9 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 }
 .research-tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* Six tabs now. Auto-fit keeps it correct if another is ever added, and
+     the phone breakpoint below drops to two columns. */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1px;
   background: var(--ax-line-2);
   border-bottom: 1px solid var(--ax-line-2);
@@ -2993,6 +2995,36 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 .research-list--muted code { background: #0c121a; padding: 1px 5px; color: var(--ax-ink-3); font-size: 11px; }
 .research-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 12px 0 16px; background: var(--ax-line-2); border: 1px solid var(--ax-line-2); }
 .research-compare article { padding: 14px; background: var(--ax-panel); }
+
+/* ── The 4 Ps · four-column grid that collapses to one on a phone ── */
+.research-pgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  margin: 16px 0 20px;
+  background: var(--ax-line-2);
+  border: 1px solid var(--ax-line-2);
+}
+.research-pgrid article { padding: 16px; background: var(--ax-panel); position: relative; }
+.research-pgrid-letter {
+  display: inline-block;
+  min-width: 26px;
+  margin-bottom: 8px;
+  padding: 2px 5px;
+  background: var(--ax-red);
+  color: #0c121a;
+  font-family: var(--ax-pixel);
+  font-size: 8px;
+  letter-spacing: .1em;
+  text-align: center;
+}
+.research-pgrid h4 { margin: 0 0 8px; font-family: var(--ax-pixel); font-size: 10px; letter-spacing: .1em; color: var(--ax-ink); }
+.research-pgrid p { margin: 0 0 8px !important; color: var(--ax-ink-2); font-size: 11.5px; line-height: 1.55; }
+.research-pgrid p:last-child { margin-bottom: 0 !important; color: var(--ax-ink-3); font-size: 11px; }
+.research-pgrid strong { color: var(--ax-red); }
+@media (max-width: 760px) {
+  .research-pgrid { grid-template-columns: 1fr; }
+}
 .research-compare b { display: block; margin-bottom: 6px; color: var(--ax-red); font-family: var(--ax-pixel); font-size: 8px; letter-spacing: .1em; }
 .research-compare p { margin: 0 !important; font-size: 11px; line-height: 1.5; color: var(--ax-ink-2); }
 .research-foot {
@@ -3096,6 +3128,108 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 .pv-wordle .g { background: #22c55e; color: #fff; border-color: #22c55e; } .pv-wordle .y { background: #eab308; color: #1a1206; border-color: #eab308; }
 .pv-wordle span { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--ax-line-2); background: var(--ax-panel); }
 .pv-generic .pv-play { color: var(--ax-red); animation: pv-pulse 1s ease-in-out infinite; } .pv-generic .pv-score { color: #22c55e; animation: pv-ans 1s ease-in-out infinite; }
+
+/* ── Mind Gym six ─────────────────────────────────────────────────────────
+ * Each scene animates the move that actually scores, in the same amber +
+ * neutrals register. Deliberately not multi-hued: a player reads the motion,
+ * not the colour.                                                    */
+.pv-fluency { flex-direction: column; gap: 6px; }
+.pv-fluency .pv-cat { color: var(--ax-ink-3); font-size: 8px; letter-spacing: .16em; }
+.pv-fluency .pv-word-in {
+  font-style: normal;
+  color: var(--ax-red);
+  font-size: 12px;
+  animation: pv-word-cycle 2.6s steps(1) infinite;
+}
+@keyframes pv-word-cycle {
+  0%   { opacity: 1; }
+  25%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.pv-fluency .pv-tally { display: flex; gap: 4px; }
+.pv-fluency .pv-tally i { width: 14px; height: 4px; background: var(--ax-line-2); display: block; }
+.pv-fluency .pv-tally i:nth-child(-n+3) { background: var(--ax-red); animation: pv-tally 2.6s steps(1) infinite; }
+.pv-fluency .pv-tally i:nth-child(3) { animation-delay: .6s; }
+.pv-fluency .pv-tally i:nth-child(2) { animation-delay: 1.2s; }
+.pv-fluency .pv-tally i:nth-child(1) { animation-delay: 1.8s; }
+@keyframes pv-tally { 0% { background: var(--ax-line-2); } 20%,100% { background: var(--ax-red); } }
+
+.pv-symbols { gap: 6px; }
+.pv-symbols .pv-key {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 4px 6px; border: 1px solid var(--ax-line-2); background: var(--ax-panel);
+}
+.pv-symbols .pv-key i { font-style: normal; font-size: 13px; color: var(--ax-ink); }
+.pv-symbols .pv-key b { font-size: 10px; color: var(--ax-ink-3); font-weight: 700; }
+.pv-symbols .pv-key.on { border-color: var(--ax-red); animation: pv-key 2s steps(1) infinite; }
+.pv-symbols .pv-key.on i, .pv-symbols .pv-key.on b { color: var(--ax-red); }
+@keyframes pv-key { 0%,40% { border-color: var(--ax-red); background: var(--ax-panel); } 41%,100% { border-color: var(--ax-line-2); } }
+
+.pv-reversi {
+  display: grid;
+  grid-template-columns: repeat(4, 15px);
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+.pv-reversi .pv-dis { width: 15px; height: 15px; border: 1px solid var(--ax-line-2); background: var(--ax-panel); border-radius: 50%; display: block; }
+.pv-reversi .pv-dis.w { background: var(--ax-ink-2); border-color: var(--ax-ink-2); }
+.pv-reversi .pv-dis.o { background: #0c121a; border-color: var(--ax-ink-3); }
+.pv-reversi .pv-drop { width: 15px; height: 15px; border: 1px dashed var(--ax-red); border-radius: 50%; display: block; animation: pv-drop 2.4s steps(1) infinite; }
+@keyframes pv-drop {
+  0%   { border-color: var(--ax-red); background: var(--ax-red); }
+  50%  { background: transparent; border-color: var(--ax-red); }
+  100% { background: transparent; border-color: var(--ax-line-2); }
+}
+
+.pv-dots {
+  display: grid;
+  grid-template-columns: repeat(4, 15px);
+  grid-template-rows: repeat(4, 15px);
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+.pv-dots i { width: 15px; height: 15px; border: 1px solid var(--ax-line-2); background: #0c121a; display: block; }
+.pv-dots i.claim { border-color: var(--ax-red); background: var(--ax-red); }
+.pv-dots i.edge { border-color: var(--ax-red); animation: pv-edge 2.6s steps(1) infinite; }
+@keyframes pv-edge {
+  0%   { background: var(--ax-red); }
+  60%  { background: var(--ax-red); }
+  100% { background: #0c121a; }
+}
+
+.pv-flood {
+  display: grid;
+  grid-template-columns: repeat(4, 15px);
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+.pv-flood i { width: 15px; height: 15px; border: 1px solid var(--ax-line-2); background: var(--ax-panel); display: block; }
+.pv-flood i.f1 { background: var(--ax-ink-3); } .pv-flood i.f2 { background: var(--ax-ink-2); }
+.pv-flood i.f3 { background: var(--ax-red); } .pv-flood i.f4 { background: #0c121a; }
+.pv-flood i.f5 { background: var(--ax-ink-3); opacity: .55; }
+.pv-flood i.f1, .pv-flood i.f2 { animation: pv-flood-spread 2.8s steps(1) infinite; }
+.pv-flood i.f1 { animation-delay: 0s; }
+.pv-flood i.f2 { animation-delay: .7s; }
+@keyframes pv-flood-spread {
+  0%   { background: var(--ax-ink-3); border-color: var(--ax-line-2); }
+  40%  { background: var(--ax-red); border-color: var(--ax-red); }
+  100% { background: var(--ax-red); border-color: var(--ax-red); }
+}
+
+.pv-peg {
+  display: grid;
+  grid-template-columns: repeat(5, 15px);
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+.pv-peg i { width: 15px; height: 15px; border: 1px solid var(--ax-line-2); background: var(--ax-panel); display: block; }
+.pv-peg i.hole { background: #070a0f; border-style: dashed; }
+.pv-peg i.jump { background: var(--ax-red); border-color: var(--ax-red); animation: pv-hop 2.4s steps(1) infinite; }
+@keyframes pv-hop {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(15px); }
+  100% { transform: translateY(0); }
+}
 
 @media (max-width: 760px) {
   .research-tabs { grid-template-columns: 1fr 1fr; }
