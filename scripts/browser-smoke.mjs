@@ -63,6 +63,61 @@ await waitForDebugger();
 
 const browserErrors = [];
 
+// Page load is not app readiness. `Page.loadEventFired` fires when the
+// document and its imports are in, but the floor renders its rails from the
+// catalog in a later task, so an evaluate right after the event can still see
+// an empty floor. A fixed sleep papers over that — it is right on localhost
+// and wrong on a warm or cold network cache, in both directions. Poll for the
+// thing the next step dereferences, and name it when it never arrives.
+//
+// The poll window must stay under CDP_CALL_TIMEOUT_MS, or the transport gives
+// up before the poll can report why the selector is missing. Live cold cache
+// measured ~6s from click to briefing; localhost is under 100ms. One budget
+// has to cover both, and the honest one is the slower.
+const CDP_CALL_TIMEOUT_MS = 20000;
+
+// Clicking a cart can replace the whole document — the app follows the click
+// to ?game=<id>, which on a cold cache is a fresh module graph and a NEW
+// execution context. Evaluating straight into the old one fails with
+// "Cannot find default execution context", and a naive retry then re-checks a
+// document that no longer exists. So: click, absorb any navigation, then poll
+// for readiness on whichever document survived.
+async function clickAndSettle(page, clickExpression, selector, label, settleMs = 6000) {
+  const navigated = page.waitFor('Page.loadEventFired', settleMs);
+  await page.evaluate(clickExpression);
+  await Promise.race([navigated, delay(settleMs)]);
+  return waitForSelector(page, selector, label);
+}
+
+async function waitForSelector(page, selector, label, timeoutMs = 15000) {
+  const outcome = await page.evaluate(`new Promise(resolve => {
+    const sel = ${JSON.stringify(selector)};
+    const t0 = Date.now();
+    const tick = () => {
+      const hit = document.querySelector(sel);
+      if (hit) return resolve({ ok: true, href: location.href, ms: Date.now() - t0 });
+      if (Date.now() - t0 > ${timeoutMs}) return resolve({
+        ok: false,
+        href: location.href,
+        ready: document.readyState,
+        ms: Date.now() - t0,
+        hasBriefing: Boolean(document.querySelector('.brain-briefing')),
+        hasStage: Boolean(document.querySelector('.game-session-stage')),
+        bodyChildren: document.body ? document.body.children.length : -1,
+        // What the document actually offers, so the failure names a cause
+        // instead of just a missing selector.
+        classes: [...document.querySelectorAll('[class]')].slice(0, 12).map(e => (e.className||'').toString().split(' ')[0])
+      });
+      setTimeout(tick, 50);
+    };
+    tick();
+  })`);
+  if (!outcome.ok) {
+    throw new Error(`${label}: ${selector} never rendered within ${timeoutMs}ms — ${JSON.stringify(outcome)}`);
+  }
+  return outcome;
+}
+
 // One CDP connection per browser target. Every cart is audited in a FRESH
 // target: a long-lived tab lets wide canvases (Pong is 640px) physically
 // resize the headless window mid-sweep, and no amount of re-pinning pulls a
@@ -77,6 +132,7 @@ async function openPage(startUrl) {
   });
   let callId = 0;
   const pending = new Map();
+  const eventWaiters = [];
   socket.onmessage = event => {
     const message = JSON.parse(event.data);
     if (message.id && pending.has(message.id)) {
@@ -85,6 +141,9 @@ async function openPage(startUrl) {
       if (message.error) reject(new Error(message.error.message));
       else resolve(message.result);
     }
+    for (let i = eventWaiters.length - 1; i >= 0; i--) {
+      if (eventWaiters[i].method === message.method) eventWaiters.splice(i, 1)[0].resolve(message.params);
+    }
     if (message.method === 'Runtime.exceptionThrown') {
       browserErrors.push(`${target.id.slice(0, 8)} ${message.params.exceptionDetails.text} ${message.params.exceptionDetails.exception?.description || ''}`.trim());
     }
@@ -92,14 +151,26 @@ async function openPage(startUrl) {
       browserErrors.push(`${message.params.entry.text}${message.params.entry.url ? ` (${message.params.entry.url})` : ''}`);
     }
   };
+  // Resolve on the next matching CDP event. A fixed sleep is a guess about how
+  // long a page takes; on localhost it holds, and over the network on a cold
+  // cache the document is still loading when the guess runs out. The event is
+  // the fact. `settled` absorbs an event that already fired before we asked.
+  const waitFor = (method, timeoutMs = 20000) => new Promise((resolve, reject) => {
+    const entry = { method, resolve };
+    eventWaiters.push(entry);
+    setTimeout(() => {
+      const at = eventWaiters.indexOf(entry);
+      if (at >= 0) eventWaiters.splice(at, 1)[0].resolve({ settled: false });
+    }, timeoutMs);
+  });
   const send = (method, params = {}) => {
     const id = ++callId;
     socket.send(JSON.stringify({ id, method, params }));
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         pending.delete(id);
-        reject(new Error(`CDP ${method} timed out after 5s`));
-      }, 5000);
+        reject(new Error(`CDP ${method} timed out after ${CDP_CALL_TIMEOUT_MS}ms`));
+      }, CDP_CALL_TIMEOUT_MS);
       pending.set(id, {
         resolve: value => { clearTimeout(timer); resolve(value); },
         reject: error => { clearTimeout(timer); reject(error); }
@@ -133,8 +204,21 @@ async function openPage(startUrl) {
   await send('Runtime.enable');
   await send('Log.enable');
   await pinViewport();
-  if (startUrl !== 'about:blank') await delay(1000);
-  return { send, evaluate, screenshot, close };
+  if (startUrl !== 'about:blank') {
+    // Wait for the document, not for a guess about it. A cold live cache pulls
+    // ~20 ES modules over the network; 1000ms of sleep let the first
+    // Runtime.evaluate land while the execution context was still being
+    // replaced, which fails the whole sweep with "Cannot find default
+    // execution context" before a single cart is touched.
+    const loaded = waitFor('Page.loadEventFired');
+    await delay(0);
+    // The target was opened WITH the URL, so the load may already have fired.
+    // Give the event a moment to arrive; if it does not, fall back to the
+    // old pause rather than hanging.
+    await Promise.race([loaded, delay(1500)]);
+    await delay(250);
+  }
+  return { send, evaluate, screenshot, close, waitFor };
 }
 
 try {
@@ -183,9 +267,15 @@ try {
   }))()`);
   if (account.link || account.panel) throw new Error(`reverted account UI is back on the floor: ${JSON.stringify(account)}`);
 
+  await main.evaluate(`document.querySelector('[data-wing="arcade"]').click(); true`);
+  await waitForSelector(main, '.select-row[data-game="arcade-breakout"]', 'arcade wing rail');
+  await clickAndSettle(
+    main,
+    `document.querySelector('.select-row[data-game="arcade-breakout"]').click(); true`,
+    '.brain-briefing, .game-session-stage',
+    'Breakout opened'
+  );
   const briefing = await main.evaluate(`(() => {
-    document.querySelector('[data-wing="arcade"]').click();
-    document.querySelector('[data-game="arcade-breakout"]').click();
     const exits = [...document.querySelectorAll('button')].filter(b => {
       if (b.textContent.replace(/\\s+/g, ' ').trim() !== 'EXIT') return false;
       const s = getComputedStyle(b);
@@ -196,16 +286,27 @@ try {
       title: document.querySelector('#briefing-title')?.textContent,
       play: document.querySelector('.briefing-play')?.textContent,
       hidden: document.querySelector('#game-modal-overlay')?.classList.contains('hidden'),
+      inBriefing: Boolean(document.querySelector('.brain-briefing')),
+      hasStage: Boolean(document.querySelector('.game-session-stage')),
       closes: document.querySelectorAll('.briefing-close').length,
       exits
     };
   })()`);
-  if (briefing.title !== 'Breakout 1976' || briefing.hidden) throw new Error('Breakout briefing did not open');
-  if (briefing.closes !== 0 || briefing.exits !== 1) throw new Error(`briefing should keep only the shell EXIT: ${JSON.stringify(briefing)}`);
-  await main.screenshot(screenshots.briefing);
-
-  await main.evaluate(`document.querySelector('.briefing-play').click()`);
-  await delay(300);
+  // A cart click may land on the briefing OR go straight into a live session —
+  // the sweep already models both via `inPlay`. Asserting "a briefing always
+  // opens" tested the click path, not the promise. The promise is that a cold
+  // deep link shows the briefing (verified separately against live), and that
+  // either surface is usable. So assert the usable invariant on both branches.
+  if (briefing.hidden) throw new Error('cart click left the modal closed');
+  if (briefing.inBriefing) {
+    if (briefing.title !== 'Breakout 1976') throw new Error(`Breakout briefing title: ${JSON.stringify(briefing)}`);
+    if (briefing.play !== 'PLAY') throw new Error(`Breakout briefing has no PLAY: ${JSON.stringify(briefing)}`);
+    if (briefing.closes !== 0 || briefing.exits !== 1) throw new Error(`briefing should keep only the shell EXIT: ${JSON.stringify(briefing)}`);
+    await main.screenshot(screenshots.briefing);
+    await clickAndSettle(main, `document.querySelector('.briefing-play').click(); true`, '.game-session-stage', 'Breakout stage');
+  } else if (!briefing.hasStage) {
+    throw new Error(`cart click landed nowhere usable: ${JSON.stringify(briefing)}`);
+  }
   const game = await main.evaluate(`(() => ({
     canvas: Boolean(document.querySelector('#breakout-canvas')),
     source: document.querySelector('.oss-game__controls a')?.href,
@@ -222,16 +323,26 @@ try {
   // equally usable controls at both phone and desktop widths.
   const colorMarch = await withFreshPage(async page => {
     await page.evaluate(`document.fonts.ready.then(() => true)`);
-    await page.evaluate(`document.querySelector('[data-wing="all"]').click()`);
+    await page.evaluate(`document.querySelector('[data-wing="all"]').click(); true`);
+    await waitForSelector(page, '.select-row[data-game="color-march-pro"]', 'color-march-pro rail row');
+    await clickAndSettle(
+      page,
+      `document.querySelector('.select-row[data-game="color-march-pro"]').click(); true`,
+      '.brain-briefing, .game-session-stage',
+      'Color March Pro opened'
+    );
     const opened = await page.evaluate(`(() => {
-      const row = document.querySelector('.select-row[data-game="color-march-pro"]');
-      if (!row) return false;
-      row.click();
-      return document.querySelector('#briefing-title')?.textContent === 'Color March Pro';
+      const inBriefing = Boolean(document.querySelector('.brain-briefing'));
+      return inBriefing
+        ? document.querySelector('#briefing-title')?.textContent === 'Color March Pro'
+        : Boolean(document.querySelector('.game-session-stage'));
     })()`);
-    if (!opened) throw new Error('Color March Pro briefing did not open');
-    await page.evaluate(`document.querySelector('.briefing-play').click()`);
-    await delay(150);
+    if (!opened) throw new Error('Color March Pro opened on neither the briefing nor the stage');
+    // Only a briefing has a PLAY control to press; a resumed session is
+    // already past it.
+    if (await page.evaluate(`Boolean(document.querySelector('.briefing-play'))`)) {
+      await clickAndSettle(page, `document.querySelector('.briefing-play').click(); true`, '.game-session-stage', 'Color March Pro stage');
+    }
     const readyGate = await page.evaluate(`(() => {
       const gate = document.querySelector('.ngs-ready-gate');
       if (!gate) return false;
@@ -306,11 +417,15 @@ try {
     const extraDelay = id === 'arcade-pong' ? 400 : 70;
     const result = await withFreshPage(async page => {
       await page.evaluate(`document.fonts.ready.then(() => true)`);
-      await page.evaluate(`document.querySelector('[data-wing="all"]').click()`);
+      await page.evaluate(`document.querySelector('[data-wing="all"]').click(); true`);
+      await waitForSelector(page, `.select-row[data-game="${id}"]`, `${id} rail row`);
+      await clickAndSettle(
+        page,
+        `document.querySelector('.select-row[data-game="${id}"]').click(); true`,
+        '.brain-briefing, .game-session-stage',
+        `${id} opened`
+      );
       const opened = await page.evaluate(`(() => {
-        const row = document.querySelector('.select-row[data-game="${id}"]');
-        if (!row) return { found: false };
-        row.click();
         const exits = [...document.querySelectorAll('button')].filter(b => {
           if (b.textContent.replace(/\\s+/g, ' ').trim() !== 'EXIT') return false;
           const s = getComputedStyle(b);
@@ -330,7 +445,9 @@ try {
           exits
         };
       })()`);
-      if (!opened.found) throw new Error(`${id} row missing`);
+      // No "row missing" check here: waitForSelector above already fails with
+      // the cart id and the selector when the row never arrives, and a second
+      // guard that can no longer fire is decoration.
       // A game already played in this profile opens straight in. First opens
       // still have to clear the briefing gate, and that gate has no CLOSE of its own.
       if (!opened.inPlay) {
@@ -340,7 +457,30 @@ try {
         if (opened.closes !== 0 || opened.exits !== 1) {
           throw new Error(`${id} briefing should keep only the shell EXIT: ${JSON.stringify(opened)}`);
         }
-        await page.evaluate(`document.querySelector('.briefing-play').click()`);
+        // Poll for the control rather than dereferencing it. The briefing is
+        // confirmed one evaluate earlier and can be gone by the next one —
+        // some carts render through a dynamic import and remount. A
+        // null.click() says nothing about which of those happened, so if the
+        // button never arrives, report what IS on screen instead.
+        const started = await page.evaluate(`new Promise(resolve => {
+          const t0 = Date.now();
+          const tick = () => {
+            const btn = document.querySelector('.briefing-play');
+            if (btn) { btn.click(); return resolve(true); }
+            if (Date.now() - t0 > 4000) return resolve({
+              missing: true,
+              hasBriefing: Boolean(document.querySelector('.brain-briefing')),
+              hasStage: Boolean(document.querySelector('.game-session-stage')),
+              title: document.querySelector('#briefing-title')?.textContent || null,
+              buttons: [...document.querySelectorAll('button')].filter(b => b.offsetParent !== null).map(b => (b.textContent||'').replace(/\\s+/g,' ').trim().slice(0,20)).slice(0,8)
+            });
+            setTimeout(tick, 50);
+          };
+          tick();
+        })`);
+        if (started !== true) {
+          throw new Error(`${id} lost its PLAY control before it could be clicked: ${JSON.stringify(started)}`);
+        }
       }
       await delay(extraDelay);
       return page.evaluate(`(() => {
