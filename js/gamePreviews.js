@@ -468,3 +468,7 @@ export function previewHtmlFor(game) {
 function stripTags(html) {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
 }
+
+// Exported so js/registryAgreement.test.mjs can read the real keys. It used to
+// scrape this file with a regex that could not see a double-quoted key.
+export { MAP as PREVIEW_MAP };

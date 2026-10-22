@@ -22,6 +22,8 @@ import { join } from 'node:path';
 import { BRAIN_GUIDES } from './brainGuides.js';
 import { SEARCH_ALIASES } from './searchAliases.js';
 import { GAME_MAX } from '../functions/_shared/games.js';
+import { PREVIEW_MAP } from './gamePreviews.js';
+import { SCORE_CUTS } from './scoreReadouts.js';
 
 const root = new URL('..', import.meta.url).pathname;
 
@@ -34,17 +36,14 @@ const catalogIds = new Set(rows.map(row => row.id));
 const playable = rows.filter(row => row.wing !== 'meta').map(row => row.id);
 
 // ── Registries, keyed by cartridge id ────────────────────────────────────────
-// Non-importable maps are read from source; the parser is deliberately dumb —
-// first-level keys only — because a key that is not a catalog id is a finding,
-// not something to silently accept.
-function topLevelKeys(relativePath, constName) {
-  const source = readFileSync(join(root, relativePath), 'utf8');
-  const slice = source.split(`const ${constName} = {`)[1];
-  assert.ok(slice, `${relativePath}: could not find const ${constName}`);
-  const body = slice.split('\n};')[0];
-  return [...body.matchAll(/^\s*'?([A-Za-z0-9_-]+)'?\s*:/gm)].map(match => match[1]);
-}
-
+// Every registry is now read by IMPORTING it. Two of them (the preview MAP and
+// the score CUTS) used to be scraped from source with a regex, on the stated
+// ground that they were not importable — they were; they just were not
+// exported. The scraper could not see a double-quoted key ("ghost-game": …),
+// so an orphan written in Prettier/JSON style passed every run. Probed with a
+// planted orphan in each of the five registries, 2 of 7 variants slipped
+// through, both of them that parser. An import cannot have a blind spot about
+// quoting.
 // FAMILY is deliberately absent: it is keyed by skill family (memory, speed,
 // reasoning), not by cartridge, so it is shared vocabulary rather than a
 // per-cart registry. A map only belongs in this list if a cart id is its key.
@@ -52,8 +51,8 @@ const REGISTRIES = [
   { name: 'BRAIN_GUIDES',  keys: Object.keys(BRAIN_GUIDES),  source: 'js/brainGuides.js' },
   { name: 'SEARCH_ALIASES', keys: Object.keys(SEARCH_ALIASES), source: 'js/searchAliases.js' },
   { name: 'GAME_MAX',      keys: Object.keys(GAME_MAX),      source: 'functions/_shared/games.js', exclude: ['about-dr-non'] },
-  { name: 'preview MAP',   keys: topLevelKeys('js/gamePreviews.js', 'MAP'),   source: 'js/gamePreviews.js' },
-  { name: 'CUTS',          keys: topLevelKeys('js/scoreReadouts.js', 'CUTS'), source: 'js/scoreReadouts.js', exclude: ['about-dr-non'] },
+  { name: 'preview MAP',   keys: Object.keys(PREVIEW_MAP), source: 'js/gamePreviews.js' },
+  { name: 'CUTS',          keys: Object.keys(SCORE_CUTS), source: 'js/scoreReadouts.js', exclude: ['about-dr-non'] },
 ];
 
 // ── Assert, both directions ──────────────────────────────────────────────────

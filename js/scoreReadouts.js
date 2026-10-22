@@ -510,3 +510,7 @@ export function hasScoreProfile(gameId) {
   if (gameId === 'about-dr-non' || gameId === 'rom-loader' || gameId === 'ai-sandbox') return true;
   return Boolean(CUTS[gameId] || BRAIN_GUIDES[gameId]);
 }
+
+// Exported so js/registryAgreement.test.mjs can read the real keys. It used to
+// scrape this file with a regex that could not see a double-quoted key.
+export { CUTS as SCORE_CUTS };
