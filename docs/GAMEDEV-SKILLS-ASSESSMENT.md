@@ -61,7 +61,12 @@ Two real gaps upstream's "router coverage" check exposed in our system:
 Both are the same check they call router coverage: *is everything reachable, and
 is everything reachable real?* Applied to cartridges rather than skills.
 
-Both were proven by breaking them, not by assertion.
+Both were first proven against one planted case each. That turned out to be
+weaker evidence than it sounded: the 2026-10-22 audit of the audit planted 8
+stale-claim forms and 7 orphan-key variants, and these detectors missed 5 and 2
+of them respectively. Both are rebuilt and re-proven across the full set — see
+`docs/AUDIT-2026-10-22.md`. One mutation is a smoke test; a table of them is a
+guard.
 
 ### Consider later, not now
 
