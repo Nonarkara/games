@@ -17,6 +17,8 @@
  *
  *   node scripts/geometry-audit.mjs            audit the working tree
  *   GEOMETRY_ROOT=/some/copy node ...          audit a different tree (mutation proofs)
+ *   GEOMETRY_URL=https://host/ node ...        audit a LIVE site instead of the tree
+ *                                              (CDPT step 4: test the web, not the checkout)
  *   CHROME_PATH=/path/to/chrome node ...
  *
  * THE RULES (each is a sentence from §11.12, not a taste)
@@ -255,7 +257,9 @@ const server = http.createServer(async (req, res) => {
   } catch { res.writeHead(404); res.end('not found'); }
 });
 await new Promise(r => server.listen(0, '127.0.0.1', r));
-const origin = `http://127.0.0.1:${server.address().port}`;
+// Auditing a live URL is the point of CDPT step 4: a contrast bug does not show
+// up in a source check, only in a render of what was actually deployed.
+const origin = (process.env.GEOMETRY_URL || `http://127.0.0.1:${server.address().port}`).replace(/\/$/, '');
 
 if (!existsSync(CHROME)) {
   console.error(`geometry-audit: no Chrome at ${CHROME}. Set CHROME_PATH.`);
