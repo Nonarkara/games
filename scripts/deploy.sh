@@ -53,6 +53,13 @@ npm test
 npm run test:security
 echo ""
 
+# 3. Rendered geometry + contrast (CLAUDE.md §11.12, MSH). This is the one gate
+# that looks at pixels: source scans and green suites passed a header whose
+# Research link was 1.02:1 and invisible. Needs real Chrome (CHROME_PATH).
+echo "▶ Geometry + contrast (rendered in Chrome)"
+node scripts/geometry-audit.mjs || { echo "  ✗ geometry audit failed — see violations above"; exit 1; }
+echo ""
+
 if $DRY_RUN; then
   echo "▶ Dry run — would deploy:"
   echo "  npx wrangler pages deploy . --project-name=$PROJECT --branch=main \\"
