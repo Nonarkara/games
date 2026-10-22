@@ -3,9 +3,9 @@
  *
  * Two of these are standard clinical instruments the floor had no version of
  * at all — category fluency and symbol coding sit in nearly every cognitive
- * battery ever assembled, and neither was represented across 99 games. The
- * other four are classics whose absence was conspicuous: Reversi, Dots and
- * Boxes, Flood It, Peg Solitaire.
+ * battery ever assembled, and neither was represented across the floor as it
+ * stood before these six landed. The other four are classics whose absence
+ * was conspicuous: Reversi, Dots and Boxes, Flood It, Peg Solitaire.
  *
  * Every rule lives in an exported pure function so it can be tested without a
  * browser. The renderers are thin shells over those functions — if a rule is
