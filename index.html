@@ -25,7 +25,7 @@
        4h browser TTL, so a new URL is the only thing that reaches an
        already-open tab. Drop this once the zone respects existing headers. -->
   <link rel="stylesheet" href="./css/tailwind.static.css?v=11" />
-  <link rel="stylesheet" href="./css/styles.css?v=24" />
+  <link rel="stylesheet" href="./css/styles.css?v=25" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -43,12 +43,11 @@
   </script>
 </head>
 <body>
-  <div class="arcade-status" role="status">
-    <span><i></i> FLOOR OPEN</span>
-    <span>BANGKOK · 2026</span>
-    <span>NON-GAMING SYSTEM · 16-BIT · NO LOGIN REQUIRED · NO ADS</span>
-  </div>
-
+  <!-- MSH: this strip was a second header band stating "NON-GAMING SYSTEM",
+       which the brand lockup 40px below already states, and repeating
+       "16-BIT" from the page's own class and the footer. Two bands saying one
+       thing. The honest content was the location and the clock — that now
+       lives inside the brand block, so the whole band collapses to zero. -->
   <header id="app-header" class="arcade-header"></header>
 
   <main>
@@ -132,6 +131,6 @@
     <div id="game-modal-container" class="game-modal-container"></div>
   </div>
 
-  <script type="module" src="./js/app.js?v=31"></script>
+  <script type="module" src="./js/app.js?v=32"></script>
 </body>
 </html>

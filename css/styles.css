@@ -1231,34 +1231,6 @@ a { color: inherit; }
 ::selection { background: var(--ax-red); color: #fff; }
 :focus-visible { outline: 2px solid var(--ax-ink) !important; outline-offset: 3px; }
 
-.arcade-status {
-  min-height: 29px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 6px 22px;
-  color: rgba(255,255,255,.76);
-  background: var(--ax-blue);
-  border-bottom: 1px solid rgba(255,255,255,.18);
-  font-size: 9px;
-  line-height: 1.4;
-  letter-spacing: .14em;
-  font-weight: 600;
-}
-
-.arcade-status span { white-space: nowrap; }
-.arcade-status i {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 7px;
-  border-radius: 50% !important;
-  background: var(--ax-red);
-  animation: arcade-live 2.4s ease-in-out infinite;
-}
-@keyframes arcade-live { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
-
 .arcade-header {
   position: sticky;
   top: 0;
@@ -1316,13 +1288,17 @@ a { color: inherit; }
 .arcade-play-count span { color: var(--ax-ink-3); font-size: 8px; font-weight: 600; letter-spacing: .16em; }
 .arcade-search input { min-width: 0; width: 100%; border: 0; outline: 0; padding: 12px 0; background: transparent; color: var(--ax-ink); font-size: 13px; }
 .arcade-search input::placeholder { color: var(--ax-ink-3); }
-.arcade-play-count { min-width: 72px; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-right: 1px solid var(--ax-line); }
+/* MSH: these four sat at min-width 72/68/78/56 to "fill" the header band and
+   carried 42–64% empty space at every viewport. A control sizes to its label
+   plus its padding; the header's own 76px row already clears the 44px tap
+   floor vertically, so nothing here needed a width floor. */
+.arcade-play-count { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 0 14px; border-right: 1px solid var(--ax-line); }
 .arcade-play-count b { font-size: 18px; font-weight: 600; }
-.arcade-account-link { min-width: 68px; border: 0; border-right: 1px solid var(--ax-line); background: transparent; color: #235f52; font-size: 9px; font-weight: 700; letter-spacing: .12em; cursor: pointer; padding: 0 12px; }
+.arcade-account-link { border: 0; border-right: 1px solid var(--ax-line); background: transparent; color: #235f52; font-size: 9px; font-weight: 700; letter-spacing: .12em; cursor: pointer; padding: 0 12px; }
 .arcade-account-link:hover { background: #235f52; color: #fff; }
-.arcade-sound { min-width: 78px; border: 0; background: transparent; color: var(--ax-ink-2); font-size: 9px; font-weight: 600; letter-spacing: .14em; cursor: pointer; }
+.arcade-sound { border: 0; background: transparent; color: var(--ax-ink-2); font-size: 9px; font-weight: 600; letter-spacing: .14em; cursor: pointer; padding: 0 14px; }
 .arcade-sound:hover { background: #1a2430; color: var(--ax-red); }
-.arcade-about-link { min-width: 56px; border: 0; border-left: 1px solid var(--ax-line); background: transparent; color: var(--ax-red); font-size: 9px; font-weight: 700; letter-spacing: .14em; cursor: pointer; padding: 0 14px; }
+.arcade-about-link { border: 0; border-left: 1px solid var(--ax-line); background: transparent; color: var(--ax-red); font-size: 9px; font-weight: 700; letter-spacing: .14em; cursor: pointer; padding: 0 14px; }
 .arcade-about-link:hover { background: var(--ax-red); color: var(--ax-paper); }
 
 .account-overlay {
@@ -1764,9 +1740,6 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 
 @media (max-width: 760px) {
   body::before { width: 3px; }
-  .arcade-status { justify-content: flex-start; padding-inline: 14px; }
-  .arcade-status span:nth-child(2) { display: none; }
-  .arcade-status span:last-child { margin-left: auto; }
   .arcade-header { min-height: 64px; gap: 8px; padding-inline: 13px; }
   .arcade-brand-disc { width: 34px; height: 34px; }
   .arcade-brand > span:last-child { display: none; }
@@ -1774,8 +1747,8 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   .arcade-search { min-width: 0; flex: 1; padding-inline: 11px; }
   .arcade-search > span { display: none; }
   .arcade-play-count { display: none; }
-  .arcade-account-link { min-width: 62px; padding-inline: 7px; }
-  .arcade-sound { min-width: 61px; }
+  .arcade-account-link { padding-inline: 10px; }
+  .arcade-sound { padding-inline: 12px; }
 
   /* minmax(0,…) not 1fr: a bare 1fr floors at min-content, so the panel
      stayed 448px wide inside a 375px phone and the hero ran off-screen. */
@@ -1851,9 +1824,7 @@ main { width: min(100%, 1360px); margin: 0 auto; }
 }
 
 @media (max-width: 420px) {
-  .arcade-status { font-size: 8px; letter-spacing: .09em; }
-  .arcade-status span:last-child { display: none; }
-  .arcade-sound { min-width: 52px; font-size: 8px; }
+  .arcade-sound { font-size: 8px; }
   .attract-copy { padding-top: 38px; }
   .attract-copy h1 { font-size: 24px; }
   .attract-line { font-size: 10px; }
@@ -2065,8 +2036,13 @@ main { width: min(100%, 1360px); margin: 0 auto; }
   letter-spacing: 0;
 }
 .about-close {
+  /* MSH: min-height 44px is the tap-target floor and earns itself.
+     min-width 72px did not — "CLOSE" is 37px of text, so the floor added 35px
+     of empty box (49% of the control) at every viewport. The honest floor is
+     the tap target; the label plus padding sizes the rest. */
   min-height: 44px;
-  min-width: 72px;
+  min-width: 44px;
+  padding: 0 12px;
   border: 1px solid var(--ax-line-2);
   background: transparent;
   color: var(--ax-ink-2);
@@ -2802,7 +2778,11 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
  * tab inside Research is pixel-only, as requested.
  * ========================================================================== */
 .arcade-research-link {
-  min-width: 92px;
+  /* MSH: min-width 92px was the last of the header's arbitrary control floors.
+     "RESEARCH" at 9px is 53px of text; the 14px padding puts it at 81px.
+     The floor added ~11px of empty box and bought nothing — the header row is
+     76px tall here and 64px on a phone, so the 44px tap target was never at
+     risk in either axis. The control now fits its label. */
   border: 0;
   border-left: 1px solid var(--ax-line);
   background: transparent;
@@ -3232,14 +3212,34 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 }
 
 @media (max-width: 760px) {
-  .research-tabs { grid-template-columns: 1fr 1fr; }
+  /* MSH: as a 2-column grid the six tabs stacked into three rows and the strip
+     measured 199px — 24% of an 844px phone spent on navigation before a single
+     line of the thing the panel is for. As one horizontal rail it costs one
+     row. The hint line is what made each tab two lines tall; on a rail the
+     label alone carries it. The affordance is a visible scrollbar plus the
+     next tab cut at the edge — not a fade gradient, which the 16-bit register
+     forbids and which reads as decoration rather than as "more here". */
+  .research-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 10px 12px;
+    background: transparent;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+  .research-tabs::-webkit-scrollbar { height: 6px; }
+  .research-tabs::-webkit-scrollbar-track { background: var(--ax-panel); }
+  .research-tabs::-webkit-scrollbar-thumb { background: var(--ax-line-2); }
+  .research-tabs button { min-height: 44px; min-width: 0; flex: 0 0 auto; padding: 0 14px; }
+  .research-tabs button small { display: none; }
   .research-grid { grid-template-columns: 1fr 1fr; }
   .research-compare { grid-template-columns: 1fr; }
   .research-portrait { grid-template-columns: 1fr; }
   .research-foot { flex-direction: column; align-items: stretch; }
 }
 @media (max-width: 420px) {
-  .arcade-research-link { min-width: 78px; padding-inline: 10px; font-size: 8px; }
+  .arcade-research-link { padding-inline: 10px; font-size: 8px; }
   .research-body { padding: 22px 16px 26px; }
   .research-pixels { gap: 6px; padding: 10px; }
   .research-sprite { width: 28px; height: 28px; }

@@ -418,7 +418,7 @@ class NgsApp {
     headerEl.innerHTML = `
       <a class="arcade-brand" href="#top" aria-label="Dr Non — Non-Gaming System, home">
         <span class="arcade-brand-disc">NG<span></span></span>
-        <span><b>DR NON</b><small>NON-GAMING SYSTEM</small></span>
+        <span><b>DR NON</b><small>BANGKOK · 2026 · NO LOGIN</small></span>
       </a>
       <div class="arcade-tools">
         <label class="arcade-search">
