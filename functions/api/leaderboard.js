@@ -40,7 +40,7 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const game_id = url.searchParams.get('game_id') || '';
   if (!game_id) return json({ error: 'game_id_required' }, 400);
-  if (game_id.length > GAME_ID_MAX || GAME_MAX[game_id] == null) {
+  if (game_id.length > GAME_ID_MAX || !Object.hasOwn(GAME_MAX, game_id)) {
     return json({ error: 'unknown_game' }, 400);
   }
   try { return json({ game_id, board: await readBoard(env, game_id) }); }
@@ -55,7 +55,7 @@ export async function onRequestPost({ request, env }) {
 
   const game_id = String(body?.game_id || '').trim();
   const initials = normalizeInitials(body?.initials);
-  const score = Number(body?.score);
+  const score = body?.score;
   const session_id = String(body?.session_id || '').trim().toLowerCase();
 
   if (!game_id) return json({ error: 'game_id_required' }, 400);
@@ -63,8 +63,8 @@ export async function onRequestPost({ request, env }) {
   if (!isSessionId(session_id)) return json({ error: 'session_id_required' }, 400);
   if (!INITIALS_RE.test(initials)) return json({ error: 'initials_must_be_1_to_4_alnum' }, 400);
 
+  if (!Object.hasOwn(GAME_MAX, game_id)) return json({ error: 'unknown_game' }, 400);
   const max = GAME_MAX[game_id];
-  if (max == null) return json({ error: 'unknown_game' }, 400);
   if (!scoreInRange(score, max)) {
     if (!Number.isSafeInteger(score) || score < 0) return json({ error: 'invalid_score' }, 400);
     return json({ error: 'score_above_max', max }, 400);

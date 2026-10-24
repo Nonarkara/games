@@ -45,7 +45,13 @@ export async function readJson(request, maxBytes = 262144) {
   let offset = 0;
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
   const text = new TextDecoder().decode(bytes);
-  try { return { ok: true, value: JSON.parse(text) }; }
+  try {
+    const value = JSON.parse(text);
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+      return { ok: false, response: json({ error: 'json_object_required' }, 400) };
+    }
+    return { ok: true, value };
+  }
   catch { return { ok: false, response: json({ error: 'invalid_json' }, 400) }; }
 }
 

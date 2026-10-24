@@ -47,7 +47,7 @@ fi
 if ! command -v npx >/dev/null 2>&1; then
   say ""
   say "  ⚠ npx not found — cannot check live build"
-  exit 0
+  exit 1
 fi
 
 # Parse the latest Production deployment's source commit.
@@ -66,7 +66,7 @@ say ""
 
 if [ -z "$DEPLOY_SOURCE" ]; then
   say "  ⚠ could not read live build SHA from wrangler (output format may have changed)"
-  exit 0
+  exit 1
 fi
 
 if [ "$LOCAL" = "$DEPLOY_SOURCE" ]; then
