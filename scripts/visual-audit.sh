@@ -144,7 +144,7 @@ while IFS= read -r match; do
   if ! $ok; then
     report "FONT-FAMILY" "$file" "$line" "$snippet"
   fi
-done < <(grep -rnE "font-family:" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css")
+done < <(grep -rnE "font-family:" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css" | grep -vE '\.test\.(js|mjs):')
 
 # Report
 echo

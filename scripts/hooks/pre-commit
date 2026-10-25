@@ -8,7 +8,7 @@
 #   chmod +x .git/hooks/pre-commit
 # For a system-wide install, symlink it to ~/.git-templates/hooks/.
 
-set -e
+set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 if [[ -x scripts/visual-audit.sh ]]; then
