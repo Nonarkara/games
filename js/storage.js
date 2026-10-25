@@ -122,6 +122,11 @@ const defaultData = {
   briefingSeen: {}
 };
 
+const copyData = (data = defaultData) => JSON.parse(JSON.stringify(data));
+const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+let sessionData = null;
+let pendingPersist = false;
+
 /**
  * Run the v1 → v2 migration exactly once.
  * - Reads LEGACY_KEY if present
@@ -130,17 +135,21 @@ const defaultData = {
  * - Removes LEGACY_KEY
  * - Sets MIGRATION_KEY so this never runs again
  *
- * Idempotent + non-throwing. Any error → fresh `defaultData` and the flag
- * still gets set so the user is not stuck retrying.
+ * A newer canonical save wins. Failed writes retain the legacy copy and
+ * leave migration retryable; the only copy must never be deleted on error.
  */
 function migrateLegacyOnce() {
   if (typeof localStorage === 'undefined') return;
-  if (localStorage.getItem(MIGRATION_KEY) === '1') return;
-
   try {
+    if (localStorage.getItem(MIGRATION_KEY) === '1') return;
+    if (localStorage.getItem(STORAGE_KEY) !== null) {
+      localStorage.setItem(MIGRATION_KEY, '1');
+      return;
+    }
     const raw = localStorage.getItem(LEGACY_KEY);
     if (raw) {
       const legacy = JSON.parse(raw);
+      if (!isRecord(legacy)) return;
       // Slice any 5-letter initials on legacy leaderboard entries to 4
       if (legacy && legacy.leaderboards && typeof legacy.leaderboards === 'object') {
         for (const gameId of Object.keys(legacy.leaderboards)) {
@@ -155,27 +164,34 @@ function migrateLegacyOnce() {
         }
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(legacy));
+      localStorage.setItem(MIGRATION_KEY, '1');
       localStorage.removeItem(LEGACY_KEY);
+    } else {
+      localStorage.setItem(MIGRATION_KEY, '1');
     }
-  } catch (e) {
-    // Corrupt legacy — start clean. Don't throw; the app must keep booting.
-    console.warn('[NGS] legacy storage migration skipped:', e?.message || e);
-    try { localStorage.removeItem(LEGACY_KEY); } catch { /* noop */ }
-  } finally {
-    try { localStorage.setItem(MIGRATION_KEY, '1'); } catch { /* noop */ }
+  } catch {
+    console.warn('[NGS] Legacy save retained; migration will retry when storage is available.');
   }
 }
 
 export class StorageService {
   static getData() {
+    if (pendingPersist && sessionData) return copyData(sessionData);
     try {
       migrateLegacyOnce();
       const stored = localStorage.getItem(STORAGE_KEY);
       const parsed = stored ? JSON.parse(stored) : {};
-      return {
-        ...defaultData,
+      if (!isRecord(parsed)) throw new Error('invalid_save_shape');
+      const base = copyData();
+      const scores = isRecord(parsed.highScores) ? Object.fromEntries(
+        Object.entries(parsed.highScores).filter(([id, value]) =>
+          !['__proto__', 'constructor', 'prototype'].includes(id) && Number.isSafeInteger(value) && value >= 0)
+      ) : {};
+      const data = {
+        ...base,
         ...parsed,
-        highScores: { ...defaultData.highScores, ...(parsed.highScores || {}) },
+        highScores: { ...base.highScores, ...scores },
+        gamesPlayed: Number.isSafeInteger(parsed.gamesPlayed) && parsed.gamesPlayed >= 0 ? parsed.gamesPlayed : 0,
         favorites: Array.isArray(parsed.favorites) ? parsed.favorites : [],
         favoriteStates: parsed.favoriteStates && typeof parsed.favoriteStates === 'object'
           ? parsed.favoriteStates
@@ -183,19 +199,34 @@ export class StorageService {
         customGames: Array.isArray(parsed.customGames) ? parsed.customGames : [],
         briefingSeen: parsed.briefingSeen && typeof parsed.briefingSeen === 'object' ? parsed.briefingSeen : {}
       };
-    } catch (e) {
-      console.warn('[NGS] LocalStorage access error:', e);
-      return defaultData;
+      sessionData = copyData(data);
+      return data;
+    } catch {
+      console.warn('[NGS] Browser save unavailable; using progress from this page.');
+      return copyData(sessionData || defaultData);
     }
   }
 
   static saveData(data) {
+    let snapshot;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('ngs:data-changed'));
-    } catch (e) {
-      console.warn('[NGS] LocalStorage save error:', e);
+      snapshot = copyData(data);
+      if (!isRecord(snapshot)) throw new Error('invalid_save_shape');
+    } catch {
+      console.warn('[NGS] Invalid progress was not saved; previous progress is retained.');
+      return false;
     }
+    sessionData = snapshot;
+    let persisted = true;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+    } catch {
+      persisted = false;
+      console.warn('[NGS] Progress is kept on this page only; browser storage is unavailable.');
+    }
+    pendingPersist = !persisted;
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('ngs:data-changed'));
+    return persisted;
   }
 
   static getHighScore(gameId) {

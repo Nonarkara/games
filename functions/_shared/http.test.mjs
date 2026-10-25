@@ -29,6 +29,7 @@ assert.ok(pulls <= 4, 'must reject before buffering the remaining body');
 console.log('HTTP boundaries: exact JSON type, byte limits, stream cancellation passed');
 
 const failingBoardDB = {
+  async batch() { return [{ meta: { changes: 1 } }, { meta: { changes: 1 } }]; },
   prepare() {
     return {
       bind() { return this; },

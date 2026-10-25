@@ -101,15 +101,20 @@ if [[ "$OG" != *"Dr Non"* ]]; then
   echo "  ✗ og:title doesn't contain 'Dr Non': $OG"
   exit 1
 fi
-APP_JS=$(curl -s -o /dev/null -w '%{http_code}' "${CANONICAL}js/app.js")
+ENTRY=$(curl -fsS "$CANONICAL" | sed -nE 's/.*<script type="module" src="\.(\/releases\/[a-f0-9]{16}\/js\/app\.js)".*/\1/p')
+if [[ -z "$ENTRY" ]]; then
+  echo "  ✗ versioned module entry is missing from the live HTML"
+  exit 1
+fi
+APP_JS=$(curl -s -o /dev/null -w '%{http_code}' "${CANONICAL%/}${ENTRY}")
 if [[ "$APP_JS" != "200" ]]; then
-  echo "  ✗ js/app.js returned $APP_JS"
+  echo "  ✗ $ENTRY returned $APP_JS"
   exit 1
 fi
 echo "  ✓ HTTP 200"
 echo "  ✓ title: $TITLE"
 echo "  ✓ og:title: $OG"
-echo "  ✓ js/app.js: $APP_JS"
+echo "  ✓ $ENTRY: $APP_JS"
 echo ""
 
 # 6. Print

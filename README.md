@@ -32,6 +32,12 @@ Checks: `npm test`, `npm run test:security`, `npm run test:typography`, and
 `npm run audit:geometry`. The geometry check renders phone, tablet and desktop
 in Chrome; `npm run smoke` opens every cartridge and checks the play surface.
 
+Version 1.2.1 makes score insertion and session consumption one D1 transaction.
+Guest-save migration preserves a newer save and retains the old copy if copying
+fails. When browser storage rejects a write, progress survives on the current
+page; it survives a reload only after a later save succeeds. Release builds put
+all browser modules under one content-hashed path to avoid stale mixed versions.
+
 These are **experiments**, not a studio product and not a clinical tool.
 
 ## Philosophy

@@ -5,7 +5,7 @@
  *
  * Tamper resistance (in order of defense):
  *   1. Session must exist, be unused, not expired, and match game_id
- *      — consumed with UPDATE … AND used = 0 so two posts cannot both win
+ *      — consumed in the same transaction as the score insert
  *   2. Initials must be 1–4 chars, [A-Z0-9]
  *   3. Score must satisfy  0 <= score <= GAME_MAX[game_id]
  *   4. UNIQUE(session_id) on scores prevents double-submit even if
@@ -77,27 +77,26 @@ export async function onRequestPost({ request, env }) {
   }
 
   const now = Date.now();
-  let consumed;
+  const date = new Date(now).toISOString().slice(0, 10);
+  let consumed, inserted;
   try {
-    consumed = await env.DB.prepare(
-      'UPDATE sessions SET used = 1 WHERE session_id = ?1 AND used = 0 AND game_id = ?2 AND expires_at >= ?3'
-    ).bind(session_id, game_id, now).run();
-  } catch {
-    return json({ error: 'service_unavailable' }, 503);
-  }
-  if (!consumed.meta?.changes) return json({ error: 'session_invalid' }, 400);
-
-  const date = new Date().toISOString().slice(0, 10);
-
-  try {
-    await env.DB.prepare(
-      'INSERT INTO scores (game_id, initials, score, date, session_id, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)'
-    ).bind(game_id, initials, score, date, session_id, now).run();
+    // D1 batches roll back the whole sequence if either statement fails.
+    // changes() gates insertion on this batch's preceding successful consume;
+    // replayed, expired or wrong-game sessions therefore write no score.
+    [consumed, inserted] = await env.DB.batch([
+      env.DB.prepare(
+        'UPDATE sessions SET used = 1 WHERE session_id = ?1 AND used = 0 AND game_id = ?2 AND expires_at >= ?3'
+      ).bind(session_id, game_id, now),
+      env.DB.prepare(
+        'INSERT INTO scores (game_id, initials, score, date, session_id, created_at) SELECT ?1, ?2, ?3, ?4, ?5, ?6 WHERE changes() = 1'
+      ).bind(game_id, initials, score, date, session_id, now)
+    ]);
   } catch (e) {
     const msg = String(e?.message || e);
     if (msg.includes('UNIQUE')) return json({ error: 'session_already_used' }, 409);
     return json({ error: 'service_unavailable' }, 503);
   }
+  if (!consumed.meta?.changes || !inserted.meta?.changes) return json({ error: 'session_invalid' }, 400);
 
   let board;
   try { board = await readBoard(env, game_id); }
