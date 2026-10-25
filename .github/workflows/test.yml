@@ -17,4 +17,5 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
+      - run: npm run test:typography
       - run: npm run test:security

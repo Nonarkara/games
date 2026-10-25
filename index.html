@@ -17,15 +17,14 @@
   <meta name="twitter:title" content="Dr Non — Non-Gaming System" />
   <meta name="twitter:description" content="Brain expansion, not killing time. Every cartridge explains the play and the practice. No login required. No ads." />
   <meta name="twitter:image" content="https://games.nonarkara.org/public/insert-coin-hero.jpg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="preload" href="./public/fonts/jost-latin-variable.woff2" as="font" type="font/woff2" crossorigin />
   <!-- Bump ?v= on every deploy that touches these files. The _headers
        rules ask for max-age=0, but the Cloudflare zone overrides them with a
        4h browser TTL, so a new URL is the only thing that reaches an
        already-open tab. Drop this once the zone respects existing headers. -->
   <link rel="stylesheet" href="./css/tailwind.static.css?v=11" />
-  <link rel="stylesheet" href="./css/styles.css?v=30" />
+  <link rel="stylesheet" href="./css/styles.css?v=31" />
+  <link rel="stylesheet" href="./css/typography.css?v=1" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -53,7 +52,9 @@
   <main>
     <section id="ngs-hud" class="cabinet-attract" aria-label="Featured game"></section>
 
-    <section class="edge-strip" aria-labelledby="edge-title">
+    <details class="stack-details">
+      <summary>What these games practise <span>Skills, evidence, and the limits of the claim</span></summary>
+      <section class="edge-strip" aria-labelledby="edge-title">
       <div>
         <p class="edge-kicker">THE STACK</p>
         <h2 id="edge-title">Not a game system. A brain expansion system.</h2>
@@ -75,6 +76,8 @@
         <p>Non-Trivial and Blow Into The Cartridge exist only here — personal packs, not another generic feed.</p>
       </article>
     </section>
+
+    </details>
 
     <section class="arcade-directory" aria-labelledby="directory-title">
       <header class="directory-header">

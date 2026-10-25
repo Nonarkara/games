@@ -82,11 +82,21 @@ const CDP_CALL_TIMEOUT_MS = 20000;
 // "Cannot find default execution context", and a naive retry then re-checks a
 // document that no longer exists. So: click, absorb any navigation, then poll
 // for readiness on whichever document survived.
-async function clickAndSettle(page, clickExpression, selector, label, settleMs = 6000) {
-  const navigated = page.waitFor('Page.loadEventFired', settleMs);
-  await page.evaluate(clickExpression);
-  await Promise.race([navigated, delay(settleMs)]);
-  return waitForSelector(page, selector, label);
+async function clickAndSettle(page, clickExpression, selector, label) {
+  // History navigation usually renders immediately. Waiting for a load event
+  // that never fires cost six seconds per cart. Poll the actual next state;
+  // retry only when a genuine document navigation destroys its old context.
+  const contextChanged = error => /context.*destroyed|Cannot find.*context|Cannot find context/i.test(error.message);
+  try { await page.evaluate(clickExpression); }
+  catch (error) { if (!contextChanged(error)) throw error; }
+  const deadline = Date.now() + 15000;
+  while (true) {
+    try { return await waitForSelector(page, selector, label, Math.max(1, deadline - Date.now())); }
+    catch (error) {
+      if (!contextChanged(error) || Date.now() >= deadline) throw error;
+      await delay(100);
+    }
+  }
 }
 
 async function waitForSelector(page, selector, label, timeoutMs = 15000) {
@@ -483,6 +493,27 @@ try {
         }
       }
       await delay(extraDelay);
+      if (id === 'sudoku') {
+        const proof = await page.evaluate(`(() => {
+          const cells = [...document.querySelectorAll('.sdk-cell')];
+          const maskCorrect = cells.length === 81 && cells.every(cell => cell.classList.contains('is-fixed') === Boolean(cell.textContent.trim()));
+          const blank = cells.find(cell => !cell.classList.contains('is-fixed'));
+          const given = cells.find(cell => cell.classList.contains('is-fixed'));
+          if (!blank || !given) return { maskCorrect, playable: false };
+          blank.click();
+          document.querySelector('.sdk-digit[data-n="1"]').click();
+          const entered = blank.textContent === '1';
+          document.querySelector('.sdk-digit[data-n="0"]').click();
+          const cleared = blank.textContent === '';
+          const peers = document.querySelectorAll('.sdk-cell.is-peer').length;
+          const original = given.textContent;
+          given.click();
+          return { maskCorrect, entered, cleared, peers, givenProtected: given.textContent === original };
+        })()`);
+        if (!proof.maskCorrect || !proof.entered || !proof.cleared || proof.peers !== 20 || !proof.givenProtected) {
+          throw new Error('Sudoku play contract failed: ' + JSON.stringify(proof));
+        }
+      }
       return page.evaluate(`(() => {
         const stage = document.querySelector('.game-session-stage');
         const stageRect = stage?.getBoundingClientRect();

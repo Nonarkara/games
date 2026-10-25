@@ -123,9 +123,9 @@ while IFS= read -r match; do
 done < <(grep -rnE "linear-gradient" css/ js/ 2>/dev/null | grep -v "node_modules" | grep -v "css/tailwind.static.css")
 
 # 6. Rounded font tokens
-# The floor uses Press Start 2P + JetBrains Mono. Flag any new font-family
+# The floor uses Jost + JetBrains Mono. Flag any new font-family
 # added that isn't on the approved list.
-APPROVED_FONTS=("Press Start 2P" "JetBrains Mono" "Inter" "Spectral" "Fira Code" "Helvetica Neue" "Helvetica" "Arial" "sans-serif" "Georgia" "monospace" "Courier New" "Times New Roman")
+APPROVED_FONTS=("Jost" "JetBrains Mono" "Fira Code" "Helvetica Neue" "Helvetica" "Arial" "sans-serif" "Georgia" "monospace" "Courier New" "Times New Roman")
 while IFS= read -r match; do
   [ -z "$match" ] && continue
   file=$(echo "$match" | cut -d: -f1)

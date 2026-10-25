@@ -51,7 +51,7 @@ import {
   generateMoves as goMoves, scorePosition, bestMove as goBest, boardsEqual
 } from './go.js';
 import { CATEGORIES_PUBLIC as HU_CATS, poolFor as huPool, pickWord as huPick, scoreMessage as huMsg } from './headsUp.js';
-import { newSolvedBoard as sdkSolved, isValidPlacement as sdkValid, countSolutions as sdkCount, generatePuzzle as sdkGen, DIFFICULTY as SDK_DIFF } from './sudoku.js';
+import { newSolvedBoard as sdkSolved, isValidPlacement as sdkValid, countSolutions as sdkCount, generatePuzzle as sdkGen, DIFFICULTY as SDK_DIFF, fixedMask, arePeers } from './sudoku.js';
 import {
   GOALS_TO_WIN,
   MAX_KICK,
@@ -941,15 +941,23 @@ assert.ok(sdkValid(empty, 0, 0, 1), 'sudoku: empty board accepts any digit');
 assert.equal(sdkCount(sdk0), 1, 'sudoku: solved board has exactly 1 solution');
 assert.ok(sdkCount(empty) > 1, 'sudoku: empty board has many solutions');
 
-for (const d of Object.keys(SDK_DIFF)) {
-  const { puzzle, solution, givens } = sdkGen(d);
+for (const d of Object.keys(SDK_DIFF)) for (let seed = 1; seed <= 4; seed++) {
+  let state = seed;
+  const random = () => ((state = (state * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  const { puzzle, solution, givens } = sdkGen(d, random);
   const target = SDK_DIFF[d].givens;
   assert.equal(puzzle.length, 9, `sudoku: ${d} puzzle is 9x9`);
   assert.ok(Math.abs(givens - target) <= 8, `sudoku: ${d} givens within 8 of target (${target}, got ${givens})`);
   assert.equal(sdkCount(puzzle), 1, `sudoku: ${d} puzzle has exactly 1 solution`);
+  const mask = fixedMask(puzzle);
+  assert.equal(mask.length, 81, 'sudoku: fixed mask must cover all 81 cells');
+  assert.equal(mask.filter(Boolean).length, givens, 'sudoku: fixed mask protects exactly the givens');
   for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
     if (puzzle[r][c] !== 0) assert.equal(puzzle[r][c], solution[r][c], `sudoku: ${d} given at (${r},${c}) matches solution`);
   }
+}
+for (let i = 0; i < 81; i++) {
+  assert.equal(Array.from({ length: 81 }, (_, j) => j).filter(j => arePeers(i, j)).length, 20, `sudoku: cell ${i} has exactly 20 peers`);
 }
 
 // Two consecutive puzzles at the same difficulty are different

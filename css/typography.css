@@ -1,0 +1,106 @@
+/* Palette's role-based type: read with Jost, compare scores with Mono.
+   Both are SIL Open Font License. Files and licences live in public/fonts.
+   Cartridge sprites, artwork and playfields keep the arcade's identity. */
+@font-face {
+  font-family: 'Jost';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../public/fonts/jost-latin-variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('../public/fonts/jetbrains-mono-latin-variable.woff2') format('woff2');
+}
+:root { --font-sans: 'Jost', 'Trebuchet MS', sans-serif; }
+body { font-size: 16px; line-height: 1.5; }
+h1, h2, h3, h4 { font-weight: 600; }
+.attract-copy { z-index: 1; }
+.arcade-brand b { font-size: 16px; letter-spacing: .05em; }
+.arcade-brand small { font-size: 10px; letter-spacing: .06em; }
+.arcade-search > span, .arcade-play-count span { font-size: 10px; letter-spacing: .06em; }
+.arcade-about-link, .arcade-sound, .arcade-research-link { font-size: 12px; letter-spacing: .05em; }
+.arcade-search input { font-size: 15px; }
+.attract-copy h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 700; line-height: 1; }
+.attract-line { font-size: 20px; font-weight: 600; line-height: 1.35; }
+.attract-sub { font-size: 16px; line-height: 1.5; max-width: 48ch; }
+.attract-kicker, .attract-feature-kicker, .attract-moods-label { font-size: 11px; letter-spacing: .08em; }
+.attract-picks button b, .attract-moods b { font-size: 13px; letter-spacing: .04em; }
+.attract-picks span, .attract-moods span { font-size: 13px; }
+.attract-feature-code { font-family: 'JetBrains Mono', monospace; font-size: 18px; margin-top: 16px; letter-spacing: .04em; }
+.attract-feature-title { font-size: clamp(26px, 3vw, 38px); font-weight: 600; max-width: 18ch; margin-top: 8px; }
+.attract-feature-skill { font-size: 12px; letter-spacing: .04em; }
+.attract-feature-cta { margin-top: 24px; font-size: 14px; }
+.attract-feature.has-art { justify-content: flex-end; }
+.edge-strip h2 { font-size: 22px; font-weight: 600; line-height: 1.2; }
+.edge-strip article p { font-size: 15px; line-height: 1.45; }
+.edge-strip article small, .edge-strip .edge-kicker { font-size: 11px; letter-spacing: .06em; }
+.directory-header h2, .select-block-header h2 { font-size: 26px; font-weight: 600; }
+.directory-header > p, .select-block-header > p { font-size: 15px; line-height: 1.5; max-width: 65ch; }
+.cabinet-wing-copy b { font-size: 13px; letter-spacing: .04em; }
+.cabinet-wing-copy small, .cabinet-wing-count { font-size: 12px; }
+.select-name { font-size: 20px; line-height: 1.25; font-weight: 600; margin-top: 12px; }
+.select-desc { font-size: 15px; line-height: 1.45; }
+.select-brain b { font-size: 14px; font-weight: 500; }
+.select-brain small, .select-age, .select-difficulty { font-size: 10px; letter-spacing: .04em; }
+.select-code, .select-high, .arcade-play-count b { font-family: 'JetBrains Mono', monospace; }
+.briefing-primary > h3 { font-size: clamp(28px, 4vw, 44px); font-weight: 600; margin-bottom: 20px; }
+.briefing-step p, .briefing-side blockquote { font-size: 16px; line-height: 1.5; max-width: 65ch; }
+.briefing-label, .briefing-step h4, .briefing-caveat { font-size: 12px; letter-spacing: .03em; }
+.research-body p, .research-body li { font-size: 16px !important; line-height: 1.6; max-width: 65ch; }
+.research-tabs button b { font-size: 12px; letter-spacing: .04em; }
+.research-tabs button.is-active,
+.attract-picks button:hover,
+.attract-moods button:hover,
+.briefing-play { color: var(--ax-on-amber); }
+.research-tabs button.is-active small,
+.attract-picks button:hover span,
+.attract-moods button:hover span { color: rgba(26, 18, 6, .8); }
+.briefing-play:hover { background: #fbbf24; color: var(--ax-on-amber); }
+.pv-sudoku { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 3px; }
+.pv-sudoku span { width: auto; min-width: 0; }
+.stack-details { border-inline: 1px solid var(--ax-line-2); background: var(--ax-panel); }
+.stack-details > summary { padding: 10px 20px; cursor: pointer; font-size: 15px; color: var(--ax-ink); }
+.stack-details > summary span { margin-left: 16px; color: var(--ax-ink-2); font-size: 13px; }
+.stack-details[open] .edge-strip { display: grid; }
+@media (min-width: 1101px) {
+  .cabinet-attract, .attract-hero, .attract-hero > img { min-height: 500px; }
+  .attract-copy { padding: 24px 32px; }
+  .attract-copy h1 { margin-top: 12px; margin-bottom: 12px; }
+  .attract-moods { margin-top: 12px; }
+  .attract-moods button { padding: 8px 10px; min-height: 48px; }
+  .edge-strip { grid-template-columns: 1.4fr repeat(4, 1fr); }
+  .edge-strip > * { padding: 16px; }
+}
+@media (max-width: 1100px) and (min-width: 421px) {
+  .attract-hero { display: block; }
+  .attract-hero > img { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; }
+  .attract-copy { position: relative; background: rgba(5, 7, 12, .88); padding: 24px; }
+  .attract-feature-title { font-size: 26px; }
+  .attract-feature.has-art { justify-content: flex-start; }
+}
+@media (max-width: 720px) {
+  .arcade-brand b { font-size: 14px; }
+  .attract-line { font-size: 16px; }
+  .attract-feature-title { font-size: 24px; }
+  .attract-feature-cta { font-size: 13px; margin-top: 10px; }
+  .attract-picks button b, .attract-moods b { font-size: 12px; }
+  .attract-picks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .attract-picks button { min-width: 0; }
+  .attract-moods-label { font-size: 10px; }
+  .select-name { font-size: 18px; margin-top: 0; }
+  .select-brain b { font-size: 13px; }
+  .briefing-primary > h3 { font-size: 28px; }
+  .stack-details > summary { padding: 8px 14px; font-size: 14px; }
+  .stack-details > summary span { display: block; margin-left: 14px; font-size: 12px; }
+}
+@media (max-width: 480px) {
+  .attract-feature { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-areas: 'sprite title load' 'sprite meta load'; gap: 2px 10px; }
+  .attract-feature .cart-sprite { grid-area: sprite; width: 32px; height: 32px; }
+  .attract-feature-title { grid-area: title; font-size: 20px; }
+  .attract-feature-skill { grid-area: meta; font-size: 11px; }
+  .attract-feature-cta { grid-area: load; margin: 0; font-size: 12px; letter-spacing: .04em; white-space: nowrap; }
+}

@@ -22,3 +22,16 @@ Dr Non's Non-Gaming System (NGS) uses original vanilla-JavaScript renderers insi
 | Slide 2048 | [gabrielecirulli/2048](https://github.com/gabrielecirulli/2048) | Gabriele Cirulli | MIT | Classic mechanic reference; reimplemented in NGS. |
 
 No third-party game is embedded as an iframe. This keeps controls, accessibility, saved scores, and teardown behavior consistent on phones and laptops.
+
+## Typography and design studies · October 2026
+
+Jost by indestructible type and JetBrains Mono by JetBrains are served locally
+under the SIL Open Font License 1.1. Original variable fonts came from the
+[Google Fonts repository](https://github.com/google/fonts), directories
+`ofl/jost` and `ofl/jetbrainsmono`. The shipped WOFF2 files are Latin subsets;
+both licence texts are in `public/fonts/`.
+
+The typography roles, content-first layout review, font-failure checks and
+grayscale/contrast reasoning follow Dr Non's
+[Palette field guides](https://github.com/Nonarkara/palette). Original NGS
+artwork, cartridge sprites and game renderers remain in use.

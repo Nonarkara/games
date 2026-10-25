@@ -23,6 +23,15 @@ This repository is the source for a 16-bit browser floor of short games, researc
 
 Every cartridge opens with a **briefing**: how to play, what it practises, and the limit of the claim. No ads. No login required.
 
+Version 1.2 uses Palette's reading and layout rules: local Jost and JetBrains
+Mono fonts, compact launch controls, and an expandable explanation. The original
+artwork and cartridge sprites stay. No runtime framework or font service is
+required. Guest progress remains in this browser; Google login is not connected.
+
+Checks: `npm test`, `npm run test:security`, `npm run test:typography`, and
+`npm run audit:geometry`. The geometry check renders phone, tablet and desktop
+in Chrome; `npm run smoke` opens every cartridge and checks the play surface.
+
 These are **experiments**, not a studio product and not a clinical tool.
 
 ## Philosophy

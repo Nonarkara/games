@@ -412,3 +412,46 @@ Browser audit passed all 80 carts and the guest save panel at 390×844 and
 1280×900 with zero overflow or console errors. The three new games were also
 interactively played: Nonogram cycles cell state, Nim returns a CPU move, and
 Make 24 reduces four values to three after a valid operation.
+
+## Gamification skill · 2026-10-22
+`gamification-motion` (user skill) governs added feedback/juice. Games here may use shake and hit-stop on play events only; chrome never animates. Overshoot stays banned until a Divergence is written below.
+
+## MSH, Palette and system upgrade · 2026-10-25
+
+MSH here means **Massacre Spatial Hallucination**, per ../MSH.md.
+Design read: choose a short game, understand its practice, and start it while
+the original arcade room remains recognisable. Reference: Famicom cartridge
+labels and instruction manuals, with Palette's separation of exhibit and label.
+Dominant elements: INSERT COIN and its launch actions; the featured cartridge;
+then the game names. One amber indicates action; dark ink belongs on amber;
+the existing contrast repairs are preserved. Gameplay colours carry rules.
+
+Two local families: Jost for reading, headings and navigation; JetBrains Mono
+for scores and aligned game data. The old --ax-pixel token now names a legacy
+display role, not a pixel font. Both variable WOFF2 subsets and licences ship
+inside public/fonts, about 82 KiB combined. No external font service is needed.
+Do not restore Inter/Press Start/Spectral imports or whole-page scanlines.
+The CRT layer is confined to artwork, below readable copy.
+
+Composition: the rationale is an ordinary, labelled details disclosure, not
+five compulsory panels before choosing a game. All its content remains.
+Tablet copy participates in normal flow: absolutely positioned text previously
+exceeded its clipped 320px image. The geometry gate now includes 1024px and
+fails if the home title escapes its hero. A global theme/framework replacement
+was rejected: the native modules already carry the product and its 104 games.
+
+Borrowed mechanisms from Palette: type by reading role, native disclosure,
+local font loading, real interaction after screenshot, blocked-font and
+enlarged-text proof. Current browser-native font loading is used; no new
+runtime dependency or paid service is introduced.
+
+System repair: Sudoku's mask was nine booleans for a board of 81 cells, so
+givens were editable and blank first-row cells were locked. It now uses all
+81 cells. Box/row/column highlighting has exactly 20 peers. The generator now
+uses the shuffled removal order, checks uniqueness after individual removals,
+and accepts a seeded RNG for reproducible difficulty tests. Browser smoke
+tests enter and clear a digit and verify clue protection.
+
+Historical account notes above are not the current implementation: Google OAuth
+and cloud-save endpoints are absent. Current player progress remains local.
+Do not report OAuth as shipped based on the August notes.

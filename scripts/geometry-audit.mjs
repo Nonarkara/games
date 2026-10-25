@@ -37,6 +37,7 @@
  *  R7  The first answer is near the top: first cartridge within N screens.
  *  R8  On a phone the briefing's PLAY stays reachable without scrolling even
  *      when the briefing is absurdly long (a 2400px spacer is injected).
+ *  R9  The home title stays inside its hero instead of being clipped above it.
  *
  * LIMITS (stated, not hidden)
  *  - R5 judges the header only. Elsewhere a photo, gradient or pseudo-element
@@ -68,11 +69,12 @@ const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Conte
 export const LIMITS = {
   chromeShare: 0.065,
   headerHeight: 48,
-  firstCartridgeScreens: { phone: 1.0, desktop: 1.7 }
+  firstCartridgeScreens: { phone: 1.0, tablet: 1.7, desktop: 1.7 }
 };
 
 const VIEWPORTS = [
   { name: 'phone', w: 390, h: 844, mobile: true },
+  { name: 'tablet', w: 1024, h: 900, mobile: false },
   { name: 'desktop', w: 1440, h: 900, mobile: false }
 ];
 
@@ -159,6 +161,16 @@ function auditInPage(args) {
   }
 
   if (scene === 'home') {
+    // A title can have a real box yet be clipped by its hero's overflow.
+    // This was missed at 1024px when the absolute copy exceeded its image.
+    const hero = document.querySelector('.attract-hero');
+    const title = hero?.querySelector('h1');
+    if (!title || !visible(title)) flag('R9', 'home title is missing');
+    else {
+      const box = hero.getBoundingClientRect(), label = title.getBoundingClientRect();
+      metrics.titleClipped = label.top < box.top - 1 || label.bottom > box.bottom + 1;
+      if (metrics.titleClipped) flag('R9', 'home title extends outside its hero and is clipped');
+    }
     // R1 / R2
     const chrome = [...document.querySelectorAll('body *')].filter(el => {
       const cs = getComputedStyle(el);

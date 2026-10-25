@@ -50,6 +50,7 @@ echo ""
 # 2. Test
 echo "▶ Test (npm test)"
 npm test
+npm run test:typography
 npm run test:security
 echo ""
 

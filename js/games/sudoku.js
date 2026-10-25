@@ -28,45 +28,45 @@ const SIZE = 9;
 const BOX = 3;
 
 export const DIFFICULTY = {
-  easy:   { label: 'EASY',   givens: 38, desc: '38 givens. Most rows can be filled by scanning the column.' },
-  medium: { label: 'MEDIUM', givens: 32, desc: '32 givens. Pencil marks help.' },
-  hard:   { label: 'HARD',   givens: 28, desc: '28 givens. Look for hidden pairs and box-line reductions.' },
-  expert: { label: 'EXPERT', givens: 24, desc: '24 givens. Pure logic. The generator will reject non-unique puzzles.' }
+  easy:   { label: 'EASY',   givens: 38, desc: 'More clues to start. Scan each row, column and 3×3 box for the missing digits.' },
+  medium: { label: 'MEDIUM', givens: 32, desc: 'Around 32 clues. Compare which digits can fit in each empty cell.' },
+  hard:   { label: 'HARD',   givens: 28, desc: 'Around 28 clues. Look for pairs of cells that can hold the same two digits.' },
+  expert: { label: 'EXPERT', givens: 24, desc: 'Targets 24 clues. Extra clues stay when needed to keep exactly one solution.' }
 };
 
 /** Return a fresh solved 9×9 Sudoku board. */
-export function newSolvedBoard() {
+export function newSolvedBoard(random = Math.random) {
   const b = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
   // Seed the diagonal 3×3 boxes with shuffled 1-9 so the backtracker has variety.
   for (let box = 0; box < SIZE; box += BOX) {
-    const digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    const digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9], random);
     for (let i = 0; i < BOX; i++) for (let j = 0; j < BOX; j++) {
       b[box + i][box + j] = digits[i * BOX + j];
     }
   }
   // Backtracking fill
-  fillFrom(b, 0, 0);
+  fillFrom(b, 0, 0, random);
   return b;
 }
 
-function fillFrom(b, r, c) {
+function fillFrom(b, r, c, random) {
   if (r === SIZE) return true;
   const [nr, nc] = c === SIZE - 1 ? [r + 1, 0] : [r, c + 1];
-  if (b[r][c] !== 0) return fillFrom(b, nr, nc);
-  const digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  if (b[r][c] !== 0) return fillFrom(b, nr, nc, random);
+  const digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9], random);
   for (const d of digits) {
     if (!isValidPlacement(b, r, c, d)) continue;
     b[r][c] = d;
-    if (fillFrom(b, nr, nc)) return true;
+    if (fillFrom(b, nr, nc, random)) return true;
     b[r][c] = 0;
   }
   return false;
 }
 
-function shuffle(arr) {
+function shuffle(arr, random = Math.random) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -114,9 +114,9 @@ export function countSolutions(b, cap = 2) {
 /** Generate a fresh puzzle with exactly one solution.
  *  Tries to remove symmetric pairs of cells; if removal creates ambiguity,
  *  the cell is put back and another pair is tried. */
-export function generatePuzzle(difficulty = 'medium') {
+export function generatePuzzle(difficulty = 'medium', random = Math.random) {
   const targetGivens = DIFFICULTY[difficulty]?.givens ?? 32;
-  const solution = newSolvedBoard();
+  const solution = newSolvedBoard(random);
   // Build the list of 81/2 = 40 symmetric pairs (we keep pairs so the puzzle
   // is visually balanced), shuffle them.
   const pairs = [];
@@ -129,10 +129,9 @@ export function generatePuzzle(difficulty = 'medium') {
   // We want to keep `targetGivens` cells filled, i.e. remove (81 - targetGivens).
   // Each pair-removal removes 2 cells (unless i === mirror, which we never have here).
   const removalsNeeded = Math.floor((SIZE * SIZE - targetGivens) / 2);
-  shuffle(pairs);
   const puzzle = solution.map(row => row.slice());
   let removed = 0;
-  for (const [a, b] of pairs) {
+  for (const [a, b] of shuffle(pairs, random)) {
     if (removed >= removalsNeeded) break;
     const ar = Math.floor(a / SIZE), ac = a % SIZE;
     const br = Math.floor(b / SIZE), bc = b % SIZE;
@@ -148,8 +147,27 @@ export function generatePuzzle(difficulty = 'medium') {
       puzzle[br][bc] = bv;
     }
   }
-  const givens = puzzle.flat().filter(v => v !== 0).length;
+  // Symmetry is secondary to a useful difficulty. Remove individual clues
+  // when symmetric removal stalls, while preserving exactly one solution.
+  let givens = puzzle.flat().filter(v => v !== 0).length;
+  for (const index of shuffle(Array.from({ length: 81 }, (_, i) => i), random)) {
+    if (givens <= targetGivens) break;
+    const r = Math.floor(index / SIZE), c = index % SIZE, value = puzzle[r][c];
+    if (!value) continue;
+    puzzle[r][c] = 0;
+    if (countSolutions(puzzle) === 1) givens--;
+    else puzzle[r][c] = value;
+  }
   return { puzzle, solution, givens, difficulty };
+}
+
+export const fixedMask = puzzle => puzzle.flat().map(value => value !== 0);
+
+export function arePeers(a, b) {
+  if (a === b) return false;
+  const ar = Math.floor(a / SIZE), ac = a % SIZE;
+  const br = Math.floor(b / SIZE), bc = b % SIZE;
+  return ar === br || ac === bc || (Math.floor(ar / BOX) === Math.floor(br / BOX) && Math.floor(ac / BOX) === Math.floor(bc / BOX));
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -161,7 +179,7 @@ export function renderSudoku(container, onClose) {
   function start(difficulty = 'medium') {
     let { puzzle, solution } = generatePuzzle(difficulty);
     const cells = puzzle.map(row => row.slice());
-    const fixed = puzzle.map(v => v !== 0);
+    const fixed = fixedMask(puzzle);
     let selected = -1;
     let mistakes = 0;
     let startedAt = performance.now();
@@ -217,9 +235,7 @@ export function renderSudoku(container, onClose) {
         btn.textContent = v || '';
         const isSel = i === selected;
         const wrong = !fixed[i] && v !== 0 && v !== solution[r][c];
-        const sameRowCol = selected >= 0 && (Math.floor(selected / SIZE) === r || (selected % SIZE) === c);
-        const sameBox = selected >= 0 && (Math.floor(selected / BOX) * BOX === Math.floor(r / BOX) * BOX) && (Math.floor((selected % SIZE) / BOX) * BOX === Math.floor(c / BOX) * BOX);
-        const peer = isSel ? false : (sameRowCol || sameBox);
+        const peer = selected >= 0 && arePeers(i, selected);
         const sameVal = v !== 0 && selected >= 0 && v === cells[Math.floor(selected / SIZE)][selected % SIZE];
         btn.className = 'sdk-cell ' +
           (fixed[i] ? 'is-fixed ' : '') +
@@ -262,7 +278,7 @@ export function renderSudoku(container, onClose) {
           <div class="flex justify-between items-center mb-3 border-b border-amber-500/40 pb-2">
             <div>
               <h2 class="text-xl font-black text-amber-400 tracking-wider">SUDOKU</h2>
-              <p class="text-[10px] text-amber-500/80 uppercase">${diff.label} · fresh board every play</p>
+              <p class="text-[10px] text-amber-500/80 uppercase">${diff.label} · ${fixed.filter(Boolean).length} clues · fresh board every play</p>
             </div>
             ${closeButton()}
           </div>
@@ -313,7 +329,7 @@ export function renderSudoku(container, onClose) {
       const timeEl = container.querySelector('[data-time]');
       if (timeEl && !over) {
         const tick = setInterval(() => {
-          if (over) { clearInterval(tick); return; }
+          if (over || !timeEl.isConnected) { clearInterval(tick); return; }
           timeEl.textContent = ((performance.now() - startedAt) / 1000).toFixed(0) + 's';
         }, 1000);
       }
