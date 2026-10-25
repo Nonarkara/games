@@ -52,7 +52,7 @@ import { renderChess } from './games/chess.js';
 import { renderCheckers } from './games/checkers.js';
 import { renderSpiderSolitaire } from './games/spiderSolitaire.js';
 import { renderGo } from './games/go.js';
-import { renderSudoku } from './games/sudoku.js';
+import { renderSudoku } from './games/sudoku.js?v=1.2.0';
 import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } from './games/ngsDailySuite.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
