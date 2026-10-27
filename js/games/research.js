@@ -27,7 +27,7 @@ export function renderResearch(container, onClose) {
           <div>
             <p>RESEARCH · NON-GAMING SYSTEM</p>
             <h2 id="research-title">The words behind the floor</h2>
-            <p class="research-sub">Why games are not a waste of time. How this project came about. The science underneath, and the person who built it. One floor, five frameworks, 104 cartridges — every claim shows its paper.</p>
+            <p class="research-sub">Why games are not a waste of time. How this project came about. The science underneath, and the person who built it. One floor, five frameworks, 106 cartridges — every claim shows its paper.</p>
           </div>
           <button type="button" class="about-close" id="close-game-btn">CLOSE</button>
         </header>

@@ -7,6 +7,8 @@
  */
 
 export const BRAIN_GUIDES = {
+  'russian-roulette': { label: 'Pass the device, press once', minutes: '1–3 min', practice: 'Choose 2–10 players. Take one turn each. One hidden trigger loses the round. Three triggers per player.', why: 'Each safe press leaves fewer possibilities. This is chance, not a measure of intelligence or a brain-training claim.', tip: 'Screen-only. Choose quiet mode if anyone dislikes surprises.', stack: [] },
+  'pirate-barrel': { label: 'One slot makes the pirate pop', minutes: '1–3 min', practice: 'Choose 2–10 players. Pick one unused slot per turn. The player who pops the pirate loses. Three slots per player.', why: 'The losing slot stays fixed. After a safe choice, the chance of losing on the next choice rises. Safe slots do not predict the hidden one.', tip: 'All unused slots have the same odds. Take turns and pass the device.', stack: [] },
   'verbal-fluency': {
     label: 'Name as many as you can', minutes: '1–2 min',
     practice: 'A category appears. Type one word, press ENTER, keep going until the clock stops. Repeats do not count twice.',

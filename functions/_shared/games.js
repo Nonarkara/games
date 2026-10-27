@@ -6,6 +6,7 @@
  * both directions so an unknown cartridge can never mint a server session.
  */
 export const GAME_MAX = Object.freeze({
+  'russian-roulette': 1, 'pirate-barrel': 1,
   // Mind Gym 2026
   'verbal-fluency': 200,
   'digit-symbol': 400,

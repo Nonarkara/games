@@ -7,6 +7,7 @@
  */
 
 const MAP = {
+  'russian-roulette': 'chance', 'pirate-barrel': 'barrel',
   // inhibition / Stroop family
   'stroop-match': 'stroop',
   'stroop-match-pro': 'stroop',
@@ -134,6 +135,8 @@ export function previewHtmlFor(game) {
   // The inner scene is pure CSS — no timers, no JS, so GameSession teardown
   // cannot leak it. Reduced-motion freezes at 0% via media query in styles.css
   const scenes = {
+    chance: `<div class="pv-scene pv-party" aria-hidden="true">?</div><p class="pv-cap">Pass · press · one hidden trigger</p>`,
+    barrel: `<div class="pv-scene pv-party" aria-hidden="true">▥</div><p class="pv-cap">Pick a slot · one makes the pirate pop</p>`,
     stroop: `
       <div class="pv-scene pv-stroop" aria-hidden="true">
         <span class="pv-word pv-w1">RED</span><span class="pv-word pv-w2">BLUE</span><span class="pv-word pv-w3">GREEN</span>

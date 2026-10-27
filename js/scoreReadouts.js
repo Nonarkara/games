@@ -10,6 +10,7 @@ import { BRAIN_GUIDES } from './brainGuides.js';
 
 /** Absolute cutoffs: score < cuts[0] rough, < cuts[1] warming, < cuts[2] solid, else sharp. */
 const CUTS = {
+  'russian-roulette': [1, 2, 3], 'pirate-barrel': [1, 2, 3],
   'verbal-fluency': [10, 16, 24],
   'digit-symbol': [25, 40, 58],
   'reversi': [25, 33, 42],

@@ -19,6 +19,8 @@
  */
 
 export const SEARCH_ALIASES = {
+  'russian-roulette': ['roulette', 'party', 'jackpot', 'trigger'],
+  'pirate-barrel': ['pop up pirate', 'pop-up pirate', 'barrel', 'sword', 'party'],
   'verbal-fluency': ['fluency', 'name as many', 'word retrieval', 'animals', 'categories', 'fas test', 'talking'],
   'digit-symbol': ['symbol coding', 'dsst', 'processing speed', 'coding', 'substitution', 'wechsler', 'shapes and numbers'],
   'reversi': ['othello', 'reversi', 'discs', 'flip', 'board game', 'corners'],

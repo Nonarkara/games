@@ -3,6 +3,7 @@
  * Floor plan: four wings (TRAIN / ARCADE / LEARN / LABS) + dense bay rows.
  * Wing clicks bind to .cabinet-wing; cartridge rows are .select-row.
  */
+import { renderRussianRoulette, renderPirateBarrel } from './games/partyChance.js';
 import { soundFx } from './audio.js';
 import { StorageService } from './storage.js';
 import { AnalyticsService } from './analytics.js';
@@ -64,6 +65,7 @@ import { MOODS, moodById, gamesForMood, moodsForGame } from './moods.js';
 import { spriteImg } from './sprites.js';
 
 const GAME_DIFFICULTY = {
+  'russian-roulette': 'beginner', 'pirate-barrel': 'beginner',
   'verbal-fluency': 'beginner', 'digit-symbol': 'beginner',
   'reversi': 'pro', 'dots-boxes': 'intermediate',
   'flood-it': 'intermediate', 'peg-solitaire': 'pro',
@@ -114,6 +116,8 @@ const WING_META = {
 
 /** @type {Array<{id:string,code:string,title:string,wing:string,category:string,domain:string,desc:string,age:string,paper?:string,tags:string[],renderer:Function}>} */
 const gamesCatalog = [
+  { id: 'russian-roulette', code: 'RRL', title: 'Russian Roulette', wing: 'labs', category: 'party', domain: 'Chance and probability', age: '12+', desc: 'Take turns pressing a button. One hidden trigger loses the round. 2–10 players.', tags: ['Party', 'Chance', 'Group'], renderer: renderRussianRoulette },
+  { id: 'pirate-barrel', code: 'PBR', title: 'Pirate Barrel', wing: 'labs', category: 'party', domain: 'Chance and probability', age: 'All', desc: 'Pick a slot. If the pirate pops up, you lose this round. 2–10 players.', tags: ['Party', 'Chance', 'Group'], credit: 'Inspired by Pop-Up Pirate · original implementation', renderer: renderPirateBarrel },
   // ── TRAIN ──────────────────────────────────────────────────────────────
   { id: 'dual-n-back', code: 'NBK', title: 'Dual N-Back', wing: 'train', category: 'memory-focus', domain: 'Working memory', age: 'Teen+', desc: 'Watch each square and letter. Tap when either matches two turns ago.', paper: 'Jaeggi 2008', tags: ['N-back', 'Research'], renderer: renderDualNBack },
   { id: 'digit-span', code: 'DSP', title: 'Digit Span', wing: 'train', category: 'memory-focus', domain: 'Capacity', age: 'Teen+', desc: 'Watch the numbers, then type them back. Each win adds one more digit.', paper: 'Miller 1956', tags: ['Capacity', 'Recall'], renderer: renderDigitSpan },
