@@ -38,15 +38,15 @@
  *  R8  On a phone the briefing's PLAY stays reachable without scrolling even
  *      when the briefing is absurdly long (a 2400px spacer is injected).
  *  R9  The home title stays inside its hero instead of being clipped above it.
+ *  R10 Every visible text element meets AA against the background it is
+ *      actually painted on. Backgrounds that cannot be determined (a photo, a
+ *      gradient, a pseudo-element) are counted UNKNOWN, never guessed.
  *
  * LIMITS (stated, not hidden)
- *  - R5 judges the header only. Elsewhere a photo, gradient or pseudo-element
- *    can sit behind text and a computed-style audit would be guessing; a wrong
- *    guess here is how the last audit's detector generated 55 findings of
- *    which none were real. A page-wide contrast sweep found the amber-chip
- *    pattern (white 9px on amber, 2.15:1) and the dim-ink token failing on
- *    both grounds — recorded in docs/AUDIT-2026-10-22.md, not gated, because
- *    fixing it is a palette decision.
+ *  - R10 cannot judge text over a photograph or a gradient, and says so rather
+ *    than guessing. Those elements are counted in `contrastUnknown` and stay a
+ *    human-eye check. The featured cartridge's dark wash over its artwork is
+ *    the largest such area.
  *  - Thresholds are a ratchet at the current good state, not a target. Lower
  *    them when the page improves; never raise one to make a build pass.
  */
@@ -202,6 +202,29 @@ function auditInPage(args) {
       }
       let acc = base; for (let i = stack.length - 1; i >= 0; i--) acc = over(stack[i], acc); return acc;
     };
+    // Page-wide resolver. Returns null when the painted background cannot be
+    // known from computed style: a photograph, a gradient, or a pseudo-element
+    // with its own background. The featured cartridge's art is exactly this —
+    // a dark wash over a photo — and guessing there would be wrong, so the
+    // element is counted as UNKNOWN and left to a human eye.
+    const pageBgOf = el => {
+      const stack = [];
+      for (let e = el; e; e = e.parentElement) {
+        const cs = getComputedStyle(e);
+        if (cs.backgroundImage && cs.backgroundImage !== 'none') return null;
+        for (const pe of ['::before', '::after']) {
+          const ps = getComputedStyle(e, pe);
+          if (ps.content && ps.content !== 'none' && ps.content !== 'normal') {
+            if (ps.backgroundImage && ps.backgroundImage !== 'none') return null;
+            const pc = parse(ps.backgroundColor);
+            if (pc && pc.a > 0) return null;
+          }
+        }
+        const c = parse(cs.backgroundColor);
+        if (c && c.a > 0) { stack.push(c); if (c.a >= 1) break; }
+      }
+      let acc = base; for (let i = stack.length - 1; i >= 0; i--) acc = over(stack[i], acc); return acc;
+    };
     let worst = Infinity;
     for (const el of header.querySelectorAll('*')) {
       const own = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
@@ -216,6 +239,50 @@ function auditInPage(args) {
       if (cr < need) flag('R5', `header text "${field ? 'placeholder' : words(el)}" is ${cr.toFixed(2)}:1 (needs ${need}:1) — ${name(el)} ${cs.color}`);
     }
     metrics.worstHeaderContrast = +worst.toFixed(2);
+
+    // R10 — every visible text element on the page, not just the header.
+    //
+    // R5 exists because the header once wore near-white ink on a light bar
+    // and every gate measured boxes. This extends the same measurement to the
+    // whole floor: the amber chips, the room discs, the dim-ink token on the
+    // dark panels. Those were found by a one-off sweep that lived in /tmp and
+    // died with the machine, which is how they came back a second time.
+    //
+    // The honest part matters more than the coverage. Where the background
+    // cannot be determined — a photograph, a gradient, a pseudo-element
+    // painting over the text — this reports UNKNOWN and does not guess. A
+    // detector that guesses produced 55 findings of which none were real.
+    {
+      let worstPage = Infinity, unknown = 0, judged = 0;
+      for (const el of document.querySelectorAll('body *')) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) continue;
+        const cs = getComputedStyle(el);
+        if (cs.visibility === 'hidden' || cs.display === 'none') continue;
+        if (parseFloat(cs.opacity) === 0) continue;
+        const own = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
+        const field = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
+        if (!own && !field) continue;
+        const bg = pageBgOf(el);
+        if (!bg) { unknown++; continue; }
+        let fg = parse(field ? getComputedStyle(el, '::placeholder').color : cs.color);
+        if (!fg) continue;
+        // The element's own opacity dims its text against the backdrop.
+        const elAlpha = parseFloat(cs.opacity);
+        if (isFinite(elAlpha) && elAlpha < 1) fg = { ...fg, a: fg.a * elAlpha };
+        if (fg.a < 1) fg = over(fg, bg);
+        const px = parseFloat(cs.fontSize);
+        const need = (px >= 24 || (px >= 18.66 && parseInt(cs.fontWeight) >= 700)) ? 3 : 4.5;
+        const cr = ratio(fg, bg);
+        judged++; worstPage = Math.min(worstPage, cr);
+        if (cr < need) {
+          flag('R10', `text "${field ? 'placeholder' : words(el)}" is ${cr.toFixed(2)}:1 (needs ${need}:1) — ${name(el)} ${cs.color} on rgb(${Math.round(bg.r)},${Math.round(bg.g)},${Math.round(bg.b)})`);
+        }
+      }
+      metrics.worstPageContrast = judged ? +worstPage.toFixed(2) : null;
+      metrics.contrastJudged = judged;
+      metrics.contrastUnknown = unknown;
+    }
 
     // R7
     const first = document.querySelector('.select-row');

@@ -860,7 +860,12 @@ body.axiom-modal-open { overflow: hidden; }
 .cabinet-wing-count {
   font-size: 0.65rem;
   letter-spacing: 0.06em;
-  opacity: 0.75;
+  /* §11.10: this used to carry opacity 0.75 on top of the dim-ink token, so
+     the count was dimmed twice — 3.61:1 on the panel and 3.37:1 on the active
+     amber, both under the 4.5 floor. A blanket opacity dims whatever is added
+     to this element later, silently. The tertiary token already IS the
+     de-emphasis and measures 5.42:1, so the opacity is redundant and the
+     count can be dimmed by colour alone. */
 }
 
 .cabinet-papers {
