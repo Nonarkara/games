@@ -4,6 +4,7 @@
   <url><loc>https://games.nonarkara.org/?game=pirate-barrel</loc></url>
   <url><loc>https://games.nonarkara.org/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://games.nonarkara.org/?game=dual-n-back</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://games.nonarkara.org/?game=pirate-tank</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://games.nonarkara.org/?game=digit-span</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://games.nonarkara.org/?game=stroop-match</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://games.nonarkara.org/?game=stroop-match-pro</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -66,6 +67,7 @@
   <url><loc>https://games.nonarkara.org/?game=reversi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://games.nonarkara.org/?game=dots-boxes</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://games.nonarkara.org/?game=monty-hall</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://games.nonarkara.org/?game=six-chambers</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://games.nonarkara.org/?game=asteroids</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://games.nonarkara.org/?game=frogger</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://games.nonarkara.org/?game=connect-four</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>

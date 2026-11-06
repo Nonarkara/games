@@ -55,6 +55,8 @@ import { renderSpiderSolitaire } from './games/spiderSolitaire.js';
 import { renderGo } from './games/go.js';
 import { renderSudoku } from './games/sudoku.js?v=1.2.0';
 import { renderReactionGate, renderOneBack, renderOddball, renderBackwardSpan } from './games/ngsDailySuite.js';
+import { renderSixChambers } from './games/six-chambers.js';
+import { renderPirateTank } from './games/pirate-tank.js';
 import { bindModalUX, GameSession } from './ui.js';
 import { getBrainGuide, PAPER_LINKS, TRANSFER_CAVEAT } from './brainGuides.js';
 import { gameIdFromSearch, gameQuery } from './deepLink.js';
@@ -85,6 +87,7 @@ const GAME_DIFFICULTY = {
   'cyber-blackjack': 'beginner', 'trivia-master': 'beginner', 'pattern-breaker': 'intermediate',
   'rom-loader': 'beginner', 'ai-sandbox': 'beginner', 'warehouse-push': 'intermediate',
   'rock-paper-scissors': 'beginner', 'paper-soccer': 'intermediate', 'monty-hall': 'beginner',
+  'six-chambers': 'intermediate', 'pirate-tank': 'intermediate',
   'asteroids': 'intermediate', 'frogger': 'intermediate', 'connect-four': 'intermediate',
   'solitaire': 'intermediate', 'chess': 'pro', 'checkers': 'pro', 'spider-solitaire': 'pro',
   'go': 'pro', 'sudoku': 'beginner', 'number-chain': 'intermediate', 'word-guess': 'intermediate',
@@ -120,6 +123,7 @@ const gamesCatalog = [
   { id: 'pirate-barrel', code: 'PBR', title: 'Pirate Barrel', wing: 'labs', category: 'party', domain: 'Chance and probability', age: 'All', desc: 'Pick a slot. If the pirate pops up, you lose this round. 2–10 players.', tags: ['Party', 'Chance', 'Group'], credit: 'Inspired by Pop-Up Pirate · original implementation', renderer: renderPirateBarrel },
   // ── TRAIN ──────────────────────────────────────────────────────────────
   { id: 'dual-n-back', code: 'NBK', title: 'Dual N-Back', wing: 'train', category: 'memory-focus', domain: 'Working memory', age: 'Teen+', desc: 'Watch each square and letter. Tap when either matches two turns ago.', paper: 'Jaeggi 2008', tags: ['N-back', 'Research'], renderer: renderDualNBack },
+  { id: 'pirate-tank', code: 'PTK', title: 'Pirate in a Tank', wing: 'train', category: 'puzzle', domain: 'Mental rotation', age: 'All', desc: 'Rotate the barrel to bring the deep hole to the knife, then push it home.', paper: '', tags: ['puzzle'], renderer: renderPirateTank },
   { id: 'digit-span', code: 'DSP', title: 'Digit Span', wing: 'train', category: 'memory-focus', domain: 'Capacity', age: 'Teen+', desc: 'Watch the numbers, then type them back. Each win adds one more digit.', paper: 'Miller 1956', tags: ['Capacity', 'Recall'], renderer: renderDigitSpan },
   { id: 'stroop-match', code: 'STR', title: 'Colour Match', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: '8+', desc: 'The word says RED but the ink is BLUE — tap the colour of the ink, not the word it spells.', paper: 'Stroop 1935', tags: ['Colour', 'Inhibition', 'Focus'], renderer: renderStroop },
   { id: 'stroop-match-pro', code: 'CMP', title: 'Colour Match Pro', wing: 'train', category: 'memory-focus', domain: 'Inhibition', age: 'Teen+', desc: 'Tap the ink colour. All answers are white, so the buttons cannot hint.', paper: 'Stroop 1935', tags: ['Colour', 'Inhibition', 'Focus'], renderer: renderStroopPro },
@@ -186,6 +190,7 @@ const gamesCatalog = [
   { id: 'dots-boxes', code: 'DTB', title: 'Dots and Boxes', wing: 'arcade', category: 'puzzle', domain: 'Chain parity', age: '8+', desc: 'Draw one line a turn. Close the fourth side of a box to claim it and go again.', tags: ['Board', 'Opponent', 'Paper'], renderer: renderDotsBoxes },
   // ── LEARN ──────────────────────────────────────────────────────────────
   { id: 'monty-hall', code: 'MTY', title: 'Monty Hall', wing: 'learn', category: 'math-logic', domain: 'Probability', age: 'All', desc: 'Pick a door, see one empty door opened, then choose whether to stay or switch.', paper: 'Selvin 1975', tags: ['Probability', 'Bayes', 'Argument-settler'], renderer: renderMontyHall },
+  { id: 'six-chambers', code: 'SIX', title: 'Six Chambers', wing: 'learn', category: 'math-logic', domain: 'Bayesian updating', age: 'All', desc: 'Predict the chance the next pull holds a squib, then pull the trigger and watch the odds.', paper: '', tags: ['math-logic'], renderer: renderSixChambers },
   { id: 'asteroids', code: 'AST', title: 'Asteroids', wing: 'arcade', category: 'classics', domain: 'Spatial control', age: 'All', desc: 'Rotate, then hit the rocks. They split. Flying off one edge brings you back.', paper: 'Atari 1979', tags: ['Vector', 'Momentum', 'Classic'], renderer: renderAsteroids },
   { id: 'frogger', code: 'FRG', title: 'Frogger', wing: 'arcade', category: 'classics', domain: 'Timing', age: 'All', desc: 'Cross five lanes of traffic. Every crossing rebuilds the road faster.', paper: 'Konami 1981', tags: ['Timing', 'Lanes', 'Classic'], renderer: renderFrogger },
   { id: 'connect-four', code: 'CF4', title: 'Connect Four', wing: 'arcade', category: 'adult-mind', domain: 'Adversarial play', age: 'All', desc: 'Drop discs into columns and connect four before the computer does.', tags: ['Opponent', 'Minimax', 'Strategy'], renderer: renderConnectFour },

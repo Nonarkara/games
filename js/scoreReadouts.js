@@ -11,6 +11,9 @@ import { BRAIN_GUIDES } from './brainGuides.js';
 /** Absolute cutoffs: score < cuts[0] rough, < cuts[1] warming, < cuts[2] solid, else sharp. */
 const CUTS = {
   'russian-roulette': [1, 2, 3], 'pirate-barrel': [1, 2, 3],
+  // Six Chambers: +2 per right answer, −1 per wrong one, 12 pulls max (24).
+  'six-chambers': [8, 16, 22],
+  'pirate-tank': [1, 2, 3],
   'verbal-fluency': [10, 16, 24],
   'digit-symbol': [25, 40, 58],
   'reversi': [25, 33, 42],

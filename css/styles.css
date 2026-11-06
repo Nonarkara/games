@@ -3161,6 +3161,19 @@ html[data-theme="sixteen"] .attract-feature-title { color: #1a1206; }
 .pv-party .pv-card { animation: pv-card 2s ease-in-out infinite; } .pv-party .pv-card:nth-child(2) { animation-delay: .3s; } .pv-party .pv-card:nth-child(3) { animation-delay: .6s; }
 @keyframes pv-card { 0%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); border-color: var(--ax-red); } }
 .pv-board { width: 36px; height: 36px; border: 1px solid var(--ax-line-2); background: #0c121a; display: inline-block; }
+/* Six Chambers — the cylinder face, and the odds that climb as you pull. */
+.pv-chambers { gap: 12px; }
+.pv-chambers .pv-cyl { display: inline-grid; grid-template-columns: repeat(3, 16px); gap: 4px; }
+.pv-chambers .pv-ch { width: 16px; height: 16px; border: 1px solid var(--ax-line-2); background: #0c121a; display: block; border-radius: 50%; }
+.pv-chambers .pv-ch.on { background: var(--ax-red); border-color: var(--ax-red); animation: pv-flash 1.8s steps(1) infinite; }
+.pv-chambers .pv-odds { color: var(--ax-red); font-size: 11px; }
+/* Pirate in a Tank — a bore square-on is wide, edge-on it is a slit. */
+.pv-tank { gap: 8px; }
+.pv-tank .pv-bore { display: inline-block; height: 24px; border: 1px solid var(--ax-line-2); background: #0c121a; }
+.pv-tank .pv-bore.deep { width: 24px; border-color: var(--ax-red); }
+.pv-tank .pv-bore.wide { width: 14px; }
+.pv-tank .pv-bore.slit { width: 4px; }
+.pv-tank .pv-blade { color: var(--ax-ink); font-size: 13px; }
 .pv-rps span { min-width: 28px; text-align: center; } .pv-rps .pv-win { color: var(--ax-red); animation: pv-win 1s ease-in-out infinite; }
 @keyframes pv-win { 0%,100% { opacity: .6; } 50% { opacity: 1; transform: scale(1.08); } }
 .pv-tictac span { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--ax-line-2); background: var(--ax-panel); }

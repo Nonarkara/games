@@ -112,7 +112,9 @@ const defaultData = {
     'spider-solitaire': 0,
     'go': 0,
     'heads-up': 0,
-    'sudoku': 0
+    'sudoku': 0,
+    'six-chambers': 0,
+    'pirate-tank': 0,
   },
   favorites: [],
   favoriteStates: {},

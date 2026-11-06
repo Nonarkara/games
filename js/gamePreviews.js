@@ -17,6 +17,7 @@ const MAP = {
   'stop-signal': 'gongo',
   // memory span / n-back
   'dual-n-back': 'nback',
+  'pirate-tank': 'tank',
   'digit-span': 'span',
   'backward-span': 'span',
   'operation-span': 'span',
@@ -48,6 +49,7 @@ const MAP = {
   'mind-eyes': 'eyes',
   'calibration': 'math',
   'monty-hall': 'cards',
+  'six-chambers': 'chambers',
   // arcade
   'cyber-tetris': 'tetris',
   'arcade-breakout': 'breakout',
@@ -137,6 +139,8 @@ export function previewHtmlFor(game) {
   const scenes = {
     chance: `<div class="pv-scene pv-party" aria-hidden="true">?</div><p class="pv-cap">Pass · press · one hidden trigger</p>`,
     barrel: `<div class="pv-scene pv-party" aria-hidden="true">▥</div><p class="pv-cap">Pick a slot · one makes the pirate pop</p>`,
+    chambers: `<div class="pv-scene pv-chambers" aria-hidden="true"><span class="pv-cyl"><i class="pv-ch on"></i><i class="pv-ch"></i><i class="pv-ch"></i><i class="pv-ch"></i><i class="pv-ch"></i><i class="pv-ch"></i></span><span class="pv-odds">1/6 &rarr; 1/5 &rarr; 1/4</span></div><p class="pv-cap">Say the odds &middot; pull &middot; they climb</p>`,
+    tank: `<div class="pv-scene pv-tank" aria-hidden="true"><i class="pv-bore slit"></i><i class="pv-bore wide"></i><i class="pv-bore deep"></i><span class="pv-blade">&#9664;</span></div><p class="pv-cap">Turn the barrel &middot; one bore goes deep</p>`,
     stroop: `
       <div class="pv-scene pv-stroop" aria-hidden="true">
         <span class="pv-word pv-w1">RED</span><span class="pv-word pv-w2">BLUE</span><span class="pv-word pv-w3">GREEN</span>

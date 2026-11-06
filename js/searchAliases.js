@@ -37,6 +37,7 @@ export const SEARCH_ALIASES = {
 
   /* ── TRAIN ─────────────────────────────────────────────────────────── */
   'dual-n-back': ['nback', 'n back', 'working memory', 'jaeggi', 'brain training'],
+  'pirate-tank': ['pirate in a tank', 'tank', 'mental rotation', 'deep hole', 'bore', 'knife', 'perspective', 'depth'],
   'digit-span': ['digits', 'numbers', 'remember numbers', 'recall', 'span'],
   'go-nogo': ['impulse', 'self control', 'inhibition', 'stop', 'restraint'],
   'simon-seq': ['simon says', 'sequence', 'pattern', 'lights', 'repeat the pattern'],
@@ -100,6 +101,7 @@ export const SEARCH_ALIASES = {
 
   /* ── LEARN ─────────────────────────────────────────────────────────── */
   'monty-hall': ['doors', 'goat', 'switch or stay', 'probability', 'game show'],
+  'six-chambers': ['six chambers', 'russian roulette maths', 'roulette probability', 'odds', 'chance', 'bayesian', 'cylinder', 'squib'],
   'number-chain': ['sequences', 'what comes next', 'number pattern'],
   'word-guess': ['wordle', 'five letter', '5 letter', 'word game', 'guess the word'],
   'mate-in-one': ['chess', 'checkmate', 'mate', 'tactics', 'puzzle chess'],

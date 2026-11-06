@@ -795,6 +795,20 @@ export const BRAIN_GUIDES = {
     tip: 'Group the lit cells into shapes or pairs before the grid hides them. A cluster of three is easier than three singles.',
     stack: ['kahneman', 'plasticity', 'clear']
   },
+  'six-chambers': {
+    label: 'Bayesian updating', minutes: '4–6 min',
+    practice: 'Before each pull, name the chance the next pull holds a squib. Then pull and watch the odds the cylinder actually hands you.',
+    why: 'Two cylinders, one lesson. Spun each pull, the chance never moves and a safe pull tells you nothing. Walked without spinning, a safe pull narrows the field and the chance climbs: 1/6, 1/5, 1/4, 1/3, 1/2, 1. Most people carry one fixed number and never update it — that is the error this trains out.',
+    tip: 'Unspun, surviving makes the next pull MORE dangerous, not less. Count the chambers you have not reached and divide by that.',
+    stack: ['kahneman', 'plasticity', 'clear']
+  },
+  'pirate-tank': {
+    label: 'Mental rotation', minutes: '3–5 min',
+    practice: 'Work out which hole is the deep one and how far round the barrel it sits, then turn the barrel until that hole faces the blade.',
+    why: 'Rotation is easy when the object moves and hard when you have to move instead. The barrel stays still here, so the whole rotation has to happen in your head — which is the direction that is actually worth practising.',
+    tip: 'A hole square-on is a circle, edge-on it is a slit, and past the far side it is gone. The deep bore is the one that stays wide and dark.',
+    stack: ['plasticity', 'clear']
+  },
 };
 
 export const PAPER_LINKS = {

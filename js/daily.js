@@ -1,9 +1,9 @@
 /**
  * Dr Non — Non-Gaming System · Today's Five
  *
- * With 104 cartridges on the floor, the honest problem is not discovery — the
- * search and the moods handle that — it is that nothing gives you a reason to
- * come back tomorrow.
+ * With a hundred-odd cartridges on the floor, the honest problem is not
+ * discovery — the search and the moods handle that — it is that nothing gives
+ * you a reason to come back tomorrow.
  *
  * The obvious mechanic is a streak, and this deliberately is not one. A streak
  * works by making you afraid to lose it, which is loss aversion pointed at the

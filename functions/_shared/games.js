@@ -7,6 +7,10 @@
  */
 export const GAME_MAX = Object.freeze({
   'russian-roulette': 1, 'pirate-barrel': 1,
+  // Six Chambers scores +2 per correct probability and −1 per wrong one,
+  // over at most 12 pulls — so 24 is the true ceiling, not a round number.
+  'six-chambers': 24,
+  'pirate-tank': 1,
   // Mind Gym 2026
   'verbal-fluency': 200,
   'digit-symbol': 400,

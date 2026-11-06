@@ -87,7 +87,13 @@ async function clickAndSettle(page, clickExpression, selector, label) {
   // that never fires cost six seconds per cart. Poll the actual next state;
   // retry only when a genuine document navigation destroys its old context.
   const contextChanged = error => /context.*destroyed|Cannot find.*context|Cannot find context/i.test(error.message);
-  try { await page.evaluate(clickExpression); }
+  try {
+    const clicked = await page.evaluate(clickExpression);
+    // The poll resolves false when the control never showed up. Say so here,
+    // where the selector is still known, rather than letting the wait below
+    // time out on a selector the cart never had.
+    if (clicked === false) throw new Error(`${label}: the control to click never appeared`);
+  }
   catch (error) { if (!contextChanged(error)) throw error; }
   const deadline = Date.now() + 15000;
   while (true) {
@@ -126,6 +132,61 @@ async function waitForSelector(page, selector, label, timeoutMs = 15000) {
     throw new Error(`${label}: ${selector} never rendered within ${timeoutMs}ms — ${JSON.stringify(outcome)}`);
   }
   return outcome;
+}
+
+/**
+ * Click a control only once it is actually there.
+ *
+ * The sweep used to write `document.querySelector(sel).click()` and trust it.
+ * That is a race: the floor renders its rails from the catalog in a later
+ * task, so on a cold network cache the wing tabs are not in the DOM yet and
+ * the dereference throws "Cannot read properties of null (reading 'click')".
+ * On localhost the module graph is already warm, the race never fires, and
+ * the harness looks fine — until it runs against the deployed site, where it
+ * fails at whatever cart the network happened to be slow for.
+ *
+ * The error names the symptom, not the cause. Polling for the element first
+ * turns it into a wait, and the timeout below reports what WAS on screen.
+ */
+async function clickWhenReady(page, selector, label, timeoutMs = 8000) {
+  const outcome = await page.evaluate(`new Promise(resolve => {
+    const sel = ${JSON.stringify(selector)};
+    const t0 = Date.now();
+    const tick = () => {
+      const el = document.querySelector(sel);
+      if (el) { el.click(); return resolve({ ok: true, ms: Date.now() - t0 }); }
+      if (Date.now() - t0 > ${timeoutMs}) return resolve({
+        ok: false,
+        ms: Date.now() - t0,
+        href: location.href,
+        ready: document.readyState,
+        hasFloor: Boolean(document.querySelector('.select-row')),
+        hasModal: Boolean(document.querySelector('#game-modal-overlay')),
+        bodyChildren: document.body ? document.body.children.length : -1
+      });
+      setTimeout(tick, 50);
+    };
+    tick();
+  })`);
+  if (!outcome.ok) {
+    throw new Error(`${label}: ${selector} never became clickable within ${timeoutMs}ms — ${JSON.stringify(outcome)}`);
+  }
+  return outcome;
+}
+
+/** The same poll, as an expression, for the click paths that also navigate. */
+function clickExpression(selector) {
+  return `new Promise(resolve => {
+    const sel = ${JSON.stringify(selector)};
+    const t0 = Date.now();
+    const tick = () => {
+      const el = document.querySelector(sel);
+      if (el) { el.click(); return resolve(true); }
+      if (Date.now() - t0 > 8000) return resolve(false);
+      setTimeout(tick, 50);
+    };
+    tick();
+  })`;
 }
 
 // One CDP connection per browser target. Every cart is audited in a FRESH
@@ -226,6 +287,30 @@ async function openPage(startUrl) {
     // Give the event a moment to arrive; if it does not, fall back to the
     // old pause rather than hanging.
     await Promise.race([loaded, delay(1500)]);
+    // …and then wait for the APP, not for the document. The load event can
+    // beat the app: on a live deployment the module graph is still in flight
+    // when the 1500ms fallback fires, so the sweep used to start against a
+    // page that had no floor on it. That is what produced the intermittent
+    // "Cannot read properties of null (reading 'click')" — the wing tab
+    // simply was not in the DOM yet. The app paints its wing bar when its
+    // module runs, so that is the thing worth waiting for.
+    const ready = await evaluate(`new Promise(resolve => {
+      const t0 = Date.now();
+      const tick = () => {
+        if (document.querySelector('[data-wing="all"]')) return resolve({ ok: true, ms: Date.now() - t0 });
+        if (Date.now() - t0 > 12000) return resolve({
+          ok: false, ms: Date.now() - t0, href: location.href,
+          ready: document.readyState,
+          bodyChildren: document.body ? document.body.children.length : -1,
+          scripts: document.querySelectorAll('script[type="module"]').length
+        });
+        setTimeout(tick, 50);
+      };
+      tick();
+    })`);
+    if (!ready.ok) {
+      throw new Error(`the app never painted its floor within 12000ms — ${JSON.stringify(ready)}`);
+    }
     await delay(250);
   }
   return { send, evaluate, screenshot, close, waitFor };
@@ -277,11 +362,11 @@ try {
   }))()`);
   if (account.link || account.panel) throw new Error(`reverted account UI is back on the floor: ${JSON.stringify(account)}`);
 
-  await main.evaluate(`document.querySelector('[data-wing="arcade"]').click(); true`);
+  await clickWhenReady(main, '[data-wing="arcade"]', 'arcade wing tab');
   await waitForSelector(main, '.select-row[data-game="arcade-breakout"]', 'arcade wing rail');
   await clickAndSettle(
     main,
-    `document.querySelector('.select-row[data-game="arcade-breakout"]').click(); true`,
+    clickExpression('.select-row[data-game="arcade-breakout"]'),
     '.brain-briefing, .game-session-stage',
     'Breakout opened'
   );
@@ -313,7 +398,7 @@ try {
     if (briefing.play !== 'PLAY') throw new Error(`Breakout briefing has no PLAY: ${JSON.stringify(briefing)}`);
     if (briefing.closes !== 0 || briefing.exits !== 1) throw new Error(`briefing should keep only the shell EXIT: ${JSON.stringify(briefing)}`);
     await main.screenshot(screenshots.briefing);
-    await clickAndSettle(main, `document.querySelector('.briefing-play').click(); true`, '.game-session-stage', 'Breakout stage');
+    await clickAndSettle(main, clickExpression('.briefing-play'), '.game-session-stage', 'Breakout stage');
   } else if (!briefing.hasStage) {
     throw new Error(`cart click landed nowhere usable: ${JSON.stringify(briefing)}`);
   }
@@ -333,11 +418,11 @@ try {
   // equally usable controls at both phone and desktop widths.
   const colorMarch = await withFreshPage(async page => {
     await page.evaluate(`document.fonts.ready.then(() => true)`);
-    await page.evaluate(`document.querySelector('[data-wing="all"]').click(); true`);
+    await clickWhenReady(page, '[data-wing="all"]', 'all wing tab');
     await waitForSelector(page, '.select-row[data-game="color-march-pro"]', 'color-march-pro rail row');
     await clickAndSettle(
       page,
-      `document.querySelector('.select-row[data-game="color-march-pro"]').click(); true`,
+      clickExpression('.select-row[data-game="color-march-pro"]'),
       '.brain-briefing, .game-session-stage',
       'Color March Pro opened'
     );
@@ -351,7 +436,7 @@ try {
     // Only a briefing has a PLAY control to press; a resumed session is
     // already past it.
     if (await page.evaluate(`Boolean(document.querySelector('.briefing-play'))`)) {
-      await clickAndSettle(page, `document.querySelector('.briefing-play').click(); true`, '.game-session-stage', 'Color March Pro stage');
+      await clickAndSettle(page, clickExpression('.briefing-play'), '.game-session-stage', 'Color March Pro stage');
     }
     const readyGate = await page.evaluate(`(() => {
       const gate = document.querySelector('.ngs-ready-gate');
@@ -414,7 +499,7 @@ try {
   // a tab whose emulated size actually held.
   const catalogIds = await withFreshPage(async main => {
     await main.evaluate(`document.fonts.ready.then(() => true)`);
-    await main.evaluate(`document.querySelector('[data-wing="all"]').click()`);
+    await clickWhenReady(main, '[data-wing="all"]', 'all wing tab');
     return main.evaluate(`[...document.querySelectorAll('.select-row[data-game]')]
       .map(row => row.dataset.game)
       .filter(id => id !== 'about-dr-non')`);
@@ -427,11 +512,11 @@ try {
     const extraDelay = id === 'arcade-pong' ? 400 : 70;
     const result = await withFreshPage(async page => {
       await page.evaluate(`document.fonts.ready.then(() => true)`);
-      await page.evaluate(`document.querySelector('[data-wing="all"]').click(); true`);
+      await clickWhenReady(page, '[data-wing="all"]', 'all wing tab');
       await waitForSelector(page, `.select-row[data-game="${id}"]`, `${id} rail row`);
       await clickAndSettle(
         page,
-        `document.querySelector('.select-row[data-game="${id}"]').click(); true`,
+        clickExpression(`.select-row[data-game="${id}"]`),
         '.brain-briefing, .game-session-stage',
         `${id} opened`
       );
@@ -501,9 +586,9 @@ try {
           const given = cells.find(cell => cell.classList.contains('is-fixed'));
           if (!blank || !given) return { maskCorrect, playable: false };
           blank.click();
-          document.querySelector('.sdk-digit[data-n="1"]').click();
+          document.querySelector('.sdk-digit[data-n="1"]')?.click();
           const entered = blank.textContent === '1';
-          document.querySelector('.sdk-digit[data-n="0"]').click();
+          document.querySelector('.sdk-digit[data-n="0"]')?.click();
           const cleared = blank.textContent === '';
           const peers = document.querySelectorAll('.sdk-cell.is-peer').length;
           const original = given.textContent;
