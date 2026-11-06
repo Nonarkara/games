@@ -509,12 +509,14 @@ class NgsApp {
           fetchpriority="high"
         />
         <figcaption class="attract-copy" id="top">
-          <p class="attract-kicker">${this.playableCount()} CARTS · 16-BIT FLOOR · BRIEFING ON EVERY TITLE</p>
-          <h1>INSERT<br><em>COIN</em></h1>
-          <p class="attract-line">Kill time. Keep the mind.</p>
-          <p class="attract-sub">Chunky carts. Honest claims. Every title opens with the skill it trains, how long a round takes, and the Simons caveat — far transfer is contested. Near transfer is real.</p>
+          <p class="attract-kicker">DR NON’S NON-GAMING SYSTEM · INSERT COIN</p>
+          <h1>Pick a game.<br>Take a break.</h1>
+          <p class="attract-line">Memory, puzzles, arcade and party games. Free to play, no account. Every game explains its rules.</p>
           <div class="attract-picks" aria-label="Fast ways to choose a game">
-            <button type="button" data-discovery="quick"><b>QUICK HIT</b><span>Starts around 1–3 min</span></button>
+            <button type="button" data-discovery="quick"><b>PLAY A QUICK GAME <span aria-hidden="true">→</span></b><span>A 1–3 minute round, picked for you</span></button>
+          </div>
+          <details class="discovery-options"><summary>More ways to pick</summary>
+          <div class="discovery-secondary">
             <button type="button" data-discovery="recommended"><b>PICK FOR ME</b><span>Least-practised skill</span></button>
             <button type="button" data-discovery="surprise"><b>SURPRISE</b><span>Prefers an unplayed cart</span></button>
           </div>
@@ -522,16 +524,17 @@ class NgsApp {
             <p class="attract-moods-label">OR PICK BY MOOD — RANDOM CART, YOUR HEAD-SPACE</p>
             ${MOODS.map(m => `<button type="button" data-mood="${m.id}"><b>${m.label}</b><span>${m.blurb}</span></button>`).join('')}
           </div>
+          </details>
         </figcaption>
       </figure>
       ${feature ? `
         <button type="button" class="attract-feature${feature.id === 'paper-soccer' ? ' has-art' : ''}" data-game="${feature.id}" aria-label="Load ${feature.title}">
-          <span class="attract-feature-kicker">TODAY'S CARTRIDGE · ${wingLabel}</span>
+          <span class="attract-feature-kicker">${feature.id === 'paper-soccer' ? 'THE HOUSE GAME' : `FEATURED · ${wingLabel}`}</span>
           ${spriteImg(feature.id, 'cart-sprite cart-sprite--hero', 'ink')}
           <span class="attract-feature-code">${feature.code}</span>
           <span class="attract-feature-title">${feature.title}</span>
-          <span class="attract-feature-skill">${guide.label} · ${guide.minutes} · HI ${high}</span>
-          <span class="attract-feature-cta">LOAD GAME</span>
+          <span class="attract-feature-skill">${feature.desc} · ${guide.minutes}${high ? ` · Best ${high}` : ''}</span>
+          <span class="attract-feature-cta">PLAY ${feature.title} →</span>
         </button>
       ` : ''}
     `;
