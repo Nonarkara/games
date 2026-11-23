@@ -535,7 +535,7 @@ export function resolveKick(ball, dest, power, defenders = [], options = {}) {
   // This does not break the conservation law. Contact still happens exactly
   // where the drawn disc says it does — the law is that the blocking radius
   // matches the radius you can see, not that touching a man ends the move.
-  if (block && block.t < exitT && block.player.role !== 'gk'
+  if (block && block.t <= exitT && block.player.role !== 'gk'
       && shooter && power >= DRIVE_ON && isStrike(ball, dest, shooter.team)) {
     const reach = BLOCK_RADIUS;
     const square = Math.max(0, Math.min(1, 1 - block.gap / reach));
@@ -576,7 +576,7 @@ export function resolveKick(ball, dest, power, defenders = [], options = {}) {
     };
   }
 
-  if (block && block.t < exitT) {
+  if (block && block.t <= exitT) {
     if (tableSoccer && power >= 0.65) {
       if (block.player.role === 'gk') {
         const reboundX = block.player.team === 'red' ? 9 : PITCH.length - 9;
@@ -1259,6 +1259,7 @@ export function renderPaperSoccer(container, onClose) {
   let map = { left: 0, top: 0, scale: 1, cssW: 640, cssH: 380 };
   let shake = 0;
   let particles = [];
+  let ballSpin = 0;
 
   function spawnParticles(x, y, color = '#f59e0b', count = 6) {
     for (let i = 0; i < count; i++) {
@@ -1663,16 +1664,21 @@ export function renderPaperSoccer(container, onClose) {
 
   function startFlight(angle, power) {
     const dest = kickDestination(state.ball, angle, power);
-    const preview = resolveKick(state.ball, dest, power, defendersNow(), { shooter: shooterNow() });
+    const preview = resolveKick(state.ball, dest, power, defendersNow(), { shooter: shooterNow(), tableSoccer: true, bank: true });
     flying = {
       from: { ...state.ball },
       to: preview.dest,
+      bounce: preview.bounce ? { ...preview.bounce } : null,
+      post: preview.post ? { ...preview.post } : null,
+      bounced: false,
+      hitPost: false,
       start: performance.now(),
       ms: 280 + kickTravel(power) * 7.5,
       angle,
-      power
+      power,
+      resolved: preview
     };
-    soundFx.playHit();
+    playTableSound('flick');
   }
 
   const movableMen = team => movablePlayers(state, team);
@@ -1818,6 +1824,15 @@ export function renderPaperSoccer(container, onClose) {
     raf = requestAnimationFrame(loop);
     const now = performance.now();
 
+    if (shake > 0) shake = Math.max(0, shake - 0.4);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= 0.045;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+
     if (collecting && now - collecting.start >= collecting.ms) {
       collecting = null;
       maybeCpu();
@@ -1836,21 +1851,81 @@ export function renderPaperSoccer(container, onClose) {
     if (flying) {
       const t = Math.min(1, (now - flying.start) / flying.ms);
       const ease = 1 - (1 - t) * (1 - t);
-      state.ball = {
-        x: flying.from.x + (flying.to.x - flying.from.x) * ease,
-        y: flying.from.y + (flying.to.y - flying.from.y) * ease
-      };
+
+      if (flying.bounce) {
+        if (ease < 0.5) {
+          const t1 = ease * 2;
+          state.ball = {
+            x: flying.from.x + (flying.bounce.x - flying.from.x) * t1,
+            y: flying.from.y + (flying.bounce.y - flying.from.y) * t1
+          };
+        } else {
+          if (!flying.bounced) {
+            flying.bounced = true;
+            playTableSound('bank');
+            shake = 6;
+            spawnParticles(flying.bounce.x, flying.bounce.y, '#f59e0b', 8);
+          }
+          const t2 = (ease - 0.5) * 2;
+          state.ball = {
+            x: flying.bounce.x + (flying.to.x - flying.bounce.x) * t2,
+            y: flying.bounce.y + (flying.to.y - flying.bounce.y) * t2
+          };
+        }
+      } else if (flying.post) {
+        if (ease < 0.65) {
+          const t1 = ease / 0.65;
+          state.ball = {
+            x: flying.from.x + (flying.post.x - flying.from.x) * t1,
+            y: flying.from.y + (flying.post.y - flying.from.y) * t1
+          };
+        } else {
+          if (!flying.hitPost) {
+            flying.hitPost = true;
+            playTableSound('woodwork');
+            shake = 9;
+            spawnParticles(flying.post.x, flying.post.y, '#e5e7eb', 12);
+          }
+          const t2 = (ease - 0.65) / 0.35;
+          state.ball = {
+            x: flying.post.x + (flying.to.x - flying.post.x) * t2,
+            y: flying.post.y + (flying.to.y - flying.post.y) * t2
+          };
+        }
+      } else {
+        state.ball = {
+          x: flying.from.x + (flying.to.x - flying.from.x) * ease,
+          y: flying.from.y + (flying.to.y - flying.from.y) * ease
+        };
+      }
+
+      ballSpin = (ballSpin + 0.3) % (Math.PI * 2);
+
       if (t >= 1) {
-        const { angle, power, from } = flying;
+        const { angle, power, from, resolved } = flying;
         flying = null;
         state.ball = { ...from };
-        const dest = kickDestination(state.ball, angle, power);
-        const resolved = resolveKick(state.ball, dest, power, defendersNow(), { shooter: shooterNow() });
 
-        if (resolved.kind === 'goal') {
+        if (resolved?.kind === 'woodwork') {
+          playTableSound('woodwork');
+          shake = 6;
+          spawnParticles(resolved.dest.x, resolved.dest.y, '#f59e0b', 6);
+        } else if (resolved?.kind === 'deflect') {
+          playTableSound('clack');
+          shake = 5;
+          spawnParticles(resolved.dest.x, resolved.dest.y, '#f59e0b', 8);
+        } else if (resolved?.kind === 'parry') {
+          playTableSound('clack');
+          shake = 6;
+          spawnParticles(resolved.dest.x, resolved.dest.y, '#f87171', 8);
+        } else if (resolved?.kind === 'goal') {
+          playTableSound('screamer');
+        }
+
+        if (resolved?.kind === 'goal') {
           state.score[resolved.scorer] += 1;
           state.ball = resolved.dest;
-          state.log = `${resolved.scorer.toUpperCase()} GOAL`;
+          state.log = resolved.bank ? `${resolved.scorer.toUpperCase()} BANK GOAL! WHAT A TRICK SHOT!` : `${resolved.scorer.toUpperCase()} GOAL`;
 
           if (state.score[resolved.scorer] >= GOALS_TO_WIN) {
             state.winner = resolved.scorer;
@@ -1868,11 +1943,11 @@ export function renderPaperSoccer(container, onClose) {
           return;
         }
 
-        applyKick(state, angle, power);
+        applyKick(state, angle, power, { tableSoccer: true, bank: true });
         if (state.collect) {
           collecting = { ...state.collect, start: performance.now(), ms: 260 };
           state.collect = null;
-          soundFx.playClick?.();
+          playTableSound('clack');
         }
         syncSkip();
         if (state.phase === 'over' || state.winner) {
@@ -1913,6 +1988,27 @@ export function renderPaperSoccer(container, onClose) {
     ctx.strokeStyle = 'rgba(245,158,11,0.55)';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(origin.x, origin.y, pw, ph);
+
+    // Table soccer wooden cushion rails along top and bottom sidelines
+    const railH = Math.max(4, 2.5 * map.scale);
+    // Top cushion rail
+    ctx.fillStyle = '#261208';
+    ctx.fillRect(origin.x, origin.y - railH, pw, railH);
+    ctx.fillStyle = '#3d1d11';
+    ctx.fillRect(origin.x, origin.y - railH + 1, pw, railH - 2);
+    // Bottom cushion rail
+    ctx.fillStyle = '#261208';
+    ctx.fillRect(origin.x, origin.y + ph, pw, railH);
+    ctx.fillStyle = '#3d1d11';
+    ctx.fillRect(origin.x, origin.y + ph + 1, pw, railH - 2);
+
+    // Brass cushion rivets along rails every 15 yards
+    ctx.fillStyle = '#b45309';
+    for (let rx = 5; rx <= PITCH.length - 5; rx += 15) {
+      const sp = toScreen({ x: rx, y: 0 });
+      ctx.fillRect(sp.x - 1.5, origin.y - railH / 2 - 1.5, 3, 3);
+      ctx.fillRect(sp.x - 1.5, origin.y + ph + railH / 2 - 1.5, 3, 3);
+    }
 
     // Halfway line & center circle
     const mid = toScreen({ x: PITCH.length / 2, y: PITCH.width / 2 });
@@ -2175,11 +2271,21 @@ export function renderPaperSoccer(container, onClose) {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Pentagon pattern dot
+    // Rolling seam pattern rotating with ballSpin
+    ctx.save();
+    ctx.translate(p.x, ballY);
+    ctx.rotate(ballSpin);
+    ctx.strokeStyle = '#2b1900';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(0, 0, br * 0.5, 0, Math.PI);
+    ctx.stroke();
+    // Center pentagon dot
     ctx.fillStyle = '#0a0e14';
     ctx.beginPath();
-    ctx.arc(p.x, ballY, br * 0.35, 0, Math.PI * 2);
+    ctx.arc(0, 0, br * 0.3, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
   }
 
   function liveAim() {
@@ -2187,7 +2293,7 @@ export function renderPaperSoccer(container, onClose) {
     const power = charge.power != null ? charge.power : 0.25;
     const angle = charge.angle;
     const dest = kickDestination(state.ball, angle, power);
-    const resolved = resolveKick(state.ball, dest, power, defendersNow(), { shooter: shooterNow() });
+    const resolved = resolveKick(state.ball, dest, power, defendersNow(), { shooter: shooterNow(), tableSoccer: true, bank: true });
     const preview = resolved.kind === 'play'
       ? possessionPreview(state, resolved.dest, state.possession)
       : null;
@@ -2195,6 +2301,9 @@ export function renderPaperSoccer(container, onClose) {
       power,
       dest: resolved.dest,
       kind: resolved.kind,
+      bounce: resolved.bounce,
+      post: resolved.post,
+      bank: Boolean(resolved.bank),
       preview,
       scorer: resolved.scorer,
       stopper: resolved.by ? findPlayer(state, resolved.by) : null,
@@ -2261,20 +2370,58 @@ export function renderPaperSoccer(container, onClose) {
     }
     ctx.restore();
 
-    ctx.strokeStyle = AMBER;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath();
-    ctx.moveTo(from.x, from.y);
-    ctx.lineTo(to.x, to.y);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    if (live.bounce) {
+      const bScreen = toScreen(live.bounce);
+      ctx.strokeStyle = AMBER;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(bScreen.x, bScreen.y);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(bScreen.x, bScreen.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(bScreen.x, bScreen.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = AMBER;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     let ring = AMBER;
-    let label = 'PLACE PASS';
-    if (live.kind === 'goal') { ring = '#4ade80'; label = 'ON TARGET'; }
-    else if (live.kind === 'over') { ring = '#f87171'; label = 'TOO HARD'; }
-    else if (live.kind === 'block' || live.kind === 'save') {
+    let label = live.bank ? 'BANK PASS' : 'PLACE PASS';
+    if (live.kind === 'goal') {
+      ring = '#4ade80';
+      label = live.bank ? 'BANK GOAL!' : 'ON TARGET';
+    } else if (live.kind === 'woodwork') {
+      ring = '#f59e0b';
+      label = 'WOODWORK DANGER!';
+    } else if (live.kind === 'deflect') {
+      ring = '#f59e0b';
+      label = 'DEFLECTION!';
+    } else if (live.kind === 'parry') {
+      ring = '#f59e0b';
+      label = 'KEEPER SPILL!';
+    } else if (live.kind === 'over') {
+      ring = '#f87171';
+      label = 'TOO HARD';
+    } else if (live.kind === 'block' || live.kind === 'save') {
       ring = '#f87171';
       label = live.kind === 'save' ? 'KEEPER GETS IT' : 'BLOCKED';
       if (live.stopper) {
@@ -2438,14 +2585,34 @@ export function renderPaperSoccer(container, onClose) {
     ctx.restore();
   }
 
+  function drawParticles() {
+    if (!particles.length) return;
+    ctx.save();
+    for (const p of particles) {
+      const s = toScreen(p);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillRect(s.x - 2, s.y - 2, 4, 4);
+    }
+    ctx.restore();
+  }
+
   function draw() {
     if (!ctx || !map.scale) return;
+    ctx.save();
+    if (shake > 0) {
+      const sx = (Math.random() - 0.5) * shake;
+      const sy = (Math.random() - 0.5) * shake;
+      ctx.translate(sx, sy);
+    }
     drawPitch();
     for (const player of allPlayers(state)) drawMan(player);
     drawBall();
     drawCharge();
+    drawParticles();
     drawSeats();
     drawCelebration();
+    ctx.restore();
     syncSkip();
   }
 

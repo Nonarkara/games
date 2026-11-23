@@ -78,6 +78,7 @@ import {
   possessionPreview,
   powerForAim,
   aimFromPointer,
+  goalMouthY,
   placeTeam,
   resolveKick,
   skipMove,
@@ -452,6 +453,25 @@ assert.equal(overBar.keeperTeam, 'blue');
 const throwIn = resolveKick(mid, { x: mid.x, y: mid.y + 80 }, 1);
 assert.equal(throwIn.kind, 'throw-in');
 assert.equal(throwIn.dest.y, PITCH.width);
+
+// Table soccer physics: cushion bank shot, woodwork ping, and deflections
+{
+  const bankKick = resolveKick({ x: 50, y: 5 }, { x: 80, y: -10 }, 0.8, [], { tableSoccer: true, bank: true });
+  assert.ok(bankKick.bank, 'bank shot off cushion reflects');
+  assert.equal(bankKick.bounce.y, 0, 'cushion point is on top rail y=0');
+
+  const { y0 } = goalMouthY();
+  const woodworkKick = resolveKick({ x: 95, y: 25 }, { x: 105, y: y0 - 0.4 }, 0.85, [], { tableSoccer: true });
+  assert.equal(woodworkKick.kind, 'woodwork', 'shot grazing the post clangs the woodwork');
+
+  const deflector = [{ id: 'b-def', team: 'blue', role: 'field', x: 55, y: 34 + BLOCK_RADIUS - 0.1 }];
+  const deflectKick = resolveKick({ x: 20, y: 34 }, { x: 90, y: 34 }, 0.8, deflector, { tableSoccer: true });
+  assert.equal(deflectKick.kind, 'deflect', 'hard hit off outfield defender deflects loose');
+
+  const gk = [{ id: 'b-gk', team: 'blue', role: 'gk', x: 104, y: 34 }];
+  const parryKick = resolveKick({ x: 80, y: 34 }, { x: 104, y: 34 }, 0.9, gk, { tableSoccer: true });
+  assert.equal(parryKick.kind, 'parry', 'heavy strike causes goalkeeper spill');
+}
 
 // Bodies in the lane are what stopped "blue wins by three shots from the
 // centre spot": a dead-centre blast now walks into the keeper's hands.
